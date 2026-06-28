@@ -1263,7 +1263,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="nav-group-body">
         <button class="nav-btn" onclick="go('ideen')"><span class="ico">💡</span>Ideen-Pool <span id="ideenBadge" style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('research')"><span class="ico">⚔️</span>Konkurrenz-Tabelle <span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
-        <button class="nav-btn" onclick="go('auswahl')"><span class="ico">⭐</span>Produkte <span id="auswahlBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <button class="nav-btn" onclick="go('auswahl')"><span class="ico">⭐</span>Engere Wahl <span id="auswahlBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('helium')"><span class="ico">📥</span>Helium 10 Import</button>
         <button class="nav-btn" onclick="go('nischen')"><span class="ico">🧭</span>Nischen-Analyzer</button>
         <button class="nav-btn" onclick="go('keywords')"><span class="ico">🔑</span>Keyword-Center</button>
@@ -1355,6 +1355,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <button class="btn btn-g btn-sm" onclick="exportCSV()">📥 CSV</button>
       <button class="btn btn-sm" onclick="exportJSON()">💾 Backup</button>
       <button class="btn btn-sm" onclick="document.getElementById('impFile').click()">📂 Import</button>
+      <div style="margin-left:auto;display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden">
+        <button id="prodViewTable" class="btn btn-sm" onclick="setProdView('table')" style="border:none;border-radius:0;background:var(--ac);color:#fff" title="Tabellen-Ansicht">📋 Tabelle</button>
+        <button id="prodViewCards" class="btn btn-sm" onclick="setProdView('cards')" style="border:none;border-radius:0;background:transparent;color:var(--tx2)" title="Kachel-Ansicht">🔲 Kacheln</button>
+      </div>
     </div>
     <div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:16px">💡</span>
@@ -1382,6 +1386,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <th>Quelle</th><th>Notizen</th><th onclick="psort('datum')">Datum</th><th>Aktion</th>
       </tr></thead><tbody id="prodBody"></tbody></table>
     </div>
+    <div id="prodCards" style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
     <div class="empty" id="prodEmpty" style="display:none"><div class="eico">📦</div><h3>Keine Produkte</h3><p>Starte mit „+ Neues Produkt"</p></div>
   </div>
 </div>
@@ -1519,7 +1524,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-auswahl">
   <div class="page-header">
-    <h1><span class="hico">⭐</span>Produkte<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1>
+    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1>
   </div>
   <div class="page-body">
     <div class="help-box gold">
@@ -5644,7 +5649,7 @@ function researchPromoteToProduct(candId){
   var c=D.research.candidates.find(function(x){return x.id===candId;});
   if(!c){toast('Kandidat nicht gefunden');return;}
   var exists=D.research.shortlist.find(function(s){return s.sourceCandidateId===candId;});
-  if(exists){toast('„'+esc(c.name||'')+'" ist schon im Produkte-Bereich');auswahlUpdateBadge();go('auswahl');return;}
+  if(exists){toast('„'+esc(c.name||'')+'" ist schon in der Engeren Wahl');auswahlUpdateBadge();go('auswahl');return;}
   var item={
     id:'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
     sourceCandidateId:candId,
@@ -5682,7 +5687,7 @@ function auswahlSaveNote(id,val){
 function auswahlDelete(id){
   researchInit();
   var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
-  if(!confirm('„'+(it.name||'')+'" aus dem Produkte-Bereich entfernen?'))return;
+  if(!confirm('„'+(it.name||'')+'" aus der Engeren Wahl entfernen?'))return;
   D.research.shortlist=D.research.shortlist.filter(function(x){return x.id!==id;});
   save();renderAuswahl();auswahlUpdateBadge();toast('Entfernt');
 }
@@ -5705,6 +5710,26 @@ function auswahlOrderSample(id){
   if(typeof renderProds==='function')renderProds();
   renderAuswahl();auswahlUpdateBadge();
   toast('📦 „'+esc(it.name||'')+'" → Muster bestellt & in Produktliste übernommen');
+}
+function auswahlAddToProduktliste(id){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  if(it.movedToProducts){toast('Schon in der Produktliste');go('produkte');return;}
+  var p={
+    name:it.name||'Produkt', kategorie:it.kategorie||'', status:'Recherche',
+    asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
+    fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
+    bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    quelle:'Produktfindung', suchvolumen:0,
+    notizen:(it.notes?it.notes+' · ':'')+'Aus Engerer Wahl übernommen'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
+    datum:new Date().toLocaleDateString('de-DE')
+  };
+  D.products.push(p);
+  it.movedToProducts=true;it.updatedAt=new Date().toISOString();
+  save();
+  if(typeof renderProds==='function')renderProds();
+  renderAuswahl();auswahlUpdateBadge();
+  toast('➕ „'+esc(it.name||'')+'" zur Produktliste hinzugefügt');
 }
 function auswahlStatCard(label,val,color){
   return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;min-width:120px"><div style="font-size:11px;color:var(--tx2)">'+label+'</div><div style="font-size:22px;font-weight:800;color:var(--'+color+')">'+val+'</div></div>';
@@ -5738,9 +5763,10 @@ function renderAuswahl(){
     html+='<span style="align-self:flex-start;display:inline-block;padding:3px 10px;background:var(--'+d.bg+');color:var(--'+d.color+');border-radius:8px;font-size:11px;font-weight:700">'+d.label+'</span>';
     html+='<textarea placeholder="Notizen / Entscheidung …" onchange="auswahlSaveNote(\''+it.id+'\',this.value)" style="width:100%;box-sizing:border-box;min-height:50px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12px;color:var(--tx);resize:vertical">'+esc(it.notes||'')+'</textarea>';
     html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">';
-    if(!it.movedToProducts)html+='<button class="btn btn-sm" onclick="auswahlOrderSample(\''+it.id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">📦 Muster bestellen → Produktliste</button>';
-    else html+='<span style="font-size:11px;color:var(--gn);font-weight:700;align-self:center">✓ in Produktliste</span>';
+    if(!it.movedToProducts)html+='<button class="btn btn-sm" onclick="auswahlAddToProduktliste(\''+it.id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">➕ Zur Produktliste</button>';
+    else html+='<span style="font-size:11px;color:var(--gn);font-weight:700;align-self:center">✓ in Produktliste · <a onclick="go(\'produkte\')" style="color:var(--ac);cursor:pointer">öffnen</a></span>';
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'pruefen\')" title="weiter prüfen" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">🔍</button>';
+    html+='<button class="btn btn-sm" onclick="auswahlOrderSample(\''+it.id+'\')" title="Muster bestellt (übernimmt auch in Produktliste)" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📦</button>';
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'abgelehnt\')" title="ablehnen" style="background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌</button>';
     html+='<button class="btn btn-sm" onclick="go(\'inhalt\')" title="Im KI-Bildstudio Bilder erstellen" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">🎨</button>';
     html+='<button class="btn btn-sm" onclick="auswahlDelete(\''+it.id+'\')" title="entfernen" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🗑</button>';
@@ -6851,6 +6877,8 @@ function helpBoxCollapsible(icon,title,text,opts){
 }
 
 // ═══════════════ PRODUKTE ═══════════════
+var prodView=(function(){try{return localStorage.getItem('shub_prodView')||'table';}catch(e){return 'table';}})();
+function setProdView(v){prodView=v;try{localStorage.setItem('shub_prodView',v);}catch(e){}renderProds();}
 function renderProds(){
   var q=(document.getElementById('prodSearch').value||'').toLowerCase();
   var fs=document.getElementById('fStatus').value;
@@ -6870,6 +6898,7 @@ function renderProds(){
     return String(va).localeCompare(String(vb),'de')*dir;
   });
   var tb=document.getElementById('prodBody');tb.innerHTML='';
+  var cardsHtml='';
   fl.forEach(function(p){
     var i=D.products.indexOf(p),c=cp(p);
     var sc=p.status==='Idee'?'b-idee':p.status==='Recherche'?'b-recherche':p.status==='Analyse'?'b-analyse':p.status==='Bestellt'?'b-bestellt':'b-abgelehnt';
@@ -6904,9 +6933,34 @@ function renderProds(){
         +'<button class="del" onclick="delProd('+i+')" title="Löschen">🗑️</button>'
       +'</div></td>';
     tb.appendChild(tr);
+    var mcol=(c.m!==null)?(c.m>=25?'gn':c.m>=10?'ac':'rd'):'tx3';
+    cardsHtml+='<div onclick="openProductDetail('+i+')" style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+(p.name?esc(p.name):'<span style="color:var(--rd)">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</div><span class="badge '+sc+'" style="flex-shrink:0">'+esc(p.status)+'</span></div>'
+      +(p.kategorie?'<div style="font-size:11.5px;color:var(--tx2)">🏷️ '+esc(p.kategorie)+'</div>':'')
+      +'<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--tx2);border-top:1px solid var(--bd);padding-top:8px">'
+        +'<span>EK <b style="color:var(--tx)">'+fmt(p.einkaufspreis)+'</b></span>'
+        +'<span>VK <b style="color:var(--tx)">'+fmt(p.verkaufspreis)+'</b></span>'
+        +'<span>Marge <b style="color:var(--'+mcol+')">'+(c.m!==null?c.m.toFixed(1)+'%':'—')+'</b></span>'
+        +'<span>ROI <b style="color:var(--tx)">'+(c.roi!==null?c.roi.toFixed(0)+'%':'—')+'</b></span>'
+      +'</div>'
+      +(p.quelle?'<div style="font-size:10.5px;color:var(--tx3)">Quelle: '+esc(p.quelle)+'</div>':'')
+      +'<div onclick="event.stopPropagation()" style="display:flex;gap:6px;margin-top:2px">'
+        +'<button class="btn btn-sm" onclick="openProductDetail('+i+')" style="background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:none;font-weight:600;font-size:11px">📝 Details</button>'
+        +'<button class="btn btn-sm" onclick="dupProd('+i+')" title="Duplizieren">📋</button>'
+        +'<button class="btn btn-sm del" onclick="delProd('+i+')" title="Löschen">🗑️</button>'
+      +'</div>'
+    +'</div>';
   });
-  document.getElementById('prodEmpty').style.display=fl.length?'none':'block';
-  document.getElementById('prodTable').style.display=fl.length?'table':'none';
+  document.getElementById('prodCards').innerHTML=cardsHtml;
+  var hasItems=fl.length>0;
+  document.getElementById('prodEmpty').style.display=hasItems?'none':'block';
+  document.getElementById('prodTable').style.display=(hasItems&&prodView==='table')?'table':'none';
+  document.getElementById('prodCards').style.display=(hasItems&&prodView==='cards')?'grid':'none';
+  var _bt=document.getElementById('prodViewTable'),_bc=document.getElementById('prodViewCards');
+  if(_bt&&_bc){
+    _bt.style.background=prodView==='table'?'var(--ac)':'transparent';_bt.style.color=prodView==='table'?'#fff':'var(--tx2)';
+    _bc.style.background=prodView==='cards'?'var(--ac)':'transparent';_bc.style.color=prodView==='cards'?'#fff':'var(--tx2)';
+  }
   document.getElementById('prodCount').textContent=D.products.length+' Produkte';
   // stats
   document.getElementById('stTotal').textContent=D.products.length;
@@ -15879,7 +15933,7 @@ function renderIdeen(){
       +'<td style="font-size:11px;color:var(--tx2);white-space:nowrap">'+(i.datum||'—')+'</td>'
       +'<td onclick="event.stopPropagation()"><div class="row-act">'
         +'<button onclick="editIdee('+idx+')" title="Bearbeiten">✏️</button>'
-        +'<button onclick="ideeToProd('+idx+')" title="In Produktliste übernehmen" style="color:var(--gn);border-color:var(--gn)">➡️</button>'
+        +'<button onclick="ideeToProd('+idx+')" title="In Produktliste übernehmen" style="background:var(--gn);color:#fff;border:none;font-weight:600;padding:5px 9px;font-size:11px;border-radius:5px;white-space:nowrap">➕ Produktliste</button>'
         +'<button class="del" onclick="delIdee('+idx+')" title="Löschen">🗑️</button>'
       +'</div></td>';
     // Click on row opens edit modal (except on interactive cells that stopped propagation)
