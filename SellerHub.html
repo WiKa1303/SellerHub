@@ -3075,8 +3075,27 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   }
   // ── Geteilte Engine für die Produktfindung (Konkurrenz-Analyse aus ASIN/Link) ──
   // Liefert reine Daten zurück (keine DOM-Seiteneffekte), damit der Recherche-Bereich sie nutzen kann.
+  // Find the REAL top product on Amazon for a search term → canonical /dp/ link (or null)
+  async function igResolveTop(name,tld){
+    tld=tld||"de";
+    const q="https://www.amazon."+tld+"/s?k="+encodeURIComponent((name||"").replace(/[*_`#]/g,"").trim());
+    let html=null;
+    try{html=await igFetchRawProxy(q);}catch(e){}
+    if(!html||html.length<2000){try{html=await igFetchVia(q);}catch(e){}}
+    if(!html)return null;
+    // Collect candidate ASINs in document order (search results carry data-asin="B0…")
+    const asins=[],seen={};let m;
+    const reData=/data-asin="(B0[A-Z0-9]{8})"/gi;
+    while((m=reData.exec(html))){const a=m[1].toUpperCase();if(!seen[a]){seen[a]=1;asins.push(a);}}
+    if(!asins.length){const reDp=/\/dp\/(B0[A-Z0-9]{8})/gi;while((m=reDp.exec(html))){const a=m[1].toUpperCase();if(!seen[a]){seen[a]=1;asins.push(a);}}}
+    // Return the first whose product image really exists (skips junk/placeholder ASINs)
+    for(const a of asins.slice(0,8)){
+      try{if(typeof asinHasImage==="function"?await asinHasImage(a):true)return "https://www.amazon."+tld+"/dp/"+a;}catch(e){}
+    }
+    return null;
+  }
   window.SHImport={
-    asin:igAsin, tld:igTld, fetchImageB64:igFetchImageB64,
+    asin:igAsin, tld:igTld, fetchImageB64:igFetchImageB64, resolveTop:igResolveTop,
     async fetchListing(raw){
       raw=(raw||"").trim();
       const asin=igAsin(raw);
@@ -15824,9 +15843,8 @@ function renderIdeen(){
       if(i.amazonLink.length>30)shortUrl+='…';
       amazonCell='<a href="'+esc(i.amazonLink)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--ac);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--acd);padding:4px 8px;border-radius:5px;border:1px solid var(--ac)" title="'+esc(i.amazonLink)+'">🔗 '+esc(shortUrl)+'</a><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:none;color:var(--tx3);padding:2px 4px;font-size:10px;cursor:pointer;margin-left:4px" title="Link bearbeiten">✏️</button>';
     }else{
-      // Build smarter Amazon search URL with ref=nb_sb_noss for direct results
-      var amzSearch=buildAmazonSearchUrl(i.name);
-      amazonCell='<a href="'+amzSearch+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--bl);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--bld);padding:4px 8px;border-radius:5px;border:1px solid var(--bl)" title="Suche auf Amazon nach: '+esc(i.name)+'">🔍 Produkt finden</a><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:1px dashed var(--bd);color:var(--tx3);padding:3px 6px;border-radius:5px;font-size:10px;cursor:pointer;margin-left:4px" title="Direktlink hinzufügen">+</button>';
+      // "Produkt finden" resolves the real top Amazon product on click and opens it directly
+      amazonCell='<button onclick="event.stopPropagation();ideenOpenProduct('+idx+')" style="color:var(--bl);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--bld);padding:4px 8px;border-radius:5px;border:1px solid var(--bl);cursor:pointer;font-family:inherit" title="Öffnet eine präzise Amazon-Suche – die obersten Treffer sind die echten Produkte für: '+esc(i.name)+'">🔍 Produkt finden</button><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:1px dashed var(--bd);color:var(--tx3);padding:3px 6px;border-radius:5px;font-size:10px;cursor:pointer;margin-left:4px" title="Echten /dp/-Link einfügen → öffnet danach direkt das Produkt">+</button>';
     }
 
     // HERSTELLER CELL: Quick-search buttons for Alibaba (with EN translation), Europages (correct URL)
@@ -16002,6 +16020,13 @@ function addBildUrl(idx){
   if(url.trim())toast('✓ Bild hinzugefügt');
 }
 
+// Click "Produkt finden": if a real /dp/ link is cached, open the product directly; otherwise
+// open a PRECISE Amazon search (the top hits are the real products). Reliable, no dead links.
+function ideenOpenProduct(idx){
+  var idee=D.ideen[idx];if(!idee)return;
+  if(idee.amazonLink&&/\/dp\/|\/gp\/product\//i.test(idee.amazonLink)){window.open(idee.amazonLink,'_blank','noopener');return;}
+  window.open(buildAmazonSearchUrl(idee.name),'_blank','noopener');
+}
 function addAmazonLink(idx){
   var current=D.ideen[idx].amazonLink||'';
   var suggest=current||'https://www.amazon.de/s?k='+encodeURIComponent(D.ideen[idx].name);
@@ -16021,10 +16046,17 @@ function showBildPreview(url,name){
 }
 
 // Build a smart Amazon search URL that goes directly to product results, not category
+// Trim a long marketing product name down to the core search keywords (better Amazon top-hits)
+function amazonSearchTerms(name){
+  if(!name)return '';
+  var stop=/^(set|aus|fuer|für|mit|und|der|die|das|den|dem|ein|eine|einen|im|in|zum|zur|von|vom|am|als|oder|bzw|sowie|inkl|inklusive|modulares?|modular|mehrzweck|hochwertige[rsn]?|premium|universal|verstellbare[rsn]?|faltbare[rsn]?|luftdichte[rsn]?|wandmontierte[rsn]?|tuerhaengende[rsn]?)$/i;
+  var words=name.replace(/[*_`#,()\/]/g,' ').replace(/&/g,' ').split(/\s+/).filter(Boolean).filter(function(w){return !stop.test(w)});
+  var terms=words.slice(0,6).join(' ').trim();
+  return terms||name.replace(/[*_`#]/g,'').trim();
+}
 function buildAmazonSearchUrl(productName){
   if(!productName)return 'https://www.amazon.de';
-  // Clean the name: remove special chars that confuse Amazon search, keep umlauts
-  var clean=productName.replace(/[*_`#]/g,'').trim();
+  var clean=amazonSearchTerms(productName);
   // Amazon's standard search with sort by relevance
   return 'https://www.amazon.de/s?k='+encodeURIComponent(clean)+'&i=aps&ref=nb_sb_noss';
 }
@@ -17256,7 +17288,83 @@ function previewParsePerplexity(){
   }
 }
 
-function importPerplexityResponse(){
+// Collect all Amazon PRODUCT links (/dp/ASIN or /gp/product/ASIN) from a text.
+// The URL is REBUILT cleanly as https://www.amazon.<tld>/dp/<ASIN> so trailing
+// markdown (**, ), tracking params, …) can never break the link.
+function collectAmazonProductLinks(text){
+  if(!text)return [];
+  var out=[],seen={};
+  var re=/https?:\/\/(?:www\.)?(amazon\.(?:[a-z]{2,3})(?:\.[a-z]{2})?)((?:\/[^\s)\]>"'*`]+?)?)\/(?:dp|gp\/product)\/([A-Z0-9]{10})/gi;
+  var m;
+  while((m=re.exec(text))!==null){
+    var host=m[1].toLowerCase();
+    var path=m[2]||'';
+    var asin=m[3].toUpperCase();
+    if(seen[asin])continue;
+    seen[asin]=true;
+    var slug;try{slug=decodeURIComponent(host+path)}catch(e){slug=host+path}
+    slug=slug.toLowerCase().replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss');
+    out.push({
+      url:'https://www.'+host+'/dp/'+asin,   // clean, canonical link
+      asin:asin,
+      slug:slug,
+      hasSlug:path.replace(/^\/+/,'').length>2   // true = real product-name URL (trustworthy), false = bare /dp/ (often AI-guessed)
+    });
+  }
+  return out;
+}
+// Rebuild any Amazon product link into a clean canonical https://www.amazon.<tld>/dp/ASIN
+// (removes trailing markdown like ** or ), tracking params, etc. that would break the link)
+function cleanAmazonUrl(url){
+  if(!url)return '';
+  var m=url.match(/(amazon\.(?:[a-z]{2,3})(?:\.[a-z]{2})?)\/(?:[^\s]*?\/)?(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
+  if(m)return 'https://www.'+m[1].toLowerCase()+'/dp/'+m[2].toUpperCase();
+  return url;
+}
+// Tokenize a product name into comparable keywords (lowercase, umlaut-free, words >=4 chars, no stopwords)
+function ideaTokens(name){
+  if(!name)return [];
+  var s=name.toLowerCase().replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,' ');
+  var stop={der:1,die:1,das:1,und:1,fuer:1,mit:1,aus:1,set:1,the:1,for:1,and:1,with:1,von:1,den:1,ein:1,eine:1};
+  return s.split(/\s+/).filter(function(w){return w.length>=4&&!stop[w]});
+}
+// Pick the Amazon product link whose URL-slug best matches an idea name (so each idea opens its OWN product)
+function bestAmazonLinkFor(name,cands,used){
+  var toks=ideaTokens(name);
+  if(!toks.length)return null;
+  var best=null,bestScore=0;
+  cands.forEach(function(c){
+    if(used[c.asin])return;
+    var score=0;
+    toks.forEach(function(t){if(c.slug.indexOf(t)>-1)score++;});
+    if(score>bestScore){bestScore=score;best=c;}
+  });
+  return bestScore>=1?best:null;
+}
+
+// Check if an ASIN is a REAL Amazon product: its image-CDN entry is an actual photo,
+// not the 1x1 transparent placeholder that Amazon returns for non-existent ASINs.
+// (Loading an <img> needs no CORS, so this works from file:// too.)
+function asinHasImage(asin){
+  return new Promise(function(res){
+    if(!/^[A-Z0-9]{10}$/i.test(asin)){res(false);return;}
+    var img=new Image(),done=false;
+    var finish=function(v){if(done)return;done=true;res(v);};
+    img.onload=function(){finish(img.naturalWidth>=2&&img.naturalHeight>=2);};
+    img.onerror=function(){finish(false);};
+    img.src='https://images-na.ssl-images-amazon.com/images/P/'+asin.toUpperCase()+'.jpg';
+    setTimeout(function(){finish(false);},5000);
+  });
+}
+// Validate many ASINs in parallel → returns a map {ASIN:true} of the ones that really exist
+function validateAsins(asins){
+  return Promise.all(asins.map(function(a){
+    return asinHasImage(a).then(function(ok){return ok?a.toUpperCase():null});
+  })).then(function(r){var s={};r.forEach(function(a){if(a)s[a]=true;});return s;});
+}
+function asinOf(url){var m=(url||'').match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);return m?m[1].toUpperCase():'';}
+
+async function importPerplexityResponse(){
   var txt=document.getElementById('perplexityResp').value;
   var parsed=extractJSON(txt);
   if(!parsed||!Array.isArray(parsed)||parsed.length===0){
@@ -17271,13 +17379,58 @@ function importPerplexityResponse(){
   // Extract sources for attribution
   var sources=extractPerplexitySources(txt);
   var sourcesText=sources.length>0?sources.slice(0,8).join('\n'):'';
+  // All Amazon product links in the response → assign the matching one to each idea
+  var amazonCands=collectAmazonProductLinks(txt);
 
-  var count=0;
+  // Build all ideas first (so we can do link-matching in two passes)
+  var neueIdeen=[];
   parsed.forEach(function(o){
     if(!o||(!o.name&&!o.produkt&&!o.title))return;
     var idee=normalizeIdee(o,quelle,'Zu prüfen');
-    // Append sources to dedicated quellen field
     if(sourcesText)idee.quellen=sourcesText;
+    if(idee.amazonLink)idee.amazonLink=cleanAmazonUrl(idee.amazonLink);
+    neueIdeen.push(idee);
+  });
+
+  // ── Verify every candidate ASIN really exists on Amazon (AI loves to invent them) ──
+  var checkAsins={};
+  amazonCands.forEach(function(c){checkAsins[c.asin]=true;});
+  neueIdeen.forEach(function(i){var a=asinOf(i.amazonLink);if(a)checkAsins[a]=true;});
+  var asinList=Object.keys(checkAsins);
+  var valid={};
+  if(asinList.length){
+    toast('Prüfe '+asinList.length+' Produktlink'+(asinList.length>1?'s':'')+' …');
+    try{valid=await validateAsins(asinList);}catch(e){valid={};}
+  }
+  var fakeCount=asinList.length-Object.keys(valid).length;
+  // Drop AI-invented links; keep only verified real products as candidates
+  var goodCands=amazonCands.filter(function(c){return valid[c.asin];});
+  var usedAsins={};
+  var hasDp=function(l){return /\/dp\/|\/gp\/product\//i.test(l||'')};
+
+  // Clear the model's own JSON link if its ASIN is fake; otherwise reserve it
+  neueIdeen.forEach(function(idee){
+    var a=asinOf(idee.amazonLink);
+    if(a&&!valid[a])idee.amazonLink='';
+    else if(a)usedAsins[a]=true;
+  });
+  // Pass 1: high-confidence match by product-name words in the URL (verified links only)
+  neueIdeen.forEach(function(idee){
+    if(hasDp(idee.amazonLink))return;
+    var match=bestAmazonLinkFor(idee.name,goodCands,usedAsins);
+    if(match){idee.amazonLink=match.url;usedAsins[match.asin]=true;}
+  });
+  // Pass 2: assign remaining verified links to still-unlinked ideas IN ORDER
+  var rest=goodCands.filter(function(c){return !usedAsins[c.asin];});
+  var ri=0;
+  neueIdeen.forEach(function(idee){
+    if(hasDp(idee.amazonLink))return;
+    if(ri<rest.length){idee.amazonLink=rest[ri].url;usedAsins[rest[ri].asin]=true;ri++;}
+  });
+
+  var count=0,linked=0;
+  neueIdeen.forEach(function(idee){
+    if(hasDp(idee.amazonLink))linked++;
     D.ideen.push(idee);
     count++;
   });
@@ -17286,8 +17439,9 @@ function importPerplexityResponse(){
     save();renderIdeen();
     closePerplexityModal();
     try{localStorage.removeItem('wika_pending_perplexity')}catch(e){}
-    var msg='✓ '+count+' Ideen in Pool importiert';
-    if(sources.length>0)msg+=' ('+sources.length+' Quellen)';
+    var msg='✓ '+count+' Ideen importiert';
+    if(linked>0)msg+=' · '+linked+'× 🔗 Direktlink';
+    if(fakeCount>0)msg+=' · '+fakeCount+' erfundene Links verworfen → Suche';
     toast(msg);
     go('ideen');
   }else{
