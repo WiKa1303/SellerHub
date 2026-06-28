@@ -1532,22 +1532,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
       </div>
 
-      <!-- Konkurrenz per ASIN / Amazon-Link analysieren -->
-      <div class="card" style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:12px;padding:16px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <span style="font-size:24px">🔗</span>
-          <div>
-            <div style="font-weight:700;color:var(--tx);font-size:15px">Konkurrenz per ASIN / Amazon-Link analysieren</div>
-            <div style="font-size:12.5px;color:var(--tx2)">Holt Titel, USPs &amp; Produktbilder eines Konkurrenz-Listings und legt daraus einen Recherche-Kandidaten an. Optional leitet die KI besseres Marketing ab – im <b>KI-Bildstudio</b> ladbar.</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="text" id="researchAsinInput" placeholder="Amazon-Link (…/dp/B0…) oder ASIN (z. B. B0CVBBBCZN)" style="flex:1;min-width:240px;min-height:46px;box-sizing:border-box;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;padding:0 14px;font-size:13.5px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')researchAnalyzeAsin()">
-          <button class="btn btn-p" id="researchAsinBtn" onclick="researchAnalyzeAsin()" style="white-space:nowrap;min-height:46px">🔍 Analysieren</button>
-        </div>
-        <div id="researchAsinResult"></div>
-      </div>
-
       <!-- Master-Tabelle -->
       <div style="overflow-x:auto;background:var(--s1);border:1px solid var(--bd);border-radius:10px">
         <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:1400px">
@@ -2453,13 +2437,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       </div>
       <button type="button" class="ig-kb-x" id="igKeyBannerX" title="Ausblenden">×</button>
     </div>
-    <div class="card ig-import-card" id="igLoadCandCard">
-      <div class="ig-import-head"><span class="ig-import-emoji">📥</span><div><div class="ig-import-title">Aus Recherche-Kandidat laden</div><div class="ig-import-sub">Titel, USPs &amp; Produktbilder aus deiner Produktfindung übernehmen</div></div></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <select id="igCandSelect" style="flex:1;width:auto;min-width:200px;min-height:46px;box-sizing:border-box;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;padding:0 12px;font-size:13.5px;font-family:inherit;outline:none"><option value="">– Kandidat wählen –</option></select>
-        <button class="btn btn-p" id="igLoadCandBtn" style="white-space:nowrap;min-height:46px">📥 Laden</button>
+    <div class="card ig-import-card" id="igImportCard">
+      <div class="ig-import-head"><span class="ig-import-emoji">⚡</span><div><div class="ig-import-title">Schnellstart per Amazon-Link</div><div class="ig-import-sub">Titel, Beschreibung, USPs &amp; Produktbilder automatisch übernehmen</div></div></div>
+      <div class="ig-import">
+        <span class="ig-ic">🔗</span>
+        <input type="text" id="igUrl" placeholder="Amazon-Link (…/dp/B0…) oder ASIN (z. B. B0CVBBBCZN)">
+        <button class="ig-imp-btn" id="igImportBtn">Importieren</button>
       </div>
-      <div class="ig-hint" id="igLoadCandHint">Konkurrenz-ASINs analysierst du jetzt im Bereich <b>🎯 Produktfindung → Recherche-Kandidaten</b>. Die dort gespeicherten Daten (✨ = inkl. KI-Optimierung) erscheinen hier zur Auswahl.</div>
+      <div class="ig-hint" id="igImportHint">Link oder reine ASIN möglich – übernimmt Titel, Beschreibung, USPs &amp; Produktbilder automatisch. Der erste Abruf kann ein paar Sekunden dauern.</div>
+      <div id="igBeatRow" style="display:none;margin-top:12px">
+        <button type="button" class="ig-beat-btn" id="igBeatBtn">🏆 Vergleichen &amp; besser vermarkten</button>
+      </div>
+    </div>
+    <div class="card" id="igBeatCard" style="display:none">
+      <div class="ig-sec"><span class="ig-step" style="background:var(--pu)">★</span><h3>Konkurrenz vs. dein optimiertes Marketing</h3><span class="ig-resstatus" id="igBeatStatus"></span></div>
+      <div id="igBeatBody"></div>
     </div>
     <div class="ig-layout" id="igLayout">
       <div class="ig-left">
@@ -2762,13 +2754,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     }
     throw new Error("Seite nicht ladbar (Reader/Proxy nicht erreichbar)");
   }
-  // Rohes HTML (mit Amazon-Bild-JSON) NUR über klassische Proxys – ohne jina.ai-Bereinigung
-  async function igFetchRawProxy(u){
-    for(const mk of IG_PROXIES){
-      try{const r=await fetch(mk(u));if(!r.ok)continue;const t=await r.text();if(t&&t.length>2000)return t;}catch(e){}
-    }
-    return null;
-  }
   function igAsin(s){
     var m=s.match(/(?:\/dp\/|\/gp\/product\/|\/product\/|[?&]asin=)([A-Z0-9]{10})/i)||s.match(/(?:^|\/|=)([A-Z0-9]{10})(?:[/?#]|$)/);
     return m?m[1].toUpperCase():null;
@@ -2783,66 +2768,48 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     return await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:"amazon.jpg",mime:blob.type,dataUrl:fr.result,base64:String(fr.result).split(",")[1]});fr.onerror=rej;fr.readAsDataURL(blob);});
   }
   function igExtractImages(html,doc){
-    // Amazon liefert dasselbe Foto in vielen Größen (gleiche Bild-ID, andere URL).
-    // Wir deduplizieren nach BILD-ID, damit echte unterschiedliche Produktfotos zurückkommen.
-    const uhtml=String(html).replace(/\\u002[fF]/g,"/").replace(/\\\//g,"/");
-    const idOf=u=>{const m=String(u||"").replace(/\\u002[fF]/g,"/").replace(/\\\//g,"/").match(/\/images\/I\/([^.\/]+)\./);return m?m[1]:null;};
-    const big=id=>"https://m.media-amazon.com/images/I/"+id+"._AC_SL1500_.jpg";
-    const byId=new Map();
-    const add=u=>{const id=idOf(u);if(id && id.length>=6 && !byId.has(id))byId.set(id,big(id));};
-    let m;
-    // 1) Galerie-JSON (colorImages/imageGalleryData): je hiRes/large = EIN eigenes Foto
-    const reJson=/"(?:hiRes|large|mainUrl)"\s*:\s*"(https?:[^"]+?\.(?:jpe?g|png))"/gi;
-    while((m=reJson.exec(uhtml))){add(m[1]);}
-    // 2) Hauptbild + Größen-Varianten (data-a-dynamic-image) → gleiche ID, wird zusammengefasst
+    const urls=new Set();
     const li=doc.querySelector("#landingImage, #imgBlkFront, #main-image, #imgTagWrapperId img");
     const dyn=li&&li.getAttribute("data-a-dynamic-image");
-    if(dyn){try{Object.keys(JSON.parse(dyn)).forEach(add);}catch(e){}}
-    if(li){add(li.getAttribute("data-old-hires"));add(li.getAttribute("src"));}
-    // 3) Galerie-Thumbnails (teilen die Bild-ID mit dem Vollbild)
-    doc.querySelectorAll("#altImages img, li.imageThumbnail img, .imageThumbnail img, .a-button-thumbnail img").forEach(im=>{add(im.getAttribute("src"));add(im.getAttribute("data-src"));});
-    // 4) Fallback: alle Amazon-Produktbild-IDs aus dem rohen HTML (nur wenn bisher kaum etwas gefunden)
-    if(byId.size<2){
-      const reAny=/\/images\/I\/([^"'.\/\\ ]{6,})\.[a-z0-9._-]*?\.(?:jpe?g|png)/gi;
-      while((m=reAny.exec(uhtml))){if(!byId.has(m[1]))byId.set(m[1],big(m[1]));}
-    }
-    // 5) og:image als letzter Notnagel
-    if(byId.size===0){const og=doc.querySelector('meta[property="og:image"]');if(og&&og.getAttribute("content"))add(og.getAttribute("content"));}
-    return [...byId.values()];
+    if(dyn){try{Object.keys(JSON.parse(dyn)).forEach(u=>urls.add(u));}catch(e){}}
+    const re=/"(?:hiRes|large)":"(https:[^"]+?\.(?:jpg|png))"/g;let m;
+    while((m=re.exec(html))){urls.add(m[1].replace(/\\u002[fF]/g,"/").replace(/\\\//g,"/"));}
+    const og=doc.querySelector('meta[property="og:image"]');if(og&&og.getAttribute("content"))urls.add(og.getAttribute("content"));
+    return [...urls].filter(u=>/(m\.media-amazon|images-..\.ssl-images-amazon|images-amazon)/.test(u));
   }
-  // ── Aus Recherche-Kandidat laden (Daten kommen aus der Produktfindung) ──
-  function igPopulateCands(){
-    const sel=$("igCandSelect");if(!sel)return;
-    const list=(window.SHResearch&&window.SHResearch.withComp&&window.SHResearch.withComp())||[];
-    const cur=sel.value;
-    const esch=s=>(s||"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
-    sel.innerHTML='<option value="">– Kandidat wählen –</option>'+list.map(c=>'<option value="'+c.id+'">'+esch((c.name||"Kandidat").slice(0,70))+(c.beat?" ✨":"")+'</option>').join("");
-    if(cur)sel.value=cur;
-    if(!list.length){const o=document.createElement("option");o.value="";o.textContent="(noch keine analysierten Kandidaten)";sel.appendChild(o);}
-  }
-  (function(){const s=$("igCandSelect");if(s){s.addEventListener("focus",igPopulateCands);s.addEventListener("mousedown",igPopulateCands);}})();
-  $("igLoadCandBtn").onclick=async()=>{
-    igPopulateCands();
-    const id=$("igCandSelect").value;
-    if(!id){igToast("Bitte zuerst einen Recherche-Kandidaten wählen.",true);return;}
-    const c=window.SHResearch&&window.SHResearch.byId&&window.SHResearch.byId(id);
-    if(!c){igToast("Kandidat nicht gefunden.",true);return;}
-    const btn=$("igLoadCandBtn");const old=btn.textContent;btn.disabled=true;btn.textContent="Lädt …";
+  $("igImportBtn").onclick=async()=>{
+    var raw=$("igUrl").value.trim();
+    if(!raw){igToast("Bitte einen Amazon-Link oder eine ASIN einfügen.",true);return;}
+    const asin=igAsin(raw);
+    if(!/amazon\./i.test(raw) && !asin){igToast("Bitte einen Amazon-Link oder eine 10-stellige ASIN einfügen.",true);return;}
+    const target=asin?("https://www.amazon."+(/amazon\./i.test(raw)?igTld(raw):"de")+"/dp/"+asin):raw;
+    const btn=$("igImportBtn");const old=btn.textContent;btn.disabled=true;btn.textContent="Lädt …";
     try{
-      const t=(c.beat&&c.beat.titles&&c.beat.titles[0])||c.compTitle||c.name||"";
-      if(t)$("igTitle").value=t.slice(0,250);
-      const d=(c.beat&&c.beat.desc)||c.compDesc||"";
-      if(d)$("igDesc").value=d;
-      const u=(c.beat&&c.beat.usps&&c.beat.usps.length)?c.beat.usps:(c.compUsps||[]);
-      if(u.length){usps=u.slice(0,5);while(usps.length<3)usps.push("");renderUsps();}
+      const html=await igFetchVia(target);
+      const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);
+      const doc=new DOMParser().parseFromString(html,"text/html");
+      var title="";
+      const tEl=doc.querySelector("#productTitle");if(tEl)title=tEl.textContent;
+      if(!title){const ogt=doc.querySelector('meta[property="og:title"]');if(ogt)title=ogt.getAttribute("content")||"";}
+      if(!title){const tt=doc.querySelector("title");if(tt)title=tt.textContent.replace(/^Amazon\.[a-z.]+\s*:?\s*/i,"").replace(/\s*[:|-]\s*Amazon\.[a-z.]+.*$/i,"");}
+      title=(title||"").replace(/\s+/g," ").trim();
+      if(title)$("igTitle").value=title.slice(0,250);
+      const bullets=[...doc.querySelectorAll("#feature-bullets li .a-list-item, #feature-bullets li")].map(li=>li.textContent.replace(/\s+/g," ").trim()).filter(t=>t&&t.length>2&&!/^(See more|Mehr anzeigen)/i.test(t));
+      const uniqB=[...new Set(bullets)];
+      if(uniqB.length){$("igDesc").value=uniqB.join(" ");usps=uniqB.slice(0,5).map(b=>b.length>70?b.slice(0,70):b);while(usps.length<3)usps.push("");renderUsps();}
+      const imgUrls=igExtractImages(html,doc).slice(0,6);
       let added=0;
-      const urls=(c.compImages||[]).slice(0,9);
-      for(const iu of urls){if(mainImgs.length>=10)break;try{mainImgs.push(await window.SHImport.fetchImageB64(iu));added++;}catch(e){}}
+      for(const iu of imgUrls){if(mainImgs.length>=10)break;try{mainImgs.push(await igFetchImageB64(iu));added++;}catch(e){}}
       renderThumbs("igThumbsMain",mainImgs);updateBadge();igUpdateCounts();updateChecklist();
-      igCompetitor={title:c.compTitle||"",desc:c.compDesc||"",usps:c.compUsps||[],asin:c.compAsin||""};
-      igToast("Geladen ✓ "+[t?"Titel":"",u.length?"USPs":"",added?added+" Bild(er)":""].filter(Boolean).join(" · ")+(c.beat?" · inkl. KI-Optimierung":""));
+      if(!title && !uniqB.length && !added){
+        igToast(blocked?"Amazon hat den Abruf blockiert (Roboter-Check"+(asin?", ASIN "+asin:"")+"). Später erneut oder manuell hochladen.":"Nichts gefunden"+(asin?" (ASIN "+asin+")":"")+" – evtl. blockiert. Bitte manuell hochladen.",true);
+      }else{
+        igToast("Import ✓ "+[title?"Titel":"",uniqB.length?"Text":"",added?added+" Bild(er)":""].filter(Boolean).join(" · ")+(asin?" · ASIN "+asin:""));
+        igCompetitor={title:$("igTitle").value.trim(),desc:$("igDesc").value.trim(),usps:usps.filter(u=>u.trim()),asin:asin||""};
+        $("igBeatRow").style.display="block";
+      }
     }catch(err){
-      igToast("Laden fehlgeschlagen: "+err.message,true);
+      igToast("Import fehlgeschlagen: "+err.message+". Bitte manuell hochladen.",true);
     }finally{btn.disabled=false;btn.textContent=old;}
   };
 
@@ -3068,8 +3035,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       if(over)igPromptKeyOnOverload();
     }finally{igBeatProgHide();btn.disabled=false;btn.textContent=old;}
   }
-  // Hinweis: Der frühere "Vergleichen & besser vermarkten"-Button lebt jetzt in der
-  // Produktfindung (researchBeatCandidate). igBeatCompetitor/igRenderBeat bleiben ungenutzt.
+  $("igBeatBtn").onclick=igBeatCompetitor;
 
   // ── KI-Titel-Verbesserung (Schritt 1) ──
   async function igGenText(promptText){
@@ -3105,85 +3071,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     if(!t||!t.trim())throw new Error("Leere Antwort der Text-KI");
     return t;
   }
-  // ── Geteilte Engine für die Produktfindung (Konkurrenz-Analyse aus ASIN/Link) ──
-  // Liefert reine Daten zurück (keine DOM-Seiteneffekte), damit der Recherche-Bereich sie nutzen kann.
-  window.SHImport={
-    asin:igAsin, tld:igTld, fetchImageB64:igFetchImageB64,
-    async fetchListing(raw){
-      raw=(raw||"").trim();
-      const asin=igAsin(raw);
-      if(!/amazon\./i.test(raw) && !asin) throw new Error("Bitte einen Amazon-Link oder eine 10-stellige ASIN angeben.");
-      const target=asin?("https://www.amazon."+(/amazon\./i.test(raw)?igTld(raw):"de")+"/dp/"+asin):raw;
-      const html=await igFetchVia(target);
-      const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);
-      const doc=new DOMParser().parseFromString(html,"text/html");
-      let title="";
-      const tEl=doc.querySelector("#productTitle");if(tEl)title=tEl.textContent;
-      if(!title){const ogt=doc.querySelector('meta[property="og:title"]');if(ogt)title=ogt.getAttribute("content")||"";}
-      if(!title){const tt=doc.querySelector("title");if(tt)title=tt.textContent.replace(/^Amazon\.[a-z.]+\s*:?\s*/i,"").replace(/\s*[:|-]\s*Amazon\.[a-z.]+.*$/i,"");}
-      title=(title||"").replace(/\s+/g," ").trim();
-      const bullets=[...doc.querySelectorAll("#feature-bullets li .a-list-item, #feature-bullets li")].map(li=>li.textContent.replace(/\s+/g," ").trim()).filter(t=>t&&t.length>2&&!/^(See more|Mehr anzeigen)/i.test(t));
-      const uniqB=[...new Set(bullets)];
-      let imageUrls=igExtractImages(html,doc);
-      if(imageUrls.length<2){
-        // jina.ai liefert oft nur das Hauptbild → rohes HTML über Proxy nachladen und Galerie extrahieren
-        try{
-          const raw=await igFetchRawProxy(target);
-          if(raw){
-            const rdoc=new DOMParser().parseFromString(raw,"text/html");
-            const more=igExtractImages(raw,rdoc);
-            const seen=new Set(imageUrls);
-            for(const u of more){if(!seen.has(u)){seen.add(u);imageUrls.push(u);}}
-          }
-        }catch(e){}
-      }
-      imageUrls=imageUrls.slice(0,9);
-      // Preis bestmöglich auslesen (de/eu/us-Formate) → Startwert fürs VK-Feld
-      const parsePrice=s=>{
-        if(!s)return null;
-        const mm=s.replace(/\s/g,"").match(/(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)/);
-        if(!mm)return null;
-        let n=mm[1];
-        if(/[.,]\d{1,2}$/.test(n)){n=n.replace(/[.,](?=\d{3})/g,"").replace(",",".");}
-        else{n=n.replace(/[.,]/g,"");}
-        const v=parseFloat(n);
-        return isFinite(v)&&v>0&&v<100000?Math.round(v*100)/100:null;
-      };
-      let priceTxt="";
-      const pEl=doc.querySelector("#corePriceDisplay_desktop_feature_div .a-offscreen, #corePrice_feature_div .a-offscreen, #priceblock_ourprice, #priceblock_dealprice, .a-price .a-offscreen, span.a-price>span.a-offscreen");
-      if(pEl)priceTxt=pEl.textContent;
-      if(!priceTxt){const pm=html.match(/"priceAmount"\s*:\s*"?([0-9.,]+)/i)||html.match(/class="a-offscreen">\s*([^<]*\d[^<]*)</);if(pm)priceTxt=pm[1];}
-      const price=parsePrice(priceTxt);
-      return {title, desc:uniqB.join(" "), usps:uniqB.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls, asin:asin||"", price, blocked};
-    },
-    async beat(ref, lang, onStep){
-      lang=lang||"Deutsch";
-      const ctx="KONKURRENZ-Titel: "+(ref.title||"—")+"\nKONKURRENZ-Beschreibung: "+(ref.desc||"—")+"\nKONKURRENZ-USPs:\n"+((ref.usps&&ref.usps.length)?ref.usps.map(u=>"- "+u).join("\n"):"—");
-      const prompts=[
-        "Du bist erfahrener Amazon-Marketing-Stratege. Unten stehen die Listing-Daten eines KONKURRENZ-Produkts. Nenne 4–5 konkrete Schwächen/Lücken dieses Listings und wie man dasselbe Produkt BESSER vermarktet, um Käufer abzuwerben. Antworte in "+lang+", je Punkt eine kurze Zeile, OHNE Nummerierung, OHNE Vorrede.\n\n"+ctx,
-        "Du bist Amazon-SEO-Texter. Erstelle 3 stärkere, verkaufsstärkere Amazon-Produkttitel in "+lang+", die das folgende KONKURRENZ-Produkt schlagen (mehr relevante Keywords, klarer Hauptnutzen, Vertrauen), max. ca. 180 Zeichen. Nur die 3 Titel, je Zeile, OHNE Nummerierung/Anführungszeichen.\n\n"+ctx,
-        "Du bist Amazon-SEO-Texter. Schreibe EINE überzeugende, bessere Produktbeschreibung in "+lang+" als Fließtext (ca. 60–120 Wörter), die das KONKURRENZ-Produkt klar übertrifft und Vorteile/Differenzierung betont. NUR den Text, ohne Vorrede.\n\n"+ctx,
-        "Du bist Amazon-SEO-Texter. Leite 5 stärkere, differenzierende USPs in "+lang+" ab, die besser sind als beim KONKURRENZ-Produkt (max. ca. 8 Wörter je USP). Je einer pro Zeile, OHNE Nummerierung/Anführungszeichen.\n\n"+ctx,
-        "Du bist Amazon-Conversion-Experte. Erkläre in "+lang+" in 3–4 kurzen, konkreten Stichpunkten, WARUM das neue, optimierte Listing mehr Käufer überzeugt und zu MEHR VERKÄUFEN führt – bessere Keyword-Sichtbarkeit, klarerer Hauptnutzen, Vertrauen/Kaufbeweise, stärkerer Kaufanreiz. Je Punkt EINE kurze Zeile, OHNE Nummerierung, OHNE Vorrede.\n\n"+ctx
-      ];
-      const labels=["Konkurrenz analysieren","Bessere Titel texten","Beschreibung optimieren","Stärkere USPs ableiten","Verkaufsargumente formulieren"];
-      const out=[];let ok=0,lastErr=null;
-      for(let i=0;i<prompts.length;i++){
-        if(onStep){try{onStep(i,prompts.length,labels[i]);}catch(e){}}
-        try{const t=await igGenTextSafe(prompts[i],4);out.push(t);if(t)ok++;}catch(e){out.push("");lastErr=e;}
-        if(onStep){try{onStep(i+1,prompts.length,labels[i]);}catch(e){}}
-      }
-      if(ok===0)throw lastErr||new Error("Die KI ist gerade überlastet.");
-      const clean=s=>(s||"").trim().replace(/^["'»„“]+|["'«”]+$/g,"").trim();
-      return {
-        weaknesses:igLine(out[0]).slice(0,6),
-        titles:igLine(out[1]).slice(0,3),
-        desc:clean(out[2]),
-        usps:igLine(out[3]).slice(0,5),
-        why:igLine(out[4]).slice(0,5)
-      };
-    }
-  };
   function igParseTitles(raw){
     raw=(raw||"").trim();
     try{const j=JSON.parse(raw);if(Array.isArray(j))return j.map(String).map(s=>s.trim()).filter(Boolean).slice(0,3);}catch(e){}
@@ -5914,7 +5801,6 @@ function researchAddCandidate(){
     notes:'',
     scoreMatrix:{},
     computedScore:0,
-    compTitle:'',compDesc:'',compUsps:[],compImages:[],compAsin:'',beat:null,compFetchedAt:null,
     createdAt:new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
@@ -5923,160 +5809,6 @@ function researchAddCandidate(){
   researchRenderTable();
   researchUpdateBadge();
   toast('✓ Kandidat „'+esc(name)+'" angelegt');
-}
-
-// ── Zugriff für das KI-Bildstudio: Kandidaten mit Konkurrenz-Daten ──
-window.SHResearch={
-  withComp:function(){return ((D.research&&D.research.candidates)||[]).filter(function(c){return c.compTitle||(c.compImages&&c.compImages.length)||c.beat;});},
-  byId:function(id){return ((D.research&&D.research.candidates)||[]).find(function(c){return c.id===id;});}
-};
-
-// ── Konkurrenz per ASIN / Amazon-Link analysieren → neuer Recherche-Kandidat ──
-async function researchAnalyzeAsin(){
-  researchInit();
-  var inp=document.getElementById('researchAsinInput');
-  var raw=(inp&&inp.value||'').trim();
-  if(!raw){toast('Bitte einen Amazon-Link oder eine ASIN eingeben');return;}
-  if(!window.SHImport||!window.SHImport.fetchListing){toast('Import-Engine nicht geladen – bitte Seite neu laden');return;}
-  var btn=document.getElementById('researchAsinBtn');var old=btn?btn.textContent:'';
-  if(btn){btn.disabled=true;btn.textContent='Lädt …';}
-  var res=document.getElementById('researchAsinResult');
-  if(res)res.innerHTML='<div style="padding:14px 4px;color:var(--tx2);font-size:13px">⏳ Konkurrenz-Listing wird geladen … (der erste Abruf kann ein paar Sekunden dauern)</div>';
-  try{
-    var data=await window.SHImport.fetchListing(raw);
-    if(!data.title && !(data.usps&&data.usps.length) && !(data.imageUrls&&data.imageUrls.length)){
-      if(res)res.innerHTML='<div style="padding:12px;border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px">'+(data.blocked?'⚠️ Amazon hat den Abruf blockiert (Roboter-Check). Bitte später erneut versuchen oder eine andere ASIN.':'⚠️ Nichts gefunden – evtl. blockiert. Bitte später erneut versuchen.')+'</div>';
-      return;
-    }
-    var c={
-      id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-      name:(data.title||'Konkurrenz-Produkt').slice(0,120),
-      kategorie:'',hauptkeyword:'',
-      vk:(data.price!=null?data.price:null),top10Umsatz:null,avgReviews:null,
-      konkurrenz:'',schwaechen:'',differenzierung:'',
-      ek:null,fbaGebuehren:null,ppcRisiko:'',nettoMarge:null,
-      risiko:'',status:'recherche',currentStep:1,notes:'',
-      scoreMatrix:{},computedScore:0,
-      compTitle:data.title||'',compDesc:data.desc||'',compUsps:data.usps||[],compImages:data.imageUrls||[],compAsin:data.asin||'',beat:null,compFetchedAt:new Date().toISOString(),
-      createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
-    };
-    D.research.candidates.unshift(c);
-    save();researchRenderTable();if(typeof researchRenderStatsBar==='function')researchRenderStatsBar();researchUpdateBadge();
-    if(inp)inp.value='';
-    toast('✓ Kandidat aus ASIN angelegt'+(data.asin?' ('+data.asin+')':'')+(data.price!=null?' · VK '+data.price+' € übernommen':''));
-    researchRenderAsinResult(c.id);
-  }catch(err){
-    if(res)res.innerHTML='<div style="padding:12px;border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px">⚠️ Import fehlgeschlagen: '+esc(err&&err.message||'Fehler')+'</div>';
-  }finally{if(btn){btn.disabled=false;btn.textContent=old;}}
-}
-
-function researchRenderAsinResult(id){
-  var res=document.getElementById('researchAsinResult');if(!res)return;
-  var c=((D.research&&D.research.candidates)||[]).find(function(x){return x.id===id;});
-  if(!c){res.innerHTML='';return;}
-  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
-  var uspLi=(c.compUsps||[]).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
-  var h='';
-  h+='<div style="background:var(--s1);border:1.5px solid var(--pu);border-radius:12px;padding:16px;margin-top:12px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div style="font-weight:700;color:var(--tx)">🅰 Konkurrenz importiert'+(c.compAsin?' · ASIN '+esc(c.compAsin):'')+'</div><span style="font-size:11px;color:var(--gn);font-weight:700">✓ als Kandidat gespeichert</span></div>';
-  h+='<div style="font-size:13px;color:var(--tx);font-weight:600;margin-bottom:6px">'+esc(c.compTitle||c.name||'')+'</div>';
-  if(c.vk!=null)h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:4px">💶 Konkurrenz-Preis <b>'+esc(String(c.vk))+' €</b> → als <b>VK-Startwert</b> in die Tabelle übernommen</div>';
-  if(imgs)h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">'+imgs+'</div>';
-  if(uspLi)h+='<ul style="margin:6px 0;padding-left:18px;font-size:12px;color:var(--tx2)">'+uspLi+'</ul>';
-  h+='<button class="btn btn-p" id="researchBeatBtn_'+c.id+'" onclick="researchBeatCandidate(\''+c.id+'\')" style="margin-top:8px;background:linear-gradient(135deg,var(--pu),var(--ac));border:none">🏆 Vergleichen &amp; besser vermarkten</button>';
-  h+='<div id="researchBeatResult_'+c.id+'"></div>';
-  h+='</div>';
-  res.innerHTML=h;
-  if(c.beat)researchRenderBeat(c.id);
-}
-
-// ── Fortschritts-Popup für die Konkurrenz-Analyse (Prozent + Balken + Schritte) ──
-var RB_STEPS=["Konkurrenz analysieren","Bessere Titel texten","Beschreibung optimieren","Stärkere USPs ableiten","Verkaufsargumente formulieren"];
-var rbProg={pct:0,target:0,timer:null};
-function researchBeatProgPaint(){
-  var p=Math.round(rbProg.pct);
-  var pe=document.getElementById('researchBeatPct'),bar=document.getElementById('researchBeatBar');
-  if(pe)pe.textContent=p+' %';
-  if(bar)bar.style.width=p+'%';
-}
-function researchBeatProgShow(){
-  researchBeatProgHide();
-  rbProg={pct:0,target:5,timer:null};
-  var ov=document.createElement('div');
-  ov.id='researchBeatOverlay';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,41,.55);display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(2px)';
-  var steps=RB_STEPS.map(function(s,i){return '<div id="researchBeatStep'+i+'" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--tx2);opacity:.4;transition:opacity .25s"><span class="rbchk" style="width:18px;height:18px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gn)">○</span><span>'+s+'</span></div>';}).join('');
-  ov.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:26px 28px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.35)">'+
-    '<div style="font-weight:800;font-size:16px;color:var(--tx);margin-bottom:4px">🏆 Besseres Marketing wird erstellt</div>'+
-    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:18px">Die KI analysiert die Konkurrenz und leitet stärkeres Marketing ab. Das dauert meist 10–30 Sekunden.</div>'+
-    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px">'+
-      '<span id="researchBeatStepLbl" style="font-size:13px;color:var(--tx);font-weight:600">Konkurrenz analysieren …</span>'+
-      '<span id="researchBeatPct" style="font-size:22px;font-weight:800;color:var(--pu)">0 %</span>'+
-    '</div>'+
-    '<div style="height:10px;background:var(--s3);border-radius:6px;overflow:hidden"><div id="researchBeatBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--pu),var(--ac));border-radius:6px;transition:width .35s ease"></div></div>'+
-    '<div style="margin-top:16px;display:flex;flex-direction:column;gap:7px">'+steps+'</div>'+
-  '</div>';
-  document.body.appendChild(ov);
-  researchBeatProgPaint();
-  rbProg.timer=setInterval(function(){
-    if(rbProg.pct<rbProg.target){rbProg.pct=Math.min(rbProg.target,rbProg.pct+Math.max(.4,(rbProg.target-rbProg.pct)*0.06));researchBeatProgPaint();}
-  },90);
-}
-function researchBeatProgStep(completed,total,label){
-  rbProg.target=Math.min(96,(completed/total)*96);
-  var lbl=document.getElementById('researchBeatStepLbl');if(lbl&&label)lbl.textContent=label+' …';
-  for(var i=0;i<completed;i++){
-    var el=document.getElementById('researchBeatStep'+i);
-    if(el){el.style.opacity='1';var chk=el.querySelector('.rbchk');if(chk){chk.textContent='✓';chk.style.borderColor='var(--gn)';chk.style.background='var(--gnd)';}}
-  }
-  researchBeatProgPaint();
-}
-function researchBeatProgDone(){rbProg.target=100;rbProg.pct=100;researchBeatProgPaint();}
-function researchBeatProgHide(){if(rbProg&&rbProg.timer){clearInterval(rbProg.timer);rbProg.timer=null;}var ov=document.getElementById('researchBeatOverlay');if(ov&&ov.parentNode)ov.parentNode.removeChild(ov);}
-
-async function researchBeatCandidate(id){
-  var c=((D.research&&D.research.candidates)||[]).find(function(x){return x.id===id;});if(!c)return;
-  if(!window.SHImport||!window.SHImport.beat){toast('KI-Engine nicht geladen – bitte Seite neu laden');return;}
-  var btn=document.getElementById('researchBeatBtn_'+id);var old=btn?btn.textContent:'';
-  if(btn){btn.disabled=true;btn.textContent='… KI analysiert';}
-  var box=document.getElementById('researchBeatResult_'+id);
-  researchBeatProgShow();
-  try{
-    var beat=await window.SHImport.beat({title:c.compTitle,desc:c.compDesc,usps:c.compUsps},'Deutsch',researchBeatProgStep);
-    if(!beat.titles.length && !beat.desc && !beat.usps.length)throw new Error('Die KI hat gerade keine optimierten Inhalte geliefert (vermutlich kurz überlastet). Bitte erneut versuchen.');
-    researchBeatProgDone();
-    await new Promise(function(r){setTimeout(r,450);});
-    researchBeatProgHide();
-    var filledDiff=false;
-    if((!c.differenzierung||!c.differenzierung.trim()) && beat.weaknesses && beat.weaknesses.length){
-      c.differenzierung=beat.weaknesses.slice(0,3).join(' · ').slice(0,300);filledDiff=true;
-    }
-    c.beat=beat;c.updatedAt=new Date().toISOString();save();researchRenderTable();
-    researchRenderBeat(id);
-    toast('✓ KI-Optimierung gespeichert'+(filledDiff?' · Differenzierung vorgefüllt':'')+' – im KI-Bildstudio ladbar');
-  }catch(err){
-    researchBeatProgHide();
-    if(box)box.innerHTML='<div style="padding:12px;border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div>⏳ '+esc(err&&err.message||'Fehler')+'</div><button class="btn btn-sm" onclick="researchBeatCandidate(\''+id+'\')">🔄 Nochmal versuchen</button></div>';
-  }finally{researchBeatProgHide();if(btn){btn.disabled=false;btn.textContent=old;}}
-}
-
-function researchRenderBeat(id){
-  var c=((D.research&&D.research.candidates)||[]).find(function(x){return x.id===id;});if(!c||!c.beat)return;
-  var box=document.getElementById('researchBeatResult_'+id);if(!box)return;
-  var b=c.beat;
-  var titles=(b.titles||[]).map(function(t,i){return '<div style="background:var(--gnd);border:1px solid var(--gn);border-radius:7px;padding:7px 10px;margin:4px 0;font-size:12.5px;color:var(--tx)">'+(i===0?'★ ':'')+esc(t)+'</div>';}).join('');
-  var usps=(b.usps||[]).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
-  var why=(b.why||[]).map(function(w){return '<li>'+esc(w)+'</li>';}).join('');
-  var weak=(b.weaknesses||[]).map(function(w){return '<li>'+esc(w)+'</li>';}).join('');
-  var h='<div style="margin-top:14px;border-top:1px dashed var(--bd);padding-top:12px">';
-  h+='<div style="font-weight:700;color:var(--gn);margin-bottom:8px">🅱 KI-optimiertes Marketing ✨ <span style="font-size:11px;color:var(--tx3);font-weight:400">– gespeichert, im Bildstudio ladbar</span></div>';
-  if(titles)h+='<div style="font-size:11px;color:var(--tx3);font-weight:700;margin-bottom:2px">BESSERE TITEL</div>'+titles;
-  if(b.desc)h+='<div style="font-size:11px;color:var(--tx3);font-weight:700;margin:8px 0 2px">BESSERE BESCHREIBUNG</div><div style="font-size:12.5px;color:var(--tx);background:var(--s2);border-radius:7px;padding:8px 10px">'+esc(b.desc)+'</div>';
-  if(usps)h+='<div style="font-size:11px;color:var(--tx3);font-weight:700;margin:8px 0 2px">BESSERE USPs</div><ul style="margin:2px 0;padding-left:18px;font-size:12.5px;color:var(--tx)">'+usps+'</ul>';
-  if(why)h+='<div style="font-size:11px;color:var(--tx3);font-weight:700;margin:8px 0 2px">💡 WARUM DAS MEHR VERKAUFT</div><ul style="margin:2px 0;padding-left:18px;font-size:12.5px;color:var(--tx2)">'+why+'</ul>';
-  if(weak)h+='<details style="margin-top:10px"><summary style="cursor:pointer;font-size:12.5px;color:var(--tx2)">⚔️ Schwächen der Konkurrenz ('+(b.weaknesses||[]).length+')</summary><ul style="margin:6px 0;padding-left:18px;font-size:12px;color:var(--tx2)">'+weak+'</ul></details>';
-  h+='</div>';
-  box.innerHTML=h;
 }
 
 function researchImportFromIdeen(){
