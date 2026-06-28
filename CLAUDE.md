@@ -34,11 +34,18 @@ Da alles in einer Datei steckt, ist Hosting denkbar einfach:
 - Seiten = `<div class="page" id="p-NAME">`, Wechsel über `go('name')`; Sidebar-Navigation als Accordion.
 - Wichtigstes Modul: **KI-Bildstudio** (`id="p-inhalt"`, Bezeichner-Präfix `ig…`) — erzeugt Amazon-Marketing-Visuals aus Produktfotos. Text-KI: Gemini `gemini-2.5-flash` mit eigenem Key (localStorage `gemini_key`), sonst kostenloser Pollinations-Fallback. Bild-KI: Gemini Nano Banana `gemini-2.5-flash-image`.
 
-## Wichtiger Hinweis zur Mitnahme zwischen Rechnern
+## Versionierung & Sync zwischen Rechnern (Git + GitHub)
+Dieses Projekt ist ein Git-Repo mit privatem GitHub-Remote: **`WiKa1303/SellerHub`** (https://github.com/WiKa1303/SellerHub).
+Code/Design wird über GitHub zwischen MacBook und Mac Studio synchronisiert.
+- **Vor dem Arbeiten:** `git pull`
+- **Nach dem Arbeiten:** `git add -A && git commit -m "…" && git push`
+- Dadurch keine manuellen `backups/`-Kopien mehr nötig — jede Version steckt in der Git-Historie (`git log --oneline`).
+- ⚠️ Nicht gleichzeitig auf beiden Macs committen, ohne vorher zu pullen/pushen (iCloud + Git-Konflikte vermeiden).
+
+## Wichtiger Hinweis zu den App-DATEN (nicht Code)
 Die App speichert Login + eingegebene Daten im Browser **gebunden an den Dateipfad** (`file://`).
-Auf einem neuen Rechner ist die App daher zunächst „leer" (neuer Login nötig).
+Auf einem neuen Rechner ist die App daher zunächst „leer" (neuer Login nötig). Git/GitHub synct nur den **Code**, nicht die Browser-Daten.
 Echte Daten mitnehmen: in der App **Export** (`sellerhub-data.json`) → auf dem anderen Rechner **Import**.
-Der Code/Design (diese HTML-Datei) synchronisiert über iCloud jedoch sauber.
 
 ## Offene nächste Schritte (Stand 28.6.2026)
 - Hauptbild exakt 1:1 erzwingen; USP-Bilder optional ohne Text (Umschalter).
