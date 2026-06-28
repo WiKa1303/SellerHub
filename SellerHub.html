@@ -1261,9 +1261,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <div class="nav-group open has-active" id="navgrp-findung">
       <button class="nav-group-header" onclick="toggleNavGroup('findung')"><span class="grp-ico">🎯</span><span class="grp-label">Produktfindung</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
-        <button class="nav-btn" onclick="go('findung')"><span class="ico">📊</span>Übersicht <span id="findungBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('ideen')"><span class="ico">💡</span>Ideen-Pool <span id="ideenBadge" style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
-        <button class="nav-btn" onclick="go('research')"><span class="ico">🗂️</span>Recherche-Kandidaten <span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <button class="nav-btn" onclick="go('research')"><span class="ico">⚔️</span>Konkurrenz-Tabelle <span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <button class="nav-btn" onclick="go('auswahl')"><span class="ico">⭐</span>Produkte <span id="auswahlBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('helium')"><span class="ico">📥</span>Helium 10 Import</button>
         <button class="nav-btn" onclick="go('nischen')"><span class="ico">🧭</span>Nischen-Analyzer</button>
         <button class="nav-btn" onclick="go('keywords')"><span class="ico">🔑</span>Keyword-Center</button>
@@ -1396,89 +1396,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: PRODUKTFINDUNG HUB (Pipeline-Übersicht)                   -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="page" id="p-findung">
-  <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">🎯</span>Produktfindung<span class="wika-help" data-tooltip="Der zentrale Bereich für Ideen, Recherche und Helium-10-Import.&#10;&#10;Pipeline:&#10;💡 Idee → 🔍 In Recherche → ⭐ Kandidat → 📦 Muster → 🚀 Aktiv&#10;&#10;Hier siehst du den Gesamt-Status aller Produktideen auf einen Blick.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Pipeline von der ersten Idee bis zum bestellten Muster</span></h1>
-  </div>
-  <div class="page-body">
-
-    <!-- ─── ERSTE-SCHRITTE ERKLÄRUNG ─── -->
-    <details class="help-box help-box-collapsible purple" style="display:block;margin-bottom:18px">
-      <summary>🎯 Was ist Produktfindung? <span style="font-size:11px;color:var(--tx3);font-weight:500;margin-left:auto">▾ Klick für Anleitung</span></summary>
-      <div class="help-text" style="margin-top:10px;line-height:1.7">
-        <p style="margin:0 0 8px 0">Produktfindung ist die <b>Pipeline</b>, durch die jede Produktidee läuft, bevor du sie tatsächlich auf Amazon verkaufst. Die 5 Stufen:</p>
-        <ol style="margin:8px 0 8px 20px;padding:0">
-          <li style="margin-bottom:4px"><b>💡 Idee</b> – Brainstorming, du sammelst rohe Ideen aus Trends, Foren, Problem-Recherche</li>
-          <li style="margin-bottom:4px"><b>🔍 In Recherche</b> – du prüfst die Idee mit Helium 10: Marktgröße, Konkurrenz, Keywords</li>
-          <li style="margin-bottom:4px"><b>⭐ Kandidat</b> – die Idee hat die Vorprüfung bestanden und wird tiefergehend validiert</li>
-          <li style="margin-bottom:4px"><b>📦 Muster bestellt</b> – Lieferanten kontaktiert, Muster bestellt und getestet</li>
-          <li><b>🚀 Aktiv</b> – Produkt wird auf Amazon verkauft (steht jetzt in der separaten Produktliste)</li>
-        </ol>
-        <p style="margin:8px 0 0 0;font-style:italic;color:var(--tx3)">Faustregel: Von 100 Ideen werden ~5 zu Kandidaten, ~2 werden bestellt, ~1 wird erfolgreich verkauft. <b>Diszipliniertes Aussortieren ist normal.</b></p>
-      </div>
-      <a class="help-link" onclick="researchOpenLesson('rp_2');return false" style="cursor:pointer">📖 Komplette Methodik im Lernzentrum →</a>
-    </details>
-
-    <!-- ─── HUB-NAVIGATION (für direkten Sprung zu den Unterbereichen) ─── -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:24px">
-      <button onclick="go('ideen')" class="hub-card" style="text-align:left;padding:16px 18px;background:var(--s1);border:1.5px solid var(--bd);border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:14px;transition:all .15s" onmouseover="this.style.borderColor='var(--pu)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--bd)';this.style.transform=''">
-        <div style="font-size:32px">💡</div>
-        <div style="flex:1">
-          <div style="font-weight:700;color:var(--tx);font-size:15px">Ideen-Pool</div>
-          <div style="font-size:11px;color:var(--tx2);margin-top:2px" id="findungHubIdeen">Brainstorming-Phase</div>
-        </div>
-        <span style="color:var(--pu);font-size:18px">→</span>
-      </button>
-      <button onclick="go('research')" class="hub-card" style="text-align:left;padding:16px 18px;background:var(--s1);border:1.5px solid var(--bd);border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:14px;transition:all .15s" onmouseover="this.style.borderColor='var(--pu)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--bd)';this.style.transform=''">
-        <div style="font-size:32px">🗂️</div>
-        <div style="flex:1">
-          <div style="font-weight:700;color:var(--tx);font-size:15px">Recherche-Kandidaten</div>
-          <div style="font-size:11px;color:var(--tx2);margin-top:2px" id="findungHubRecherche">20-Schritte-Workflow</div>
-        </div>
-        <span style="color:var(--pu);font-size:18px">→</span>
-      </button>
-      <button onclick="go('helium')" class="hub-card" style="text-align:left;padding:16px 18px;background:var(--s1);border:1.5px solid var(--bd);border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:14px;transition:all .15s" onmouseover="this.style.borderColor='var(--pu)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--bd)';this.style.transform=''">
-        <div style="font-size:32px">📥</div>
-        <div style="flex:1">
-          <div style="font-weight:700;color:var(--tx);font-size:15px">Helium 10 Import</div>
-          <div style="font-size:11px;color:var(--tx2);margin-top:2px">Black Box · Cerebro · Xray</div>
-        </div>
-        <span style="color:var(--pu);font-size:18px">→</span>
-      </button>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- ─── PIPELINE-VISUALISIERUNG (Kanban-Stil) ─── -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div style="margin-bottom:20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div>
-        <h2 style="margin:0;font-size:18px;font-family:'Playfair Display',serif">📊 Pipeline-Übersicht</h2>
-        <div style="font-size:12px;color:var(--tx2);margin-top:2px">Alle Ideen, Kandidaten und Produkte – sortiert nach Pipeline-Stufe</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-p" onclick="findungNewIdea()" style="font-size:12px">➕ Neue Idee</button>
-        <button class="btn btn-sm" onclick="researchAddCandidate();setTimeout(renderFindungHub,200)" style="font-size:12px;background:var(--pud);color:var(--pu);border:1px solid var(--pu)">➕ Neuer Kandidat</button>
-      </div>
-    </div>
-
-    <!-- Kanban Pipeline -->
-    <div id="findungPipeline" style="display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px"></div>
-
-    <!-- ─── METHODIK-BANNER ─── -->
-    <div style="background:linear-gradient(135deg,var(--gnd),var(--s2));border:1.5px solid var(--gn);border-radius:12px;padding:16px 22px;margin-top:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div style="font-size:30px">🎓</div>
-      <div style="flex:1;min-width:200px">
-        <div style="font-weight:700;color:var(--gn);font-size:14px;margin-bottom:3px">Brauchst du eine Anleitung?</div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.5">Die komplette 20-Schritte-Methodik mit allen Prompts findest du im Lernzentrum: <b>KI-Produktrecherche-Prozess</b>.</div>
-      </div>
-      <button class="btn btn-sm" onclick="researchOpenLearnLink()" style="background:var(--gn);color:#fff;border:none;white-space:nowrap">📖 Methodik öffnen →</button>
-    </div>
-
-  </div>
-</div>
 <div class="page" id="p-research">
   <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">🎯</span>Recherche-Kandidaten<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Vier Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;📚 Prompt-Bibliothek — alle 22 KI-Prompts kopierbar&#10;&#10;Die komplette Methodik findest du im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1>
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Vier Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;📚 Prompt-Bibliothek — alle 22 KI-Prompts kopierbar&#10;&#10;Die komplette Methodik findest du im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1>
   </div>
   <div class="page-body">
 
@@ -1550,25 +1470,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
       <!-- Master-Tabelle -->
       <div style="overflow-x:auto;background:var(--s1);border:1px solid var(--bd);border-radius:10px">
-        <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:1400px">
+        <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:640px">
           <thead>
             <tr>
-              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:180px">Produktidee <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Der <b>Arbeitsname</b> der Produktidee. So spezifisch wie möglich, damit du sie wiedererkennst (z.B. „Duschablage Edelstahl ohne Bohren").</span></span></th>
-              <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">In welcher Amazon-Kategorie wäre das Produkt? z.B. „Bad", „Heimwerker", „Fliesen". Wichtig für die Gebühren-Schätzung und FBA-Regeln.</span></span></th>
-              <th>Hauptkeyword <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Der wichtigste Suchbegriff bei Amazon.de, unter dem Kunden dein Produkt finden würden. Bekommst du aus Helium 10 Black Box oder Cerebro.</span></span></th>
-              <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Geplanter <b>Verkaufspreis</b> auf Amazon. Sollte zwischen 15 und 50 € liegen (Faustregel). Orientiere dich am Median der Top 10 Wettbewerber.</span></span></th>
-              <th class="nc">Top-10 Umsatz <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Geschätzter monatlicher Umsatz der <b>Top 10 Konkurrenten zusammen</b>. Aus Helium 10 Xray ablesen. Faustregel: &gt; 30.000 € = guter Markt.</span></span></th>
-              <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Anzahl Bewertungen der Top 10. <b>Niedrig ist gut</b> für Newcomer: &lt; 500 = leicht, &lt; 1.000 = machbar, &gt; 2.000 = sehr schwer.</span></span></th>
-              <th>Konkurrenz <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Wie stark ist die Konkurrenz? Hängt ab von: Markendominanz, Listing-Qualität, Reviewzahl. „niedrig" ist gut, „hoch" gefährlich für Newcomer.</span></span></th>
-              <th>Differenzierung <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Womit bist du <b>besser</b> als die Konkurrenz? Material, Bundle, Größe, Anleitung? Aus der Review-Analyse abgeleitet. Keine Differenzierung = ablehnen.</span></span></th>
-              <th class="nc">EK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Geschätzter <b>Einkaufspreis</b> beim Lieferanten (China DDP). Faustregel: Verkaufspreis ÷ 3-4 für gesunde Marge.</span></span></th>
-              <th class="nc">Marge <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below"><b>Netto-Marge</b> in %, nach Amazon-Gebühren, Versand, PPC und Retouren. Ziel: mindestens 15-25%. Unter 10% = nicht starten.</span></span></th>
-              <th>PPC-Risiko <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Wie teuer wird Werbung? Hängt ab von Wettbewerb auf den Keywords. „hoch" = ACoS über 35%, das frisst deine Marge auf.</span></span></th>
-              <th>Risiko <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Rechtliches und logistisches Gesamt-Risiko: CE-Pflicht, Haftung, Retourenrate, Bruch-Empfindlichkeit. „hoch" = besser ablehnen.</span></span></th>
-              <th class="nc">Score <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Auto-berechneter Gesamtscore 1-100, gewichtet aus den Feldern. Detail-Bewertung mit Slidern im Tab „Score-Matrix". <b>&gt; 70 = top, &gt; 50 = okay, &lt; 50 = kritisch.</b></span></span></th>
-              <th>Status <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below left">Wo steht der Kandidat in der <b>Pipeline</b>? Idee → In Recherche → Kandidat → Muster → Aktiv (oder Abgelehnt).</span></span></th>
-              <th>Schritt <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below left">Aktueller Schritt im <b>20-Schritte-Workflow</b>. Klick auf 📋-Button um den Workflow-Tracker zu öffnen.</span></span></th>
-              <th style="width:80px"></th>
+              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:200px">Produktname <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Name des analysierten Konkurrenz-Produkts – editierbar.</span></span></th>
+              <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". Editierbar.</span></span></th>
+              <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis – aus dem Konkurrenz-Listing vorbefüllt, editierbar.</span></span></th>
+              <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer.</span></span></th>
+              <th class="nc">Score <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Auto-Score 1–100 aus der Detail-Bewertung (⚖️ Score-Matrix). <b>&gt; 70 top, &gt; 50 okay.</b></span></span></th>
+              <th style="text-align:right;min-width:190px">Aktionen <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below left">★ = in den Bereich „Produkte" übernehmen · ⚖️ Score-Matrix · 📋 Workflow · 🗑 löschen.</span></span></th>
             </tr>
           </thead>
           <tbody id="researchTableBody"></tbody>
@@ -1611,6 +1521,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: IDEEN-POOL                                               -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-auswahl">
+  <div class="page-header">
+    <h1><span class="hico">⭐</span>Produkte<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1>
+  </div>
+  <div class="page-body">
+    <div class="help-box gold">
+      <div class="help-icon">⭐</div>
+      <div class="help-body">
+        <div class="help-title">Deine Entscheidungs-Werkbank</div>
+        <div class="help-text">Produkte, die du in der <b>⚔️ Konkurrenz-Tabelle</b> mit „★ Produkt" übernimmst, erscheinen hier als Karte – mit Bildern, USPs, Preis und Score. Triff hier die Entscheidung: <b>📦 Muster bestellen</b> (→ wandert in die Produktliste), <b>🔍 weiter prüfen</b> oder <b>❌ ablehnen</b>.</div>
+      </div>
+    </div>
+    <div id="auswahlStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div id="auswahlList"></div>
+  </div>
+</div>
+
 <div class="page" id="p-ideen">
   <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span></div>
   <div class="page-body">
@@ -2810,6 +2737,46 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     if(byId.size===0){const og=doc.querySelector('meta[property="og:image"]');if(og&&og.getAttribute("content"))add(og.getAttribute("content"));}
     return [...byId.values()];
   }
+  // Liest alle Felder aus einem Amazon-HTML: Titel, USPs, Bilder, Preis, Kategorie, Review-Anzahl
+  function igParseListing(html){
+    const doc=new DOMParser().parseFromString(html,"text/html");
+    let title="";
+    const tEl=doc.querySelector("#productTitle");if(tEl)title=tEl.textContent;
+    if(!title){const ogt=doc.querySelector('meta[property="og:title"]');if(ogt)title=ogt.getAttribute("content")||"";}
+    if(!title){const tt=doc.querySelector("title");if(tt)title=tt.textContent.replace(/^Amazon\.[a-z.]+\s*:?\s*/i,"").replace(/\s*[:|-]\s*Amazon\.[a-z.]+.*$/i,"");}
+    title=(title||"").replace(/\s+/g," ").trim();
+    const bullets=[...doc.querySelectorAll("#feature-bullets li .a-list-item, #feature-bullets li")].map(li=>li.textContent.replace(/\s+/g," ").trim()).filter(t=>t&&t.length>2&&!/^(See more|Mehr anzeigen)/i.test(t));
+    const usps=[...new Set(bullets)];
+    const imageUrls=igExtractImages(html,doc);
+    // Preis (de/eu/us-Formate)
+    const parsePrice=s=>{
+      if(!s)return null;
+      const mm=s.replace(/\s/g,"").match(/(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)/);
+      if(!mm)return null;
+      let n=mm[1];
+      if(/[.,]\d{1,2}$/.test(n)){n=n.replace(/[.,](?=\d{3})/g,"").replace(",",".");}else{n=n.replace(/[.,]/g,"");}
+      const v=parseFloat(n);
+      return isFinite(v)&&v>0&&v<100000?Math.round(v*100)/100:null;
+    };
+    let priceTxt="";
+    const pEl=doc.querySelector("#corePriceDisplay_desktop_feature_div .a-offscreen, #corePrice_feature_div .a-offscreen, #priceblock_ourprice, #priceblock_dealprice, #price_inside_buybox, .a-price .a-offscreen, span.a-price>span.a-offscreen");
+    if(pEl)priceTxt=pEl.textContent;
+    if(!priceTxt){const pm=html.match(/"priceAmount"\s*:\s*"?([0-9.,]+)/i)||html.match(/"displayPrice"\s*:\s*"([^"]+)"/i)||html.match(/class="a-offscreen">\s*([^<]*\d[^<]*)</);if(pm)priceTxt=pm[1];}
+    const price=parsePrice(priceTxt);
+    // Kategorie (Breadcrumb oben, sonst Bestseller-Rang-Kategorie)
+    let category="";
+    const crumbs=[...doc.querySelectorAll("#wayfinding-breadcrumbs_feature_div a, .a-breadcrumb a")].map(a=>a.textContent.replace(/\s+/g," ").trim()).filter(Boolean);
+    if(crumbs.length)category=crumbs[0];
+    if(!category){const bm=html.match(/Bestseller-Rang[\s\S]{0,140}?\bin\b\s+([A-Za-zÄÖÜäöüß &\/-]{3,40})/i)||html.match(/Best Sellers Rank[\s\S]{0,140}?\bin\b\s+([A-Za-z &\/-]{3,40})/i);if(bm)category=bm[1];}
+    category=(category||"").replace(/\s+/g," ").trim().slice(0,40);
+    // Review-Anzahl
+    let reviews=null,rTxt="";
+    const rEl=doc.querySelector("#acrCustomerReviewText, [data-hook='total-review-count']");
+    if(rEl)rTxt=rEl.textContent;
+    if(!rTxt){const rm=html.match(/([\d.,]+)\s*(?:Bewertungen|Sternebewertungen|ratings|global ratings|customer reviews)/i);if(rm)rTxt=rm[1];}
+    if(rTxt){const rn=rTxt.replace(/[^\d]/g,"");if(rn)reviews=parseInt(rn,10);}
+    return {title, usps, imageUrls, price, category, reviews};
+  }
   // ── Aus Recherche-Kandidat laden (Daten kommen aus der Produktfindung) ──
   function igPopulateCands(){
     const sel=$("igCandSelect");if(!sel)return;
@@ -3116,45 +3083,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       const target=asin?("https://www.amazon."+(/amazon\./i.test(raw)?igTld(raw):"de")+"/dp/"+asin):raw;
       const html=await igFetchVia(target);
       const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);
-      const doc=new DOMParser().parseFromString(html,"text/html");
-      let title="";
-      const tEl=doc.querySelector("#productTitle");if(tEl)title=tEl.textContent;
-      if(!title){const ogt=doc.querySelector('meta[property="og:title"]');if(ogt)title=ogt.getAttribute("content")||"";}
-      if(!title){const tt=doc.querySelector("title");if(tt)title=tt.textContent.replace(/^Amazon\.[a-z.]+\s*:?\s*/i,"").replace(/\s*[:|-]\s*Amazon\.[a-z.]+.*$/i,"");}
-      title=(title||"").replace(/\s+/g," ").trim();
-      const bullets=[...doc.querySelectorAll("#feature-bullets li .a-list-item, #feature-bullets li")].map(li=>li.textContent.replace(/\s+/g," ").trim()).filter(t=>t&&t.length>2&&!/^(See more|Mehr anzeigen)/i.test(t));
-      const uniqB=[...new Set(bullets)];
-      let imageUrls=igExtractImages(html,doc);
-      if(imageUrls.length<2){
-        // jina.ai liefert oft nur das Hauptbild → rohes HTML über Proxy nachladen und Galerie extrahieren
+      let r=igParseListing(html);
+      // jina.ai liefert oft KEIN Preis/Kategorie/Reviews/komplette Galerie → rohes Amazon-HTML nachladen und Lücken füllen
+      if(!r.price || !r.category || r.reviews==null || r.imageUrls.length<2){
         try{
-          const raw=await igFetchRawProxy(target);
-          if(raw){
-            const rdoc=new DOMParser().parseFromString(raw,"text/html");
-            const more=igExtractImages(raw,rdoc);
-            const seen=new Set(imageUrls);
-            for(const u of more){if(!seen.has(u)){seen.add(u);imageUrls.push(u);}}
+          const rawHtml=await igFetchRawProxy(target);
+          if(rawHtml){
+            const r2=igParseListing(rawHtml);
+            if(!r.title && r2.title)r.title=r2.title;
+            if(!r.usps.length && r2.usps.length)r.usps=r2.usps;
+            if(!r.price && r2.price)r.price=r2.price;
+            if(!r.category && r2.category)r.category=r2.category;
+            if(r.reviews==null && r2.reviews!=null)r.reviews=r2.reviews;
+            const seen=new Set(r.imageUrls);for(const u of r2.imageUrls){if(!seen.has(u)){seen.add(u);r.imageUrls.push(u);}}
           }
         }catch(e){}
       }
-      imageUrls=imageUrls.slice(0,9);
-      // Preis bestmöglich auslesen (de/eu/us-Formate) → Startwert fürs VK-Feld
-      const parsePrice=s=>{
-        if(!s)return null;
-        const mm=s.replace(/\s/g,"").match(/(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)/);
-        if(!mm)return null;
-        let n=mm[1];
-        if(/[.,]\d{1,2}$/.test(n)){n=n.replace(/[.,](?=\d{3})/g,"").replace(",",".");}
-        else{n=n.replace(/[.,]/g,"");}
-        const v=parseFloat(n);
-        return isFinite(v)&&v>0&&v<100000?Math.round(v*100)/100:null;
-      };
-      let priceTxt="";
-      const pEl=doc.querySelector("#corePriceDisplay_desktop_feature_div .a-offscreen, #corePrice_feature_div .a-offscreen, #priceblock_ourprice, #priceblock_dealprice, .a-price .a-offscreen, span.a-price>span.a-offscreen");
-      if(pEl)priceTxt=pEl.textContent;
-      if(!priceTxt){const pm=html.match(/"priceAmount"\s*:\s*"?([0-9.,]+)/i)||html.match(/class="a-offscreen">\s*([^<]*\d[^<]*)</);if(pm)priceTxt=pm[1];}
-      const price=parsePrice(priceTxt);
-      return {title, desc:uniqB.join(" "), usps:uniqB.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls, asin:asin||"", price, blocked};
+      return {title:r.title, desc:r.usps.join(" "), usps:r.usps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:r.imageUrls.slice(0,9), asin:asin||"", price:r.price, category:r.category, reviews:r.reviews, blocked};
     },
     async beat(ref, lang, onStep){
       lang=lang||"Deutsch";
@@ -3932,11 +3877,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <span style="font-size:11px;color:var(--tx3);font-weight:500">Ideen finden, Konkurrenz analysieren, Markt verstehen</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <button class="quick-card" onclick="go('findung')" data-color="pu" style="border:2px solid var(--pu);background:linear-gradient(135deg,var(--s1),var(--pud))">
+        <button class="quick-card" onclick="go('research')" data-color="pu" style="border:2px solid var(--pu);background:linear-gradient(135deg,var(--s1),var(--pud))">
           <div class="qico" style="background:var(--pu);color:#fff">🎯</div>
           <div class="qbody">
             <div class="qtitle" style="color:var(--pu)">Produktfindung</div>
-            <div class="qmeta" id="qcResearch">Pipeline-Übersicht & alle Unterbereiche</div>
+            <div class="qmeta" id="qcResearch">Konkurrenz analysieren & Produkte wählen</div>
           </div>
           <div class="qarrow">→</div>
         </button>
@@ -5399,11 +5344,13 @@ function go(name){
   if(page)page.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
   // For detail view, highlight the produkte sidebar entry
+  // Übersicht-Seite entfernt → auf Konkurrenz-Tabelle umleiten
+  if(name==='findung')name='research';
   var sidebarKey=name==='detail'?'produkte':name;
   var btns=document.querySelectorAll('.nav-btn');
   for(var i=0;i<btns.length;i++){if(btns[i].getAttribute('onclick')==="go('"+sidebarKey+"')")btns[i].classList.add('active');}
   // Nav-Gruppen (Accordion): Gruppe der aktiven Seite öffnen, übrige schließen
-  var navGroupMap={findung:'findung',ideen:'findung',research:'findung',helium:'findung',nischen:'findung',keywords:'findung',keywordclean:'findung',produkte:'kalk',gebuehren:'kalk',kalkulation:'kalk',detail:'kalk',listing:'listing',inhalt:'listing',launch:'listing',lager:'listing',sourcing:'listing',tasks:'org',coaching:'org',admin:'admin'};
+  var navGroupMap={findung:'findung',ideen:'findung',research:'findung',auswahl:'findung',helium:'findung',nischen:'findung',keywords:'findung',keywordclean:'findung',produkte:'kalk',gebuehren:'kalk',kalkulation:'kalk',detail:'kalk',listing:'listing',inhalt:'listing',launch:'listing',lager:'listing',sourcing:'listing',tasks:'org',coaching:'org',admin:'admin'};
   var activeGrp=navGroupMap[sidebarKey]||navGroupMap[name];
   document.querySelectorAll('.nav-group').forEach(function(g){
     var on=g.id==='navgrp-'+activeGrp;
@@ -5417,6 +5364,7 @@ function go(name){
   if(name==='findung')renderFindungHub();
   if(name==='ideen')renderIdeen();
   if(name==='research')renderResearch();
+  if(name==='auswahl')renderAuswahl();
   if(name==='coaching')renderCoaching();
   if(name==='tasks')renderTasks();
   if(name==='nischen')renderNischen();
@@ -5428,7 +5376,7 @@ function go(name){
   if(name==='gebuehren'){switchCalcTab(calcActiveTab||'full');if(typeof fbaPopulateSelects==='function'){fbaPopulateSelects();fbaTogglePpc();fbaCalc();}if(typeof qCalc==='function')qCalc();}
   if(name==='kalkulation'){go('gebuehren');switchCalcTab('quick');return;}
   // Findung Sub-Nav einblenden (außer bei Hub-Übersicht selbst)
-  if(['ideen','research','helium'].indexOf(name)>-1){
+  if(['ideen','research','helium','auswahl'].indexOf(name)>-1){
     if(typeof injectFindungSubNav==='function')injectFindungSubNav('p-'+name,name);
   }
   // Restore default title when leaving detail view
@@ -5657,15 +5605,139 @@ function researchInit(){
   if(!D.research)D.research={candidates:[],workflowState:{}};
   if(!D.research.candidates)D.research.candidates=[];
   if(!D.research.workflowState)D.research.workflowState={};
+  if(!D.research.shortlist)D.research.shortlist=[];
+}
+
+// ─────────────── PRODUKTE (engere Auswahl & Entscheidung) ───────────────
+var AUSWAHL_DECISION={
+  pruefen:{label:'🔍 In Prüfung', color:'pu', bg:'pud'},
+  muster: {label:'📦 Muster bestellt', color:'gn', bg:'gnd'},
+  abgelehnt:{label:'❌ Abgelehnt', color:'rd', bg:'rdd'}
+};
+function auswahlUpdateBadge(){
+  researchInit();
+  var b=document.getElementById('auswahlBadge');if(!b)return;
+  var n=D.research.shortlist.filter(function(x){return x.decision!=='abgelehnt';}).length;
+  if(n>0){b.style.display='inline-block';b.textContent=n;}else{b.style.display='none';}
+}
+function researchPromoteToProduct(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c){toast('Kandidat nicht gefunden');return;}
+  var exists=D.research.shortlist.find(function(s){return s.sourceCandidateId===candId;});
+  if(exists){toast('„'+esc(c.name||'')+'" ist schon im Produkte-Bereich');auswahlUpdateBadge();go('auswahl');return;}
+  var item={
+    id:'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    sourceCandidateId:candId,
+    name:c.name||'Produkt',
+    kategorie:c.kategorie||'',
+    vk:(c.vk!=null?c.vk:null),
+    avgReviews:(c.avgReviews!=null?c.avgReviews:null),
+    score:researchCalcScore(c),
+    compAsin:c.compAsin||'',
+    compImages:(c.compImages||[]).slice(0,9),
+    compUsps:((c.beat&&c.beat.usps&&c.beat.usps.length)?c.beat.usps:(c.compUsps||[])).slice(0,6),
+    hasBeat:!!c.beat,
+    decision:'pruefen',
+    notes:'',
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  D.research.shortlist.unshift(item);
+  if(normalizeStatus(c.status)==='recherche'){c.status='kandidat';c.updatedAt=new Date().toISOString();}
+  save();researchRenderTable();researchUpdateBadge();auswahlUpdateBadge();
+  toast('★ „'+esc(c.name||'')+'" zu Produkte übernommen');
+  go('auswahl');
+}
+function auswahlSetDecision(id,dec){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  it.decision=dec;it.updatedAt=new Date().toISOString();
+  save();renderAuswahl();auswahlUpdateBadge();
+}
+function auswahlSaveNote(id,val){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  it.notes=val;it.updatedAt=new Date().toISOString();save();
+}
+function auswahlDelete(id){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  if(!confirm('„'+(it.name||'')+'" aus dem Produkte-Bereich entfernen?'))return;
+  D.research.shortlist=D.research.shortlist.filter(function(x){return x.id!==id;});
+  save();renderAuswahl();auswahlUpdateBadge();toast('Entfernt');
+}
+function auswahlOrderSample(id){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  if(it.movedToProducts){toast('Schon in der Produktliste');go('produkte');return;}
+  var p={
+    name:it.name||'Produkt', kategorie:it.kategorie||'', status:'Bestellt',
+    asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
+    fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
+    bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    quelle:'Produktfindung', suchvolumen:0,
+    notizen:(it.notes?it.notes+' · ':'')+'Aus Produktfindung übernommen (Muster bestellt)'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
+    datum:new Date().toLocaleDateString('de-DE')
+  };
+  D.products.push(p);
+  it.decision='muster';it.movedToProducts=true;it.updatedAt=new Date().toISOString();
+  save();
+  if(typeof renderProds==='function')renderProds();
+  renderAuswahl();auswahlUpdateBadge();
+  toast('📦 „'+esc(it.name||'')+'" → Muster bestellt & in Produktliste übernommen');
+}
+function auswahlStatCard(label,val,color){
+  return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;min-width:120px"><div style="font-size:11px;color:var(--tx2)">'+label+'</div><div style="font-size:22px;font-weight:800;color:var(--'+color+')">'+val+'</div></div>';
+}
+function renderAuswahl(){
+  researchInit();
+  auswahlUpdateBadge();
+  var list=D.research.shortlist;
+  var stats=document.getElementById('auswahlStats');
+  if(stats){
+    var cnt={total:list.length,pruefen:0,muster:0,abgelehnt:0};
+    list.forEach(function(x){if(cnt.hasOwnProperty(x.decision))cnt[x.decision]++;});
+    stats.innerHTML=auswahlStatCard('Gesamt',cnt.total,'tx')+auswahlStatCard('🔍 In Prüfung',cnt.pruefen,'pu')+auswahlStatCard('📦 Muster bestellt',cnt.muster,'gn')+auswahlStatCard('❌ Abgelehnt',cnt.abgelehnt,'rd');
+  }
+  var box=document.getElementById('auswahlList');if(!box)return;
+  if(!list.length){
+    box.innerHTML='<div style="padding:50px 30px;text-align:center;color:var(--tx2);background:var(--s1);border:1px solid var(--bd);border-radius:12px"><div style="font-size:48px;margin-bottom:14px">⭐</div><div style="font-weight:700;color:var(--tx);font-size:16px;margin-bottom:6px">Noch keine Produkte in der engeren Wahl</div><div style="font-size:13px;margin-bottom:18px">Geh in die <b>⚔️ Konkurrenz-Tabelle</b> und übernimm vielversprechende Produkte mit „★ Produkt".</div><button class="btn btn-p" onclick="go(\'research\')">⚔️ Zur Konkurrenz-Tabelle</button></div>';
+    return;
+  }
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">';
+  list.forEach(function(it){
+    var d=AUSWAHL_DECISION[it.decision]||AUSWAHL_DECISION.pruefen;
+    var sc=it.score||0; var scc=sc>=70?'gn':sc>=50?'ac':sc>0?'rd':'tx3';
+    var imgs=(it.compImages||[]).slice(0,5).map(function(u){return '<img src="'+esc(u)+'" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
+    var usps=(it.compUsps||[]).slice(0,4).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
+    html+='<div style="background:var(--s1);border:1.5px solid '+(it.decision==='abgelehnt'?'var(--bd)':'var(--'+d.color+')')+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px'+(it.decision==='abgelehnt'?';opacity:.6':'')+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+esc(it.name||'')+'</div><span style="flex-shrink:0;display:inline-block;padding:3px 9px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:12px">'+(sc>0?sc:'—')+'</span></div>';
+    html+='<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--tx2)">'+(it.kategorie?'<span>🏷️ '+esc(it.kategorie)+'</span>':'')+(it.vk!=null?'<span>💶 '+esc(String(it.vk))+' €</span>':'')+(it.avgReviews!=null?'<span>⭐ '+esc(String(it.avgReviews))+' Rev.</span>':'')+(it.hasBeat?'<span style="color:var(--gn);font-weight:700">✨ KI-optimiert</span>':'')+'</div>';
+    if(imgs)html+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';
+    if(usps)html+='<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--tx2)">'+usps+'</ul>';
+    html+='<span style="align-self:flex-start;display:inline-block;padding:3px 10px;background:var(--'+d.bg+');color:var(--'+d.color+');border-radius:8px;font-size:11px;font-weight:700">'+d.label+'</span>';
+    html+='<textarea placeholder="Notizen / Entscheidung …" onchange="auswahlSaveNote(\''+it.id+'\',this.value)" style="width:100%;box-sizing:border-box;min-height:50px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12px;color:var(--tx);resize:vertical">'+esc(it.notes||'')+'</textarea>';
+    html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">';
+    if(!it.movedToProducts)html+='<button class="btn btn-sm" onclick="auswahlOrderSample(\''+it.id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">📦 Muster bestellen → Produktliste</button>';
+    else html+='<span style="font-size:11px;color:var(--gn);font-weight:700;align-self:center">✓ in Produktliste</span>';
+    html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'pruefen\')" title="weiter prüfen" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">🔍</button>';
+    html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'abgelehnt\')" title="ablehnen" style="background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌</button>';
+    html+='<button class="btn btn-sm" onclick="go(\'inhalt\')" title="Im KI-Bildstudio Bilder erstellen" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">🎨</button>';
+    html+='<button class="btn btn-sm" onclick="auswahlDelete(\''+it.id+'\')" title="entfernen" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🗑</button>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
 }
 
 // Sub-Navigation für Produktfindung-Bereiche
 // Wird unter dem page-header eines Sub-Bereichs eingeblendet
 function renderFindungSubNav(activeKey){
   var tabs=[
-    {key:'findung', icon:'📊', label:'Übersicht'},
     {key:'ideen',   icon:'💡', label:'Ideen-Pool'},
-    {key:'research',icon:'🗂️', label:'Recherche-Kandidaten'},
+    {key:'research',icon:'⚔️', label:'Konkurrenz-Tabelle'},
+    {key:'auswahl', icon:'⭐', label:'Produkte'},
     {key:'helium',  icon:'📥', label:'Helium 10 Import'}
   ];
   var html='<div class="findung-subnav" style="background:linear-gradient(180deg,var(--pud),transparent);border-bottom:1.5px solid var(--bd);padding:8px 18px 0 18px;margin-bottom:14px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">';
@@ -5886,6 +5958,7 @@ function researchOpenLearnLink(){
 
 function researchUpdateBadge(){
   researchInit();
+  if(typeof auswahlUpdateBadge==='function')auswahlUpdateBadge();
   var badge=document.getElementById('researchBadge');
   if(!badge)return;
   var active=D.research.candidates.filter(function(c){return normalizeStatus(c.status)!=='abgelehnt'}).length;
@@ -5951,8 +6024,8 @@ async function researchAnalyzeAsin(){
     var c={
       id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
       name:(data.title||'Konkurrenz-Produkt').slice(0,120),
-      kategorie:'',hauptkeyword:'',
-      vk:(data.price!=null?data.price:null),top10Umsatz:null,avgReviews:null,
+      kategorie:(data.category||''),hauptkeyword:'',
+      vk:(data.price!=null?data.price:null),top10Umsatz:null,avgReviews:(data.reviews!=null?data.reviews:null),
       konkurrenz:'',schwaechen:'',differenzierung:'',
       ek:null,fbaGebuehren:null,ppcRisiko:'',nettoMarge:null,
       risiko:'',status:'recherche',currentStep:1,notes:'',
@@ -5963,7 +6036,7 @@ async function researchAnalyzeAsin(){
     D.research.candidates.unshift(c);
     save();researchRenderTable();if(typeof researchRenderStatsBar==='function')researchRenderStatsBar();researchUpdateBadge();
     if(inp)inp.value='';
-    toast('✓ Kandidat aus ASIN angelegt'+(data.asin?' ('+data.asin+')':'')+(data.price!=null?' · VK '+data.price+' € übernommen':''));
+    toast('✓ Kandidat aus ASIN angelegt'+(data.asin?' ('+data.asin+')':'')+[data.category?'Kategorie':'',data.price!=null?'VK '+data.price+' €':'',data.reviews!=null?data.reviews+' Reviews':''].filter(Boolean).map(function(x){return ' · '+x;}).join(''));
     researchRenderAsinResult(c.id);
   }catch(err){
     if(res)res.innerHTML='<div style="padding:12px;border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px">⚠️ Import fehlgeschlagen: '+esc(err&&err.message||'Fehler')+'</div>';
@@ -5980,7 +6053,11 @@ function researchRenderAsinResult(id){
   h+='<div style="background:var(--s1);border:1.5px solid var(--pu);border-radius:12px;padding:16px;margin-top:12px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div style="font-weight:700;color:var(--tx)">🅰 Konkurrenz importiert'+(c.compAsin?' · ASIN '+esc(c.compAsin):'')+'</div><span style="font-size:11px;color:var(--gn);font-weight:700">✓ als Kandidat gespeichert</span></div>';
   h+='<div style="font-size:13px;color:var(--tx);font-weight:600;margin-bottom:6px">'+esc(c.compTitle||c.name||'')+'</div>';
-  if(c.vk!=null)h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:4px">💶 Konkurrenz-Preis <b>'+esc(String(c.vk))+' €</b> → als <b>VK-Startwert</b> in die Tabelle übernommen</div>';
+  var meta2=[];
+  if(c.kategorie)meta2.push('🏷️ '+esc(c.kategorie));
+  if(c.vk!=null)meta2.push('💶 '+esc(String(c.vk))+' €');
+  if(c.avgReviews!=null)meta2.push('⭐ '+esc(String(c.avgReviews))+' Bewertungen');
+  if(meta2.length)h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:6px">'+meta2.join(' · ')+' <span style="color:var(--tx3)">→ in die Tabelle übernommen</span></div>';
   if(imgs)h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">'+imgs+'</div>';
   if(uspLi)h+='<ul style="margin:6px 0;padding-left:18px;font-size:12px;color:var(--tx2)">'+uspLi+'</ul>';
   h+='<button class="btn btn-p" id="researchBeatBtn_'+c.id+'" onclick="researchBeatCandidate(\''+c.id+'\')" style="margin-top:8px;background:linear-gradient(135deg,var(--pu),var(--ac));border:none">🏆 Vergleichen &amp; besser vermarkten</button>';
@@ -6206,32 +6283,16 @@ function researchRenderTable(){
     var score=researchCalcScore(c);
     var scoreColor=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
     html+='<tr data-cid="'+c.id+'">'+
-      '<td style="position:sticky;left:0;background:var(--s1);font-weight:600">'+esc(c.name)+'</td>'+
-      '<td><input type="text" value="'+esc(c.kategorie||'')+'" onchange="researchUpdateField(\''+c.id+'\',\'kategorie\',this.value)" style="width:100%;min-width:110px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td><input type="text" value="'+esc(c.hauptkeyword||'')+'" onchange="researchUpdateField(\''+c.id+'\',\'hauptkeyword\',this.value)" style="width:100%;min-width:130px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.vk!=null?c.vk:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'vk\',this.value)" style="width:60px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.top10Umsatz!=null?c.top10Umsatz:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'top10Umsatz\',this.value)" style="width:80px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.avgReviews!=null?c.avgReviews:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'avgReviews\',this.value)" style="width:70px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td><select onchange="researchUpdateField(\''+c.id+'\',\'konkurrenz\',this.value)" style="width:100%;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+
-        ['','niedrig','mittel','hoch'].map(function(o){return '<option value="'+o+'"'+(c.konkurrenz===o?' selected':'')+'>'+(o||'—')+'</option>'}).join('')+
-      '</select></td>'+
-      '<td><input type="text" value="'+esc(c.differenzierung||'')+'" onchange="researchUpdateField(\''+c.id+'\',\'differenzierung\',this.value)" style="width:100%;min-width:140px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.ek!=null?c.ek:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'ek\',this.value)" style="width:60px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.nettoMarge!=null?c.nettoMarge:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'nettoMarge\',this.value)" placeholder="%" style="width:60px;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'"></td>'+
-      '<td><select onchange="researchUpdateField(\''+c.id+'\',\'ppcRisiko\',this.value)" style="width:100%;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+
-        ['','niedrig','mittel','hoch'].map(function(o){return '<option value="'+o+'"'+(c.ppcRisiko===o?' selected':'')+'>'+(o||'—')+'</option>'}).join('')+
-      '</select></td>'+
-      '<td><select onchange="researchUpdateField(\''+c.id+'\',\'risiko\',this.value)" style="width:100%;background:transparent;border:1px solid transparent;padding:3px 6px;border-radius:4px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\';this.style.background=\'var(--s2)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+
-        ['','niedrig','mittel','hoch'].map(function(o){return '<option value="'+o+'"'+(c.risiko===o?' selected':'')+'>'+(o||'—')+'</option>'}).join('')+
-      '</select></td>'+
+      '<td style="position:sticky;left:0;background:var(--s1)"><button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="width:100%;min-width:180px;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button></td>'+
+      '<td><input type="text" value="'+esc(c.kategorie||'')+'" onchange="researchUpdateField(\''+c.id+'\',\'kategorie\',this.value)" placeholder="z. B. Bad" style="width:100%;min-width:120px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
+      '<td class="nc"><input type="number" step="0.01" value="'+(c.vk!=null?c.vk:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'vk\',this.value)" placeholder="€" style="width:74px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
+      '<td class="nc"><input type="number" value="'+(c.avgReviews!=null?c.avgReviews:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'avgReviews\',this.value)" placeholder="Anz." style="width:74px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
       '<td class="nc"><span style="display:inline-block;padding:3px 9px;background:var(--'+scoreColor+'d);color:var(--'+scoreColor+');border-radius:10px;font-weight:700;font-size:12px;min-width:40px;text-align:center">'+(score>0?score:'—')+'</span></td>'+
-      '<td><select onchange="researchUpdateField(\''+c.id+'\',\'status\',this.value)" style="width:100%;min-width:140px;background:var(--'+cfg.bg+');border:1px solid var(--'+cfg.color+');padding:4px 6px;border-radius:6px;font-family:inherit;font-size:11px;color:var(--'+cfg.color+');font-weight:600">'+
-        pipelineStatusOptions(statusKey,['recherche','kandidat','muster','aktiv','abgelehnt'])+
-      '</select></td>'+
-      '<td><span style="display:inline-block;padding:3px 8px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;font-size:11px;color:var(--tx2);font-weight:600">'+(c.currentStep||1)+'/20</span></td>'+
-      '<td style="white-space:nowrap">'+
-        '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+c.id+'\')" title="Workflow öffnen" style="padding:4px 8px;font-size:11px;background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋</button> '+
+      '<td style="white-space:nowrap;text-align:right">'+
+        '<button class="btn btn-sm" onclick="researchOpenEdit(\''+c.id+'\')" title="Bearbeiten" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx);border:1px solid var(--bd)">✏️</button> '+
+        '<button class="btn btn-sm" onclick="researchPromoteToProduct(\''+c.id+'\')" title="In den Bereich Produkte übernehmen" style="padding:4px 9px;font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">★ Produkt</button> '+
         '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" title="Score-Matrix" style="padding:4px 8px;font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️</button> '+
+        '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+c.id+'\')" title="20-Schritte-Workflow" style="padding:4px 8px;font-size:11px;background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋</button> '+
         '<button class="btn btn-sm" onclick="researchDeleteCandidate(\''+c.id+'\')" title="Löschen" style="padding:4px 8px;font-size:11px;background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">🗑</button>'+
       '</td>'+
     '</tr>';
@@ -6254,17 +6315,68 @@ function researchUpdateField(id,field,value){
   // Recompute score if relevant
   c.computedScore=researchCalcScore(c);
   save();
-  // If status change → rerender stats
+  // Stats/Badge bei Status-Änderung
   if(field==='status'){researchRenderStatsBar();researchUpdateBadge();}
-  // Update score badge in row without full re-render
-  var row=document.querySelector('tr[data-cid="'+id+'"]');
-  if(row && ['vk','top10Umsatz','avgReviews','konkurrenz','nettoMarge','ppcRisiko','risiko','differenzierung'].indexOf(field)>-1){
-    var sc=row.querySelector('td.nc:nth-last-child(4) span');
-    // Simpler: re-render whole table for safety on status changes — but updates feel laggy. Skip for non-status.
-    if(field==='status' || field==='konkurrenz' || field==='risiko' || field==='ppcRisiko'){
-      researchRenderTable();
-    }
+  // Score-relevante Felder → Tabelle neu rendern (aktualisiert Score-Badge)
+  if(['avgReviews','nettoMarge','konkurrenz','risiko','ppcRisiko','differenzierung','status'].indexOf(field)>-1){
+    researchRenderTable();
   }
+}
+
+// ── Produkt-Detail bearbeiten (Klick auf Name in der Konkurrenz-Tabelle) ──
+function researchCloseEdit(){
+  var o=document.getElementById('researchEditOverlay');
+  if(o&&o.parentNode)o.parentNode.removeChild(o);
+  var pg=document.getElementById('p-research');
+  if(pg&&pg.classList.contains('active')&&typeof researchRenderTable==='function')researchRenderTable();
+}
+function researchUpdateUsps(id,val){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===id;});if(!c)return;
+  c.compUsps=(val||'').split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean).slice(0,8);
+  c.updatedAt=new Date().toISOString();save();
+}
+function researchOpenEdit(id){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===id;});if(!c){toast('Eintrag nicht gefunden');return;}
+  researchCloseEdit();
+  var IN='width:100%;box-sizing:border-box;background:var(--s1);border:1.5px solid var(--bd);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:13px;color:var(--tx);outline:none';
+  var LBL='display:block;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:0 0 4px';
+  var risk=[['','—'],['niedrig','niedrig'],['mittel','mittel'],['hoch','hoch']];
+  var statusOpts=[['recherche','🔍 In Recherche'],['kandidat','⭐ Kandidat'],['muster','📦 Muster bestellt'],['aktiv','🚀 Aktiv'],['abgelehnt','❌ Abgelehnt']];
+  function field(label,inner){return '<div style="margin-bottom:12px"><label style="'+LBL+'">'+label+'</label>'+inner+'</div>';}
+  function inp(f,val,type,extra){return '<input type="'+(type||'text')+'" value="'+esc(val!=null?String(val):'')+'" onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+(extra||'')+'">';}
+  function selF(f,curVal,opts){return '<select onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(curVal===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
+  var score=researchCalcScore(c);var scc=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
+  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
+  var ov=document.createElement('div');ov.id='researchEditOverlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,41,.55);display:flex;align-items:flex-start;justify-content:center;z-index:99999;padding:30px 16px;overflow-y:auto;backdrop-filter:blur(2px)';
+  ov.onclick=function(e){if(e.target===ov)researchCloseEdit();};
+  var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:min(720px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35)">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 22px;border-bottom:1px solid var(--bd)">';
+  h+='<div style="font-weight:800;font-size:17px;color:var(--tx)">✏️ Produkt bearbeiten</div>';
+  h+='<div style="display:flex;align-items:center;gap:10px"><span style="display:inline-block;padding:4px 11px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:13px">Score '+(score>0?score:'—')+'</span><button onclick="researchCloseEdit()" style="background:none;border:none;font-size:22px;color:var(--tx2);cursor:pointer;line-height:1">✕</button></div>';
+  h+='</div>';
+  h+='<div style="padding:20px 22px;max-height:68vh;overflow-y:auto">';
+  h+=field('Produktname',inp('name',c.name,'text'));
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Kategorie',inp('kategorie',c.kategorie,'text'))+field('Hauptkeyword',inp('hauptkeyword',c.hauptkeyword,'text'))+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'))+field('EK €',inp('ek',c.ek,'number',';text-align:right'))+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'))+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'))+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'))+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Konkurrenz',selF('konkurrenz',c.konkurrenz||'',risk))+field('PPC-Risiko',selF('ppcRisiko',c.ppcRisiko||'',risk))+field('Risiko',selF('risiko',c.risiko||'',risk))+'</div>';
+  h+=field('Status (Pipeline)',selF('status',normalizeStatus(c.status),statusOpts));
+  h+=field('Differenzierung (warum besser?)','<textarea onchange="researchUpdateField(\''+id+'\',\'differenzierung\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.differenzierung||'')+'</textarea>');
+  h+=field('USPs (eine pro Zeile)','<textarea onchange="researchUpdateUsps(\''+id+'\',this.value)" placeholder="z. B. Edelstahl rostfrei&#10;Ohne Bohren montierbar" style="'+IN+';min-height:80px;resize:vertical">'+esc((c.compUsps||[]).join('\n'))+'</textarea>');
+  h+=field('Notizen','<textarea onchange="researchUpdateField(\''+id+'\',\'notes\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.notes||'')+'</textarea>');
+  if(c.compAsin||imgs){h+='<div style="margin-top:6px;padding-top:12px;border-top:1px dashed var(--bd)">';if(c.compAsin)h+='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Konkurrenz-ASIN: <b>'+esc(c.compAsin)+'</b></div>';if(imgs)h+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';h+='</div>';}
+  h+='</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bd)">';
+  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️ Score-Matrix</button>';
+  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenWorkflow(\''+id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋 Workflow</button>';
+  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchPromoteToProduct(\''+id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">★ Als Produkt übernehmen</button>';
+  h+='<button class="btn btn-p" onclick="researchCloseEdit()">✓ Fertig</button>';
+  h+='</div></div>';
+  ov.innerHTML=h;
+  document.body.appendChild(ov);
 }
 
 function researchDeleteCandidate(id){
