@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# iCloud-Platzhalter
+*.icloud
+
+# Konfliktdateien von iCloud (falls zwei Macs gleichzeitig speichern)
+* [0-9].html
+* Konflikt*.html
+
+# Exportierte App-Daten (gehören nicht in die Versionierung)
+sellerhub-data.json
