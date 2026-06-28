@@ -42,6 +42,14 @@ Code/Design wird über GitHub zwischen MacBook und Mac Studio synchronisiert.
 - Dadurch keine manuellen `backups/`-Kopien mehr nötig — jede Version steckt in der Git-Historie (`git log --oneline`).
 - ⚠️ Nicht gleichzeitig auf beiden Macs committen, ohne vorher zu pullen/pushen (iCloud + Git-Konflikte vermeiden).
 
+### Automatischer Sync über Claude-Code-Hooks (`.claude/settings.json`)
+Beim Arbeiten mit Claude Code im Terminal läuft der Sync automatisch:
+- **SessionStart-Hook:** beim Sitzungsstart automatisch `git pull` (neuester Stand).
+- **SessionEnd-Hook:** beim Sitzungsende automatisch `git add -A` + `git commit` (nur bei Änderungen, mit Zeitstempel) + `git push`.
+- Die Hooks sind ins Repo committet → gelten auf MacBook und Mac Studio.
+- Voraussetzung Push: `gh` CLI eingerichtet (auf MacBook erledigt; auf Mac Studio ggf. einmalig `gh auth login` + `gh auth setup-git`).
+- Hooks ansehen/abschalten: im Terminal `/hooks`. Automatische End-Commits sichern auch unfertige Stände — für saubere Historie zwischendrin selbst committen.
+
 ## Wichtiger Hinweis zu den App-DATEN (nicht Code)
 Die App speichert Login + eingegebene Daten im Browser **gebunden an den Dateipfad** (`file://`).
 Auf einem neuen Rechner ist die App daher zunächst „leer" (neuer Login nötig). Git/GitHub synct nur den **Code**, nicht die Browser-Daten.
