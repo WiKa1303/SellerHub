@@ -1398,7 +1398,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-research">
   <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Vier Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;📚 Prompt-Bibliothek — alle 22 KI-Prompts kopierbar&#10;&#10;Die komplette Methodik findest du im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1>
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1>
   </div>
   <div class="page-body">
 
@@ -1407,7 +1407,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <button class="researchTab" data-tab="overview" onclick="researchShowTab('overview')" title="Übersicht aller Kandidaten mit allen Recherche-Feldern" style="padding:12px 20px;background:var(--s1);border:1.5px solid var(--pu);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--pu);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;margin-bottom:-2px">🗂️ Master-Tabelle</button>
       <button class="researchTab" data-tab="workflow" onclick="researchShowTab('workflow')" title="20-Schritte-Workflow pro Kandidat mit Checklisten und Prompts" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">📋 Workflow-Tracker</button>
       <button class="researchTab" data-tab="score" onclick="researchShowTab('score')" title="Gewichtete Bewertungs-Matrix mit 7 Kriterien" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">⚖️ Score-Matrix</button>
-      <button class="researchTab" data-tab="prompts" onclick="researchShowTab('prompts')" title="Alle 22 KI-Prompts aus dem Workflow zum Kopieren" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">📚 Prompt-Bibliothek</button>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 12px">
         <button class="btn btn-sm" onclick="researchOpenLearnLink()" title="Die komplette Methodik im Lernzentrum nachlesen" style="font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📖 Methodik im Lernzentrum</button>
       </div>
@@ -1511,9 +1510,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <!-- ═════════════════════════════════════════════════════════════ -->
     <!-- TAB 4: PROMPT-BIBLIOTHEK                                       -->
     <!-- ═════════════════════════════════════════════════════════════ -->
-    <div id="researchView_prompts" style="display:none">
-      <div id="researchPromptsContent"></div>
-    </div>
 
   </div>
 </div>
@@ -1623,6 +1619,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="eico">💡</div><h3>Noch keine Ideen</h3>
       <p>Nutze <b>🤖 KI-Import</b> um Ideen von Claude/Gemini reinzuladen, oder lege manuell an.</p>
     </div>
+    <!-- Prompt-Bibliothek (aus der Konkurrenz-Tabelle hierher verschoben) -->
+    <details id="ideenPromptLib" style="margin-top:20px;background:var(--s1);border:1.5px solid var(--gn);border-radius:12px;padding:2px 18px" ontoggle="if(this.open&&!this._loaded){if(typeof researchRenderPrompts==='function')researchRenderPrompts();this._loaded=true;}">
+      <summary style="cursor:pointer;font-weight:700;color:var(--gn);font-size:15px;padding:14px 0">📚 Prompt-Bibliothek <span style="font-size:12px;color:var(--tx2);font-weight:400">— alle Profi-Prompts für die Produktrecherche (klicken zum Aufklappen)</span></summary>
+      <div id="researchPromptsContent" style="padding-bottom:16px"></div>
+    </details>
   </div>
 </div>
 
@@ -5375,10 +5376,9 @@ function go(name){
   if(name==='keywords'||name==='sourcing'||name==='launch')fillProdSelects();
   if(name==='gebuehren'){switchCalcTab(calcActiveTab||'full');if(typeof fbaPopulateSelects==='function'){fbaPopulateSelects();fbaTogglePpc();fbaCalc();}if(typeof qCalc==='function')qCalc();}
   if(name==='kalkulation'){go('gebuehren');switchCalcTab('quick');return;}
-  // Findung Sub-Nav einblenden (außer bei Hub-Übersicht selbst)
-  if(['ideen','research','helium','auswahl'].indexOf(name)>-1){
-    if(typeof injectFindungSubNav==='function')injectFindungSubNav('p-'+name,name);
-  }
+  // Sub-Navigation entfernt – alle Produktfindungs-Punkte stehen links in der Sidebar.
+  // Falls noch eine alte Sub-Nav-Leiste im DOM hängt (z.B. aus früherer Sitzung), entfernen:
+  var _sn=document.querySelector('#p-'+name+' .findung-subnav');if(_sn&&_sn.parentNode)_sn.parentNode.removeChild(_sn);
   // Restore default title when leaving detail view
   if(name!=='detail')document.title=WIKA_NAME+' v'+WIKA_VERSION;
 }
@@ -5935,7 +5935,7 @@ function researchShowTab(tab){
     }
   });
   // Hide all views
-  ['overview','workflow','score','prompts'].forEach(function(v){
+  ['overview','workflow','score'].forEach(function(v){
     var el=document.getElementById('researchView_'+v);
     if(el)el.style.display=(v===tab?'block':'none');
   });
@@ -5943,7 +5943,6 @@ function researchShowTab(tab){
   if(tab==='overview')researchRenderTable();
   else if(tab==='workflow')researchRenderWorkflow();
   else if(tab==='score')researchRenderScore();
-  else if(tab==='prompts')researchRenderPrompts();
 }
 
 function researchOpenLearnLink(){
@@ -6085,7 +6084,7 @@ function researchBeatProgShow(){
   var steps=RB_STEPS.map(function(s,i){return '<div id="researchBeatStep'+i+'" style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--tx2);opacity:.4;transition:opacity .25s"><span class="rbchk" style="width:18px;height:18px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gn)">○</span><span>'+s+'</span></div>';}).join('');
   ov.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:26px 28px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.35)">'+
     '<div style="font-weight:800;font-size:16px;color:var(--tx);margin-bottom:4px">🏆 Besseres Marketing wird erstellt</div>'+
-    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:18px">Die KI analysiert die Konkurrenz und leitet stärkeres Marketing ab. Das dauert meist 10–30 Sekunden.</div>'+
+    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:18px">Die KI analysiert die Konkurrenz und leitet stärkeres Marketing ab. Je nach Auslastung kann das einen Moment dauern – danke für deine Geduld.</div>'+
     '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px">'+
       '<span id="researchBeatStepLbl" style="font-size:13px;color:var(--tx);font-weight:600">Konkurrenz analysieren …</span>'+
       '<span id="researchBeatPct" style="font-size:22px;font-weight:800;color:var(--pu)">0 %</span>'+
@@ -6344,7 +6343,13 @@ function researchOpenEdit(id){
   var LBL='display:block;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:0 0 4px';
   var risk=[['','—'],['niedrig','niedrig'],['mittel','mittel'],['hoch','hoch']];
   var statusOpts=[['recherche','🔍 In Recherche'],['kandidat','⭐ Kandidat'],['muster','📦 Muster bestellt'],['aktiv','🚀 Aktiv'],['abgelehnt','❌ Abgelehnt']];
-  function field(label,inner){return '<div style="margin-bottom:12px"><label style="'+LBL+'">'+label+'</label>'+inner+'</div>';}
+  function badge(src){
+    if(src==='auto')return ' <span style="background:var(--gnd);color:var(--gn);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">AUTO</span>';
+    if(src==='calc')return ' <span style="background:var(--acd);color:var(--ac);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">BERECHNET</span>';
+    if(src==='self')return ' <span style="background:var(--s3);color:var(--tx2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">DU</span>';
+    return '';
+  }
+  function field(label,inner,hint,src){return '<div style="margin-bottom:12px"><label style="'+LBL+'">'+label+badge(src)+'</label>'+inner+(hint?'<div style="font-size:10.5px;color:var(--tx3);margin-top:3px">'+hint+'</div>':'')+'</div>';}
   function inp(f,val,type,extra){return '<input type="'+(type||'text')+'" value="'+esc(val!=null?String(val):'')+'" onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+(extra||'')+'">';}
   function selF(f,curVal,opts){return '<select onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(curVal===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
   var score=researchCalcScore(c);var scc=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
@@ -6358,14 +6363,15 @@ function researchOpenEdit(id){
   h+='<div style="display:flex;align-items:center;gap:10px"><span style="display:inline-block;padding:4px 11px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:13px">Score '+(score>0?score:'—')+'</span><button onclick="researchCloseEdit()" style="background:none;border:none;font-size:22px;color:var(--tx2);cursor:pointer;line-height:1">✕</button></div>';
   h+='</div>';
   h+='<div style="padding:20px 22px;max-height:68vh;overflow-y:auto">';
-  h+=field('Produktname',inp('name',c.name,'text'));
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Kategorie',inp('kategorie',c.kategorie,'text'))+field('Hauptkeyword',inp('hauptkeyword',c.hauptkeyword,'text'))+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'))+field('EK €',inp('ek',c.ek,'number',';text-align:right'))+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'))+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'))+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'))+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Konkurrenz',selF('konkurrenz',c.konkurrenz||'',risk))+field('PPC-Risiko',selF('ppcRisiko',c.ppcRisiko||'',risk))+field('Risiko',selF('risiko',c.risiko||'',risk))+'</div>';
+  h+='<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--tx3);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--bd)"><span><b style="color:var(--gn)">AUTO</b> = aus dem Listing geladen</span><span><b style="color:var(--ac)">BERECHNET</b> = aus deinen Zahlen</span><span><b style="color:var(--tx2)">DU</b> = selbst eintragen (Helium 10 / Lieferant / Einschätzung)</span></div>';
+  h+=field('Produktname',inp('name',c.name,'text'),'Aus dem Konkurrenz-Listing.','auto');
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Kategorie',inp('kategorie',c.kategorie,'text'),'Automatisch (oberste Amazon-Kategorie) – verfeinerbar.','auto')+field('Hauptkeyword',inp('hauptkeyword',c.hauptkeyword,'text'),'Aus Helium 10 Cerebro / Black Box.','self')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'),'Konkurrenz-Preis, automatisch.','auto')+field('EK €',inp('ek',c.ek,'number',';text-align:right'),'Dein Einkaufspreis beim Lieferanten.','self')+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'),'VK − EK − Gebühren − PPC.','calc')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'),'Aus Helium 10 Xray.','self')+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'),'Bewertungsanzahl, automatisch.','auto')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Konkurrenz',selF('konkurrenz',c.konkurrenz||'',risk),'Deine Einschätzung.','self')+field('PPC-Risiko',selF('ppcRisiko',c.ppcRisiko||'',risk),'Deine Einschätzung.','self')+field('Risiko',selF('risiko',c.risiko||'',risk),'Deine Einschätzung.','self')+'</div>';
   h+=field('Status (Pipeline)',selF('status',normalizeStatus(c.status),statusOpts));
-  h+=field('Differenzierung (warum besser?)','<textarea onchange="researchUpdateField(\''+id+'\',\'differenzierung\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.differenzierung||'')+'</textarea>');
-  h+=field('USPs (eine pro Zeile)','<textarea onchange="researchUpdateUsps(\''+id+'\',this.value)" placeholder="z. B. Edelstahl rostfrei&#10;Ohne Bohren montierbar" style="'+IN+';min-height:80px;resize:vertical">'+esc((c.compUsps||[]).join('\n'))+'</textarea>');
+  h+=field('Differenzierung (warum besser?)','<textarea onchange="researchUpdateField(\''+id+'\',\'differenzierung\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.differenzierung||'')+'</textarea>','Wird bei „🏆 besser vermarkten" teils automatisch befüllt.','');
+  h+=field('USPs (eine pro Zeile)','<textarea onchange="researchUpdateUsps(\''+id+'\',this.value)" placeholder="z. B. Edelstahl rostfrei&#10;Ohne Bohren montierbar" style="'+IN+';min-height:80px;resize:vertical">'+esc((c.compUsps||[]).join('\n'))+'</textarea>','Aus dem Konkurrenz-Listing.','auto');
   h+=field('Notizen','<textarea onchange="researchUpdateField(\''+id+'\',\'notes\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.notes||'')+'</textarea>');
   if(c.compAsin||imgs){h+='<div style="margin-top:6px;padding-top:12px;border-top:1px dashed var(--bd)">';if(c.compAsin)h+='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Konkurrenz-ASIN: <b>'+esc(c.compAsin)+'</b></div>';if(imgs)h+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';h+='</div>';}
   h+='</div>';
@@ -15759,6 +15765,12 @@ document.addEventListener('keydown',function(e){
 });
 
 // ═══════════════ IDEEN-POOL ═══════════════
+function ideenResetFilters(){
+  var s=document.getElementById('ideenSearch');if(s)s.value='';
+  var fs=document.getElementById('fIdeeStatus');if(fs)fs.value='';
+  var fq=document.getElementById('fIdeeQuelle');if(fq)fq.value='';
+  renderIdeen();
+}
 function renderIdeen(){
   var q=(document.getElementById('ideenSearch').value||'').toLowerCase();
   var fs=document.getElementById('fIdeeStatus').value;
@@ -15857,7 +15869,16 @@ function renderIdeen(){
     tb.appendChild(tr);
   });
   updateBulkBar();
-  document.getElementById('ideenEmpty').style.display=fl.length?'none':'block';
+  var _ie=document.getElementById('ideenEmpty');
+  if(fl.length){_ie.style.display='none';}
+  else if(D.ideen.length>0){
+    // Ideen vorhanden, aber durch Filter ausgeblendet → klar machen + Reset anbieten
+    _ie.style.display='block';
+    _ie.innerHTML='<div class="eico">🔍</div><h3>'+D.ideen.length+' Idee'+(D.ideen.length>1?'n':'')+' durch Filter ausgeblendet</h3><p>Such-, Status- oder Quellen-Filter blenden gerade alle Ideen aus.</p><button class="btn btn-p" onclick="ideenResetFilters()">Filter zurücksetzen &amp; alle anzeigen</button>';
+  }else{
+    _ie.style.display='block';
+    _ie.innerHTML='<div class="eico">💡</div><h3>Noch keine Ideen</h3><p>Nutze <b>🤖 KI-Import</b> um Ideen von Claude/Gemini reinzuladen, oder lege manuell an.</p>';
+  }
   document.getElementById('ideenTable').style.display=fl.length?'table':'none';
   document.getElementById('ideenCount').textContent=D.ideen.length+' Ideen';
   // stats
@@ -16312,7 +16333,14 @@ function normalizeIdee(o,quelle,defStatus){
     warum:fixEnc((o.warum||o.why||o.reason||o.begruendung||'').toString().trim()),
     risiken:fixEnc((o.risiken||o.risks||o.risk||o.nachteile||'').toString().trim()),
     bildUrl:(o.bildUrl||o.bild||o.image||o.imageUrl||'').toString().trim(),
-    amazonLink:(o.amazonLink||o.amazon||o.link||o.url||'').toString().trim(),
+    amazonLink:(function(){
+      var l=(o.amazonLink||o.amazon||o.link||o.url||'').toString().trim();
+      if(l)return l;
+      // JSON gave only a bare ASIN → build a direct Amazon.de product link
+      var a=(o.asin||o.ASIN||'').toString().trim();
+      if(/^[A-Z0-9]{10}$/i.test(a))return 'https://www.amazon.de/dp/'+a.toUpperCase();
+      return '';
+    })(),
     quellen:(o.quellen||o.sources||o.source||'').toString().trim(),
     datum:new Date().toLocaleDateString('de-DE')
   };
@@ -16504,7 +16532,7 @@ function generatePrompt(){
       p+='Antworte AUSSCHLIESSLICH mit einem gültigen JSON-Array. Keine Einleitung, keine Erklärungen, keine Kommentare davor oder danach. Nur das JSON-Array.\n\n';
       p+='**WICHTIG zu Umlauten:** Verwende deutsche Umlaute direkt (ä, ö, ü, ß, €, °) – KEINE HTML-Entities, KEINE Escape-Sequenzen wie "\\u00e4", KEINE doppelten Bindestriche. Halte das JSON einfach und sauber UTF-8.\n\n';
       p+='Struktur pro Idee:\n\n';
-      p+='```json\n[\n  {\n    "name": "Konkreter Produktname",\n    "kategorie": "Amazon-Kategorie",\n    "potenzial": "Hoch",\n    "vkPreis": 24.99,\n    "marktgroesse": "z.B. 5.000 Suchanfragen/Monat, wachsend",\n    "zielgruppe": "Spezifische Zielgruppenbeschreibung",\n    "differenzierung": "Konkreter USP gegenüber Konkurrenz",\n    "warum": "Datenbasierte Begründung",\n    "risiken": "Mögliche Herausforderungen",\n    "bildUrl": "",\n    "amazonLink": ""\n  }\n]\n```\n\n';
+      p+='```json\n[\n  {\n    "name": "Konkreter Produktname",\n    "kategorie": "Amazon-Kategorie",\n    "potenzial": "Hoch",\n    "vkPreis": 24.99,\n    "marktgroesse": "z.B. 5.000 Suchanfragen/Monat, wachsend",\n    "zielgruppe": "Spezifische Zielgruppenbeschreibung",\n    "differenzierung": "Konkreter USP gegenüber Konkurrenz",\n    "warum": "Datenbasierte Begründung",\n    "risiken": "Mögliche Herausforderungen",\n    "bildUrl": "",\n    "amazonLink": "https://www.amazon.de/dp/B0XXXXXXXX"\n  }\n]\n```\n\n';
 
       p+='**REGELN FÜR DIE FELDER:**\n';
       p+='- "name": Konkreter, verkäuflicher Produktname (nicht zu generisch, max. 60 Zeichen)\n';
@@ -16517,7 +16545,7 @@ function generatePrompt(){
       p+='- "warum": Datenbasierte Begründung warum diese Idee vielversprechend ist\n';
       p+='- "risiken": Ehrliche Einschätzung der Risiken\n';
       p+='- "bildUrl": Leer lassen "" (Bild wird später manuell hinzugefügt)\n';
-      p+='- "amazonLink": Leer lassen "" (Link wird später manuell hinzugefügt)\n\n';
+      p+='- "amazonLink": Direkter Amazon.de-Produktlink (Format https://www.amazon.de/dp/ASIN) zu EINEM konkreten, real existierenden Referenzprodukt dieser Art, das du per Websuche tatsächlich gefunden hast. So landet der Nutzer direkt auf dem Produkt statt auf einer Suchergebnis-Liste. NUR einen echten, verifizierten Link angeben – wenn du nicht im Web suchst oder unsicher bist, leer lassen "" (dann wird automatisch eine Amazon-Suche genutzt).\n\n';
 
       p+='**Liefere genau '+anzahl+' Ideen. Sei spezifisch, nicht generisch. Denke wie ein Unternehmer.**';
     }else{
@@ -16544,8 +16572,8 @@ function generatePrompt(){
       p+='- Products with dominant brands\n- Gated/restricted categories\n- High-priced electronics\n- High return risk products\n- Too generic ideas\n\n---\n\n';
 
       p+='**RESPONSE FORMAT – IMPORTANT:**\n\nRespond ONLY with a valid JSON array. No introduction, no explanations.\n\n';
-      p+='```json\n[\n  {\n    "name": "Product name",\n    "kategorie": "Category",\n    "potenzial": "Hoch",\n    "vkPreis": 24.99,\n    "marktgroesse": "Market size estimate",\n    "zielgruppe": "Target group",\n    "differenzierung": "USP",\n    "warum": "Why promising",\n    "risiken": "Risks"\n  }\n]\n```\n\n';
-      p+='"potenzial" must be only "Hoch", "Mittel" or "Niedrig". Return exactly '+anzahl+' ideas.';
+      p+='```json\n[\n  {\n    "name": "Product name",\n    "kategorie": "Category",\n    "potenzial": "Hoch",\n    "vkPreis": 24.99,\n    "marktgroesse": "Market size estimate",\n    "zielgruppe": "Target group",\n    "differenzierung": "USP",\n    "warum": "Why promising",\n    "risiken": "Risks",\n    "amazonLink": "https://www.amazon.de/dp/B0XXXXXXXX"\n  }\n]\n```\n\n';
+      p+='"potenzial" must be only "Hoch", "Mittel" or "Niedrig". "amazonLink" = a direct Amazon.de product link (https://www.amazon.de/dp/ASIN) to ONE real reference product you actually found via web search, so the user lands directly on the product instead of a search list. Only provide a real, verified link – if you are not browsing the web or unsure, leave it "". Return exactly '+anzahl+' ideas.';
     }
 
     var out=document.getElementById('pOut');
@@ -16768,6 +16796,16 @@ function parseIdeaBlock(title,body){
   if(!idea.warum&&!idea.differenzierung&&!idea.marktgroesse){
     var clean=body.replace(/\*+/g,'').replace(/\n+/g,' ').replace(/\s+/g,' ').trim();
     idea.warum=fixEnc(clean.substring(0,300));
+  }
+
+  // Try to grab a direct Amazon product link (so "Produkt finden" opens the exact product, not a search)
+  var amzUrl=body.match(/https?:\/\/(?:www\.)?amazon\.[a-z.]+\/[^\s)\]]*?(?:\/dp\/|\/gp\/product\/)[A-Z0-9]{10}[^\s)\]]*/i);
+  if(amzUrl){
+    idea.amazonLink=amzUrl[0].replace(/[).,]+$/,'');
+  }else{
+    // Or a bare ASIN mentioned in the text → build a direct .de link
+    var asinM=body.match(/\bASIN\s*:?\s*([A-Z0-9]{10})\b/i)||body.match(/\b(B0[A-Z0-9]{8})\b/);
+    if(asinM)idea.amazonLink='https://www.amazon.de/dp/'+asinM[1].toUpperCase();
   }
 
   return idea;
