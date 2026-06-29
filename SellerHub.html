@@ -51,8 +51,14 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(180deg,var(--bg
 .nav-group.has-active>.nav-group-header .grp-ico{filter:drop-shadow(0 0 6px rgba(217,119,6,.5))}
 .nav-group-header .grp-badge{width:7px;height:7px;border-radius:50%;background:var(--ac);margin-left:2px}
 .nav-group-body{overflow:hidden;max-height:0;opacity:.35;transition:max-height .25s ease,opacity .2s ease;margin:0 0 2px 18px;border-left:2px solid var(--bd);padding-left:5px}
-.nav-group.open>.nav-group-body{max-height:520px;opacity:1}
+.nav-group.open>.nav-group-body{max-height:600px;opacity:1}
 .nav-group-body .nav-btn{font-size:13px;padding:9px 13px}
+.nav-lbl{display:flex;flex-direction:column;line-height:1.2;gap:1px;min-width:0}
+.nav-sub{font-size:10px;color:#6b7392;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-btn.active .nav-sub{color:var(--ac);opacity:.8}
+.nav-sec{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#5b647e;padding:11px 13px 4px}
+.stage-back{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--pud);color:var(--pu);border:1px solid var(--pu);border-radius:8px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.stage-back:hover{background:var(--pu);color:#fff}
 .sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#8a96aa}
 .sidebar-footer span{color:#a8b1cc !important}
 
@@ -228,6 +234,13 @@ td{padding:12px 12px;font-size:13px;border-bottom:1px solid var(--bd);vertical-a
 .subtab.active{color:var(--ac);border-bottom-color:var(--ac)}
 .subtab .count{background:var(--s3);color:var(--tx2);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:700;min-width:18px;text-align:center}
 .subtab.active .count{background:var(--acd);color:var(--ac)}
+.prodcard-imgwrap{width:100%;height:150px;border-radius:9px;border:1px solid var(--bd);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:2px}
+.prodcard-img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.prodcard-imgwrap:hover{overflow:visible;position:relative;z-index:50;border-color:var(--ac)}
+.prodcard-imgwrap:hover .prodcard-img{transform:scale(1.7);box-shadow:0 12px 40px rgba(0,0,0,.45);border-radius:8px}
+.prodcard-noimg{color:var(--tx3);font-size:30px;opacity:.5}
+.prodrow-thumb{width:38px;height:38px;object-fit:contain;background:#fff;border:1px solid var(--bd);border-radius:6px;vertical-align:middle;margin-right:8px;flex-shrink:0;cursor:zoom-in;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.prodrow-thumb:hover{transform:scale(2);box-shadow:0 8px 24px rgba(0,0,0,.45);border-color:var(--ac);position:relative;z-index:50}
 .detail-body{padding:24px 32px;flex:1;overflow-y:auto}
 .subpage{display:none}
 .subpage.active{display:block}
@@ -1258,29 +1271,24 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   <nav class="sidebar-nav">
     <button class="nav-btn active" onclick="go('dashboard')" style="margin-bottom:8px"><span class="ico">🏠</span>Dashboard</button>
 
-    <div class="nav-group open has-active" id="navgrp-findung">
-      <button class="nav-group-header" onclick="toggleNavGroup('findung')"><span class="grp-ico">🎯</span><span class="grp-label">Produktfindung</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+    <!-- ═══ KERN: PRODUKTRECHERCHE ═══ -->
+    <div class="nav-group open has-active" id="navgrp-recherche">
+      <button class="nav-group-header" onclick="toggleNavGroup('recherche')"><span class="grp-ico">🔎</span><span class="grp-label">Produktrecherche</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
-        <button class="nav-btn" onclick="go('ideen')"><span class="ico">💡</span>Ideen-Pool <span id="ideenBadge" style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
-        <button class="nav-btn" onclick="go('research')"><span class="ico">⚔️</span>Konkurrenz-Tabelle <span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
-        <button class="nav-btn" onclick="go('auswahl')"><span class="ico">⭐</span>Engere Wahl <span id="auswahlBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
-        <button class="nav-btn" onclick="go('helium')"><span class="ico">📥</span>Helium 10 Import</button>
-        <button class="nav-btn" onclick="go('nischen')"><span class="ico">🧭</span>Nischen-Analyzer</button>
-        <button class="nav-btn" onclick="go('keywords')"><span class="ico">🔑</span>Keyword-Center</button>
+        <button class="nav-btn" onclick="go('pipeline')" title="Dein Recherche-Trichter: Idee → Validieren → Shortlist → Entscheidung"><span class="ico">🗂️</span><span class="nav-lbl"><span>Pipeline</span><span class="nav-sub">dein Trichter – hier arbeitest du</span></span><span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <div class="nav-sec">Werkzeuge</div>
+        <button class="nav-btn" onclick="go('helium')" title="Helium-10-Exporte (Black Box/Xray/Cerebro) importieren – füttert Ideen & Kandidaten"><span class="ico">📥</span><span class="nav-lbl"><span>Daten holen</span><span class="nav-sub">Helium-10-Import</span></span></button>
+        <button class="nav-btn" onclick="go('nischen')" title="Mehrere Nischen objektiv vergleichen und ranken"><span class="ico">🧭</span><span class="nav-lbl"><span>Nischen vergleichen</span><span class="nav-sub">mehrere Nischen ranken</span></span></button>
+        <button class="nav-btn" onclick="go('gebuehren')" title="FBA-Profit, Marge, ROI, Break-even & BSR→Verkäufe-Schätzer"><span class="ico">💶</span><span class="nav-lbl"><span>Marge rechnen</span><span class="nav-sub">FBA-Profit & BSR-Schätzer</span></span></button>
       </div>
     </div>
 
-    <div class="nav-group" id="navgrp-kalk">
-      <button class="nav-group-header" onclick="toggleNavGroup('kalk')"><span class="grp-ico">💶</span><span class="grp-label">Kalkulation &amp; Produkte</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+    <!-- ═══ BETRIEB (nach der GO-Entscheidung) ═══ -->
+    <div class="nav-group" id="navgrp-betrieb">
+      <button class="nav-group-header" onclick="toggleNavGroup('betrieb')"><span class="grp-ico">🛠️</span><span class="grp-label">Betrieb (nach GO)</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
         <button class="nav-btn" onclick="go('produkte')"><span class="ico">📋</span>Produktliste</button>
-        <button class="nav-btn" onclick="go('gebuehren')"><span class="ico">💶</span>Kalkulations-Center</button>
-      </div>
-    </div>
-
-    <div class="nav-group" id="navgrp-listing">
-      <button class="nav-group-header" onclick="toggleNavGroup('listing')"><span class="grp-ico">🚀</span><span class="grp-label">Listing &amp; Launch</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
-      <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('keywords')"><span class="ico">🔑</span>Keyword-Center</button>
         <button class="nav-btn" onclick="go('listing')"><span class="ico">📝</span>Listing-Editor</button>
         <button class="nav-btn" onclick="go('inhalt')"><span class="ico">✨</span>KI-Bildstudio</button>
         <button class="nav-btn" onclick="go('launch')"><span class="ico">🚀</span>Launch-Planer</button>
@@ -1288,8 +1296,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       </div>
     </div>
 
-    <div class="nav-group" id="navgrp-org">
-      <button class="nav-group-header" onclick="toggleNavGroup('org')"><span class="grp-ico">🗂️</span><span class="grp-label">Organisation</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+    <!-- ═══ MEHR ═══ -->
+    <div class="nav-group" id="navgrp-mehr">
+      <button class="nav-group-header" onclick="toggleNavGroup('mehr')"><span class="grp-ico">📚</span><span class="grp-label">Mehr</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
         <button class="nav-btn" onclick="go('tasks')"><span class="ico">✅</span>Aufgaben-Board <span id="tasksBadge" style="margin-left:auto;background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('coaching')"><span class="ico">🎓</span>Lernzentrum <span id="coachingBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
@@ -1319,6 +1328,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 <!-- ═══ MAIN ═══ -->
 <div class="main">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: RECHERCHE-PIPELINE (Kanban über alle Stufen)            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-pipeline">
+  <div class="page-header"><h1><span class="hico">🗂️</span>Recherche-Pipeline <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Idee → Validieren → Shortlist → Entscheidung</span></h1></div>
+  <div class="page-body">
+    <div class="help-box purple"><div class="help-icon">🗂️</div><div class="help-body">
+      <div class="help-title">Dein Recherche-Trichter auf einen Blick</div>
+      <div class="help-text">Du recherchierst <b>beliebig viele Produkte parallel</b> – jeder Kandidat ist eine eigene, gespeicherte Recherche und wandert eigenständig von links nach rechts. Mit „→" schiebst du ihn in die nächste Stufe; Bewertung &amp; Ampel kommen aus dem <b>Scorecard</b>.</div>
+    </div></div>
+    <!-- Start-Leiste: Recherche direkt hier starten -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+      <span style="font-size:12px;color:var(--tx2);font-weight:700;margin-right:2px">Neue Recherche starten:</span>
+      <button class="btn btn-p btn-sm" onclick="go('helium')">📥 Helium-Import</button>
+      <button class="btn btn-sm" onclick="go('research');setTimeout(function(){var e=document.getElementById('researchAsinInput');if(e){e.focus();e.scrollIntoView({block:'center'})}},160)">🔗 ASIN analysieren</button>
+      <button class="btn btn-sm" onclick="openIdeeModal()">➕ Idee</button>
+      <button class="btn btn-sm" onclick="pipelineAddCandidate()">➕ Kandidat</button>
+    </div>
+    <div id="pipelineBoard" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start"></div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: PRODUKTLISTE                                             -->
@@ -1403,7 +1434,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-research">
   <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1>
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Validieren" · ← zurück</button>
   </div>
   <div class="page-body">
 
@@ -1411,7 +1442,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <div id="researchTabNav" style="display:flex;gap:2px;margin-bottom:18px;border-bottom:2px solid var(--bd);padding-bottom:0;flex-wrap:wrap">
       <button class="researchTab" data-tab="overview" onclick="researchShowTab('overview')" title="Übersicht aller Kandidaten mit allen Recherche-Feldern" style="padding:12px 20px;background:var(--s1);border:1.5px solid var(--pu);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--pu);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;margin-bottom:-2px">🗂️ Master-Tabelle</button>
       <button class="researchTab" data-tab="workflow" onclick="researchShowTab('workflow')" title="20-Schritte-Workflow pro Kandidat mit Checklisten und Prompts" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">📋 Workflow-Tracker</button>
-      <button class="researchTab" data-tab="score" onclick="researchShowTab('score')" title="Gewichtete Bewertungs-Matrix mit 7 Kriterien" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">⚖️ Score-Matrix</button>
+      <button class="researchTab" data-tab="score" onclick="researchShowTab('score')" title="Entscheidungs-Scorecard: 6 Dimensionen → GO/PRÜFEN/NO-GO" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">⚖️ Scorecard</button>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 12px">
         <button class="btn btn-sm" onclick="researchOpenLearnLink()" title="Die komplette Methodik im Lernzentrum nachlesen" style="font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📖 Methodik im Lernzentrum</button>
       </div>
@@ -1478,9 +1509,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           <thead>
             <tr>
               <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:200px">Produktname <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Name des analysierten Konkurrenz-Produkts – editierbar.</span></span></th>
-              <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". Editierbar.</span></span></th>
-              <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis – aus dem Konkurrenz-Listing vorbefüllt, editierbar.</span></span></th>
-              <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer.</span></span></th>
+              <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
+              <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis aus dem Konkurrenz-Listing. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
+              <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
               <th class="nc">Score <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Auto-Score 1–100 aus der Detail-Bewertung (⚖️ Score-Matrix). <b>&gt; 70 top, &gt; 50 okay.</b></span></span></th>
               <th style="text-align:right;min-width:190px">Aktionen <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below left">★ = in den Bereich „Produkte" übernehmen · ⚖️ Score-Matrix · 📋 Workflow · 🗑 löschen.</span></span></th>
             </tr>
@@ -1524,7 +1555,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-auswahl">
   <div class="page-header">
-    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1>
+    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Shortlist & Entscheidung" · ← zurück</button>
   </div>
   <div class="page-body">
     <div class="help-box gold">
@@ -1540,7 +1571,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 
 <div class="page" id="p-ideen">
-  <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span></div>
+  <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline" style="margin-left:12px">🗂️ Pipeline-Stufe „Idee" · ← zurück</button></div>
   <div class="page-body">
 
     <!-- Help-Box -->
@@ -1658,7 +1689,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <button class="subtab" data-sub="recherche" onclick="goSub('recherche')"><span>🔍</span>Recherche</button>
       <button class="subtab" data-sub="kalkulation" onclick="goSub('kalkulation')"><span>🧮</span>Kalkulation</button>
       <button class="subtab" data-sub="hersteller" onclick="goSub('hersteller')"><span>🏭</span>Hersteller <span class="count" id="herCount">0</span></button>
-      <button class="subtab" data-sub="sales" onclick="goSub('sales')"><span>📊</span>Verkaufsdaten <span class="count" id="salesCount" style="display:none">●</span></button>
+      <button class="subtab" data-sub="sales" onclick="goSub('sales')"><span>📈</span>Marktdaten (Helium 10) <span class="count" id="salesCount" style="display:none">●</span></button>
     </div>
   </div>
 
@@ -1869,6 +1900,44 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
       <button class="calcTab" data-calctab="quick" onclick="switchCalcTab('quick')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">⚡ Schnell-Kalkulation</button>
       <button class="calcTab" data-calctab="full" onclick="switchCalcTab('full')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">💶 FBA-Kalkulator (vollständig)</button>
+      <button class="calcTab" data-calctab="bsr" onclick="switchCalcTab('bsr')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📈 BSR → Verkäufe</button>
+    </div>
+
+    <!-- TAB: BSR → VERKÄUFE-SCHÄTZER -->
+    <div id="calcTab-bsr" style="display:none">
+      <div class="help-box purple"><div class="help-icon">📈</div><div class="help-body">
+        <div class="help-title">BSR-Verkaufsschätzer (wie Xray)</div>
+        <div class="help-text">Schätzt aus dem <b>Best-Seller-Rank</b> einer Kategorie die monatlichen Verkäufe &amp; den Umsatz. Reine Schätzung per Mathematik – <b>kalibriere</b> sie mit einem Produkt, dessen echte Verkäufe du kennst, dann wird sie für diese Kategorie deutlich genauer.</div>
+      </div></div>
+      <div class="detail-row" style="align-items:start">
+        <div class="card">
+          <h3>🔢 Eingabe</h3>
+          <div class="fi"><label>Kategorie</label><select id="bsrCat"></select></div>
+          <div class="fi" style="margin-top:10px"><label>BSR (Best-Seller-Rank)</label><input id="bsrRank" type="number" placeholder="z. B. 4500" oninput="bsrCalc()"></div>
+          <div class="fi" style="margin-top:10px"><label>Verkaufspreis € (für Umsatz)</label><input id="bsrPrice" type="number" step="0.01" placeholder="z. B. 24.99" oninput="bsrCalc()"></div>
+          <div style="margin-top:6px"><button class="btn btn-p" onclick="bsrCalc()">📈 Schätzen</button></div>
+        </div>
+        <div class="card">
+          <h3>📊 Schätzung</h3>
+          <div class="cg" style="grid-template-columns:1fr 1fr">
+            <div class="ci"><span class="cl">Verkäufe / Tag</span><span class="cv" style="color:var(--gn)" id="bsrDay">—</span></div>
+            <div class="ci"><span class="cl">Verkäufe / Monat</span><span class="cv" style="color:var(--gn)" id="bsrMonth">—</span></div>
+            <div class="ci"><span class="cl">Umsatz / Monat</span><span class="cv" style="color:var(--gn);font-size:18px" id="bsrRev">—</span></div>
+            <div class="ci"><span class="cl">Kategorie-Status</span><span class="cv" style="font-size:12px" id="bsrCalibState">Standard</span></div>
+          </div>
+          <div style="margin-top:12px;font-size:11px;color:var(--tx3);font-style:italic">💡 Schätzwerte – keine Echtdaten. Genauigkeit steigt mit Kalibrierung.</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;background:var(--s1)">
+        <h3>🎯 Kalibrieren (optional, pro Kategorie)</h3>
+        <p style="color:var(--tx2);font-size:12px;margin-bottom:10px">Kennst du für die gewählte Kategorie ein Produkt mit <b>bekanntem BSR</b> und <b>bekannten Verkäufen/Monat</b> (z. B. aus einem echten Helium-Export)? Trag beides ein – der Schätzer passt sich für diese Kategorie an.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="fi" style="margin:0"><label>Bekannter BSR</label><input id="bsrCalRank" type="number" placeholder="z. B. 2000" style="width:140px"></div>
+          <div class="fi" style="margin:0"><label>Echte Verkäufe / Monat</label><input id="bsrCalSales" type="number" placeholder="z. B. 600" style="width:160px"></div>
+          <button class="btn btn-p" onclick="bsrCalibrate()">🎯 Kalibrieren</button>
+          <button class="btn btn-sm btn-d" onclick="bsrResetCalib()">↺ Zurücksetzen</button>
+        </div>
+      </div>
     </div>
 
     <!-- TAB: SCHNELL-KALKULATION -->
@@ -3152,7 +3221,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         usps:igLine(out[3]).slice(0,5),
         why:igLine(out[4]).slice(0,5)
       };
-    }
+    },
+    async ask(prompt){ return await igGenTextSafe(prompt,4); }
   };
   function igParseTitles(raw){
     raw=(raw||"").trim();
@@ -3487,6 +3557,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
       <button class="kwTab" data-kwtab="tracking" onclick="switchKwTab('tracking')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">📍 Keyword-Tracking</button>
       <button class="kwTab" data-kwtab="cleaner" onclick="switchKwTab('cleaner')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🧹 Backend-Reiniger</button>
+      <button class="kwTab" data-kwtab="scribbles" onclick="switchKwTab('scribbles')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📝 Listing-Abdeckung</button>
     </div>
 
     <!-- TAB 1: TRACKING -->
@@ -3521,6 +3592,27 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div id="keywordcleanBody">
         <!-- via JS gerendert -->
       </div>
+    </div>
+
+    <!-- TAB 3: LISTING-ABDECKUNG (Scribbles) -->
+    <div id="kwTab-scribbles" style="display:none">
+      <div class="help-box gold"><div class="help-icon">📝</div><div class="help-body">
+        <div class="help-title">Listing-Keyword-Abdeckung (Scribbles)</div>
+        <div class="help-text">Trag deine Ziel-Keywords ein und schreib (oder füge ein) Titel, Bullets &amp; Beschreibung. Es wird markiert, welche Keywords schon abgedeckt sind, plus ein Abdeckungs-Score.</div>
+      </div></div>
+      <div class="detail-row" style="align-items:start">
+        <div class="card">
+          <h3>🎯 Keywords</h3>
+          <div class="fi"><label>Ziel-Keywords (eins pro Zeile)</label><textarea id="scKw" rows="12" placeholder="seifenspender edelstahl&#10;seifenspender wand&#10;nachfüllbar" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+        </div>
+        <div class="card">
+          <h3>✍️ Dein Listing</h3>
+          <div class="fi"><label>Titel</label><textarea id="scTitle" rows="2" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+          <div class="fi" style="margin-top:8px"><label>Bullet Points</label><textarea id="scBullets" rows="4" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+          <div class="fi" style="margin-top:8px"><label>Beschreibung</label><textarea id="scDesc" rows="4" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>📊 Abdeckung</h3><div id="scOut" style="font-size:12px;color:var(--tx2)">Trag Keywords und Listing-Text ein …</div></div>
     </div>
 
   </div>
@@ -3809,6 +3901,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
+
 <!-- ═══ HELIUM IMPORT PREVIEW MODAL ═══ -->
 <div class="mo" id="heliumImportModal" onclick="if(event.target===this)closeHeliumModal()">
   <div class="modal" style="width:1000px;max-height:85vh">
@@ -3863,153 +3956,37 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page active" id="p-dashboard">
   <div class="page-header" style="background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px solid var(--ac);padding-bottom:16px">
-    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Willkommen zurück bei SellerHub</span></h1>
+    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Willkommen zurück bei SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/SellerHub.html">v29.6</span></h1>
   </div>
   <div class="page-body">
 
     <!-- ─── LICENSE COUNTDOWN PANEL ─── -->
     <div id="dashLicensePanel" style="display:none;margin-bottom:22px"></div>
 
-    <!-- ─── WELCOME-HILFE (einklappbar) ─── -->
-    <details class="help-box help-box-collapsible gold" style="display:block;margin-bottom:18px">
-      <summary>👋 Erste Schritte mit SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:500;margin-left:auto">▾ Klick für Anleitung</span></summary>
-      <div class="help-text" style="margin-top:10px;line-height:1.7">
-        <p style="margin:0 0 8px 0"><b>SellerHub hilft dir bei der systematischen Recherche und Verwaltung profitabler FBA-Produkte.</b> Der typische Arbeitsfluss:</p>
-        <ol style="margin:8px 0 12px 20px;padding:0">
-          <li style="margin-bottom:5px"><b>🎯 Produktfindung</b> → Ideen sammeln, recherchieren, validieren (Pipeline mit 5 Stufen)</li>
-          <li style="margin-bottom:5px"><b>📋 Produktliste</b> → bestätigte Produkte verwalten, Marge tracken, Lagerbestand</li>
-          <li style="margin-bottom:5px"><b>⚔️ Analyse-Bereiche</b> → Wettbewerb, Keywords, Reviews pro Produkt</li>
-          <li><b>🎓 Lernzentrum</b> → KI-Produktrecherche-Methodik, Helium 10, PPC, Sourcing</li>
-        </ol>
-        <p style="margin:0;font-style:italic;color:var(--tx3);font-size:12px">💡 <b>Neu bei SellerHub?</b> Starte im Lernzentrum mit der „KI-Produktrecherche-Prozess"-Methodik. Sie zeigt dir den kompletten 20-Schritte-Workflow, den SellerHub dann in der Produktfindung operativ unterstützt.</p>
-      </div>
-      <a class="help-link" onclick="go('coaching');return false" style="cursor:pointer">📖 Zum Lernzentrum →</a>
-    </details>
+    <!-- ─── FOKUS: PRODUKTRECHERCHE-FAHRPLAN (geführt) ─── -->
+    <div id="dashRoadmap" style="margin-bottom:18px"></div>
 
-    <!-- ─── HERO STATS (reduziert auf 3 wichtigste) ─── -->
+    <!-- ─── DEINE PRODUKTSUCHEN (mehrere parallel, je 5 Schritte) ─── -->
+    <div id="dashSearches" style="margin-bottom:24px"></div>
+
+    <!-- ─── HERO STATS (Recherche-Funnel) ─── -->
     <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px">
       <!-- populated by renderDash() -->
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- ─── WORKFLOW-PHASEN: Quick Cards thematisch gruppiert ─── -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-
-    <!-- PHASE 1: RECHERCHIEREN -->
-    <div style="margin-bottom:22px">
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--pud)">
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--pu);font-weight:800;margin:0">🔍 Recherchieren</h2>
-        <span style="font-size:11px;color:var(--tx3);font-weight:500">Ideen finden, Konkurrenz analysieren, Markt verstehen</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <button class="quick-card" onclick="go('research')" data-color="pu" style="border:2px solid var(--pu);background:linear-gradient(135deg,var(--s1),var(--pud))">
-          <div class="qico" style="background:var(--pu);color:#fff">🎯</div>
-          <div class="qbody">
-            <div class="qtitle" style="color:var(--pu)">Produktfindung</div>
-            <div class="qmeta" id="qcResearch">Konkurrenz analysieren & Produkte wählen</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- PHASE 2: PLANEN & KALKULIEREN -->
-    <div style="margin-bottom:22px">
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--acd)">
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--ac);font-weight:800;margin:0">📋 Planen & Kalkulieren</h2>
-        <span style="font-size:11px;color:var(--tx3);font-weight:500">Produkte verwalten, Marge berechnen, Keywords optimieren</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <button class="quick-card" onclick="go('produkte')" data-color="ac">
-          <div class="qico" style="background:var(--acd);color:var(--ac)">📋</div>
-          <div class="qbody">
-            <div class="qtitle">Produktliste</div>
-            <div class="qmeta" id="qcProds">— Produkte</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-        <button class="quick-card" onclick="go('gebuehren')" data-color="gn">
-          <div class="qico" style="background:var(--gnd);color:var(--gn)">💶</div>
-          <div class="qbody">
-            <div class="qtitle">Gebührenrechner</div>
-            <div class="qmeta">Amazon FBA Fees</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-        <button class="quick-card" onclick="go('keywords')" data-color="bl">
-          <div class="qico" style="background:var(--bld);color:var(--bl)">🔑</div>
-          <div class="qbody">
-            <div class="qtitle">Keyword-Tracker</div>
-            <div class="qmeta" id="qcKeywords">— Keywords</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- PHASE 3: LAUNCH & OPERATIONS -->
-    <div style="margin-bottom:22px">
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--cyd)">
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--cy);font-weight:800;margin:0">🚀 Launch & Operations</h2>
-        <span style="font-size:11px;color:var(--tx3);font-weight:500">Produkte launchen, Lager verwalten, Verkäufe analysieren</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <button class="quick-card" onclick="go('launch')" data-color="cy">
-          <div class="qico" style="background:var(--cyd);color:var(--cy)">🚀</div>
-          <div class="qbody">
-            <div class="qtitle">Launch-Planer</div>
-            <div class="qmeta" id="qcLaunches">— Launches</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-        <button class="quick-card" onclick="go('lager')" data-color="or">
-          <div class="qico" style="background:var(--ord);color:var(--or)">📦</div>
-          <div class="qbody">
-            <div class="qtitle">Lagerbestand</div>
-            <div class="qmeta">Nachbestellungen</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- PHASE 4: LERNEN -->
-    <div style="margin-bottom:30px">
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--gnd)">
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--gn);font-weight:800;margin:0">🎓 Lernen & Weiterbilden</h2>
-        <span style="font-size:11px;color:var(--tx3);font-weight:500">Strategie, Tools, Best Practices</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-        <button class="quick-card" onclick="go('coaching')" data-color="gn">
-          <div class="qico" style="background:var(--gnd);color:var(--gn)">🎓</div>
-          <div class="qbody">
-            <div class="qtitle">Lernzentrum</div>
-            <div class="qmeta" id="qcCoaching">FBA Coaching & Tutorials</div>
-          </div>
-          <div class="qarrow">→</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- ─── DETAILS-BEREICH: Top Produkte + Aktivität ─── -->
+    <!-- ─── RECHERCHE-PAYOFF: Top-Kandidaten + Aktivität ─── -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
     <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:18px" id="dashBottomGrid">
 
-      <!-- Top Produkte -->
+      <!-- Top-Kandidaten nach Score -->
       <div class="card" style="background:var(--s1);border:1px solid var(--bd2)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <h3 style="margin:0">🏆 Top Produkte nach Marge</h3>
-          <button class="btn btn-sm" onclick="go('produkte')" style="font-size:11px">Alle ansehen →</button>
+          <h3 style="margin:0">🏆 Top-Kandidaten nach Score</h3>
+          <button class="btn btn-sm" onclick="go('research');researchShowTab('score')" style="font-size:11px">Scorecard →</button>
         </div>
-        <div style="overflow-x:auto">
-          <table style="margin:0"><thead><tr><th>Produkt</th><th class="nc">VK €</th><th class="nc">Marge</th><th class="nc">Gewinn</th><th>Status</th></tr></thead><tbody id="dashTable"></tbody></table>
-        </div>
-        <div id="dashTableEmpty" style="display:none;padding:30px;text-align:center;color:var(--tx2);font-size:13px">
-          <div style="font-size:32px;margin-bottom:8px">📦</div>
-          Noch keine Produkte mit Kalkulation. <a onclick="go('produkte')" style="color:var(--ac);cursor:pointer">Erstelle dein erstes Produkt →</a>
-        </div>
+        <div id="dashTopCands"></div>
       </div>
 
       <!-- Aktivitäts-Feed -->
@@ -4020,6 +3997,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
       </div>
 
+    </div>
+
+    <!-- ─── WERKZEUGE & BETRIEB (kompakte Schnelllinks) ─── -->
+    <div class="card" style="background:var(--s1);border:1px solid var(--bd2);margin-bottom:18px">
+      <h3 style="margin:0 0 12px 0;font-size:14px">🛠️ Werkzeuge & Betrieb <span style="font-size:11px;color:var(--tx3);font-weight:400">— nach der GO-Entscheidung</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+        <button class="btn btn-sm" onclick="go('produkte')" style="justify-content:flex-start;font-size:12px">📋 Produktliste</button>
+        <button class="btn btn-sm" onclick="go('gebuehren')" style="justify-content:flex-start;font-size:12px">💶 Marge rechnen</button>
+        <button class="btn btn-sm" onclick="go('keywords')" style="justify-content:flex-start;font-size:12px">🔑 Keyword-Center</button>
+        <button class="btn btn-sm" onclick="go('listing')" style="justify-content:flex-start;font-size:12px">📝 Listing-Editor</button>
+        <button class="btn btn-sm" onclick="go('inhalt')" style="justify-content:flex-start;font-size:12px">✨ KI-Bildstudio</button>
+        <button class="btn btn-sm" onclick="go('launch')" style="justify-content:flex-start;font-size:12px">🚀 Launch-Planer</button>
+        <button class="btn btn-sm" onclick="go('lager')" style="justify-content:flex-start;font-size:12px">📦 Lagerbestand</button>
+        <button class="btn btn-sm" onclick="go('coaching')" style="justify-content:flex-start;font-size:12px">🎓 Lernzentrum</button>
+      </div>
     </div>
 
     <!-- ─── COLLAPSIBLE: WEITERE STATISTIKEN ─── -->
@@ -5175,6 +5167,7 @@ function adminSendLicenseUpdateMail(u){
         <div class="fi"><label>Kategorie</label><input id="fKa" list="kl"><datalist id="kl"></datalist></div>
         <div class="fi"><label>Status</label><select id="fSt"><option>Idee</option><option>Recherche</option><option>Analyse</option><option>Bestellt</option><option>Abgelehnt</option></select></div>
         <div class="fi"><label>ASIN</label><input id="fAs"></div>
+        <div class="fi"><label>Bild-URL (Hauptbild)</label><input id="fImg" placeholder="https://m.media-amazon.com/…"></div>
         <div class="fi"><label>Quelle</label><input id="fQu"></div>
         <div class="fi"><label>Bewertung</label><select id="fBw"><option value="0">—</option><option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5">⭐⭐⭐⭐⭐</option></select></div>
       </div>
@@ -5371,11 +5364,11 @@ function go(name){
   // For detail view, highlight the produkte sidebar entry
   // Übersicht-Seite entfernt → auf Konkurrenz-Tabelle umleiten
   if(name==='findung')name='research';
-  var sidebarKey=name==='detail'?'produkte':name;
+  var sidebarKey=name==='detail'?'produkte':(['ideen','research','auswahl'].indexOf(name)>-1?'pipeline':name);
   var btns=document.querySelectorAll('.nav-btn');
   for(var i=0;i<btns.length;i++){if(btns[i].getAttribute('onclick')==="go('"+sidebarKey+"')")btns[i].classList.add('active');}
   // Nav-Gruppen (Accordion): Gruppe der aktiven Seite öffnen, übrige schließen
-  var navGroupMap={findung:'findung',ideen:'findung',research:'findung',auswahl:'findung',helium:'findung',nischen:'findung',keywords:'findung',keywordclean:'findung',produkte:'kalk',gebuehren:'kalk',kalkulation:'kalk',detail:'kalk',listing:'listing',inhalt:'listing',launch:'listing',lager:'listing',sourcing:'listing',tasks:'org',coaching:'org',admin:'admin'};
+  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',sourcing:'betrieb',tasks:'mehr',coaching:'mehr',admin:'admin'};
   var activeGrp=navGroupMap[sidebarKey]||navGroupMap[name];
   document.querySelectorAll('.nav-group').forEach(function(g){
     var on=g.id==='navgrp-'+activeGrp;
@@ -5393,6 +5386,7 @@ function go(name){
   if(name==='coaching')renderCoaching();
   if(name==='tasks')renderTasks();
   if(name==='nischen')renderNischen();
+  if(name==='pipeline'&&typeof renderPipeline==='function')renderPipeline();
   if(name==='listing')renderListing();
   if(name==='keywords'){if(typeof renderKW==='function')renderKW();if(typeof renderKeywordClean==='function')renderKeywordClean();}
   if(name==='keywordclean'){go('keywords');switchKwTab('cleaner');return;}
@@ -5611,15 +5605,89 @@ var RESEARCH_STATUS_CONFIG={
 };
 
 // ─── SCORE-MATRIX GEWICHTUNG ───
-var RESEARCH_SCORE_CRITERIA=[
-  {key:'nachfrage',label:'Nachfrage',weight:20,desc:'Suchvolumen, monatlicher Umsatz Top 10'},
-  {key:'wettbewerb',label:'Wettbewerb',weight:20,desc:'Marken-Dominanz, Review-Anzahl, Listing-Qualität'},
-  {key:'marge',label:'Marge',weight:20,desc:'Netto-Marge nach allen Kosten inkl. PPC'},
-  {key:'differenzierung',label:'Differenzierung',weight:15,desc:'Konkrete Verbesserungs- und Bundle-Möglichkeiten'},
-  {key:'logistik',label:'Logistik',weight:10,desc:'Größe, Gewicht, FBA-Kompatibilität'},
-  {key:'risiko',label:'Risiko',weight:10,desc:'Rechtlich, Haftung, Retourenquote'},
-  {key:'lieferant',label:'Lieferantenverfügbarkeit',weight:5,desc:'Anzahl Quellen, MOQ, Reaktion'}
+// ═══ ENTSCHEIDUNGS-SCORECARD (ein kanonisches Bewertungssystem) ═══
+var DECISION_DIMS=[
+  {key:'nachfrage', label:'Nachfrage',         weight:25, desc:'Monatsumsatz Top-Seller, Suchvolumen'},
+  {key:'wettbewerb',label:'Wettbewerb',        weight:25, desc:'⌀ Reviews Top-10 (niedrig = gut), Marken-Dominanz'},
+  {key:'wirtschaft',label:'Wirtschaftlichkeit',weight:20, desc:'Netto-Marge nach FBA + PPC, ROI, Preisband'},
+  {key:'differenz', label:'Differenzierung',   weight:15, desc:'Lösbare Schwächen der Konkurrenz (Review-Mining)'},
+  {key:'risiko',    label:'Risiko / Logistik', weight:10, desc:'Gewicht/Größe, Saisonalität, Recht/IP/Gating'},
+  {key:'kapital',   label:'Kapitalbedarf',     weight:5,  desc:'Startbudget (Menge × EK + PPC-Anlauf)'}
 ];
+// Alt-Kompatibilität (falls noch irgendwo referenziert)
+var RESEARCH_SCORE_CRITERIA=DECISION_DIMS;
+
+// Auto-Schätzung einer Dimension aus den Kandidatendaten → {val:0-10|null, reason}
+function decisionAuto(c,key){
+  if(key==='nachfrage'){
+    if(c.top10Umsatz!=null&&c.top10Umsatz>0){var u=c.top10Umsatz;var v=u>=30000?10:u>=20000?9:u>=12000?8:u>=8000?7:u>=5000?6:u>=3000?4:2;return {val:v,reason:'Top-Umsatz '+Math.round(u).toLocaleString('de-DE')+' €/M'};}
+    return {val:null,reason:'Kein Umsatz-/Nachfragewert erfasst'};
+  }
+  if(key==='wettbewerb'){
+    if(c.avgReviews!=null){var r=c.avgReviews;var v=r<100?10:r<300?8:r<600?6:r<1000?4:r<2000?2:1;return {val:v,reason:'⌀ '+Math.round(r).toLocaleString('de-DE')+' Reviews Top-10'};}
+    return {val:null,reason:'Keine ⌀-Review-Zahl erfasst'};
+  }
+  if(key==='wirtschaft'){
+    if(c.nettoMarge!=null){var m=c.nettoMarge;var v=m>=35?10:m>=30?8:m>=25?6:m>=20?4:m>=15?2:1;return {val:v,reason:'Netto-Marge '+m+' %'};}
+    return {val:null,reason:'Keine Netto-Marge erfasst'};
+  }
+  if(key==='differenz'){
+    var t=(c.differenzierung||'').trim();if(t.length>40)return {val:8,reason:'Differenzierung beschrieben'};if(t.length>5)return {val:5,reason:'Ansatz vorhanden'};return {val:null,reason:'Noch offen – via Review-Mining (Schritt 3)'};
+  }
+  if(key==='risiko'){
+    if(c.risiko){var v=c.risiko==='niedrig'?9:c.risiko==='mittel'?6:3;return {val:v,reason:'Risiko: '+c.risiko};}
+    return {val:null,reason:'Risiko nicht eingestuft'};
+  }
+  if(key==='kapital'){
+    if(c.ek!=null&&c.ek>0){var inv=c.ek*500;var v=inv<2000?9:inv<4000?7:inv<7000?5:inv<12000?3:1;return {val:v,reason:'~'+Math.round(inv).toLocaleString('de-DE')+' € Startbudget (500 Stk)'};}
+    return {val:null,reason:'Kein EK für Startbudget'};
+  }
+  return {val:null,reason:''};
+}
+// Effektiver Wert: manuelle Übersteuerung (c.score2) hat Vorrang, sonst Auto
+function decisionEff(c,key){
+  var ov=c.score2&&c.score2[key];
+  if(typeof ov==='number'&&ov>0)return ov;
+  return decisionAuto(c,key).val; // kann null sein (nicht bewertet)
+}
+// Einmalige Migration alter scoreMatrix-Werte (7 Krit.) ins neue Modell
+function decisionMigrate(c){
+  if(c.score2)return;
+  c.score2={};
+  var sm=c.scoreMatrix;
+  if(sm&&Object.keys(sm).length){
+    if(sm.nachfrage)c.score2.nachfrage=sm.nachfrage;
+    if(sm.wettbewerb)c.score2.wettbewerb=sm.wettbewerb;
+    if(sm.marge)c.score2.wirtschaft=sm.marge;
+    if(sm.differenzierung)c.score2.differenz=sm.differenzierung;
+    var lo=sm.logistik||0,ri=sm.risiko||0,n=(sm.logistik?1:0)+(sm.risiko?1:0);
+    if(n)c.score2.risiko=Math.round((lo+ri)/n);
+  }
+}
+// Rote/gelbe Flags
+function decisionRedFlags(c){
+  var f=[];
+  if(c.vk!=null&&c.vk>0&&c.vk<15)f.push({hard:true,t:'Preis < 15 € → Margenfalle'});
+  if(c.avgReviews!=null&&c.avgReviews>2000)f.push({hard:true,t:'⌀ Reviews Top-10 > 2.000 → hohe Einstiegsbarriere'});
+  if(c.nettoMarge!=null&&c.nettoMarge<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich'});
+  if(c.risiko==='hoch')f.push({hard:true,t:'Hohes Risiko (Recht/Haftung/Retouren)'});
+  if(c.ppcRisiko==='hoch')f.push({hard:false,t:'Hohes PPC-Risiko'});
+  return f;
+}
+// Gesamturteil
+function decisionVerdict(c){
+  var score=researchCalcScore(c);
+  var flags=decisionRedFlags(c);
+  var hard=flags.filter(function(x){return x.hard;}).length;
+  var weakest=null,rated=0;
+  DECISION_DIMS.forEach(function(d){var v=decisionEff(c,d.key);if(typeof v==='number'){rated++;if(!weakest||v<weakest.val)weakest={label:d.label,val:v};}});
+  var verdict,label,color;
+  if(score===0){verdict='offen';label='UNBEWERTET';color='tx3';}
+  else if(score>=70&&hard===0){verdict='go';label='GO';color='gn';}
+  else if(score<50||(hard>0&&score<60)){verdict='nogo';label='NO-GO';color='rd';}
+  else{verdict='pruefen';label='PRÜFEN';color='ac';}
+  return {score:score,verdict:verdict,label:label,color:color,flags:flags,hard:hard,weakest:weakest,rated:rated,total:DECISION_DIMS.length};
+}
 
 // ═══════════════════════════════════════════════════════════════
 // CORE FUNCTIONS
@@ -5644,12 +5712,13 @@ function auswahlUpdateBadge(){
   var n=D.research.shortlist.filter(function(x){return x.decision!=='abgelehnt';}).length;
   if(n>0){b.style.display='inline-block';b.textContent=n;}else{b.style.display='none';}
 }
-function researchPromoteToProduct(candId){
+function researchPromoteToProduct(candId,opts){
+  var stay=opts&&opts.stay;
   researchInit();
   var c=D.research.candidates.find(function(x){return x.id===candId;});
   if(!c){toast('Kandidat nicht gefunden');return;}
   var exists=D.research.shortlist.find(function(s){return s.sourceCandidateId===candId;});
-  if(exists){toast('„'+esc(c.name||'')+'" ist schon in der Engeren Wahl');auswahlUpdateBadge();go('auswahl');return;}
+  if(exists){toast('„'+esc(c.name||'')+'" ist schon in der Engeren Wahl');auswahlUpdateBadge();if(!stay)go('auswahl');return;}
   var item={
     id:'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
     sourceCandidateId:candId,
@@ -5670,8 +5739,8 @@ function researchPromoteToProduct(candId){
   D.research.shortlist.unshift(item);
   if(normalizeStatus(c.status)==='recherche'){c.status='kandidat';c.updatedAt=new Date().toISOString();}
   save();researchRenderTable();researchUpdateBadge();auswahlUpdateBadge();
-  toast('★ „'+esc(c.name||'')+'" zu Produkte übernommen');
-  go('auswahl');
+  toast('★ „'+esc(c.name||'')+'" zu Engerer Wahl übernommen');
+  if(!stay)go('auswahl');
 }
 function auswahlSetDecision(id,dec){
   researchInit();
@@ -5700,6 +5769,7 @@ function auswahlOrderSample(id){
     asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
     fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
     bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    bild:(it.compImages&&it.compImages[0])||'',
     quelle:'Produktfindung', suchvolumen:0,
     notizen:(it.notes?it.notes+' · ':'')+'Aus Produktfindung übernommen (Muster bestellt)'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
     datum:new Date().toLocaleDateString('de-DE')
@@ -5720,6 +5790,7 @@ function auswahlAddToProduktliste(id){
     asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
     fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
     bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    bild:(it.compImages&&it.compImages[0])||'',
     quelle:'Produktfindung', suchvolumen:0,
     notizen:(it.notes?it.notes+' · ':'')+'Aus Engerer Wahl übernommen'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
     datum:new Date().toLocaleDateString('de-DE')
@@ -6268,6 +6339,144 @@ function researchImportFromIdeen(){
   };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// RECHERCHE-PIPELINE (Kanban-Board über alle Stufen)
+// ═══════════════════════════════════════════════════════════════
+function pipeCol(icon,title,color,count,cards){
+  return '<div style="flex:0 0 272px;min-width:272px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 250px)">'+
+    '<div style="padding:11px 14px;border-bottom:2px solid var(--'+color+');display:flex;justify-content:space-between;align-items:center;flex-shrink:0">'+
+      '<span style="font-weight:700;color:var(--tx);font-size:13px">'+icon+' '+title+'</span>'+
+      '<span style="background:var(--'+color+'d);color:var(--'+color+');font-weight:700;font-size:11px;padding:2px 9px;border-radius:10px">'+count+'</span>'+
+    '</div>'+
+    '<div style="padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">'+(cards||'<div style="color:var(--tx3);font-size:12px;text-align:center;padding:24px 8px">— leer —</div>')+'</div>'+
+  '</div>';
+}
+
+function renderPipeline(){
+  researchInit();
+  var board=document.getElementById('pipelineBoard');
+  if(!board)return;
+  var shortCandIds={};
+  (D.research.shortlist||[]).forEach(function(s){if(s.sourceCandidateId)shortCandIds[s.sourceCandidateId]=true;});
+
+  // ── Stufe 1: Idee ──
+  var ideen=(D.ideen||[]).filter(function(i){return !i.promoted && normalizeStatus(i.status)!=='abgelehnt';});
+  var c1='';
+  ideen.forEach(function(i){
+    var idx=D.ideen.indexOf(i);
+    c1+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
+      '<div style="font-weight:600;color:var(--tx);font-size:12.5px;margin-bottom:4px">'+esc(i.title||i.name||'Ohne Titel')+'</div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+[i.kategorie?esc(i.kategorie):'',i.potenzial?'Potenzial '+esc(i.potenzial):'',i.quelle?esc(i.quelle):''].filter(Boolean).join(' · ')+'</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        '<button class="btn btn-sm" onclick="pipelinePromoteIdea('+idx+')" style="font-size:10.5px;background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-weight:700">🔬 Validieren →</button>'+
+        '<button class="btn btn-sm" onclick="go(\'ideen\')" style="font-size:10.5px" title="Im Ideen-Pool bearbeiten">✏️</button>'+
+        '<button class="btn btn-sm del" onclick="pipelineDelIdee('+idx+')" style="font-size:10.5px" title="Idee löschen">🗑</button>'+
+      '</div>'+
+    '</div>';
+  });
+
+  // ── Stufe 2: Validieren (Kandidaten, noch nicht in Shortlist) ──
+  var cands=(D.research.candidates||[]).filter(function(c){var st=normalizeStatus(c.status);return !shortCandIds[c.id]&&st!=='abgelehnt'&&st!=='aktiv'&&st!=='muster';});
+  var c2='';
+  cands.forEach(function(c){
+    var vd=decisionVerdict(c);
+    var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    c2+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
+      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:10.5px" title="Scorecard öffnen">⚖️</button>'+
+        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenWorkflow(\''+c.id+'\')" style="font-size:10.5px" title="20-Schritte-Workflow">📋</button>'+
+        '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬</button>'+
+        '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat bearbeiten (alle Felder)">✏️</button>'+
+        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">⭐ Shortlist →</button>'+
+        '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat löschen">🗑</button>'+
+      '</div>'+
+    '</div>';
+  });
+
+  // ── Stufe 3: Shortlist (in Prüfung) ──
+  var sl=(D.research.shortlist||[]).filter(function(s){return s.decision==='pruefen'&&!s.movedToProducts;});
+  var c3='';
+  sl.forEach(function(s){
+    c3+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
+      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(s.name)+'</div>'+(s.score?'<div style="font-weight:800;color:var(--ac);font-size:15px;line-height:1">'+s.score+'</div>':'')+'</div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(s.kategorie?esc(s.kategorie)+' · ':'')+(s.compUsps&&s.compUsps.length?s.compUsps.length+' USPs':'')+'</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        '<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'muster\')" style="font-size:10.5px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">✅ GO →</button>'+
+        '<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'abgelehnt\')" style="font-size:10.5px;background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌ NO-GO</button>'+
+        '<button class="btn btn-sm" onclick="go(\'auswahl\')" style="font-size:10.5px" title="In Engerer Wahl bearbeiten">✏️</button>'+
+        '<button class="btn btn-sm del" onclick="pipelineDelShort(\''+s.id+'\')" style="font-size:10.5px" title="Aus Engerer Wahl entfernen">🗑</button>'+
+      '</div>'+
+    '</div>';
+  });
+
+  // ── Stufe 4: Entscheidung (GO/NO-GO/zur Produktliste) ──
+  var dec=(D.research.shortlist||[]).filter(function(s){return s.movedToProducts||s.decision==='muster'||s.decision==='abgelehnt';});
+  var c4='';
+  dec.forEach(function(s){
+    var go1=s.movedToProducts||s.decision==='muster';
+    var col=go1?'gn':'rd';
+    var label=s.movedToProducts?'🟢 In Produktliste':go1?'🟢 GO':'🔴 NO-GO';
+    c4+='<div style="background:var(--s1);border:1px solid var(--'+col+');border-radius:9px;padding:10px 11px;'+(go1?'':'opacity:.7')+'">'+
+      '<div style="font-weight:600;color:var(--tx);font-size:12.5px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(s.name)+'</div>'+
+      '<div style="font-size:11px;color:var(--'+col+');font-weight:700;margin-bottom:8px">'+label+'</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        (go1&&!s.movedToProducts?'<button class="btn btn-sm" onclick="auswahlOrderSample(\''+s.id+'\')" style="font-size:10.5px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">→ Produktliste</button>':'')+
+        (!go1?'<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'pruefen\')" style="font-size:10.5px" title="Zurück in Prüfung">↩</button>':'')+
+        '<button class="btn btn-sm del" onclick="pipelineDelShort(\''+s.id+'\')" style="font-size:10.5px" title="Aus Pipeline entfernen">🗑</button>'+
+      '</div>'+
+    '</div>';
+  });
+
+  board.innerHTML=
+    pipeCol('💡','Idee','tx3',ideen.length,c1)+
+    pipeCol('🔬','Validieren','pu',cands.length,c2)+
+    pipeCol('⭐','Shortlist','ac',sl.length,c3)+
+    pipeCol('✅','Entscheidung','gn',dec.length,c4);
+}
+
+// Idee → Validieren (legt einen Recherche-Kandidaten an)
+function pipelinePromoteIdea(idx){
+  researchInit();
+  var i=D.ideen[idx];if(!i)return;
+  var c={
+    id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    name:i.title||i.name||'Idee',kategorie:i.kategorie||'',hauptkeyword:i.hauptkeyword||i.keyword||'',
+    vk:(i.vkPreis!=null?i.vkPreis:null),top10Umsatz:null,avgReviews:null,
+    konkurrenz:'',schwaechen:'',differenzierung:i.differenzierung||'',
+    ek:null,fbaGebuehren:null,ppcRisiko:'',nettoMarge:null,risiko:'',
+    status:'recherche',currentStep:1,notes:i.notes||i.beschreibung||'',
+    scoreMatrix:{},score2:{},computedScore:0,sourceIdea:i.id||null,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+  };
+  D.research.candidates.unshift(c);
+  i.promoted=true;
+  save();renderPipeline();if(typeof researchUpdateBadge==='function')researchUpdateBadge();
+  toast('🔬 „'+esc(c.name)+'" ist jetzt in Validieren');
+}
+// Validieren → Shortlist (ohne Wegnavigieren)
+function pipelineToShortlist(candId){
+  researchPromoteToProduct(candId,{stay:true});
+  renderPipeline();
+}
+// Shortlist-Entscheidung setzen (bleibt auf dem Board)
+function pipelineDecide(id,dec){
+  researchInit();
+  var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
+  it.decision=dec;it.updatedAt=new Date().toISOString();
+  save();auswahlUpdateBadge();renderPipeline();
+  toast(dec==='muster'?'✅ GO – in Entscheidung':dec==='abgelehnt'?'❌ NO-GO':'↩ zurück in Prüfung');
+}
+// Löschen direkt vom Board (nutzt vorhandene Lösch-Funktionen + frischt das Board auf)
+function pipelineDelIdee(idx){var i=D.ideen[idx];if(!i)return;if(!confirm('Idee „'+(i.title||i.name||'')+'" wirklich löschen?'))return;D.ideen.splice(idx,1);save();renderPipeline();toast('Idee gelöscht');}
+function pipelineDelCand(id){researchDeleteCandidate(id);renderPipeline();}
+function pipelineDelShort(id){auswahlDelete(id);renderPipeline();}
+// Bearbeiten: in die jeweilige Detailansicht springen
+function pipelineEditCand(id){go('research');researchOpenEdit(id);}
+// Leeren Kandidaten direkt vom Board anlegen
+function pipelineAddCandidate(){researchAddCandidate();renderPipeline();}
+
 function researchRenderStatsBar(){
   researchInit();
   var cands=D.research.candidates;
@@ -6328,9 +6537,9 @@ function researchRenderTable(){
     var scoreColor=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
     html+='<tr data-cid="'+c.id+'">'+
       '<td style="position:sticky;left:0;background:var(--s1)"><button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="width:100%;min-width:180px;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button></td>'+
-      '<td><input type="text" value="'+esc(c.kategorie||'')+'" onchange="researchUpdateField(\''+c.id+'\',\'kategorie\',this.value)" placeholder="z. B. Bad" style="width:100%;min-width:120px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx)" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
-      '<td class="nc"><input type="number" step="0.01" value="'+(c.vk!=null?c.vk:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'vk\',this.value)" placeholder="€" style="width:74px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
-      '<td class="nc"><input type="number" value="'+(c.avgReviews!=null?c.avgReviews:'')+'" onchange="researchUpdateField(\''+c.id+'\',\'avgReviews\',this.value)" placeholder="Anz." style="width:74px;background:var(--s2);border:1px solid var(--bd);padding:4px 6px;border-radius:5px;font-family:inherit;font-size:12px;color:var(--tx);text-align:right" onfocus="this.style.borderColor=\'var(--pu)\'" onblur="this.style.borderColor=\'var(--bd)\'"></td>'+
+      '<td><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.kategorie?esc(c.kategorie):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
+      '<td class="nc"><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.vk!=null?'€ '+Number(c.vk).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
+      '<td class="nc"><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.avgReviews!=null?Number(c.avgReviews).toLocaleString('de-DE'):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
       '<td class="nc"><span style="display:inline-block;padding:3px 9px;background:var(--'+scoreColor+'d);color:var(--'+scoreColor+');border-radius:10px;font-weight:700;font-size:12px;min-width:40px;text-align:center">'+(score>0?score:'—')+'</span></td>'+
       '<td style="white-space:nowrap;text-align:right">'+
         '<button class="btn btn-sm" onclick="researchOpenEdit(\''+c.id+'\')" title="Bearbeiten" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx);border:1px solid var(--bd)">✏️</button> '+
@@ -6421,7 +6630,7 @@ function researchOpenEdit(id){
   if(c.compAsin||imgs){h+='<div style="margin-top:6px;padding-top:12px;border-top:1px dashed var(--bd)">';if(c.compAsin)h+='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Konkurrenz-ASIN: <b>'+esc(c.compAsin)+'</b></div>';if(imgs)h+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';h+='</div>';}
   h+='</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bd)">';
-  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️ Score-Matrix</button>';
+  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️ Scorecard</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenWorkflow(\''+id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋 Workflow</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchPromoteToProduct(\''+id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">★ Als Produkt übernehmen</button>';
   h+='<button class="btn btn-p" onclick="researchCloseEdit()">✓ Fertig</button>';
@@ -6445,24 +6654,14 @@ function researchDeleteCandidate(id){
 
 // Score-Berechnung (entweder aus Matrix oder grobe Heuristik aus Tabellen-Feldern)
 function researchCalcScore(c){
-  // If matrix has been used, prefer that
-  if(c.scoreMatrix && Object.keys(c.scoreMatrix).length>0){
-    var sum=0,wsum=0;
-    RESEARCH_SCORE_CRITERIA.forEach(function(crit){
-      var v=c.scoreMatrix[crit.key];
-      if(typeof v==='number' && v>0){sum+=v*crit.weight;wsum+=crit.weight;}
-    });
-    if(wsum>0)return Math.round(sum/wsum*10); // 1-10 scale → 1-100
-  }
-  // Fallback: heuristic from table fields
-  var s=0,n=0;
-  if(c.nettoMarge!=null){s+=Math.min(100,c.nettoMarge*2.5);n++;} // 40% marge = 100
-  if(c.konkurrenz){s+=(c.konkurrenz==='niedrig'?90:c.konkurrenz==='mittel'?60:30);n++;}
-  if(c.risiko){s+=(c.risiko==='niedrig'?90:c.risiko==='mittel'?60:30);n++;}
-  if(c.ppcRisiko){s+=(c.ppcRisiko==='niedrig'?85:c.ppcRisiko==='mittel'?55:25);n++;}
-  if(c.differenzierung && c.differenzierung.length>5){s+=75;n++;}
-  if(c.avgReviews!=null){s+=(c.avgReviews<300?90:c.avgReviews<800?60:30);n++;}
-  return n>0?Math.round(s/n):0;
+  // Gewichteter Score über die Dimensionen, die einen Wert haben (manuell oder Auto)
+  var sum=0,wsum=0;
+  DECISION_DIMS.forEach(function(d){
+    var v=decisionEff(c,d.key);
+    if(typeof v==='number'&&v>0){sum+=v*d.weight;wsum+=d.weight;}
+  });
+  if(wsum>0)return Math.round(sum/wsum*10); // 1-10 → 1-100
+  return 0;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6666,70 +6865,102 @@ function researchRenderScore(){
     return;
   }
 
+  cands.forEach(decisionMigrate);
+
   var html='';
 
-  // Help-Box mit Gewichtungs-Erklärung
-  html+=helpBox('⚖️','Score-Matrix: gewichtete Endbewertung','Bewerte jeden Kandidaten in <b>7 Kriterien von 1-10</b>. Die Gewichtung ist fix (Nachfrage/Wettbewerb/Marge je 20%, Differenzierung 15%, Logistik/Risiko je 10%, Lieferant 5%) und ergibt einen Gesamtscore von 1-100. <b>&gt; 70 = top, &gt; 50 = okay, &lt; 50 = kritisch.</b><br><span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Die Score-Matrix ersetzt keine kritische Endprüfung mit Claude – sie ist nur die quantitative Grundlage dafür.</span>',{variant:'gold',lessonId:'rp_6'});
+  html+=helpBox('⚖️','Entscheidungs-Scorecard – ein Urteil','<b>6 gewichtete Dimensionen</b> (Nachfrage 25 % · Wettbewerb 25 % · Wirtschaftlichkeit 20 % · Differenzierung 15 % · Risiko 10 % · Kapital 5 %) → Score 0–100 + Ampel <b>🟢 GO / 🟡 PRÜFEN / 🔴 NO-GO</b>. Wo Daten vorliegen, wird automatisch geschätzt – per Regler überschreibbar. <b>Rote Flags</b> (Preis&lt;15 €, &gt;2.000 Reviews, Marge&lt;15 %) verhindern ein GO.',{variant:'gold',lessonId:'rp_6'});
 
-  // Selected candidate detail panel (top)
   var selected=researchSelectedCandidate?cands.find(function(c){return c.id===researchSelectedCandidate}):null;
-  if(selected){
-    html+='<div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1.5px solid var(--ac);border-radius:12px;padding:18px 22px;margin-bottom:18px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px">'+
-        '<div><div style="font-family:\'Playfair Display\',serif;font-size:20px;color:var(--tx);font-weight:700">⚖️ '+esc(selected.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">Gewichtete Bewertung – Score 1-100</div></div>'+
-        '<div style="text-align:center"><div style="font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;font-weight:700">Gesamt-Score</div><div style="font-size:34px;font-weight:800;color:var(--ac);line-height:1">'+researchCalcScore(selected)+'</div></div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">';
-    RESEARCH_SCORE_CRITERIA.forEach(function(crit){
-      var val=(selected.scoreMatrix||{})[crit.key]||0;
-      html+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px 14px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:12px;font-weight:700;color:var(--tx)">'+esc(crit.label)+'</span><span style="font-size:10px;background:var(--pud);color:var(--pu);padding:2px 7px;border-radius:8px;font-weight:700">'+crit.weight+'%</span></div>'+
-        '<div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.3">'+esc(crit.desc)+'</div>'+
-        '<div style="display:flex;align-items:center;gap:10px">'+
-          '<input type="range" min="0" max="10" step="1" value="'+val+'" oninput="researchUpdateScoreCriterion(\''+selected.id+'\',\''+crit.key+'\',this.value)" style="flex:1;accent-color:var(--ac)">'+
-          '<span id="score_'+selected.id+'_'+crit.key+'" style="font-weight:700;color:var(--ac);min-width:30px;text-align:right;font-size:14px">'+val+' / 10</span>'+
-        '</div>'+
-      '</div>';
-    });
-    html+='</div>'+
-      '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap">'+
-        '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+selected.id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-size:11px">📋 Workflow öffnen</button>'+
-        '<button class="btn btn-sm" onclick="researchResetScore(\''+selected.id+'\')" style="background:var(--s3);color:var(--tx2);font-size:11px">↺ Bewertung zurücksetzen</button>'+
-        '<button class="btn btn-sm" onclick="researchSelectedCandidate=null;researchRenderScore()" style="font-size:11px;margin-left:auto">← Übersicht</button>'+
+
+  if(!selected){
+    html+='<div style="background:var(--s1);border:1px dashed var(--bd2);border-radius:12px;padding:18px 22px;margin-bottom:18px;color:var(--tx2);font-size:13px">⬇️ Wähle unten einen Kandidaten, um sein Entscheidungs-Scorecard zu öffnen.</div>';
+  }else{
+    var vd=decisionVerdict(selected);
+    var col=vd.color;
+    var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    html+='<div style="background:linear-gradient(135deg,var(--'+col+'d),var(--s2));border:1.5px solid var(--'+col+');border-radius:12px;padding:18px 22px;margin-bottom:18px">';
+    // Kopf: Name + großer Score + Urteil
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">'+
+      '<div style="min-width:0"><div style="font-family:\'Playfair Display\',serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(selected.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+vd.rated+'/'+vd.total+' Dimensionen bewertet</div></div>'+
+      '<div style="display:flex;align-items:center;gap:16px">'+
+        '<div style="text-align:center"><div style="font-size:40px;font-weight:800;color:var(--'+col+');line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score /100</div></div>'+
+        '<div style="background:var(--'+col+');color:#fff;font-weight:800;font-size:15px;padding:8px 16px;border-radius:10px;white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
       '</div>'+
     '</div>';
+    // Größter Schwachpunkt
+    if(vd.weakest&&vd.score>0){
+      html+='<div style="font-size:12.5px;color:var(--tx);background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;margin-bottom:10px">⚠️ <b>Größter Schwachpunkt:</b> '+esc(vd.weakest.label)+' ('+vd.weakest.val+'/10)</div>';
+    }
+    // Red Flags
+    if(vd.flags.length){
+      html+='<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:5px">';
+      vd.flags.forEach(function(f){
+        html+='<div style="font-size:12px;color:var(--'+(f.hard?'rd':'ac')+');background:var(--'+(f.hard?'rd':'ac')+'d);border:1px solid var(--'+(f.hard?'rd':'ac')+');border-radius:7px;padding:6px 10px">'+(f.hard?'🔴':'🟡')+' '+esc(f.t)+'</div>';
+      });
+      html+='</div>';
+    }
+    // Dimensionen
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">';
+    DECISION_DIMS.forEach(function(d){
+      var eff=decisionEff(selected,d.key);
+      var a=decisionAuto(selected,d.key);
+      var ov=selected.score2&&selected.score2[d.key];
+      var manual=typeof ov==='number'&&ov>0;
+      var dv=(typeof eff==='number')?eff:0;
+      var dcol=eff==null?'tx3':eff>=7?'gn':eff>=4?'ac':'rd';
+      var reason=manual?('✏️ manuell gesetzt'+(a.val!=null?' (Auto wäre '+a.val+')':'')):(eff==null?('— '+a.reason):('⚙️ Auto · '+a.reason));
+      html+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px 14px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12.5px;font-weight:700;color:var(--tx)">'+esc(d.label)+'</span><span style="font-size:10px;background:var(--pud);color:var(--pu);padding:2px 7px;border-radius:8px;font-weight:700">'+d.weight+' %</span></div>'+
+        '<div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.3">'+esc(d.desc)+'</div>'+
+        '<div style="height:8px;background:var(--s2);border-radius:5px;overflow:hidden;margin-bottom:8px"><div id="sc_bar_'+d.key+'" style="height:100%;width:'+(dv*10)+'%;background:var(--'+dcol+')"></div></div>'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+          '<input type="range" min="0" max="10" step="1" value="'+(manual?ov:0)+'" oninput="researchUpdateScoreCriterion(\''+selected.id+'\',\''+d.key+'\',this.value)" title="0 = Auto-Wert nutzen, 1–10 = manuell setzen" style="flex:1;accent-color:var(--ac)">'+
+          '<span id="sc_val_'+d.key+'" style="font-weight:700;color:var(--'+dcol+');min-width:38px;text-align:right;font-size:14px">'+(eff==null?'–':dv)+' / 10</span>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--tx3);margin-top:5px">'+esc(reason)+'</div>'+
+        (d.key==='differenz'?'<button class="btn btn-sm" onclick="reviewMiningOpen(\''+selected.id+'\')" style="margin-top:8px;width:100%;font-size:10.5px;background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-weight:700">🔬 Reviews analysieren'+(selected.reviewMining?' ✓':'')+'</button>':'')+
+        (d.key==='wettbewerb'?'<button class="btn btn-sm" onclick="nischenScanOpen(\''+selected.id+'\')" style="margin-top:8px;width:100%;font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">🔍 Nischen-Scan'+(selected.nischenScan?' ✓':'')+'</button>':'')+
+      '</div>';
+    });
+    html+='</div>';
+    // Footer
+    html+='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+selected.id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-size:11px">📋 Workflow öffnen</button>'+
+      (vd.verdict==='go'?'<button class="btn btn-sm" onclick="researchPromoteToProduct(\''+selected.id+'\')" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700;font-size:11px">★ In Engere Wahl</button>':'')+
+      '<button class="btn btn-sm" onclick="researchResetScore(\''+selected.id+'\')" style="background:var(--s3);color:var(--tx2);font-size:11px">↺ Manuelle Werte zurücksetzen</button>'+
+      '<button class="btn btn-sm" onclick="researchSelectedCandidate=null;researchRenderScore()" style="font-size:11px;margin-left:auto">← Übersicht</button>'+
+    '</div>';
+    html+='</div>';
   }
 
   // Ranking
-  var ranked=cands.slice().map(function(c){return {c:c,score:researchCalcScore(c)}}).sort(function(a,b){return b.score-a.score});
+  var ranked=cands.slice().map(function(c){return {c:c,vd:decisionVerdict(c)}}).sort(function(a,b){return b.vd.score-a.vd.score});
 
   html+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 22px">'+
     '<h3 style="margin:0 0 14px 0">🏆 Ranking aller Kandidaten</h3>'+
     '<div style="display:flex;flex-direction:column;gap:8px">';
   ranked.forEach(function(item,idx){
-    var c=item.c;
-    var s=item.score;
-    var rankColor=idx===0?'gn':idx===1?'ac':idx===2?'pu':'tx3';
+    var c=item.c,vd=item.vd,s=vd.score;
     var cfg=PIPELINE_STATUS[normalizeStatus(c.status)]||PIPELINE_STATUS.idee;
-    var scoreColor=s>=70?'gn':s>=50?'ac':s>0?'rd':'tx3';
-    var isTop3=idx<3;
-    html+='<div onclick="researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+(isTop3?'var(--'+rankColor+'d)':'var(--s2)')+';border:1px solid '+(isTop3?'var(--'+rankColor+')':'var(--bd)')+';border-radius:10px;cursor:pointer'+(researchSelectedCandidate===c.id?';box-shadow:0 0 0 2px var(--ac)':'')+'" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+
-      '<div style="font-size:18px;font-weight:800;color:var(--'+rankColor+');min-width:30px;text-align:center">#'+(idx+1)+'</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+' · Schritt '+(c.currentStep||1)+'/20</div></div>'+
-      '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:var(--'+scoreColor+');line-height:1">'+(s>0?s:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score</div></div>'+
+    var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    var isTop3=idx<3&&s>0;
+    html+='<div onclick="researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+(isTop3?'var(--'+vd.color+'d)':'var(--s2)')+';border:1px solid '+(isTop3?'var(--'+vd.color+')':'var(--bd)')+';border-radius:10px;cursor:pointer'+(researchSelectedCandidate===c.id?';box-shadow:0 0 0 2px var(--ac)':'')+'" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+
+      '<div style="font-size:16px;font-weight:800;color:var(--tx3);min-width:28px;text-align:center">#'+(idx+1)+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+'</div></div>'+
+      '<div style="font-size:12px;font-weight:700;color:var(--'+vd.color+');white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
+      '<div style="text-align:right;min-width:46px"><div style="font-size:22px;font-weight:800;color:var(--'+vd.color+');line-height:1">'+(s>0?s:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score</div></div>'+
     '</div>';
   });
   html+='</div></div>';
 
-  // Recommendation
-  if(ranked.length>0 && ranked[0].score>0){
-    var top3WithMatrix=ranked.slice(0,3).filter(function(r){return r.c.scoreMatrix && Object.keys(r.c.scoreMatrix).length>=5});
-    if(top3WithMatrix.length>0){
-      html+='<div style="background:var(--gnd);border:1.5px solid var(--gn);border-radius:12px;padding:16px 22px;margin-top:16px">'+
-        '<div style="font-weight:700;color:var(--gn);margin-bottom:8px">💡 Empfehlung</div>'+
-        '<div style="font-size:13px;color:var(--tx);line-height:1.6">Die Top-Kandidaten nach gewichteter Bewertung sind Favoriten zur Musterbestellung. Vergiss nicht: Eine Score-Matrix ersetzt keine kritische Endprüfung mit Claude (Schritt 17). Lass dir von Claude eine finale Investment-Entscheidung geben, bevor du Geld in die Hand nimmst.</div>'+
-      '</div>';
-    }
+  // Empfehlung
+  var go1=ranked.filter(function(r){return r.vd.verdict==='go';});
+  if(go1.length){
+    html+='<div style="background:var(--gnd);border:1.5px solid var(--gn);border-radius:12px;padding:16px 22px;margin-top:16px">'+
+      '<div style="font-weight:700;color:var(--gn);margin-bottom:6px">💡 Empfehlung</div>'+
+      '<div style="font-size:13px;color:var(--tx);line-height:1.6"><b>'+go1.length+'</b> Kandidat'+(go1.length>1?'en':'')+' mit 🟢 GO – Favorit: <b>'+esc(go1[0].c.name)+'</b> (Score '+go1[0].vd.score+'). Vor dem Geldausgeben die finale kritische Prüfung mit Claude (Workflow-Schritt 17) machen.</div>'+
+    '</div>';
   }
 
   container.innerHTML=html;
@@ -6739,31 +6970,199 @@ function researchUpdateScoreCriterion(candId,key,value){
   researchInit();
   var c=D.research.candidates.find(function(x){return x.id===candId});
   if(!c)return;
-  if(!c.scoreMatrix)c.scoreMatrix={};
-  c.scoreMatrix[key]=parseInt(value,10);
+  if(!c.score2)c.score2={};
+  c.score2[key]=parseInt(value,10);
   c.computedScore=researchCalcScore(c);
   c.updatedAt=new Date().toISOString();
   save();
-  // Update value display
-  var disp=document.getElementById('score_'+candId+'_'+key);
-  if(disp)disp.textContent=value+' / 10';
-  // Update total score in header (debounce via direct DOM update)
-  var headerScore=document.querySelector('#researchScoreContent > div:first-child > div:first-child > div:last-child > div:last-child');
-  if(headerScore)headerScore.textContent=c.computedScore;
-  // Re-render ranking after a short delay (to not lag the slider)
+  // Inline-Update (Slider nicht stören), volles Re-Render leicht verzögert für Urteil/Ranking
+  var eff=decisionEff(c,key);
+  var disp=document.getElementById('sc_val_'+key);if(disp)disp.textContent=(eff==null?'–':eff)+' / 10';
+  var bar=document.getElementById('sc_bar_'+key);if(bar)bar.style.width=((eff||0)*10)+'%';
   clearTimeout(window._researchScoreRerender);
-  window._researchScoreRerender=setTimeout(researchRenderScore,400);
+  window._researchScoreRerender=setTimeout(researchRenderScore,320);
 }
 
 function researchResetScore(id){
-  if(!confirm('Score-Bewertung dieses Kandidaten zurücksetzen?'))return;
+  if(!confirm('Manuelle Werte dieses Kandidaten zurücksetzen? (Auto-Schätzung bleibt aktiv)'))return;
   researchInit();
   var c=D.research.candidates.find(function(x){return x.id===id});
   if(!c)return;
-  c.scoreMatrix={};
+  c.score2={};
   c.computedScore=researchCalcScore(c);
   save();
   researchRenderScore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REVIEW-MINING: Konkurrenz-Rezensionen → Differenzierung + Score
+// ═══════════════════════════════════════════════════════════════
+function reviewMiningOpen(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c){toast('Kandidat nicht gefunden');return;}
+  var old=document.getElementById('reviewMiningModal');if(old)old.remove();
+  var asin=c.compAsin||'';
+  var revUrl=asin?('https://www.amazon.de/product-reviews/'+asin+'/?reviewerType=all_reviews&sortBy=recent'):'';
+  var ov=document.createElement('div');
+  ov.id='reviewMiningModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:700px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">🔬 Review-Mining</h2><button onclick="document.getElementById(\'reviewMiningModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
+    '<div style="padding:18px 20px">'+
+      '<div style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:4px">'+esc(c.name)+(asin?' <span style="font-family:monospace;font-size:11px;color:var(--tx2)">'+esc(asin)+'</span>':'')+'</div>'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:10px">Kopiere die <b>Kundenrezensionen des Konkurrenz-Produkts</b> von Amazon (am besten die kritischen 1–3-Sterne) und füge sie unten ein. Die KI findet die häufigsten Schwächen → daraus deine Differenzierung.'+(revUrl?' <a href="'+revUrl+'" target="_blank" style="color:var(--pu);font-weight:700">Amazon-Reviews öffnen ↗</a>':'')+'</div>'+
+      '<textarea id="rmInput" rows="7" placeholder="Rezensionstexte hier einfügen …" style="width:100%;font-family:inherit;font-size:12.5px;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);resize:vertical;box-sizing:border-box"></textarea>'+
+      '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-p" onclick="reviewMiningRun(\''+c.id+'\')">🔬 Analysieren</button></div>'+
+      '<div id="rmResult" style="margin-top:14px"></div>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(ov);
+  if(c.reviewMining){var r=document.getElementById('rmResult');if(r)r.innerHTML=reviewMiningResultHtml(c.reviewMining);}
+  setTimeout(function(){var t=document.getElementById('rmInput');if(t)t.focus();},80);
+}
+
+function reviewMiningParse(raw){
+  if(!raw)return null;
+  var s=String(raw);var a=s.indexOf('{'),b=s.lastIndexOf('}');
+  if(a<0||b<=a)return null;
+  try{var o=JSON.parse(s.slice(a,b+1));
+    return {
+      complaints:Array.isArray(o.complaints)?o.complaints.slice(0,6):[],
+      wishes:Array.isArray(o.wishes)?o.wishes.slice(0,5):[],
+      diffIdeas:Array.isArray(o.diffIdeas)?o.diffIdeas.slice(0,5):[],
+      score:typeof o.score==='number'?o.score:(parseInt(o.score,10)||0)
+    };
+  }catch(e){return null;}
+}
+
+async function reviewMiningRun(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c)return;
+  var inp=document.getElementById('rmInput');var txt=(inp&&inp.value||'').trim();
+  if(txt.length<40){toast('Bitte genügend Rezensionstext einfügen (mind. ein paar Sätze)');return;}
+  if(!window.SHImport||!window.SHImport.ask){toast('KI-Engine nicht geladen – bitte Seite neu laden');return;}
+  var res=document.getElementById('rmResult');
+  if(res)res.innerHTML='<div style="color:var(--tx2);font-size:13px;padding:10px">⏳ KI analysiert die Rezensionen … (kann ein paar Sekunden dauern)</div>';
+  var prompt='Du bist Amazon-Produktanalyst. Analysiere die folgenden Kundenrezensionen eines KONKURRENZ-Produkts und finde Chancen für ein eigenes, besseres Produkt.\n\nAntworte AUSSCHLIESSLICH mit gültigem JSON in GENAU diesem Format, ohne Vorrede, ohne Markdown:\n{"complaints":[{"text":"kurze Beschwerde","freq":"hoch|mittel|niedrig","severity":"hoch|mittel|niedrig"}],"wishes":["Wunsch"],"diffIdeas":["konkrete Differenzierungsidee"],"score":7}\n\nRegeln: max 6 complaints (nach Häufigkeit), max 5 wishes, max 5 diffIdeas (konkret, umsetzbar). score = 0–10 wie groß die Differenzierungschance ist (10 = viele klar lösbare Schwächen). Alles auf Deutsch.\n\nREZENSIONEN:\n'+txt.slice(0,6000);
+  try{
+    var raw=await window.SHImport.ask(prompt);
+    var data=reviewMiningParse(raw);
+    if(!data){if(res)res.innerHTML='<div style="color:var(--rd);font-size:12px;padding:10px">⚠️ Konnte die KI-Antwort nicht als JSON lesen. Bitte erneut versuchen (ggf. Gemini-Key im KI-Bildstudio hinterlegen für stabilere Ergebnisse).</div>';return;}
+    data.at=new Date().toISOString();
+    c.reviewMining=data;
+    c.score2=c.score2||{};
+    if(typeof data.score==='number')c.score2.differenz=Math.max(0,Math.min(10,Math.round(data.score)));
+    if(data.diffIdeas&&data.diffIdeas.length)c.differenzierung=data.diffIdeas.slice(0,3).join(' · ');
+    c.computedScore=researchCalcScore(c);c.updatedAt=new Date().toISOString();
+    save();
+    if(res)res.innerHTML=reviewMiningResultHtml(data);
+    var pp=document.getElementById('p-pipeline');if(pp&&pp.classList.contains('active')&&typeof renderPipeline==='function')renderPipeline();
+    var pr=document.getElementById('p-research');if(pr&&pr.classList.contains('active')&&typeof researchRenderScore==='function')researchRenderScore();
+    toast('✓ Review-Mining übernommen – Differenzierung '+(c.score2.differenz!=null?c.score2.differenz+'/10':''));
+  }catch(err){if(res)res.innerHTML='<div style="color:var(--rd);font-size:12px;padding:10px">⚠️ Analyse fehlgeschlagen: '+esc(err&&err.message||'Fehler')+'. Bitte erneut versuchen.</div>';}
+}
+
+function reviewMiningResultHtml(d){
+  function sevCol(s){return s==='hoch'?'rd':s==='mittel'?'ac':'tx2';}
+  var h='';
+  h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;background:var(--gnd);border:1px solid var(--gn);border-radius:9px;padding:10px 14px"><div style="font-size:30px;font-weight:800;color:var(--gn);line-height:1">'+(d.score!=null?d.score:'–')+'/10</div><div style="font-size:12px;color:var(--tx)">Differenzierungs-Chance<br><span style="color:var(--gn);font-weight:700">✓ ins Scorecard übernommen</span></div></div>';
+  if(d.complaints&&d.complaints.length){
+    h+='<div style="font-weight:700;font-size:12.5px;margin:10px 0 6px;color:var(--tx)">😖 Top-Beschwerden der Konkurrenz</div><div style="display:flex;flex-direction:column;gap:5px">';
+    d.complaints.forEach(function(c){
+      h+='<div style="display:flex;justify-content:space-between;gap:8px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:6px 10px;font-size:12px"><span style="color:var(--tx)">'+esc(c.text||'')+'</span><span style="white-space:nowrap;color:var(--'+sevCol(c.severity)+');font-weight:700;font-size:10.5px">'+(c.freq?esc(c.freq):'')+(c.severity?' · '+esc(c.severity):'')+'</span></div>';
+    });
+    h+='</div>';
+  }
+  if(d.wishes&&d.wishes.length){
+    h+='<div style="font-weight:700;font-size:12.5px;margin:12px 0 6px;color:var(--tx)">💭 Kundenwünsche</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+    d.wishes.forEach(function(w){h+='<span style="background:var(--bld);color:var(--bl);border-radius:10px;padding:3px 10px;font-size:11.5px">'+esc(w)+'</span>';});
+    h+='</div>';
+  }
+  if(d.diffIdeas&&d.diffIdeas.length){
+    h+='<div style="font-weight:700;font-size:12.5px;margin:12px 0 6px;color:var(--tx)">🚀 Differenzierungs-Ideen</div><ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--tx);line-height:1.6">';
+    d.diffIdeas.forEach(function(x){h+='<li>'+esc(x)+'</li>';});
+    h+='</ul>';
+  }
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NISCHEN-SCAN: mehrere Konkurrenz-ASINs → ⌀ Preis/Reviews → Wettbewerb
+// ═══════════════════════════════════════════════════════════════
+function nischenScanOpen(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c){toast('Kandidat nicht gefunden');return;}
+  var old=document.getElementById('nischenScanModal');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='nischenScanModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">🔍 Nischen-Scan</h2><button onclick="document.getElementById(\'nischenScanModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
+    '<div style="padding:18px 20px">'+
+      '<div style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:4px">'+esc(c.name)+'</div>'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:10px">Füge die <b>ASINs der Top-Konkurrenz</b> dieser Nische ein (von der Amazon-Suchergebnisseite – eine pro Zeile oder kommagetrennt). Der Scan holt ⌀ Preis &amp; ⌀ Reviews → daraus der Wettbewerbs-Score. <i>Amazon blockt Abrufe gelegentlich – dann gibt es weniger Treffer.</i></div>'+
+      '<textarea id="nsInput" rows="5" placeholder="B0CVBBBCZN\nB09XYZ1234\nB07ABC9999" style="width:100%;font-family:monospace;font-size:12.5px;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);resize:vertical;box-sizing:border-box">'+esc(c.compAsin||'')+'</textarea>'+
+      '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-p" id="nsRunBtn" onclick="nischenScanRun(\''+c.id+'\')">🔍 Scannen</button></div>'+
+      '<div id="nsResult" style="margin-top:14px"></div>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(ov);
+  if(c.nischenScan){var r=document.getElementById('nsResult');if(r)r.innerHTML=nischenScanResultHtml(c.nischenScan);}
+}
+
+async function nischenScanRun(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c)return;
+  var inp=document.getElementById('nsInput');var raw=(inp&&inp.value||'');
+  var found=raw.match(/B0[A-Z0-9]{8}/gi)||[];
+  var seen={},uniq=[];found.forEach(function(a){a=a.toUpperCase();if(!seen[a]){seen[a]=1;uniq.push(a);}});
+  if(uniq.length===0){toast('Keine gültigen ASINs gefunden (Format B0XXXXXXXX)');return;}
+  if(uniq.length>12)uniq=uniq.slice(0,12);
+  if(!window.SHImport||!window.SHImport.fetchListing){toast('Import-Engine nicht geladen – bitte Seite neu laden');return;}
+  var res=document.getElementById('nsResult');var btn=document.getElementById('nsRunBtn');
+  if(btn)btn.disabled=true;
+  var prices=[],reviews=[],ok=0,fail=0;
+  for(var i=0;i<uniq.length;i++){
+    if(res)res.innerHTML='<div style="color:var(--tx2);font-size:13px;padding:10px">⏳ Scanne '+(i+1)+'/'+uniq.length+' … ('+ok+' ok, '+fail+' fehlgeschlagen)</div>';
+    try{
+      var d=await window.SHImport.fetchListing(uniq[i]);
+      if(d&&(d.price!=null||d.reviews!=null)){ok++;if(d.price!=null)prices.push(d.price);if(d.reviews!=null)reviews.push(d.reviews);}
+      else fail++;
+    }catch(e){fail++;}
+  }
+  if(ok===0){if(res)res.innerHTML='<div style="color:var(--rd);font-size:12px;padding:10px">⚠️ Keine Daten abrufbar (Amazon blockt evtl.). Bitte später erneut versuchen.</div>';if(btn)btn.disabled=false;return;}
+  function avg(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:null;}
+  var data={count:uniq.length,okCount:ok,failCount:fail,avgPrice:avg(prices),avgReviews:avg(reviews),
+    minReviews:reviews.length?Math.min.apply(null,reviews):null,maxReviews:reviews.length?Math.max.apply(null,reviews):null,
+    beatable:reviews.filter(function(r){return r<300;}).length,asins:uniq,at:new Date().toISOString()};
+  c.nischenScan=data;
+  if(data.avgReviews!=null)c.avgReviews=Math.round(data.avgReviews);
+  if(data.avgPrice!=null&&c.vk==null)c.vk=Math.round(data.avgPrice*100)/100;
+  c.computedScore=researchCalcScore(c);c.updatedAt=new Date().toISOString();
+  save();
+  if(res)res.innerHTML=nischenScanResultHtml(data);
+  if(btn)btn.disabled=false;
+  var pp=document.getElementById('p-pipeline');if(pp&&pp.classList.contains('active')&&typeof renderPipeline==='function')renderPipeline();
+  var pr=document.getElementById('p-research');if(pr&&pr.classList.contains('active')&&typeof researchRenderScore==='function')researchRenderScore();
+  toast('✓ Nischen-Scan übernommen – ⌀ '+Math.round(data.avgReviews||0)+' Reviews');
+}
+
+function nischenScanResultHtml(d){
+  function stat(label,val,col){return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:9px 12px"><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">'+label+'</div><div style="font-size:17px;font-weight:800;color:var(--'+(col||'tx')+')">'+val+'</div></div>';}
+  var h='<div style="background:var(--acd);border:1px solid var(--ac);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--tx);margin-bottom:10px">✓ <b>'+d.okCount+' von '+d.count+'</b> Listings abgerufen → Wettbewerb im Scorecard aktualisiert'+(d.failCount?' ('+d.failCount+' blockiert/leer)':'')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">';
+  h+=stat('⌀ Preis',d.avgPrice!=null?fmt(d.avgPrice)+'€':'—');
+  h+=stat('⌀ Reviews',d.avgReviews!=null?Math.round(d.avgReviews).toLocaleString('de-DE'):'—',d.avgReviews!=null?(d.avgReviews<300?'gn':d.avgReviews<1000?'ac':'rd'):'tx');
+  h+=stat('Reviews-Spanne',(d.minReviews!=null?d.minReviews:'—')+'–'+(d.maxReviews!=null?d.maxReviews:'—'));
+  h+=stat('Schwache Listings','&lt;300: '+d.beatable,d.beatable>0?'gn':'tx');
+  h+='</div>';
+  return h;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -6914,7 +7313,7 @@ function renderProds(){
     var isSelected=selectedProds.indexOf(i)>-1;
     if(isSelected)tr.style.background='var(--acd)';
     tr.innerHTML='<td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="prod-check" data-idx="'+i+'" '+(isSelected?'checked':'')+' onchange="prodToggleSelect('+i+',this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></td>'
-      +'<td class="pn">'+(p.name?esc(p.name):'<span style="color:var(--rd);font-style:italic">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</td>'
+      +'<td class="pn"><div style="display:flex;align-items:center">'+(p.bild?'<img class="prodrow-thumb" src="'+esc(p.bild)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'<div>'+(p.name?esc(p.name):'<span style="color:var(--rd);font-style:italic">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</div></div></td>'
       +'<td>'+esc(p.kategorie||'—')+'</td>'
       +'<td><span class="badge '+sc+'">'+esc(p.status)+'</span></td>'
       +'<td class="nc">'+fmt(p.einkaufspreis)+'</td>'
@@ -6929,12 +7328,17 @@ function renderProds(){
       +'<td style="font-size:11px;color:var(--tx2);white-space:nowrap">'+(p.datum||'—')+'</td>'
       +'<td onclick="event.stopPropagation()"><div class="row-act">'
         +'<button onclick="openProductDetail('+i+')" title="Detail-Ansicht öffnen (mit 4 Tabs)" style="background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:none;font-weight:600;padding:5px 10px;font-size:11px;border-radius:5px"><span style="font-size:12px">📝</span> Details</button>'
+        +(p.bild?'':'<button onclick="productFetchImage('+i+')" title="Hauptbild von Amazon holen (per ASIN) oder URL eintragen">🖼️</button>')
         +'<button onclick="dupProd('+i+')" title="Duplizieren">📋</button>'
         +'<button class="del" onclick="delProd('+i+')" title="Löschen">🗑️</button>'
       +'</div></td>';
     tb.appendChild(tr);
     var mcol=(c.m!==null)?(c.m>=25?'gn':c.m>=10?'ac':'rd'):'tx3';
+    var imgBlock=p.bild
+      ? '<div class="prodcard-imgwrap"><img class="prodcard-img" src="'+esc(p.bild)+'" alt="" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.innerHTML=\'<span class=&quot;prodcard-noimg&quot;>📦</span>\'"></div>'
+      : '<div class="prodcard-imgwrap" onclick="event.stopPropagation();productFetchImage('+i+')" title="Bild von Amazon holen (per ASIN) oder URL eintragen" style="cursor:pointer;flex-direction:column;gap:6px"><span class="prodcard-noimg">📦</span><span style="font-size:11px;color:var(--ac);font-weight:700">🖼️ Bild laden</span></div>';
     cardsHtml+='<div onclick="openProductDetail('+i+')" style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'
+      +imgBlock
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+(p.name?esc(p.name):'<span style="color:var(--rd)">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</div><span class="badge '+sc+'" style="flex-shrink:0">'+esc(p.status)+'</span></div>'
       +(p.kategorie?'<div style="font-size:11.5px;color:var(--tx2)">🏷️ '+esc(p.kategorie)+'</div>':'')
       +'<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--tx2);border-top:1px solid var(--bd);padding-top:8px">'
@@ -7077,6 +7481,7 @@ function openProdModal(i){
   if(editIdx>=0){var p=D.products[i];
     document.getElementById('fNa').value=p.name||'';document.getElementById('fKa').value=p.kategorie||'';
     document.getElementById('fSt').value=p.status||'Idee';document.getElementById('fAs').value=p.asin||'';
+    document.getElementById('fImg').value=p.bild||'';
     document.getElementById('fQu').value=p.quelle||'';document.getElementById('fBw').value=p.bewertung||0;
     document.getElementById('fEK').value=p.einkaufspreis||'';document.getElementById('fVK').value=p.verkaufspreis||'';
     document.getElementById('fFBA').value=p.fbaGebuehren||'';document.getElementById('fVs').value=p.versand||'';
@@ -7103,21 +7508,36 @@ function fCalc(){
 
 function saveProd(){
   var n=document.getElementById('fNa').value.trim();if(!n)return;
-  var p={name:n,kategorie:document.getElementById('fKa').value.trim(),status:document.getElementById('fSt').value,
-    asin:document.getElementById('fAs').value.trim(),quelle:document.getElementById('fQu').value.trim(),
+  // Bestehendes Produkt als Basis behalten (bewahrt bild, helSales etc.), nur Modal-Felder überschreiben
+  var base=editIdx>=0?D.products[editIdx]:{};
+  var p=Object.assign({},base,{name:n,kategorie:document.getElementById('fKa').value.trim(),status:document.getElementById('fSt').value,
+    asin:document.getElementById('fAs').value.trim(),bild:document.getElementById('fImg').value.trim(),quelle:document.getElementById('fQu').value.trim(),
     bewertung:parseInt(document.getElementById('fBw').value)||0,
     einkaufspreis:pf('fEK'),verkaufspreis:pf('fVK'),fbaGebuehren:pf('fFBA'),versand:pf('fVs'),zoll:pf('fZl'),sonstigeKosten:pf('fSo'),
     gewicht:parseInt(document.getElementById('fGw').value)||0,masse:document.getElementById('fMa').value.trim(),
     bsr:parseInt(document.getElementById('fBS').value)||0,bewertungen:parseInt(document.getElementById('fBe').value)||0,
     wettbewerber:parseInt(document.getElementById('fWb').value)||0,suchvolumen:parseInt(document.getElementById('fSV').value)||0,
     notizen:document.getElementById('fNo').value.trim(),
-    datum:editIdx>=0?D.products[editIdx].datum:new Date().toLocaleDateString('de-DE')};
+    datum:editIdx>=0?D.products[editIdx].datum:new Date().toLocaleDateString('de-DE')});
   if(editIdx>=0){D.products[editIdx]=p;toast('Aktualisiert ✓')}else{D.products.push(p);toast('Hinzugefügt ✓')}
   save();renderProds();closePM();
 }
 function editProd(i){openProdModal(i)}
 function dupProd(i){var c=JSON.parse(JSON.stringify(D.products[i]));c.name+=' (Kopie)';c.datum=new Date().toLocaleDateString('de-DE');D.products.push(c);save();renderProds();toast('Dupliziert ✓')}
 function delProd(i){if(confirm('„'+D.products[i].name+'" löschen?')){D.products.splice(i,1);save();renderProds();toast('Gelöscht')}}
+// Hauptbild für ein Produkt von Amazon holen (per ASIN) – nutzt die vorhandene Import-Engine
+async function productFetchImage(i){
+  var p=D.products[i];if(!p)return;
+  if(!p.asin){openProdModal(i);setTimeout(function(){var f=document.getElementById('fImg');if(f)f.focus();},120);toast('Keine ASIN – bitte Bild-URL manuell eintragen');return;}
+  if(!window.SHImport||!window.SHImport.fetchListing){toast('Import-Engine nicht geladen – bitte Seite neu laden');return;}
+  toast('⏳ Lade Amazon-Bild …');
+  try{
+    var data=await window.SHImport.fetchListing(p.asin);
+    var img=(data&&data.imageUrls&&data.imageUrls[0])||'';
+    if(!img){toast('⚠️ Kein Bild gefunden (evtl. blockiert) – später erneut oder URL manuell eintragen');return;}
+    D.products[i].bild=img;save();renderProds();toast('✓ Bild geladen');
+  }catch(err){toast('⚠️ Bild-Abruf fehlgeschlagen: '+(err&&err.message||'Fehler'));}
+}
 function toCalc(i){var p=D.products[i];document.getElementById('qEK').value=p.einkaufspreis||'';document.getElementById('qVK').value=p.verkaufspreis||'';document.getElementById('qFBA').value=p.fbaGebuehren||'';document.getElementById('qShip').value=p.versand||'';document.getElementById('qZoll').value=p.zoll||'';document.getElementById('qSon').value=p.sonstigeKosten||'';go('gebuehren');switchCalcTab('quick');qCalc();toast('Daten übernommen ✓')}
 
 // ═══════════════ PRODUCT DETAIL VIEW ═══════════════
@@ -7190,10 +7610,10 @@ function openProductDetail(idx){
   renderDetailHerstellerLinks();
   renderDetailSuppliers();
 
-  // Show sales indicator dot if data exists
+  // Show market-data indicator dot if Helium 10 data exists
   var salesInd=document.getElementById('salesCount');
   if(salesInd){
-    if(p.asin&&D.salesData[p.asin]&&D.salesData[p.asin].current&&Object.keys(D.salesData[p.asin].current).length>0){
+    if(productHasHeliumData(p)){
       salesInd.style.display='inline-block';
       salesInd.style.color='var(--gn)';
     }else{
@@ -7223,121 +7643,362 @@ function goSub(name){
   if(name==='sales')renderDetailSales();
 }
 
+// Liefert ein lesbares Label zur erkannten Helium-Quelle
+function heliumSourceLabel(type){
+  return type==='xray'?'Xray':type==='blackbox'?'Black Box':type==='asin_generic'?'ASIN-Liste':(type||'Helium 10');
+}
+
+// Hat das Produkt strukturierte Helium-10-Marktdaten?
+function productHasHeliumData(p){
+  if(!p)return false;
+  return p.helSales!=null||p.helRevenue!=null||p.helBsr!=null||p.helReviews!=null||p.helRating!=null||p.helSellers!=null||p.helPrice!=null;
+}
+
 function renderDetailSales(){
   if(currentDetailIdx<0)return;
   var p=D.products[currentDetailIdx];
   var container=document.getElementById('dSalesContent');
   if(!container)return;
 
-  if(!p.asin){
-    container.innerHTML='<div class="card"><div style="text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:14px;opacity:.5">🔢</div><h3 style="margin-bottom:8px">Erst ASIN hinterlegen</h3><p style="color:var(--tx2);margin-bottom:18px">Damit Verkaufsdaten aus Seller Central diesem Produkt zugeordnet werden können, brauchst du seine ASIN. Trag sie unter <b>Übersicht → Produkt-Info → ASIN</b> ein.</p><button class="btn btn-p" onclick="goSub(\'overview\');setTimeout(function(){document.getElementById(\'dfAsin\').focus()},100)">→ Zur Übersicht</button></div></div>';
+  var indicator=document.getElementById('salesCount');
+
+  // ── Leerzustand: noch keine Helium-Marktdaten → handlungsfähiger CTA ──
+  if(!productHasHeliumData(p)){
+    var asinHint=p.asin
+      ? 'Wird automatisch der Zeile mit ASIN <b style="font-family:monospace;color:var(--ac)">'+esc(p.asin)+'</b> zugeordnet.'
+      : 'Tipp: Hinterlege oben unter <b>Übersicht</b> die ASIN – dann wird die passende Zeile automatisch erkannt.';
+    container.innerHTML='<div class="card"><div style="text-align:center;padding:40px 24px">'+
+      '<div style="font-size:48px;margin-bottom:14px;opacity:.55">📈</div>'+
+      '<h3 style="margin-bottom:8px">Noch keine Marktdaten</h3>'+
+      '<p style="color:var(--tx2);margin:0 auto 6px;max-width:460px">Importiere die <b>Helium-10-Daten</b> (Xray oder Black Box) für genau dieses Produkt. Verkäufe/Monat, Umsatz, BSR, Reviews &amp; Rating werden dann hier angezeigt.</p>'+
+      '<p style="color:var(--tx3);font-size:12px;margin:0 auto 18px;max-width:460px">'+asinHint+'</p>'+
+      '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
+        '<button class="btn btn-p" onclick="importHeliumForProduct()">📥 Helium-10-Daten importieren</button>'+
+        '<button class="btn" onclick="estimateHeliumForProduct()">🔢 Aus BSR schätzen</button>'+
+      '</div>'+
+      '</div></div>';
+    if(indicator)indicator.style.display='none';
     return;
   }
 
-  var sd=D.salesData[p.asin];
-  if(!sd||!sd.current||Object.keys(sd.current).length===0){
-    container.innerHTML='<div class="card"><div style="text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:14px;opacity:.5">📊</div><h3 style="margin-bottom:8px">Noch keine Verkaufsdaten</h3><p style="color:var(--tx2)">Für dieses Produkt (ASIN <b style="color:var(--ac);font-family:monospace">'+esc(p.asin)+'</b>) liegen aktuell keine Verkaufsdaten vor.</p></div></div>';
-    return;
-  }
-
-  var d=sd.current;
-  var hist=sd.history||[];
-
-  // Calculate trend if history has 2+ entries
-  function trend(field){
-    if(hist.length<2)return null;
-    var prev=null;
-    for(var i=1;i<hist.length;i++){
-      if(hist[i][field]!==undefined){prev=hist[i][field];break}
-    }
-    if(prev===null||d[field]===undefined)return null;
-    if(prev===0)return d[field]>0?100:0;
-    return((d[field]-prev)/prev)*100;
-  }
-
-  function trendBadge(field){
-    var t=trend(field);
-    if(t===null)return '';
-    var color=t>=5?'var(--gn)':t<=-5?'var(--rd)':'var(--tx2)';
-    var arrow=t>=5?'▲':t<=-5?'▼':'•';
-    return '<span style="font-size:10px;color:'+color+';margin-left:6px;font-weight:700">'+arrow+' '+(t>=0?'+':'')+t.toFixed(0)+'%</span>';
-  }
+  // ── Gefüllt: Helium-Marktdaten anzeigen ──
+  var src=p.helSource||'Helium 10';
+  var stand=p.helDate||'—';
+  var num=function(v){return v!=null?Math.round(v).toLocaleString('de-DE'):'—'};
 
   var html='';
 
-  // Top stats grid
+  // Kopfzeile mit Quelle + Aktionen
+  html+='<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
+    '<div><h3 style="margin:0">📈 Marktdaten aus Helium 10</h3>'+
+    '<div style="font-size:11px;color:var(--tx2);margin-top:3px">Quelle: Helium 10 ('+esc(src)+')'+(p.asin?' · ASIN <span style="font-family:monospace">'+esc(p.asin)+'</span>':'')+' · Stand '+esc(stand)+'</div></div>'+
+    '<div style="display:flex;gap:8px">'+
+      '<button class="btn btn-sm" onclick="importHeliumForProduct()" title="Neue Helium-10-CSV einlesen und Werte aktualisieren">📥 Aktualisieren</button>'+
+      '<button class="btn btn-sm btn-d" onclick="clearProductSalesData()" title="Marktdaten dieses Produkts löschen">🗑️ Löschen</button>'+
+    '</div></div></div>';
+
+  // Stat-Karten
   html+='<div class="detail-row three" style="margin-bottom:18px">';
 
-  // Verkäufe & Umsatz
-  html+='<div class="card"><h3>💰 Verkäufe & Umsatz</h3>';
+  // Verkäufe & Umsatz (monatlich, geschätzt)
+  html+='<div class="card"><h3>💰 Verkäufe &amp; Umsatz <span style="font-weight:400;color:var(--tx2);font-size:11px">/ Monat</span></h3>';
   html+='<div class="cg" style="grid-template-columns:1fr 1fr">';
-  html+='<div class="ci"><span class="cl">Verkäufe</span><span class="cv" style="color:var(--gn)">'+(d.unitsOrdered!==undefined?d.unitsOrdered:'—')+trendBadge('unitsOrdered')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Umsatz</span><span class="cv" style="color:var(--gn);font-size:18px">'+(d.orderedRevenue!==undefined?fmt(d.orderedRevenue)+'€':'—')+trendBadge('orderedRevenue')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Verkäufe</span><span class="cv" style="color:var(--gn)">'+num(p.helSales)+'</span></div>';
+  html+='<div class="ci"><span class="cl">Umsatz</span><span class="cv" style="color:var(--gn);font-size:18px">'+(p.helRevenue!=null?fmt(p.helRevenue)+'€':'—')+'</span></div>';
   html+='</div></div>';
 
-  // Traffic
-  html+='<div class="card"><h3>👁️ Traffic</h3>';
+  // Markt-Position
+  html+='<div class="card"><h3>🏆 Markt-Position</h3>';
   html+='<div class="cg" style="grid-template-columns:1fr 1fr">';
-  html+='<div class="ci"><span class="cl">Sessions</span><span class="cv" style="color:var(--bl)">'+(d.sessions!==undefined?Math.round(d.sessions).toLocaleString('de-DE'):'—')+trendBadge('sessions')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Page Views</span><span class="cv" style="color:var(--bl)">'+(d.pageViews!==undefined?Math.round(d.pageViews).toLocaleString('de-DE'):'—')+trendBadge('pageViews')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Conversion</span><span class="cv" style="color:'+(d.conversionRate>=10?'var(--gn)':d.conversionRate>=5?'var(--ac)':'var(--rd)')+'">'+(d.conversionRate!==undefined?d.conversionRate.toFixed(1)+'%':'—')+trendBadge('conversionRate')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Buy Box</span><span class="cv" style="color:'+(d.buyBoxPercent>=90?'var(--gn)':d.buyBoxPercent>=70?'var(--ac)':'var(--rd)')+'">'+(d.buyBoxPercent!==undefined?d.buyBoxPercent.toFixed(0)+'%':'—')+trendBadge('buyBoxPercent')+'</span></div>';
+  html+='<div class="ci"><span class="cl">BSR</span><span class="cv" style="color:var(--bl)">'+(p.helBsr!=null?'#'+num(p.helBsr):'—')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Rating</span><span class="cv" style="color:var(--ac)">'+(p.helRating!=null?p.helRating.toFixed(1)+' ⭐':'—')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Reviews</span><span class="cv" style="color:var(--pu)">'+num(p.helReviews)+'</span></div>';
+  html+='<div class="ci"><span class="cl">Verkäufer</span><span class="cv" style="color:var(--or)">'+(p.helSellers!=null?p.helSellers:'—')+'</span></div>';
   html+='</div></div>';
 
-  // Inventory
-  html+='<div class="card"><h3>📦 Lagerbestand</h3>';
+  // Listing-Eckdaten
+  html+='<div class="card"><h3>🏷️ Listing</h3>';
   html+='<div class="cg" style="grid-template-columns:1fr 1fr">';
-  html+='<div class="ci"><span class="cl">Verfügbar</span><span class="cv" style="color:var(--cy)">'+(d.inventoryAvailable!==undefined?d.inventoryAvailable:'—')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Inbound</span><span class="cv" style="color:var(--ac)">'+(d.inventoryInbound!==undefined?d.inventoryInbound:'—')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Reserviert</span><span class="cv" style="color:var(--tx2)">'+(d.inventoryReserved!==undefined?d.inventoryReserved:'—')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Gesamt</span><span class="cv">'+(d.inventoryTotal!==undefined?d.inventoryTotal:'—')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Preis</span><span class="cv">'+(p.helPrice!=null?fmt(p.helPrice)+'€':'—')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Gewicht</span><span class="cv" style="color:var(--cy)">'+(p.helWeight!=null?p.helWeight+' kg':'—')+'</span></div>';
+  html+='<div class="ci" style="grid-column:1/3"><span class="cl">Kategorie</span><span class="cv" style="font-size:13px">'+(p.helCategory?esc(p.helCategory):'—')+'</span></div>';
   html+='</div></div>';
 
   html+='</div>';// end three-col
 
-  // History timeline
-  if(hist.length>0){
-    html+='<div class="card"><h3>📅 Import-Verlauf <span style="font-weight:400;color:var(--tx2);font-size:11px">('+hist.length+' Einträge)</span></h3>';
-    html+='<div style="overflow-x:auto"><table style="margin-top:8px;font-size:11px"><thead><tr>';
-    html+='<th>Zeitraum</th><th>Importiert</th><th>Typ</th>';
-    html+='<th class="nc">Sessions</th><th class="nc">Verkäufe</th><th class="nc">Umsatz</th>';
-    html+='<th class="nc">Conv.</th><th class="nc">Buy Box</th><th class="nc">Lager</th>';
-    html+='</tr></thead><tbody>';
-    hist.slice(0,12).forEach(function(h){
-      var date=h._importedAt?new Date(h._importedAt).toLocaleDateString('de-DE'):'—';
-      html+='<tr>';
-      html+='<td style="font-weight:600">'+esc(h._period||'—')+'</td>';
-      html+='<td style="color:var(--tx2)">'+date+'</td>';
-      html+='<td>'+(h._type==='business'?'📈 Sales':h._type==='inventory'?'📦 Inv':'📊 Mix')+'</td>';
-      html+='<td class="nc">'+(h.sessions!==undefined?Math.round(h.sessions).toLocaleString('de-DE'):'—')+'</td>';
-      html+='<td class="nc" style="color:var(--gn)">'+(h.unitsOrdered!==undefined?h.unitsOrdered:'—')+'</td>';
-      html+='<td class="nc" style="color:var(--gn)">'+(h.orderedRevenue!==undefined?fmt(h.orderedRevenue)+'€':'—')+'</td>';
-      html+='<td class="nc">'+(h.conversionRate!==undefined?h.conversionRate.toFixed(1)+'%':'—')+'</td>';
-      html+='<td class="nc">'+(h.buyBoxPercent!==undefined?h.buyBoxPercent.toFixed(0)+'%':'—')+'</td>';
-      html+='<td class="nc" style="color:var(--cy)">'+(h.inventoryAvailable!==undefined?h.inventoryAvailable:'—')+'</td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table></div>';
-    html+='<div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px"><button class="btn btn-sm btn-d" onclick="clearProductSalesData()">🗑️ Alle Daten löschen</button></div>';
-    html+='</div>';
-  }
+  html+='<div style="font-size:11px;color:var(--tx3);font-style:italic">💡 Helium-10-Werte sind Markt-Schätzungen (Verkäufe/Umsatz pro Monat), keine Echtdaten aus Seller Central. Über „📥 Aktualisieren" jederzeit mit einem frischen Export überschreiben.</div>';
 
   container.innerHTML=html;
 
-  // Update sub-tab indicator
-  var indicator=document.getElementById('salesCount');
-  if(indicator)indicator.style.display='inline-block';
+  if(indicator){indicator.style.display='inline-block';indicator.style.color='var(--gn)';}
+}
+
+// Öffnet einen Datei-Dialog, um eine Helium-10-CSV für DIESES Produkt einzulesen
+function importHeliumForProduct(){
+  if(currentDetailIdx<0)return;
+  var prodIdx=currentDetailIdx;
+  var inp=document.createElement('input');
+  inp.type='file';inp.accept='.csv,.tsv,.txt';inp.style.display='none';
+  inp.onchange=function(e){handleHeliumProductFile(e,prodIdx);if(inp.parentNode)inp.parentNode.removeChild(inp);};
+  document.body.appendChild(inp);
+  inp.click();
+}
+
+function handleHeliumProductFile(e,prodIdx){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    var parsed=parseCSV(ev.target.result);
+    if(!parsed.headers||parsed.headers.length===0){toast('Keine Daten in der Datei');return}
+    var type=detectHeliumType(parsed.headers);
+    if(type==='keywords'){toast('Das ist ein Keyword-Export – hier brauchst du Black Box oder Xray');return}
+    var rows=parsed.rows.map(function(rw){return mapHeliumRow(rw,type)}).filter(function(rw){return rw.asin});
+    if(rows.length===0){toast('Keine ASIN-Zeilen in der Datei gefunden');return}
+    var p=D.products[prodIdx];
+    var asin=(p.asin||'').trim().toUpperCase();
+    var match=null;
+    if(asin){match=rows.filter(function(rw){return(rw.asin||'').trim().toUpperCase()===asin})[0];}
+    if(match){applyHeliumToProduct(prodIdx,match,type);}
+    else if(rows.length===1){applyHeliumToProduct(prodIdx,rows[0],type);}
+    else{heliumPickForProduct(prodIdx,rows,type);}
+  };
+  r.readAsText(f,'UTF-8');
+}
+
+// Keine eindeutige ASIN-Zuordnung → Auswahlliste direkt im Tab
+function heliumPickForProduct(prodIdx,rows,type){
+  var container=document.getElementById('dSalesContent');
+  if(!container)return;
+  window._heliumPickRows=rows;window._heliumPickType=type;window._heliumPickProd=prodIdx;
+  var p=D.products[prodIdx];
+  var html='<div class="card"><h3>📥 Passende Zeile auswählen</h3>'+
+    '<p style="color:var(--tx2);font-size:12px;margin-bottom:12px">'+(p.asin?'Keine Zeile mit ASIN <b style="font-family:monospace">'+esc(p.asin)+'</b> gefunden. ':'')+'Wähle die Zeile, die zu „<b>'+esc(p.name||'')+'</b>" gehört:</p>'+
+    '<div style="max-height:360px;overflow:auto;border:1px solid var(--bd);border-radius:8px"><table style="width:100%;font-size:11px"><thead><tr style="position:sticky;top:0;background:var(--s2);z-index:1">'+
+    '<th style="text-align:left;padding:6px 10px">ASIN</th><th style="text-align:left;padding:6px 10px;min-width:180px">Produkt</th><th class="nc" style="padding:6px 10px">Sales/M</th><th class="nc" style="padding:6px 10px">Revenue/M</th><th style="padding:6px 10px"></th></tr></thead><tbody>';
+  rows.slice(0,60).forEach(function(r,i){
+    html+='<tr style="border-bottom:1px solid var(--bd)">'+
+      '<td style="padding:5px 10px;font-family:monospace;color:var(--tx2)">'+esc(r.asin||'—')+'</td>'+
+      '<td style="padding:5px 10px">'+esc((r.name||'').substring(0,60))+'</td>'+
+      '<td class="nc" style="padding:5px 10px;color:var(--gn)">'+(r.sales!=null?Math.round(r.sales):'—')+'</td>'+
+      '<td class="nc" style="padding:5px 10px;color:var(--gn)">'+(r.revenue!=null?fmt(r.revenue)+'€':'—')+'</td>'+
+      '<td style="padding:5px 10px;text-align:right"><button class="btn btn-sm btn-p" onclick="applyHeliumPick('+i+')">übernehmen</button></td>'+
+    '</tr>';
+  });
+  html+='</tbody></table></div>'+
+    '<div style="margin-top:12px"><button class="btn btn-sm" onclick="renderDetailSales()">Abbrechen</button></div></div>';
+  container.innerHTML=html;
+}
+
+function applyHeliumPick(i){
+  var rows=window._heliumPickRows||[];
+  if(!rows[i])return;
+  applyHeliumToProduct(window._heliumPickProd,rows[i],window._heliumPickType);
+}
+
+// Schreibt die Helium-Marktdaten einer Zeile strukturiert aufs Produkt
+function applyHeliumToProduct(prodIdx,r,type){
+  var p=D.products[prodIdx];
+  if(!p)return;
+  if(r.sales!=null)p.helSales=r.sales;
+  if(r.revenue!=null)p.helRevenue=r.revenue;
+  if(r.bsr!=null)p.helBsr=r.bsr;
+  if(r.reviews!=null)p.helReviews=r.reviews;
+  if(r.rating!=null)p.helRating=r.rating;
+  if(r.sellers!=null)p.helSellers=r.sellers;
+  if(r.price!=null)p.helPrice=r.price;
+  if(r.category)p.helCategory=r.category;
+  if(r.weight!=null)p.helWeight=r.weight;
+  p.helSource=heliumSourceLabel(type);
+  p.helDate=new Date().toLocaleDateString('de-DE');
+  if(!p.asin&&r.asin)p.asin=r.asin;
+  save();
+  renderDetailSales();
+  if(typeof renderProds==='function')renderProds();
+  toast('✓ Helium-10-Daten übernommen');
+}
+
+// Inline-BSR-Schätzer im Marktdaten-Tab (nutzt dieselbe Logik wie die Seller-Tools)
+function estimateHeliumForProduct(){
+  if(currentDetailIdx<0)return;
+  var p=D.products[currentDetailIdx];
+  var container=document.getElementById('dSalesContent');
+  if(!container)return;
+  var catOpts=BSR_CATS.map(function(c){return '<option value="'+c.key+'">'+esc(c.label)+'</option>'}).join('');
+  var bsrPre=p.helBsr!=null?p.helBsr:(p.bsr||'');
+  var pricePre=p.helPrice!=null?p.helPrice:(p.verkaufspreis||'');
+  container.innerHTML='<div class="card"><h3>🔢 Verkäufe aus BSR schätzen</h3>'+
+    '<p style="color:var(--tx2);font-size:12px;margin-bottom:12px">Schätzt monatliche Verkäufe &amp; Umsatz aus dem BSR – als Alternative zum Helium-Import. <a onclick="go(\'tools\')" style="color:var(--pu);cursor:pointer">Mehr (inkl. Kalibrierung) in den Seller-Tools →</a></p>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">'+
+      '<div class="fi" style="margin:0"><label>Kategorie</label><select id="estCat">'+catOpts+'</select></div>'+
+      '<div class="fi" style="margin:0"><label>BSR</label><input id="estBsr" type="number" value="'+bsrPre+'" placeholder="z. B. 4500" style="width:130px" oninput="estPreview()"></div>'+
+      '<div class="fi" style="margin:0"><label>Preis €</label><input id="estPrice" type="number" step="0.01" value="'+pricePre+'" style="width:120px" oninput="estPreview()"></div>'+
+    '</div>'+
+    '<div id="estPreviewBox" style="margin:14px 0;font-size:13px;color:var(--tx2)"></div>'+
+    '<div style="display:flex;gap:8px"><button class="btn btn-p" onclick="estApply()">✓ Übernehmen</button><button class="btn btn-sm" onclick="renderDetailSales()">Abbrechen</button></div>'+
+    '</div>';
+  estPreview();
+}
+function estPreview(){
+  var cat=document.getElementById('estCat').value;
+  var bsr=document.getElementById('estBsr').value;
+  var price=parseFloat(document.getElementById('estPrice').value);
+  var m=estimateMonthlySalesBsr(cat,bsr);
+  var box=document.getElementById('estPreviewBox');
+  if(m==null){box.innerHTML='<span style="color:var(--tx3)">BSR eingeben für Schätzung …</span>';return;}
+  box.innerHTML='≈ <b style="color:var(--gn)">'+Math.round(m).toLocaleString('de-DE')+'</b> Verkäufe/Monat'+(price>0?' · <b style="color:var(--gn)">'+fmt(m*price)+'€</b> Umsatz/Monat':'');
+}
+function estApply(){
+  if(currentDetailIdx<0)return;
+  var p=D.products[currentDetailIdx];
+  var cat=document.getElementById('estCat').value;
+  var bsr=parseFloat(document.getElementById('estBsr').value);
+  var price=parseFloat(document.getElementById('estPrice').value);
+  var m=estimateMonthlySalesBsr(cat,bsr);
+  if(m==null){toast('Bitte gültigen BSR eingeben');return;}
+  p.helSales=Math.round(m);
+  if(price>0){p.helRevenue=m*price;p.helPrice=price;}
+  p.helBsr=bsr;
+  p.helSource='BSR-Schätzung';
+  p.helDate=new Date().toLocaleDateString('de-DE');
+  save();
+  renderDetailSales();
+  if(typeof renderProds==='function')renderProds();
+  toast('✓ Schätzung übernommen');
 }
 
 function clearProductSalesData(){
   if(currentDetailIdx<0)return;
   var p=D.products[currentDetailIdx];
-  if(!p.asin)return;
-  if(!confirm('Alle Verkaufsdaten für „'+p.name+'" löschen? Das kann nicht rückgängig gemacht werden.'))return;
-  delete D.salesData[p.asin];
+  if(!confirm('Helium-10-Marktdaten für „'+p.name+'" löschen? Das kann nicht rückgängig gemacht werden.'))return;
+  ['helSales','helRevenue','helBsr','helReviews','helRating','helSellers','helPrice','helCategory','helWeight','helSource','helDate'].forEach(function(k){delete p[k]});
+  if(p.asin&&D.salesData&&D.salesData[p.asin])delete D.salesData[p.asin];
   save();
   renderDetailSales();
-  toast('Verkaufsdaten gelöscht');
+  toast('Marktdaten gelöscht');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BSR-Schätzer (Tab im Kalkulations-Center) + Scribbles (Tab im Keyword-Center)
+// ═══════════════════════════════════════════════════════════════
+
+// Füllt das BSR-Kategorie-Dropdown einmalig
+function bsrPopulateCats(){
+  var sel=document.getElementById('bsrCat');
+  if(sel&&sel.options.length===0){
+    BSR_CATS.forEach(function(c){
+      var o=document.createElement('option');o.value=c.key;o.textContent=c.label;sel.appendChild(o);
+    });
+    sel.onchange=bsrCalc;
+  }
+  bsrCalc();
+}
+
+// ─────────────────────────────────────────────
+// BSR → Verkäufe-Schätzer (Potenz-Modell)
+//   monatl. Verkäufe = scale · BSR^(−SLOPE)
+// ─────────────────────────────────────────────
+var BSR_SLOPE=0.85;
+var BSR_BASE=320000;
+var BSR_CATS=[
+  {key:'std',     label:'Standard / Sonstige',        mult:1.0},
+  {key:'kueche',  label:'Küche & Haushalt',           mult:1.3},
+  {key:'drogerie',label:'Drogerie & Körperpflege',    mult:1.25},
+  {key:'beauty',  label:'Beauty',                      mult:1.2},
+  {key:'elektro', label:'Elektronik',                  mult:1.15},
+  {key:'spiel',   label:'Spielzeug',                   mult:1.1},
+  {key:'sport',   label:'Sport & Freizeit',            mult:1.0},
+  {key:'tier',    label:'Haustier',                    mult:0.95},
+  {key:'garten',  label:'Garten',                      mult:0.9},
+  {key:'baumarkt',label:'Baumarkt',                    mult:0.85},
+  {key:'buero',   label:'Bürobedarf',                  mult:0.8}
+];
+function bsrGetCalib(){try{return JSON.parse(localStorage.getItem('bsr_calib')||'{}')}catch(e){return {}}}
+function bsrSetCalib(o){try{localStorage.setItem('bsr_calib',JSON.stringify(o))}catch(e){}}
+function bsrScaleFor(catKey){
+  var cal=bsrGetCalib();
+  if(cal[catKey]!=null)return cal[catKey];
+  var c=BSR_CATS.filter(function(x){return x.key===catKey})[0];
+  return BSR_BASE*(c?c.mult:1);
+}
+function estimateMonthlySalesBsr(catKey,bsr){
+  bsr=parseFloat(bsr);
+  if(!bsr||bsr<1)return null;
+  return bsrScaleFor(catKey)*Math.pow(bsr,-BSR_SLOPE);
+}
+function bsrCalc(){
+  var catEl=document.getElementById('bsrCat');if(!catEl)return;
+  var cat=catEl.value||'std';
+  var bsr=document.getElementById('bsrRank').value;
+  var price=parseFloat(document.getElementById('bsrPrice').value);
+  var monthly=estimateMonthlySalesBsr(cat,bsr);
+  var dayEl=document.getElementById('bsrDay'),moEl=document.getElementById('bsrMonth'),revEl=document.getElementById('bsrRev'),stEl=document.getElementById('bsrCalibState');
+  if(monthly==null){dayEl.textContent='—';moEl.textContent='—';revEl.textContent='—';}
+  else{
+    dayEl.textContent=Math.max(0,Math.round(monthly/30.4)).toLocaleString('de-DE');
+    moEl.textContent=Math.round(monthly).toLocaleString('de-DE');
+    revEl.textContent=(price>0)?fmt(monthly*price)+'€':'— (Preis fehlt)';
+  }
+  var cal=bsrGetCalib();
+  stEl.textContent=cal[cat]!=null?'Kalibriert ✓':'Standard';
+  stEl.style.color=cal[cat]!=null?'var(--gn)':'var(--tx2)';
+}
+function bsrCalibrate(){
+  var cat=document.getElementById('bsrCat').value||'std';
+  var r=parseFloat(document.getElementById('bsrCalRank').value);
+  var s=parseFloat(document.getElementById('bsrCalSales').value);
+  if(!r||r<1||!s||s<1){toast('Bitte gültigen BSR und echte Verkäufe/Monat eintragen');return;}
+  var scale=s*Math.pow(r,BSR_SLOPE); // s = scale·r^−SLOPE  →  scale = s·r^SLOPE
+  var cal=bsrGetCalib();cal[cat]=scale;bsrSetCalib(cal);
+  bsrCalc();
+  toast('🎯 Kategorie kalibriert');
+}
+function bsrResetCalib(){
+  var cat=document.getElementById('bsrCat').value||'std';
+  var cal=bsrGetCalib();delete cal[cat];bsrSetCalib(cal);
+  bsrCalc();
+  toast('Kalibrierung zurückgesetzt');
+}
+
+// ─────────────────────────────────────────────
+// Scribbles – Listing-Keyword-Abdeckung (Tab im Keyword-Center)
+// ─────────────────────────────────────────────
+function scribblesRun(){
+  var kwEl=document.getElementById('scKw');if(!kwEl)return;
+  var kws=(kwEl.value||'').split(/\n+/).map(function(s){return s.trim()}).filter(function(s){return s.length>0});
+  var title=(document.getElementById('scTitle').value||'').toLowerCase();
+  var bullets=(document.getElementById('scBullets').value||'').toLowerCase();
+  var desc=(document.getElementById('scDesc').value||'').toLowerCase();
+  var all=title+' \n '+bullets+' \n '+desc;
+  var out=document.getElementById('scOut');
+  if(kws.length===0){out.innerHTML='<div style="color:var(--tx3);font-style:italic">Trag Keywords und Listing-Text ein …</div>';return;}
+  function wordsIn(str,phrase){
+    var ws=phrase.toLowerCase().split(/[^0-9a-zA-ZäöüÄÖÜß]+/).filter(function(w){return w.length>1});
+    if(ws.length===0)return false;
+    return ws.every(function(w){return str.indexOf(w)>-1;});
+  }
+  var covered=0;
+  var rows='';
+  kws.forEach(function(k){
+    var inT=wordsIn(title,k),inB=wordsIn(bullets,k),inD=wordsIn(desc,k);
+    var any=inT||inB||inD;
+    if(any)covered++;
+    function badge(on,l){return '<span style="display:inline-block;width:20px;text-align:center;border-radius:4px;font-size:10px;font-weight:700;margin-left:3px;background:'+(on?'var(--gnd)':'var(--s2)')+';color:'+(on?'var(--gn)':'var(--tx3)')+'">'+l+'</span>';}
+    rows+='<tr style="border-bottom:1px solid var(--bd)">'+
+      '<td style="padding:5px 8px">'+(any?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--rd)">✗</span>')+'</td>'+
+      '<td style="padding:5px 8px;'+(any?'':'color:var(--rd);font-weight:600')+'">'+esc(k)+'</td>'+
+      '<td style="padding:5px 8px;text-align:right">'+badge(inT,'T')+badge(inB,'B')+badge(inD,'D')+'</td>'+
+    '</tr>';
+  });
+  var pct=Math.round(covered/kws.length*100);
+  var col=pct>=80?'var(--gn)':pct>=50?'var(--ac)':'var(--rd)';
+  out.innerHTML=
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap">'+
+      '<div style="font-size:28px;font-weight:800;color:'+col+'">'+pct+'%</div>'+
+      '<div style="flex:1;min-width:160px"><div style="height:10px;background:var(--s2);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+'"></div></div>'+
+      '<div style="font-size:11px;color:var(--tx2);margin-top:4px">'+covered+' von '+kws.length+' Keywords abgedeckt · Titel '+title.length+' Zeichen</div></div>'+
+    '</div>'+
+    '<div style="overflow:auto;max-height:320px"><table style="width:100%;font-size:12px"><thead><tr style="position:sticky;top:0;background:var(--s2)"><th style="text-align:left;padding:5px 8px">✓</th><th style="text-align:left;padding:5px 8px">Keyword</th><th style="text-align:right;padding:5px 8px">T·B·D</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div style="margin-top:8px;font-size:11px;color:var(--tx3)">T = Titel · B = Bullets · D = Beschreibung. Abgedeckt = alle Wörter des Keywords kommen im Text vor.</div>';
 }
 
 function editTitleInline(){
@@ -8174,7 +8835,7 @@ function fbaRenderTarget(input){
 var calcActiveTab='full';
 function switchCalcTab(tab){
   calcActiveTab=tab;
-  ['quick','full'].forEach(function(t){
+  ['quick','full','bsr'].forEach(function(t){
     var pane=document.getElementById('calcTab-'+t);
     if(pane)pane.style.display=(t===tab)?'block':'none';
   });
@@ -8188,6 +8849,7 @@ function switchCalcTab(tab){
   });
   if(tab==='quick'&&typeof qCalc==='function')qCalc();
   if(tab==='full'&&typeof fbaCalc==='function')fbaCalc();
+  if(tab==='bsr'&&typeof bsrPopulateCats==='function')bsrPopulateCats();
 }
 
 function fbaSetMode(mode){
@@ -8627,7 +9289,7 @@ function renderKW(){
 
 // ─── Keyword-Center: Tab-Umschaltung ───
 function switchKwTab(tab){
-  ['tracking','cleaner'].forEach(function(t){
+  ['tracking','cleaner','scribbles'].forEach(function(t){
     var pane=document.getElementById('kwTab-'+t);
     if(pane)pane.style.display=(t===tab)?'block':'none';
   });
@@ -8640,6 +9302,7 @@ function switchKwTab(tab){
     btn.style.fontWeight=active?'700':'600';
   });
   if(tab==='cleaner'&&typeof renderKeywordClean==='function')renderKeywordClean();
+  if(tab==='scribbles'&&typeof scribblesRun==='function')scribblesRun();
 }
 function addKW(){
   var pi=parseInt(document.getElementById('kwProd').value);if(isNaN(pi))return toast('Erst Produkt wählen');
@@ -14960,11 +15623,12 @@ function renderHeliumPreview(){
     destWrap.innerHTML=
       '<div class="fi"><label>Ziel auswählen</label>'+
       '<select id="heliumDestSelect" onchange="heliumImportState.destination=this.value">'+
-        '<option value="ideen">💡 Ideen-Pool (zum Bewerten)</option>'+
+        '<option value="kandidaten">🔬 Recherche-Kandidaten (direkt in „Validieren")</option>'+
+        '<option value="ideen">💡 Ideen-Pool (erst grob bewerten)</option>'+
         '<option value="produkte">📋 Produktliste (direkt anlegen)</option>'+
       '</select>'+
       '</div>';
-    s.destination='ideen';
+    s.destination='kandidaten';
   }
 
   // Preview table
@@ -15023,7 +15687,33 @@ function confirmHeliumImport(){
   var dest=s.destination;
   var count=0;
 
-  if(dest==='ideen'){
+  if(dest==='kandidaten'){
+    researchInit();
+    validRows.forEach(function(r){
+      var nm=r.name||r.asin;if(!nm)return;
+      D.research.candidates.unshift({
+        id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+count,
+        name:nm.substring(0,120), kategorie:r.category||'', hauptkeyword:'',
+        vk:(r.price!=null?r.price:null),
+        top10Umsatz:(r.revenue!=null?r.revenue:null),
+        avgReviews:(r.reviews!=null?r.reviews:null),
+        konkurrenz:'', schwaechen:'', differenzierung:'',
+        ek:null, fbaGebuehren:null, ppcRisiko:'', nettoMarge:null, risiko:'',
+        status:'recherche', currentStep:1,
+        notes:'Aus Helium 10 importiert ('+s.detectedType+'). BSR '+(r.bsr||'—')+', Rating '+(r.rating||'—'),
+        scoreMatrix:{}, score2:{}, computedScore:0,
+        compTitle:'', compDesc:'', compUsps:[], compImages:(r.imageUrl?[r.imageUrl]:[]), compAsin:r.asin||'', beat:null, compFetchedAt:null,
+        createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+      });
+      count++;
+    });
+    save();
+    if(typeof researchRenderTable==='function')researchRenderTable();
+    if(typeof researchUpdateBadge==='function')researchUpdateBadge();
+    closeHeliumModal();
+    toast('✓ '+count+' Kandidat'+(count===1?'':'en')+' in „Validieren" angelegt');
+    go('pipeline');
+  }else if(dest==='ideen'){
     validRows.forEach(function(r){
       var ideeName=r.name||r.asin;
       if(!ideeName)return;
@@ -15078,6 +15768,19 @@ function confirmHeliumImport(){
         bsr:r.bsr||0,
         wettbewerber:r.sellers||0,
         gewicht:r.weight||0,
+        bild:r.imageUrl||'',
+        // Helium-10-Marktdaten (für den Reiter „Marktdaten (Helium 10)")
+        helSales:r.sales!=null?r.sales:null,
+        helRevenue:r.revenue!=null?r.revenue:null,
+        helBsr:r.bsr!=null?r.bsr:null,
+        helReviews:r.reviews!=null?r.reviews:null,
+        helRating:r.rating!=null?r.rating:null,
+        helSellers:r.sellers!=null?r.sellers:null,
+        helPrice:r.price!=null?r.price:null,
+        helCategory:r.category||'',
+        helWeight:r.weight!=null?r.weight:null,
+        helSource:heliumSourceLabel(s.detectedType),
+        helDate:new Date().toLocaleDateString('de-DE'),
         notizen:'Aus Helium 10 importiert ('+s.detectedType+'). Revenue: '+(r.revenue?Math.round(r.revenue)+'€/M':'—')+', Sales: '+(r.sales||'—')+'/M',
         datum:new Date().toLocaleDateString('de-DE')
       });
@@ -15564,9 +16267,162 @@ function renderSellerPage(){
   },200);
 })();
 
+// ═══════════════════════════════════════════════════════════════
+// PRODUKTRECHERCHE-FAHRPLAN (geführte Schritte, Status aus echten Daten)
+// ═══════════════════════════════════════════════════════════════
+function renderResearchRoadmap(){
+  researchInit();
+  var el=document.getElementById('dashRoadmap');
+  if(!el)return;
+  var ideen=D.ideen||[], cands=D.research.candidates||[], shortlist=D.research.shortlist||[];
+  var dataCount=cands.filter(function(c){return c.avgReviews!=null||c.vk!=null||c.nettoMarge!=null||c.reviewMining;}).length;
+  var minedCount=cands.filter(function(c){return c.reviewMining;}).length;
+  var decidedCount=cands.filter(function(c){var v=decisionVerdict(c).verdict;return v==='go'||v==='nogo';}).length;
+
+  var steps=[
+    {icon:'💡',title:'Ideen sammeln',
+     task:'Sammle 5–20 Produktideen – per KI-Import, Helium Black Box oder Brainstorming.',
+     done:ideen.length>=1, info:ideen.length+' Idee'+(ideen.length===1?'':'n'),
+     cta:'Ideen-Pool', go:"go('ideen')", cta2:'Helium-Import', go2:"go('helium')"},
+    {icon:'🔬',title:'In „Validieren" schieben',
+     task:'Schiebe vielversprechende Ideen im Board nach „Validieren" – daraus werden Kandidaten.',
+     done:cands.length>=1, info:cands.length+' Kandidat'+(cands.length===1?'':'en'),
+     cta:'Pipeline', go:"go('pipeline')"},
+    {icon:'📊',title:'Daten erfassen & Reviews minen',
+     task:'Trag pro Kandidat Preis/Reviews/Marge ein und analysiere Konkurrenz-Reviews (🔬 Review-Mining).',
+     done:dataCount>=1, info:dataCount+' mit Daten · '+minedCount+'× gemint',
+     cta:'Konkurrenz-Tabelle', go:"go('research')", cta2:'Pipeline (🔬)', go2:"go('pipeline')"},
+    {icon:'⚖️',title:'Bewerten & entscheiden',
+     task:'Öffne das Scorecard, prüfe Score + Ampel und triff je Kandidat GO / PRÜFEN / NO-GO.',
+     done:decidedCount>=1, info:decidedCount+' entschieden',
+     cta:'Scorecard', go:"go('research');researchShowTab('score')"},
+    {icon:'⭐',title:'Shortlist & Muster',
+     task:'GO-Kandidaten in die Engere Wahl, Muster bei 2–3 Lieferanten bestellen, dann Produktliste.',
+     done:shortlist.length>=1, info:shortlist.length+' in Engerer Wahl',
+     cta:'Pipeline', go:"go('pipeline')"}
+  ];
+
+  var doneN=0; steps.forEach(function(s){if(s.done)doneN++;});
+  var current=steps.length; for(var j=0;j<steps.length;j++){if(!steps[j].done){current=j;break;}}
+  var allDone=current===steps.length;
+  var pct=Math.round(doneN/steps.length*100);
+
+  var html='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:14px;padding:20px 22px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:2px">'+
+    '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--tx)">🎯 So funktioniert Produktrecherche</div>'+
+    '<div style="font-size:12px;color:var(--tx2);font-weight:700">'+(allDone?'Alle 5 Stufen aktiv 🎉':doneN+' / '+steps.length+' Stufen begonnen')+'</div>'+
+  '</div>';
+  html+='<div style="font-size:11.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45">Die <b>5-Stufen-Methode</b> – du recherchierst <b>beliebig viele Produkte gleichzeitig</b>. Jedes ist eine eigene gespeicherte Recherche und wandert eigenständig durch die <button onclick="go(\'pipeline\')" style="background:none;border:none;color:var(--ac);font-weight:700;cursor:pointer;padding:0;font-size:11.5px">Pipeline →</button>. Du musst nichts „abschließen", um Neues zu starten.</div>';
+  html+='<div style="height:8px;background:var(--s2);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+pct+'%;background:var(--ac);transition:width .3s"></div></div>';
+  if(!allDone){
+    html+='<div style="font-size:12.5px;color:var(--tx);margin-bottom:16px">👉 <b>Noch nicht begonnen:</b> '+esc(steps[current].title)+' <button class="btn btn-p btn-sm" onclick="'+steps[current].go+'" style="margin-left:6px">Starten →</button></div>';
+  }else{
+    html+='<div style="font-size:12.5px;color:var(--tx);margin-bottom:16px">🎉 Du nutzt alle 5 Stufen. Weiter geht\'s in der <button class="btn btn-p btn-sm" onclick="go(\'pipeline\')" style="margin-left:4px">Pipeline →</button></div>';
+  }
+  html+='<div style="display:flex;flex-direction:column;gap:8px">';
+  steps.forEach(function(s,idx){
+    var state=s.done?'done':(idx===current?'active':'locked');
+    var circleBg=state==='done'?'var(--gn)':state==='active'?'var(--ac)':'var(--s3)';
+    var circleTx=state==='locked'?'var(--tx3)':'#fff';
+    var circleC=state==='done'?'✓':(idx+1);
+    var border=state==='active'?'1.5px solid var(--ac)':'1px solid var(--bd)';
+    var bg=state==='active'?'var(--s1)':'var(--s2)';
+    var statusTxt=state==='done'?'<span style="color:var(--gn);font-weight:700">✅ erledigt</span> · '+esc(s.info):state==='active'?'<span style="color:var(--ac);font-weight:700">▶ jetzt dran</span> · '+esc(s.info):'<span style="color:var(--tx3)">🔒 als nächstes</span>';
+    var op=state==='locked'?'opacity:.62':'';
+    html+='<div style="display:flex;gap:12px;align-items:flex-start;padding:11px 14px;background:'+bg+';border:'+border+';border-radius:10px;'+op+'">'+
+      '<div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:'+circleBg+';color:'+circleTx+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+circleC+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:700;color:var(--tx);font-size:13.5px">'+s.icon+' '+esc(s.title)+'</div>'+
+        '<div style="font-size:11.5px;color:var(--tx2);margin:3px 0;line-height:1.45">'+esc(s.task)+'</div>'+
+        '<div style="font-size:11px">'+statusTxt+'</div>'+
+      '</div>'+
+      '<div style="flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:flex-end">'+
+        (state==='locked'
+          ? '<button class="btn btn-sm" disabled style="font-size:10.5px;opacity:.5;cursor:not-allowed" title="Erst Schritt '+idx+' abschließen">🔒</button>'
+          : '<button class="btn btn-sm'+(state==='active'?' btn-p':'')+'" onclick="'+s.go+'" style="font-size:10.5px;white-space:nowrap">'+esc(s.cta)+' →</button>'+((s.cta2)?'<button class="btn btn-sm" onclick="'+s.go2+'" style="font-size:10px;white-space:nowrap">'+esc(s.cta2)+'</button>':''))+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+
+// Top-Kandidaten nach Entscheidungs-Score (Dashboard-Widget)
+function renderDashTopCands(){
+  researchInit();
+  var el=document.getElementById('dashTopCands');if(!el)return;
+  var cands=(D.research.candidates||[]).slice();
+  if(!cands.length){el.innerHTML='<div style="padding:26px;text-align:center;color:var(--tx2);font-size:13px"><div style="font-size:32px;margin-bottom:8px;opacity:.6">🌱</div>Noch keine Kandidaten.<br><a onclick="go(\'pipeline\')" style="color:var(--ac);cursor:pointer">Starte in der Pipeline →</a></div>';return;}
+  var ranked=cands.map(function(c){return {c:c,vd:decisionVerdict(c)};}).sort(function(a,b){return b.vd.score-a.vd.score;}).slice(0,6);
+  var h='<div style="display:flex;flex-direction:column;gap:7px">';
+  ranked.forEach(function(it){
+    var c=it.c,vd=it.vd;
+    var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    h+='<div onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 11px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;cursor:pointer" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'+
+      '<div style="font-weight:800;color:var(--'+vd.color+');font-size:18px;min-width:30px;text-align:center">'+(vd.score>0?vd.score:'—')+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--tx);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:10.5px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div></div>'+
+    '</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+// Neue Produktsuche vom Dashboard starten (legt einen Recherche-Kandidaten an)
+function startNewProductSearch(){
+  if(typeof researchAddCandidate==='function')researchAddCandidate();
+  renderDash();
+}
+// Liste „Deine Produktsuchen": je Produkt eine eigene 5-Schritte-Fortschrittsanzeige
+function renderDashSearches(){
+  researchInit();
+  var el=document.getElementById('dashSearches');if(!el)return;
+  var cands=(D.research.candidates||[]).filter(function(c){return normalizeStatus(c.status)!=='abgelehnt';});
+  var shortIds={};(D.research.shortlist||[]).forEach(function(s){if(s.sourceCandidateId)shortIds[s.sourceCandidateId]=true;});
+  var stepDefs=['Angelegt','Daten + Nische','Review-Mining','Bewertet','Entscheidung'];
+  function stepsDone(c){
+    return [true,
+      (c.avgReviews!=null||c.vk!=null||c.top10Umsatz!=null||!!c.nischenScan),
+      !!c.reviewMining,
+      decisionVerdict(c).verdict!=='offen',
+      (!!shortIds[c.id]||normalizeStatus(c.status)==='muster')
+    ];
+  }
+  var html='<div style="background:var(--s1);border:1px solid var(--bd2);border-radius:12px;padding:18px 20px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:'+(cands.length?'14px':'8px')+'">'+
+    '<h3 style="margin:0">🔎 Deine Produktsuchen <span style="font-size:12px;color:var(--tx3);font-weight:400">('+cands.length+' aktiv, parallel)</span></h3>'+
+    '<button class="btn btn-p btn-sm" onclick="startNewProductSearch()">➕ Neue Produktsuche</button>'+
+  '</div>';
+  if(!cands.length){
+    html+='<div style="font-size:12.5px;color:var(--tx2)">Noch keine. Starte beliebig viele parallel – jede durchläuft dieselben 5 Schritte. Oder importiere mehrere auf einmal über <button onclick="go(\'helium\')" style="background:none;border:none;color:var(--ac);font-weight:700;cursor:pointer;padding:0;font-size:12.5px">📥 Helium-Import →</button></div>';
+  }else{
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    cands.slice(0,12).forEach(function(c){
+      var done=stepsDone(c);var vd=decisionVerdict(c);
+      var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+      var dots='';
+      done.forEach(function(ok,i){
+        dots+='<span title="'+stepDefs[i]+(ok?' ✓':' – offen')+'" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;background:'+(ok?'var(--gn)':'var(--s3)')+';color:'+(ok?'#fff':'var(--tx3)')+'">'+(ok?'✓':(i+1))+'</span>';
+        if(i<done.length-1)dots+='<span style="color:var(--bd2);font-size:9px;margin:0 1px">—</span>';
+      });
+      html+='<div onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:9px;cursor:pointer" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'+
+        '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--tx);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="display:flex;align-items:center;margin-top:6px">'+dots+'</div></div>'+
+        '<div style="text-align:right;white-space:nowrap"><div style="font-weight:800;color:var(--'+vd.color+');font-size:16px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--'+vd.color+');font-weight:700;margin-top:2px">'+emoji+' '+vd.label+'</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+    html+='<div style="margin-top:10px;font-size:10.5px;color:var(--tx3)">Schritte: 1 Angelegt · 2 Daten+Nische · 3 Review-Mining · 4 Bewertet · 5 Entscheidung — klick auf eine Suche öffnet ihr Scorecard.</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function renderDash(){
   var prods=D.products||[];
   var ideen=D.ideen||[];
+
+  // ─── Produktrecherche-Fahrplan (geführt) ───
+  if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
+  if(typeof renderDashSearches==='function')renderDashSearches();
 
   // ─── License Countdown Panel ───
   if(typeof renderLicensePanel==='function')renderLicensePanel();
@@ -15579,15 +16435,21 @@ function renderDash(){
   var ideenHohesPotenzial=ideen.filter(function(i){return i.potenzial==='Hoch'}).length;
   var herstellerCount=(D.suppliers||[]).length;
 
+  researchInit();
+  var rcands=(D.research&&D.research.candidates)?D.research.candidates:[];
+  var rshort=(D.research&&D.research.shortlist)?D.research.shortlist:[];
+  var activeCands=rcands.filter(function(c){var s=normalizeStatus(c.status);return s!=='abgelehnt'&&s!=='aktiv';});
+  var goCands=rcands.filter(function(c){return decisionVerdict(c).verdict==='go';}).length;
   var heroStats=[
-    {label:'Aktive Produkte',val:prods.length,sub:active.length+' in Bearbeitung',color:'ac',icon:'📋'},
-    {label:'Ø Marge',val:margins.length?avgM.toFixed(1)+'%':'—',sub:margins.length>0?margins.length+' Produkte kalkuliert':'noch keine Kalkulation',color:avgM>=30?'gn':avgM>=15?'ac':'rd',icon:'💰'},
-    {label:'Ideen-Pool',val:ideen.length,sub:ideenHohesPotenzial+' mit Hohem Potenzial',color:'pu',icon:'💡'}
+    {label:'Ideen',val:ideen.length,sub:ideenHohesPotenzial+' mit Hohem Potenzial',color:'pu',icon:'💡',go:"go('ideen')"},
+    {label:'Kandidaten',val:activeCands.length,sub:'in Validierung',color:'ac',icon:'🔬',go:"go('pipeline')"},
+    {label:'GO-Kandidaten',val:goCands,sub:'bereit für Shortlist',color:'gn',icon:'🟢',go:"go('research');researchShowTab('score')"},
+    {label:'Engere Wahl',val:rshort.length,sub:'Shortlist & Entscheidung',color:'cy',icon:'⭐',go:"go('pipeline')"}
   ];
   var heroHtml='';
   heroStats.forEach(function(s){
     var color='var(--'+s.color+')';
-    heroHtml+='<div class="hero-stat" style="border-left:3px solid '+color+'">'+
+    heroHtml+='<div class="hero-stat" onclick="'+s.go+'" style="border-left:3px solid '+color+';cursor:pointer">'+
       '<span class="hs-bg-icon">'+s.icon+'</span>'+
       '<div class="hs-label">'+s.label+'</div>'+
       '<div class="hs-val" style="color:'+color+'">'+esc(String(s.val))+'</div>'+
@@ -15634,24 +16496,8 @@ function renderDash(){
     }
   }
 
-  // ─── Top products table ───
-  var best=prods.slice().sort(function(a,b){return(cp(b).m||0)-(cp(a).m||0)}).filter(function(p){return cp(p).m!==null}).slice(0,8);
-  var tb=document.getElementById('dashTable');tb.innerHTML='';
-  document.getElementById('dashTableEmpty').style.display=best.length===0?'block':'none';
-  best.forEach(function(p){
-    var c=cp(p);
-    var sc=p.status==='Bestellt'?'b-bestellt':p.status==='Analyse'?'b-analyse':p.status==='Recherche'?'b-recherche':p.status==='Idee'?'b-idee':'b-abgelehnt';
-    var idx=D.products.indexOf(p);
-    var tr=document.createElement('tr');
-    tr.style.cursor='pointer';
-    tr.onclick=function(){openProductDetail(idx)};
-    tr.innerHTML='<td class="pn">'+esc(p.name||'(Ohne Namen)')+'</td>'
-      +'<td class="nc">'+fmt(p.verkaufspreis||0)+'</td>'
-      +'<td class="nc" style="font-weight:700;'+mc(c.m)+'">'+c.m.toFixed(1)+'%</td>'
-      +'<td class="nc" style="'+(c.pr>=0?'color:var(--gn)':'color:var(--rd)')+'">'+c.pr.toFixed(2)+'€</td>'
-      +'<td><span class="badge '+sc+'">'+esc(p.status||'—')+'</span></td>';
-    tb.appendChild(tr);
-  });
+  // ─── Top-Kandidaten nach Score ───
+  if(typeof renderDashTopCands==='function')renderDashTopCands();
 
   // ─── Activity feed (recent products + ideas merged by date) ───
   var activities=[];
@@ -15961,6 +16807,7 @@ function renderIdeen(){
   // badge in sidebar
   var neuCount=D.ideen.filter(function(i){return i.status==='Neu'}).length;
   var b=document.getElementById('ideenBadge');
+  if(!b)return;
   if(neuCount>0){b.style.display='inline-block';b.textContent=neuCount}else b.style.display='none';
 }
 
@@ -16340,6 +17187,7 @@ function saveIdee(){
   if(editIdeeIdx>=0){D.ideen[editIdeeIdx]=it;toast('Aktualisiert ✓')}
   else{D.ideen.push(it);toast('Idee hinzugefügt ✓')}
   save();renderIdeen();closeIdeeModal();
+  var pp=document.getElementById('p-pipeline');if(pp&&pp.classList.contains('active')&&typeof renderPipeline==='function')renderPipeline();
 }
 
 function ideeToProd(i){
