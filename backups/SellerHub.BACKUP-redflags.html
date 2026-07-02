@@ -5667,16 +5667,11 @@ function decisionMigrate(c){
 // Rote/gelbe Flags
 function decisionRedFlags(c){
   var f=[];
-  if(c.vk!=null&&c.vk>0&&c.vk<15)f.push({hard:true,t:'Preis < 15 € → Margenfalle',s:'Preis <15 €'});
-  if(c.avgReviews!=null&&c.avgReviews>2000)f.push({hard:true,t:'⌀ Reviews Top-10 > 2.000 → hohe Einstiegsbarriere',s:'>2.000 Rev.'});
-  if(c.nettoMarge!=null&&c.nettoMarge<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich',s:'Marge <15 %'});
-  if(c.ipRisiko==='ja')f.push({hard:true,t:'Marken-/Patent-/IP-Risiko → Abmahn-/Sperrgefahr',s:'IP-Risiko'});
-  if(c.risiko==='hoch')f.push({hard:true,t:'Hohes Risiko (Recht/Haftung/Retouren)',s:'Hohes Risiko'});
-  if(c.gewicht!=null&&c.gewicht>5)f.push({hard:true,t:'Gewicht > 5 kg → Sperrgut/hohe FBA-Kosten, Marge in Gefahr',s:'>5 kg'});
-  else if(c.gewicht!=null&&c.gewicht>2)f.push({hard:false,t:'Gewicht > 2 kg → höhere FBA-/Versandkosten',s:'>2 kg'});
-  if(c.gating==='ja')f.push({hard:false,t:'Amazon-Gating → Kategorie-Freischaltung nötig (Zeit/Nachweise)',s:'Gating'});
-  if(c.saisonal==='ja')f.push({hard:false,t:'Saisonal → schwankender Umsatz, Kapital zeitweise gebunden',s:'Saisonal'});
-  if(c.ppcRisiko==='hoch')f.push({hard:false,t:'Hohes PPC-Risiko',s:'PPC hoch'});
+  if(c.vk!=null&&c.vk>0&&c.vk<15)f.push({hard:true,t:'Preis < 15 € → Margenfalle'});
+  if(c.avgReviews!=null&&c.avgReviews>2000)f.push({hard:true,t:'⌀ Reviews Top-10 > 2.000 → hohe Einstiegsbarriere'});
+  if(c.nettoMarge!=null&&c.nettoMarge<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich'});
+  if(c.risiko==='hoch')f.push({hard:true,t:'Hohes Risiko (Recht/Haftung/Retouren)'});
+  if(c.ppcRisiko==='hoch')f.push({hard:false,t:'Hohes PPC-Risiko'});
   return f;
 }
 // Gesamturteil
@@ -6347,14 +6342,6 @@ function researchImportFromIdeen(){
 // ═══════════════════════════════════════════════════════════════
 // RECHERCHE-PIPELINE (Kanban-Board über alle Stufen)
 // ═══════════════════════════════════════════════════════════════
-// Kompakte Flag-Chips für Karten/Widgets (nutzt f.s = Kurzlabel)
-function pipeFlagChips(flags){
-  if(!flags||!flags.length)return '';
-  return '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">'+flags.map(function(f){
-    var c=f.hard?'rd':'ac';
-    return '<span title="'+esc(f.t)+'" style="font-size:9px;font-weight:700;color:var(--'+c+');background:var(--'+c+'d);border:1px solid var(--'+c+');border-radius:5px;padding:1px 5px;line-height:1.5">'+(f.hard?'🔴':'🟡')+' '+esc(f.s||f.t)+'</span>';
-  }).join('')+'</div>';
-}
 function pipeCol(icon,title,color,count,cards){
   return '<div style="flex:0 0 272px;min-width:272px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 250px)">'+
     '<div style="padding:11px 14px;border-bottom:2px solid var(--'+color+');display:flex;justify-content:space-between;align-items:center;flex-shrink:0">'+
@@ -6397,7 +6384,6 @@ function renderPipeline(){
     c2+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
       '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
       '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div>'+
-      pipeFlagChips(vd.flags)+
       '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:10.5px" title="Scorecard öffnen">⚖️</button>'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenWorkflow(\''+c.id+'\')" style="font-size:10.5px" title="20-Schritte-Workflow">📋</button>'+
@@ -6572,7 +6558,7 @@ function researchUpdateField(id,field,value){
   var c=D.research.candidates.find(function(x){return x.id===id});
   if(!c)return;
   // Coerce numeric fields
-  if(['vk','top10Umsatz','avgReviews','ek','fbaGebuehren','nettoMarge','gewicht'].indexOf(field)>-1){
+  if(['vk','top10Umsatz','avgReviews','ek','fbaGebuehren','nettoMarge'].indexOf(field)>-1){
     var num=parseFloat(value);
     c[field]=isNaN(num)?null:num;
   }else{
@@ -6585,9 +6571,8 @@ function researchUpdateField(id,field,value){
   // Stats/Badge bei Status-Änderung
   if(field==='status'){researchRenderStatsBar();researchUpdateBadge();}
   // Score-relevante Felder → Tabelle neu rendern (aktualisiert Score-Badge)
-  if(['avgReviews','nettoMarge','konkurrenz','risiko','ppcRisiko','differenzierung','status','vk','gewicht','saisonal','gating','ipRisiko'].indexOf(field)>-1){
+  if(['avgReviews','nettoMarge','konkurrenz','risiko','ppcRisiko','differenzierung','status'].indexOf(field)>-1){
     researchRenderTable();
-    if(typeof renderPipeline==='function'&&document.getElementById('pipelineBoard'))renderPipeline();
   }
 }
 
@@ -6638,14 +6623,6 @@ function researchOpenEdit(id){
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'),'Konkurrenz-Preis, automatisch.','auto')+field('EK €',inp('ek',c.ek,'number',';text-align:right'),'Dein Einkaufspreis beim Lieferanten.','self')+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'),'VK − EK − Gebühren − PPC.','calc')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'),'Aus Helium 10 Xray.','self')+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'),'Bewertungsanzahl, automatisch.','auto')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Konkurrenz',selF('konkurrenz',c.konkurrenz||'',risk),'Deine Einschätzung.','self')+field('PPC-Risiko',selF('ppcRisiko',c.ppcRisiko||'',risk),'Deine Einschätzung.','self')+field('Risiko',selF('risiko',c.risiko||'',risk),'Deine Einschätzung.','self')+'</div>';
-  var jn=[['','—'],['nein','nein'],['ja','ja']];
-  h+='<div style="margin:2px 0 10px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px">⚠️ Red-Flag-Check</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">'+
-    field('Gewicht kg',inp('gewicht',c.gewicht,'number',';text-align:right'),'>2 kg = teurer, >5 kg = Sperrgut.','self')+
-    field('Saisonal?',selF('saisonal',c.saisonal||'',jn),'Nur zu bestimmten Zeiten gefragt?','self')+
-    field('Gating?',selF('gating',c.gating||'',jn),'Amazon-Freischaltung nötig?','self')+
-    field('IP-Risiko?',selF('ipRisiko',c.ipRisiko||'',jn),'Marke/Patent/Design geschützt?','self')+
-  '</div>';
   h+=field('Status (Pipeline)',selF('status',normalizeStatus(c.status),statusOpts));
   h+=field('Differenzierung (warum besser?)','<textarea onchange="researchUpdateField(\''+id+'\',\'differenzierung\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.differenzierung||'')+'</textarea>','Wird bei „🏆 besser vermarkten" teils automatisch befüllt.','');
   h+=field('USPs (eine pro Zeile)','<textarea onchange="researchUpdateUsps(\''+id+'\',this.value)" placeholder="z. B. Edelstahl rostfrei&#10;Ohne Bohren montierbar" style="'+IN+';min-height:80px;resize:vertical">'+esc((c.compUsps||[]).join('\n'))+'</textarea>','Aus dem Konkurrenz-Listing.','auto');
@@ -16381,10 +16358,9 @@ function renderDashTopCands(){
   ranked.forEach(function(it){
     var c=it.c,vd=it.vd;
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
-    var chips=(vd.flags&&vd.flags.length)?'<div style="margin-top:4px">'+pipeFlagChips(vd.flags).replace(';margin-bottom:8px','')+'</div>':'';
-    h+='<div onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;cursor:pointer" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'+
+    h+='<div onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 11px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;cursor:pointer" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'+
       '<div style="font-weight:800;color:var(--'+vd.color+');font-size:18px;min-width:30px;text-align:center">'+(vd.score>0?vd.score:'—')+'</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--tx);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:10.5px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div>'+chips+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--tx);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:10.5px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div></div>'+
     '</div>';
   });
   h+='</div>';
