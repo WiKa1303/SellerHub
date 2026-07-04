@@ -68,7 +68,7 @@ dash.news.forEach(n => bySource[n.source] = (bySource[n.source] || 0) + 1);
 t('Dashboard: max. 2 pro Quelle', Object.values(bySource).every(c => c <= 2), JSON.stringify(bySource));
 
 const health = await (await fetch(base + '/api/health')).json();
-t('GET /api/health', health.ok === true && !!health.lastRun);
+t('GET /api/health', health.ok === true && !!health.crawler.lastRun && health.ai.enabled === false);
 
 // Dubletten-Probe: zweiter Crawl darf (fast) nichts Neues einfügen
 const stats2 = await runCrawl();

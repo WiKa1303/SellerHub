@@ -10,6 +10,16 @@ export const config = {
   adminKey: process.env.ADMIN_KEY || '',
   userAgent: 'SellerHub-Radar/0.1 (+https://github.com/WiKa1303/SellerHub)',
   fetchTimeoutMs: 15000,
+
+  // ═══ KI-Analyse (Phase 3) ═══
+  // Ohne ANTHROPIC_API_KEY läuft alles weiter mit Keyword-Scoring (bewusster Degradations-Pfad).
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+  aiModel: process.env.AI_MODEL || 'claude-opus-4-8',
+  // Kostenbremse 1: max. KI-Analysen pro Crawl-Lauf (Rest bleibt in der DB-Warteschlange)
+  aiMaxPerRun: parseInt(process.env.AI_MAX_PER_RUN || '60', 10),
+  // Kostenbremse 2: max. Analyse-Versuche pro Item, danach dauerhaft Keyword-Score
+  aiMaxAttempts: parseInt(process.env.AI_MAX_ATTEMPTS || '3', 10),
+  aiConcurrency: parseInt(process.env.AI_CONCURRENCY || '2', 10),
 };
 
 // ═══ FBA-Keyword-Lexikon (3 Gewichtsstufen) ═══

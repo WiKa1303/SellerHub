@@ -277,19 +277,35 @@ function radarRelTime(iso){
   if(h<1)return 'gerade eben';if(h<24)return 'vor '+h+' Std.';
   var d=Math.round(h/24);return d===1?'gestern':'vor '+d+' Tagen';
 }
+// Seller-Profil (Phase 3): bleibt lokal im Browser, wird als Query-Parameter mitgeschickt.
+//   localStorage.setItem('wika_radar_profile', JSON.stringify({seller_type:'private_label',revenue:'starter',markets:['DE'],interests:['ppc','recht']}))
+function radarProfileParams(){
+  try{
+    var p=JSON.parse(localStorage.getItem('wika_radar_profile')||'null');
+    if(!p)return '';
+    var q=[];
+    if(p.seller_type)q.push('seller_type='+encodeURIComponent(p.seller_type));
+    if(p.revenue)q.push('revenue='+encodeURIComponent(p.revenue));
+    if(p.markets&&p.markets.length)q.push('markets='+encodeURIComponent(p.markets.join(',')));
+    if(p.interests&&p.interests.length)q.push('interests='+encodeURIComponent(p.interests.join(',')));
+    return q.length?'?'+q.join('&'):'';
+  }catch(e){return '';}
+}
 function renderRadarWidget(){
   var el=document.getElementById('dashRadar');if(!el)return;
   var api=radarApi();
   if(!api){el.innerHTML='';return;}
   var cached=null;try{cached=JSON.parse(localStorage.getItem('wika_radar_cache')||'null');}catch(e){}
   if(cached)el.innerHTML=radarWidgetHtml(cached); // sofort malen (Login-Moment), dann frisch laden
-  fetch(api+'/api/dashboard-feed').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
+  fetch(api+'/api/dashboard-feed'+radarProfileParams()).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
     try{localStorage.setItem('wika_radar_cache',JSON.stringify(d));}catch(e){}
     el.innerHTML=radarWidgetHtml(d);
   }).catch(function(){
     if(!cached)el.innerHTML='<div style="background:var(--s1);border:1px dashed var(--bd2);border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--tx3)">📡 Seller-Radar: API nicht erreichbar ('+esc(api)+')</div>';
   });
 }
+// Kategorie-Chip-Farben (KI-Kategorien aus Phase 3)
+var RADAR_CAT={recht:['rd','⚖️ Recht'],steuern:['rd','💶 Steuern'],ppc:['bl','📣 PPC'],produktrecherche:['pu','🔎 Recherche'],logistik:['cy','🚚 Logistik'],events:['ac','📅 Event'],trends:['gn','📈 Trend'],sonstiges:['tx3','·']};
 function radarWidgetHtml(d){
   var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:16px 20px;margin-bottom:18px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px"><h3 style="margin:0;font-size:15px">📡 Seller-Radar <span style="font-size:11px;color:var(--tx3);font-weight:400">News &amp; Events für FBA-Seller (DACH)</span></h3>'+(d.meta&&d.meta.lastCrawl?'<span style="font-size:10.5px;color:var(--tx3)">Stand: '+radarRelTime(d.meta.lastCrawl)+'</span>':'')+'</div>';
@@ -298,9 +314,15 @@ function radarWidgetHtml(d){
   h+='<div><div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📰 Top-News</div>';
   if(d.news&&d.news.length){
     d.news.forEach(function(n){
+      var cat=n.ai_category&&RADAR_CAT[n.ai_category]?RADAR_CAT[n.ai_category]:null;
+      var score=n.ai_score!=null?n.ai_score:n.relevance_score;
+      var why=(n.why&&n.why.length)?' title="Warum: '+esc(n.why.join(' · '))+'"':' title="Relevanz-Score 0–100"';
       h+='<a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:7px 0;border-bottom:1px solid var(--bd)">'+
-        '<div style="font-size:12.5px;font-weight:600;color:var(--tx);line-height:1.4">'+esc(n.title)+'</div>'+
-        '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+esc(n.source)+' · '+radarRelTime(n.publish_date)+' · <span title="Relevanz-Score 0–100">🔥 '+n.relevance_score+'</span></div></a>';
+        '<div style="font-size:12.5px;font-weight:600;color:var(--tx);line-height:1.4">'+(n.ai_urgency==='hoch'?'<span style="color:var(--rd)" title="dringend">⚠️ </span>':'')+esc(n.title)+'</div>'+
+        (n.ai_summary&&n.ai_summary.length?'<div style="font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.45">→ '+esc(n.ai_summary[0])+'</div>':'')+
+        '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+
+          (cat?'<span style="background:var(--'+cat[0]+(cat[0]==='tx3'?'':'d')+');color:var(--'+cat[0]+');border-radius:7px;padding:1px 7px;font-weight:700;margin-right:5px">'+cat[1]+'</span>':'')+
+          esc(n.source)+' · '+radarRelTime(n.publish_date)+' · <span'+why+'>'+(n.ai_score!=null?'🤖':'🔥')+' '+score+'</span></div></a>';
     });
   }else h+='<div style="font-size:12px;color:var(--tx3)">Noch keine News – der Crawler läuft 2× täglich.</div>';
   h+='</div>';

@@ -1,7 +1,10 @@
 // ═══ REST-API (readonly + Admin-Trigger) ═══
 import express from 'express';
-import { queryNews, queryEvents } from './db.js';
+import { queryNews, queryEvents, saveFeedback } from './db.js';
 import { runCrawl, crawlState } from './crawler/run.js';
+import { drainQueue, aiState } from './ai/queue.js';
+import { aiEnabled } from './ai/analyze.js';
+import { parseProfile, rankForProfile } from './profile.js';
 import { SOURCES } from './sources.js';
 import { config } from './config.js';
 
@@ -19,16 +22,22 @@ export function buildApi() {
   // Lese-Antworten 5 min cachebar → CDN/Proxy entkoppelt die Last
   app.use((req, res, next) => { if (req.method === 'GET') res.set('Cache-Control', 'public, max-age=300'); next(); });
 
-  // GET /api/news – neueste News, sortiert nach Relevanz + Datum
+  // GET /api/news – neueste News; mit Profil-Parametern (seller_type, revenue, markets, interests) personalisiert.
+  // Personalisierte Antworten sind privat → kein Shared-Cache (Cache-Control wird überschrieben).
   app.get('/api/news', async (req, res) => {
     try {
+      const profile = parseProfile(req.query);
+      const limit = Math.min(100, parseInt(req.query.limit || '20', 10));
       const rows = await queryNews({
-        limit: Math.min(100, parseInt(req.query.limit || '20', 10)),
+        limit: profile.isEmpty ? limit : Math.min(100, limit * 3), // mehr Kandidaten fürs Re-Ranking
         country: req.query.country || null,
         minScore: parseInt(req.query.minScore || '0', 10),
         maxAgeDays: config.maxAgeDays,
       });
-      res.json({ items: rows, count: rows.length });
+      if (profile.isEmpty) return res.json({ items: rows, count: rows.length, personalized: false });
+      res.set('Cache-Control', 'private, max-age=60');
+      const ranked = rankForProfile(rows, profile).slice(0, limit);
+      res.json({ items: ranked, count: ranked.length, personalized: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
@@ -43,10 +52,16 @@ export function buildApi() {
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
-  // GET /api/dashboard-feed – kombiniert & priorisiert fürs Login-Widget
+  // GET /api/dashboard-feed – kombiniert & priorisiert fürs Login-Widget.
+  // Mit Profil-Parametern: individuell re-ranked (KI-Score + Profil-Match + Dringlichkeits-/Impact-Boost).
   app.get('/api/dashboard-feed', async (req, res) => {
     try {
-      const newsRaw = await queryNews({ limit: 30, maxAgeDays: 7 });
+      const profile = parseProfile(req.query);
+      let newsRaw = await queryNews({ limit: 40, maxAgeDays: 7 });
+      if (!profile.isEmpty) {
+        res.set('Cache-Control', 'private, max-age=60');
+        newsRaw = rankForProfile(newsRaw, profile);
+      }
       // Diversität: max. 2 Items pro Quelle, dann Top 5 – kippt nie in „5× dieselbe Story"
       const perSource = {};
       const news = [];
@@ -60,22 +75,39 @@ export function buildApi() {
         news, events,
         meta: {
           lastCrawl: crawlState.lastRun,
+          personalized: !profile.isEmpty,
+          ai: aiEnabled() ? { lastRun: aiState.lastRun, analyzed: aiState.analyzed } : null,
           sources: SOURCES.map(s => ({ id: s.id, name: s.name, region: s.region })),
         },
       });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
-  // GET /api/health – Monitoring: läuft der Crawler, welche Quelle klemmt?
-  app.get('/api/health', (req, res) => {
-    res.set('Cache-Control', 'no-store');
-    res.json({ ok: true, lastRun: crawlState.lastRun, running: crawlState.running, stats: crawlState.lastStats });
+  // POST /api/feedback – 👍/👎 zu einem Item ({id, vote: 1|-1}); Basis für Eval-/Fine-Tuning-Daten
+  app.post('/api/feedback', express.json(), async (req, res) => {
+    try {
+      const { id, vote } = req.body || {};
+      if (!id || ![1, -1].includes(vote)) return res.status(400).json({ error: 'id und vote (1|-1) erforderlich' });
+      const ok = await saveFeedback(String(id), vote);
+      res.status(ok ? 200 : 404).json({ ok });
+    } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
-  // POST /api/admin/crawl – manueller Trigger (mit ADMIN_KEY geschützt)
+  // GET /api/health – Monitoring: Crawler + KI-Layer (Token-Verbrauch = Kostenkontrolle)
+  app.get('/api/health', (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      ok: true,
+      crawler: { lastRun: crawlState.lastRun, running: crawlState.running, stats: crawlState.lastStats },
+      ai: { enabled: aiEnabled(), model: config.aiModel, ...aiState },
+    });
+  });
+
+  // POST /api/admin/crawl – manueller Trigger (mit ADMIN_KEY geschützt); stößt danach die KI-Queue an
   app.post('/api/admin/crawl', async (req, res) => {
     if (!config.adminKey || req.get('X-Api-Key') !== config.adminKey) return res.status(401).json({ error: 'unauthorized' });
     const stats = await runCrawl();
+    drainQueue().catch(() => {}); // async, blockiert die Antwort nicht
     res.json({ ok: true, stats });
   });
 
