@@ -2,7 +2,7 @@
 // EIN API-Call pro Artikel liefert Analyse UND Summary (Kosteneffizienz: kein zweiter Call).
 // Strukturierte Outputs (output_config.format) garantieren valides JSON — kein Parsing-Gefrickel.
 import Anthropic from '@anthropic-ai/sdk';
-import { config } from '../config.js';
+import { config } from '../../core/config.js';
 
 export const AI_CATEGORIES = ['recht', 'ppc', 'produktrecherche', 'logistik', 'steuern', 'events', 'trends', 'sonstiges'];
 

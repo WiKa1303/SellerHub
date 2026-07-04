@@ -1,25 +1,21 @@
 // ═══ Einstieg: DB + API + Cron in EINEM Prozess (MVP) ═══
 import cron from 'node-cron';
-import { config } from './config.js';
-import { initDb } from './db.js';
-import { buildApi } from './api.js';
-import { runCrawl } from './crawler/run.js';
-import { drainQueue } from './ai/queue.js';
-import { aiEnabled } from './ai/analyze.js';
-import { runTrendEngine } from './trends/engine.js';
-import { generateAlerts } from './alerts.js';
-import { log } from './logger.js';
+import { config } from './core/config.js';
+import { initDb } from './data/db.js';
+import { buildApi } from './api/routes.js';
+import { runCrawl } from './services/crawler/run.js';
+import { aiEnabled } from './services/intelligence/analyze.js';
+import { runIntelligencePipeline } from './services/intelligence/registry.js';
+import { log } from './core/logger.js';
 
-// Pipeline je Lauf: Crawl → KI-Analyse → Trend-Engine + Alerts.
-// Alles NACH dem Crawl ist Hintergrundverarbeitung (blockiert nie den Feed):
-// Items sind sofort mit Keyword-Score sichtbar, KI/Trends/Alerts kommen asynchron dazu.
+// Pipeline je Lauf: Crawl → Intelligence-Module (Registry-Reihenfolge:
+// relevance → trends → alerts → strategy). Alles NACH dem Crawl ist
+// Hintergrundverarbeitung und blockiert nie den Feed — Items sind sofort mit
+// Keyword-Score sichtbar, KI/Trends/Alerts/Briefing kommen asynchron dazu.
 async function crawlAndAnalyze() {
   await runCrawl();
-  await drainQueue();
-  await Promise.all([
-    runTrendEngine().catch(e => log.error('Trend-Engine:', e.message)),
-    generateAlerts().catch(e => log.error('Alert-Generator:', e.message)),
-  ]);
+  const results = await runIntelligencePipeline();
+  log.info('Intelligence-Pipeline:', JSON.stringify(results));
 }
 
 async function main() {

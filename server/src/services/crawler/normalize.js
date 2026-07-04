@@ -1,5 +1,5 @@
 // ═══ Normalisierung: URL-Kanonisierung, Text, Datum, Event-Erkennung ═══
-import { EVENT_PATTERN } from '../config.js';
+import { EVENT_PATTERN } from '../../core/config.js';
 
 const TRACKING_PARAMS = /^(utm_|fbclid|gclid|mc_cid|mc_eid|ref$|source$)/i;
 

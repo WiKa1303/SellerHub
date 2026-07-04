@@ -1,12 +1,12 @@
 // ═══ Ein Crawl-Lauf: Quellen → Items → Filter → Score → Dedupe → DB ═══
-import { SOURCES } from '../sources.js';
-import { config } from '../config.js';
+import { SOURCES } from '../../data/sources.js';
+import { config } from '../../core/config.js';
 import { fetchFeed } from './rss.js';
 import { canonicalUrl, cleanSummary, normalizeTitle, parseDate, detectKind, extractEventDate } from './normalize.js';
-import { scoreItem } from '../scoring.js';
-import { urlHash, isDuplicateTitle } from '../dedupe.js';
-import { insertItem, recentTitleNorms } from '../db.js';
-import { log } from '../logger.js';
+import { scoreItem } from './scoring.js';
+import { urlHash, isDuplicateTitle } from '../../core/dedupe.js';
+import { insertItem, recentTitleNorms } from '../../data/db.js';
+import { log } from '../../core/logger.js';
 
 /** Letzter Lauf für /api/health (im Speicher – MVP reicht das). */
 export const crawlState = { lastRun: null, lastStats: null, running: false };

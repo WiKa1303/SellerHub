@@ -3,10 +3,10 @@
 // Trend-Score aus Wachstum/Volumen/Relevanz/Impact/Quellenvielfalt.
 // Nur die SPRACHE (Zusammenfassung + Handlungsempfehlung) kommt von der KI —
 // und nur für die Top-Themen (Kostenbremse).
-import { analyzedItemsSince, upsertTrendTopic, upsertTopicDaily } from '../db.js';
+import { analyzedItemsSince, upsertTrendTopic, upsertTopicDaily } from '../../data/db.js';
 import { buildClusters, topicLabel } from './topics.js';
 import { interpretTopics } from './interpret.js';
-import { log } from '../logger.js';
+import { log } from '../../core/logger.js';
 
 export const trendState = { lastRun: null, topics: 0, spikes: 0, running: false };
 

@@ -2,12 +2,12 @@
 // Läuft OHNE echten API-Key: der Anthropic-Client wird gemockt (aiClient-Override).
 //   node test/ai.test.js
 import { newDb } from 'pg-mem';
-import { initDb, insertItem, pendingAiItems, queryNews } from '../src/db.js';
-import { aiClient, analyzeItem } from '../src/ai/analyze.js';
-import { drainQueue, aiState } from '../src/ai/queue.js';
-import { parseProfile, personalizedScore, rankForProfile } from '../src/profile.js';
-import { buildApi } from '../src/api.js';
-import { config } from '../src/config.js';
+import { initDb, insertItem, pendingAiItems, queryNews } from '../src/data/db.js';
+import { aiClient, analyzeItem } from '../src/services/intelligence/analyze.js';
+import { drainQueue, aiState } from '../src/services/intelligence/queue.js';
+import { parseProfile, personalizedScore, rankForProfile } from '../src/services/feed/profile.js';
+import { buildApi } from '../src/api/routes.js';
+import { config } from '../src/core/config.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -117,7 +117,7 @@ t('POST /api/feedback speichert 👍', fb.ok === true);
 const fbBad = await fetch(base + '/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: 'x', vote: 5 }) });
 t('Feedback validiert vote', fbBad.status === 400);
 const health = await (await fetch(base + '/api/health')).json();
-t('Health zeigt KI-Status + Token-Verbrauch', health.ai.enabled === true && health.ai.tokensIn > 0);
+t('Health zeigt KI-Status + Token-Verbrauch', health.ai.enabled === true && health.modules.relevance.tokensIn > 0);
 
 srv.close();
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen · ${apiCalls} Mock-API-Calls`);

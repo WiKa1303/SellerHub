@@ -5,10 +5,10 @@
 //   (die Schnittstelle drainQueue() bleibt dann identisch, nur der Dispatcher wechselt).
 // Async by design: der Crawler blockiert NIE auf die KI — Items sind sofort mit
 // Keyword-Score sichtbar, der KI-Score ersetzt ihn, sobald er fertig ist.
-import { config } from '../config.js';
+import { config } from '../../core/config.js';
 import { analyzeItem, aiEnabled } from './analyze.js';
-import { pendingAiItems, saveAiResult, saveAiFailure } from '../db.js';
-import { log } from '../logger.js';
+import { pendingAiItems, saveAiResult, saveAiFailure } from '../../data/db.js';
+import { log } from '../../core/logger.js';
 
 /** Laufzeit-Statistik für /api/health (Logging von KI-Entscheidungen: DB + diese Zähler) */
 export const aiState = {

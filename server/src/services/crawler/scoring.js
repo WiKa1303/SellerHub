@@ -1,6 +1,6 @@
 // ═══ Relevanz-Score 0–100: deterministisch und erklärbar ═══
 //   Quellen-Gewicht (0–30) + Keywords (0–40) + Aktualität (0–20) + Fristen-Boost (0–10)
-import { KEYWORDS, IMPACT_PATTERN } from './config.js';
+import { KEYWORDS, IMPACT_PATTERN } from '../../core/config.js';
 
 /** @returns {{score:number, reasons:string[]}} score 0–100 + „Warum sehe ich das?" */
 export function scoreItem({ title, summary, publishDate, sourceWeight }) {

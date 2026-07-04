@@ -15,6 +15,8 @@ SellerHub/
 │   ├── bildstudio.js   ← KI-Bildstudio (ig…-Modul, IIFE)
 │   ├── admin.js        ← Admin-Bereich (User-Verwaltung)
 │   └── app.js          ← die eigentliche App (Data-Layer D, alle Seiten & Module, ~900 KB)
+├── server/             ← Seller-Radar-Backend (Crawler + KI + Trends + Alerts + Strategy)
+│                          eigene Doku: server/ARCHITEKTUR.md + server/CLAUDE.md + server/README.md
 ├── CLAUDE.md           ← diese Notiz
 ├── KONZEPT-Produktrecherche.md
 └── backups/            ← alte Stände (inkl. SellerHub.BACKUP-vor-split.html), nicht bearbeiten

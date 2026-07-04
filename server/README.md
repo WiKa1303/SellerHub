@@ -3,24 +3,25 @@
 News & Event Intelligence Hub für Amazon FBA Seller (DACH): Crawler + Relevanz-Filter + REST-API.
 Konzept & Architektur-Entscheidungen: [`../KONZEPT-SellerRadar.md`](../KONZEPT-SellerRadar.md).
 
-## Projektstruktur
+## Projektstruktur (Service-Architektur — Details & Grenzen: [`ARCHITEKTUR.md`](ARCHITEKTUR.md))
 
 ```
 server/
+├── ARCHITEKTUR.md            ← Schichten, Service-Grenzen, Kernmodule, Multi-Tenancy, Skalierung
+├── CLAUDE.md                 ← Konventionen + Checklisten für die Weiterentwicklung mit Claude Code
 ├── src/
-│   ├── index.js            ← Einstieg: DB + API + Cron in einem Prozess
-│   ├── config.js           ← ENV, Schwellen, Keyword-Lexikon (alles Justierbare)
-│   ├── sources.js          ← Seed-Quellen (Konfigurationsdaten, kein Code)
-│   ├── db.js               ← pg-Pool, Auto-Migration, Queries
-│   ├── scoring.js          ← Relevanz-Score 0–100 (deterministisch, erklärbar)
-│   ├── dedupe.js           ← URL-Hash + Titel-Trigram-Ähnlichkeit
-│   ├── api.js              ← GET /api/news · /api/events · /api/dashboard-feed · /api/health
-│   ├── crawl-once.js       ← Einmal-Lauf für externe Scheduler
-│   └── crawler/
-│       ├── run.js          ← Orchestrierung eines Crawl-Laufs
-│       ├── rss.js          ← RSS/Atom laden + parsen
-│       └── normalize.js    ← URL/Text/Datum-Normalisierung, Event-Erkennung
-├── test/smoke.test.js      ← End-to-End gegen echte Feeds (pg-mem statt Postgres)
+│   ├── index.js              ← Boot: DB + API + Cron + Intelligence-Pipeline
+│   ├── crawl-once.js         ← Einmal-Lauf für externe Scheduler
+│   ├── core/                 ← config.js (ENV/Schwellen/Lexika) · logger.js · dedupe.js
+│   ├── data/                 ← db.js (Schema + Repositories, einzige SQL-Stelle) · sources.js
+│   ├── api/routes.js         ← REST: news/events/dashboard-feed/trends/alerts/market-intelligence/strategy/health
+│   └── services/
+│       ├── crawler/          ← rss.js · normalize.js · scoring.js · run.js
+│       ├── intelligence/     ← AI-LAYER: registry.js (Erweiterungspunkt!) · analyze.js · queue.js
+│       │                        topics.js · engine.js · interpret.js · strategy.js
+│       ├── alerts/rules.js   ← Risk Shield (deterministisches Regelwerk)
+│       └── feed/profile.js   ← Personal Intelligence Feed (Profil-Ranking)
+├── test/                     ← smoke · ai · trends · strategy (pg-mem, KI gemockt)
 ├── .env.example
 └── package.json
 ```

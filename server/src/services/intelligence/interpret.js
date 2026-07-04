@@ -3,9 +3,9 @@
 // Wie dringend? Monetäre Chance oder Risiko? → summary + recommended_action.
 // Kostendesign: EIN Call für bis zu 8 Themen (Array-Output), nicht 8 Calls.
 // Ohne API-Key: deterministischer Fallback aus den vorhandenen Artikel-Analysen.
-import { aiClient } from '../ai/analyze.js';
-import { config } from '../config.js';
-import { log } from '../logger.js';
+import { aiClient } from './analyze.js';
+import { config } from '../../core/config.js';
+import { log } from '../../core/logger.js';
 
 const SYSTEM_PROMPT = `Du bist Marktanalyst für Amazon-FBA-Seller im DACH-Raum.
 Du bekommst Trend-Themen mit Kennzahlen und Beleg-Artikeln. Interpretiere jedes Thema unternehmerisch:

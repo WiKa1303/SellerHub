@@ -2,8 +2,8 @@
 // Deterministische Alert-Regeln über den KI-Analysefeldern. Bewusst KEINE
 // KI-Entscheidung: Ein Alert muss reproduzierbar und begründbar sein.
 // Push-Vorbereitung (Phase 5): alerts.delivered_at IS NULL = Zustell-Queue.
-import { itemsWithoutAlertCheck, insertAlert } from './db.js';
-import { log } from './logger.js';
+import { itemsWithoutAlertCheck, insertAlert } from '../../data/db.js';
+import { log } from '../../core/logger.js';
 
 export const alertState = { lastRun: null, created: 0 };
 

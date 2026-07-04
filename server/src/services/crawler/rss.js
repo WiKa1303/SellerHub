@@ -1,6 +1,6 @@
 // ═══ RSS/Atom laden + parsen → Roh-Items ═══
 import { XMLParser } from 'fast-xml-parser';
-import { config } from '../config.js';
+import { config } from '../../core/config.js';
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
 

@@ -321,6 +321,15 @@ function radarWidgetHtml(d){
         '<div style="font-size:12.5px;color:var(--tx);margin-top:2px">'+esc(a.title)+(a.ai_affected?' <span style="color:var(--tx3);font-size:11px">— betrifft: '+esc(a.ai_affected)+'</span>':'')+'</div></a>';
     });
   }
+  // ── Strategy Engine: Tages-Briefing (Headline + Top-Priorität) ──
+  if(d.mi&&d.mi.strategy&&d.mi.strategy.headline){
+    var st=d.mi.strategy;var p0=(st.priorities&&st.priorities[0])||null;
+    h+='<div style="background:linear-gradient(135deg,var(--pud),var(--s2));border:1px solid var(--pu);border-radius:10px;padding:10px 14px;margin-bottom:12px">'+
+      '<div style="font-size:11px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">🧭 Strategie-Briefing · '+esc(st.day||'')+'</div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--tx);line-height:1.4">'+esc(st.headline)+'</div>'+
+      (p0?'<div style="font-size:11.5px;color:var(--tx2);margin-top:4px">1. Priorität ('+(p0.type==='chance'?'✦ Chance':'⚠ Risiko')+'): <b>'+esc(p0.title)+'</b> → '+esc(p0.action)+'</div>':'')+
+    '</div>';
+  }
   // ── Market Intelligence (Phase 4): Top-Trends mit Handlungsempfehlung ──
   if(d.mi&&d.mi.rising_trends&&d.mi.rising_trends.length){
     h+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:12px">';

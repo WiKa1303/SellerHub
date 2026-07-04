@@ -1,12 +1,12 @@
 // ═══ Phase-4-Tests: Trend-Engine, Spike-Detection, Alerts, Market Intelligence ═══
 //   node test/trends.test.js   (ohne API-Key: Interpretations-Layer wird gemockt)
 import { newDb } from 'pg-mem';
-import { initDb, insertItem, saveAiResult, queryTrends, queryAlerts, topicHistory } from '../src/db.js';
-import { aiClient } from '../src/ai/analyze.js';
-import { buildClusters } from '../src/trends/topics.js';
-import { computeMetrics, dailyBuckets, runTrendEngine } from '../src/trends/engine.js';
-import { classifyAlert, generateAlerts } from '../src/alerts.js';
-import { buildApi } from '../src/api.js';
+import { initDb, insertItem, saveAiResult, queryTrends, queryAlerts, topicHistory } from '../src/data/db.js';
+import { aiClient } from '../src/services/intelligence/analyze.js';
+import { buildClusters } from '../src/services/intelligence/topics.js';
+import { computeMetrics, dailyBuckets, runTrendEngine } from '../src/services/intelligence/engine.js';
+import { classifyAlert, generateAlerts } from '../src/services/alerts/rules.js';
+import { buildApi } from '../src/api/routes.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -133,7 +133,7 @@ t('Dashboard-Priorisierung: Critical-Alerts gepinnt', Array.isArray(dash.critica
 const alertsApi = await (await fetch(base + '/api/alerts?level=critical')).json();
 t('GET /api/alerts filtert nach Level', alertsApi.items.every(a => a.alert_level === 'critical'));
 const health = await (await fetch(base + '/api/health')).json();
-t('Health zeigt Trend-/Alert-Status', health.trends.topics === 2 && health.alerts.created >= 3);
+t('Health zeigt Trend-/Alert-Status', health.modules.trends.topics === 2 && health.modules.alerts.created >= 3);
 
 srv.close();
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen`);

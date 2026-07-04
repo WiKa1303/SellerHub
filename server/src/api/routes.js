@@ -1,14 +1,14 @@
 // ═══ REST-API (readonly + Admin-Trigger) ═══
 import express from 'express';
-import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory } from './db.js';
-import { runCrawl, crawlState } from './crawler/run.js';
-import { drainQueue, aiState } from './ai/queue.js';
-import { aiEnabled } from './ai/analyze.js';
-import { runTrendEngine, trendState } from './trends/engine.js';
-import { generateAlerts, alertState } from './alerts.js';
-import { parseProfile, rankForProfile } from './profile.js';
-import { SOURCES } from './sources.js';
-import { config } from './config.js';
+import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory, latestStrategyBrief } from '../data/db.js';
+import { runCrawl, crawlState } from '../services/crawler/run.js';
+import { aiState } from '../services/intelligence/queue.js';
+import { aiEnabled } from '../services/intelligence/analyze.js';
+import { trendState } from '../services/intelligence/engine.js';
+import { AI_MODULES, runIntelligencePipeline } from '../services/intelligence/registry.js';
+import { parseProfile, rankForProfile } from '../services/feed/profile.js';
+import { SOURCES } from '../data/sources.js';
+import { config } from '../core/config.js';
 
 export function buildApi() {
   const app = express();
@@ -17,10 +17,14 @@ export function buildApi() {
   // CORS: Inhalte sind öffentlich, das SellerHub-Frontend (file:// oder eigene Domain) darf lesen.
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key, X-Tenant-Id');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     next();
   });
+  // Multi-Tenant-Seam: Tenant wird HIER aufgelöst (heute immer 'public').
+  // Bei Accounts (v2): Auth-Token → tenant_id, und req.tenantId wandert als
+  // Filter in die data/-Repositories. Siehe ARCHITEKTUR.md → Multi-Tenancy.
+  app.use((req, res, next) => { req.tenantId = req.get('X-Tenant-Id') || 'public'; next(); });
   // Lese-Antworten 5 min cachebar → CDN/Proxy entkoppelt die Last
   app.use((req, res, next) => { if (req.method === 'GET') res.set('Cache-Control', 'public, max-age=300'); next(); });
 
@@ -135,11 +139,13 @@ export function buildApi() {
       const rising = await Promise.all(all.map(async t => ({
         ...t, sparkline: (await topicHistory(t.id, 30)).map(d => d.mentions),
       })));
+      const brief = await latestStrategyBrief();
       res.json({
         rising_trends: rising,
         top_risks: risks,
         opportunities: chances,
         alerts: { critical, important },
+        strategy: brief ? { day: brief.day, ...brief.brief } : null,
         meta: {
           computed_at: trendState.lastRun,
           window: { short_days: 7, long_days: 30 },
@@ -159,23 +165,32 @@ export function buildApi() {
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
-  // GET /api/health – Monitoring: Crawler + KI-Layer (Token-Verbrauch = Kostenkontrolle)
+  // GET /api/strategy/brief – Strategy Engine: das aktuelle Tages-Briefing
+  app.get('/api/strategy/brief', async (req, res) => {
+    try {
+      const b = await latestStrategyBrief();
+      if (!b) return res.status(404).json({ error: 'noch kein Briefing erstellt' });
+      res.json({ day: b.day, model: b.model, created_at: b.created_at, ...b.brief });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
+  // GET /api/health – Monitoring: alle Intelligence-Module aus der Registry
   app.get('/api/health', (req, res) => {
     res.set('Cache-Control', 'no-store');
+    const modules = Object.fromEntries(AI_MODULES.map(m => [m.id, m.state]));
     res.json({
       ok: true,
       crawler: { lastRun: crawlState.lastRun, running: crawlState.running, stats: crawlState.lastStats },
-      ai: { enabled: aiEnabled(), model: config.aiModel, ...aiState },
-      trends: trendState,
-      alerts: alertState,
+      ai: { enabled: aiEnabled(), model: config.aiModel },
+      modules,
     });
   });
 
-  // POST /api/admin/crawl – manueller Trigger (ADMIN_KEY); danach KI-Queue → Trends → Alerts (async)
+  // POST /api/admin/crawl – manueller Trigger (ADMIN_KEY); danach die komplette Intelligence-Pipeline (async)
   app.post('/api/admin/crawl', async (req, res) => {
     if (!config.adminKey || req.get('X-Api-Key') !== config.adminKey) return res.status(401).json({ error: 'unauthorized' });
     const stats = await runCrawl();
-    drainQueue().then(() => Promise.all([runTrendEngine(), generateAlerts()])).catch(() => {});
+    runIntelligencePipeline().catch(() => {});
     res.json({ ok: true, stats });
   });
 

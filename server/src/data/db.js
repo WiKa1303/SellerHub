@@ -1,8 +1,8 @@
 // ═══ Datenbank: pg-Pool + Auto-Migration ═══
 // MVP-Entscheidung: id = SHA-256 der kanonischen URL (Primärschlüssel = Dublettenschutz Ebene 1).
 import pg from 'pg';
-import { config } from './config.js';
-import { log } from './logger.js';
+import { config } from '../core/config.js';
+import { log } from '../core/logger.js';
 
 let pool = null;
 
@@ -84,8 +84,34 @@ export async function initDb(poolOverride) {
       created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
       delivered_at TIMESTAMPTZ                       -- NULL = noch nicht gepusht (Phase 5)
     )`);
-  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts)');
+  // Strategy Engine: 1 Briefing pro Tag, in der DB gecacht (= max. 1 LLM-Call/Tag)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS strategy_briefs (
+      day        TEXT PRIMARY KEY,                  -- YYYY-MM-DD
+      brief      TEXT NOT NULL,                     -- JSON: headline, situation, priorities, watchlist
+      model      TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs)');
   return pool;
+}
+
+// ═══ Strategy-Briefings ═══
+export async function saveStrategyBrief(day, brief, model) {
+  await db().query(
+    `INSERT INTO strategy_briefs (day, brief, model) VALUES ($1,$2,$3)
+     ON CONFLICT (day) DO UPDATE SET brief=$2, model=$3`,
+    [day, JSON.stringify(brief), model]);
+}
+
+export async function getStrategyBrief(day) {
+  const r = await db().query(`SELECT * FROM strategy_briefs WHERE day = $1`, [day]);
+  return r.rows[0] ? { ...r.rows[0], brief: JSON.parse(r.rows[0].brief) } : null;
+}
+
+export async function latestStrategyBrief() {
+  const r = await db().query(`SELECT * FROM strategy_briefs ORDER BY day DESC LIMIT 1`);
+  return r.rows[0] ? { ...r.rows[0], brief: JSON.parse(r.rows[0].brief) } : null;
 }
 
 export function db() {

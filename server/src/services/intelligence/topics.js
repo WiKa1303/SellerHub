@@ -6,7 +6,7 @@
 // hundert Slugs statt Embeddings auf zehntausenden Artikeln.
 // Upgrade-Pfad ab echter Themen-Unschärfe/Volumen: Embeddings (z.B. Voyage) +
 // pgvector + Agglomeration — die Schnittstelle buildClusters(items) bleibt gleich.
-import { titleSimilarity } from '../dedupe.js';
+import { titleSimilarity } from '../../core/dedupe.js';
 
 const MERGE_THRESHOLD = 0.55; // Slug-Ähnlichkeit, ab der zwei Topics dasselbe Thema sind
 

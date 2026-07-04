@@ -2,12 +2,12 @@
 // Crawlt die ECHTEN Feeds → speichert → fragt die API ab. Netzwerk erforderlich.
 //   npm test
 import { newDb } from 'pg-mem';
-import { initDb } from '../src/db.js';
-import { runCrawl } from '../src/crawler/run.js';
-import { buildApi } from '../src/api.js';
-import { scoreItem } from '../src/scoring.js';
-import { urlHash, titleSimilarity, isDuplicateTitle } from '../src/dedupe.js';
-import { canonicalUrl, normalizeTitle, extractEventDate, cleanSummary } from '../src/crawler/normalize.js';
+import { initDb } from '../src/data/db.js';
+import { runCrawl } from '../src/services/crawler/run.js';
+import { buildApi } from '../src/api/routes.js';
+import { scoreItem } from '../src/services/crawler/scoring.js';
+import { urlHash, titleSimilarity, isDuplicateTitle } from '../src/core/dedupe.js';
+import { canonicalUrl, normalizeTitle, extractEventDate, cleanSummary } from '../src/services/crawler/normalize.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
