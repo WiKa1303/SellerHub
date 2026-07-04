@@ -2,10 +2,8 @@
 import express from 'express';
 import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory, latestStrategyBrief } from '../data/db.js';
 import { runCrawl, crawlState } from '../services/crawler/run.js';
-import { aiState } from '../services/intelligence/queue.js';
-import { aiEnabled } from '../services/intelligence/analyze.js';
-import { trendState } from '../services/intelligence/engine.js';
-import { AI_MODULES, runIntelligencePipeline } from '../services/intelligence/registry.js';
+import { aiEnabled } from '../core/ai-client.js';
+import { AI_MODULES, moduleState, runIntelligencePipeline } from '../services/intelligence/registry.js';
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
@@ -85,7 +83,7 @@ export function buildApi() {
         meta: {
           lastCrawl: crawlState.lastRun,
           personalized: !profile.isEmpty,
-          ai: aiEnabled() ? { lastRun: aiState.lastRun, analyzed: aiState.analyzed } : null,
+          ai: aiEnabled() ? { lastRun: moduleState('relevance').lastRun, analyzed: moduleState('relevance').analyzed } : null,
           sources: SOURCES.map(s => ({ id: s.id, name: s.name, region: s.region })),
         },
       });
@@ -147,9 +145,9 @@ export function buildApi() {
         alerts: { critical, important },
         strategy: brief ? { day: brief.day, ...brief.brief } : null,
         meta: {
-          computed_at: trendState.lastRun,
+          computed_at: moduleState('trends').lastRun,
           window: { short_days: 7, long_days: 30 },
-          topics_total: trendState.topics, spikes: trendState.spikes,
+          topics_total: moduleState('trends').topics, spikes: moduleState('trends').spikes,
         },
       });
     } catch (e) { res.status(500).json({ error: e.message }); }

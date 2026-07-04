@@ -3,7 +3,7 @@
 // Wie dringend? Monetäre Chance oder Risiko? → summary + recommended_action.
 // Kostendesign: EIN Call für bis zu 8 Themen (Array-Output), nicht 8 Calls.
 // Ohne API-Key: deterministischer Fallback aus den vorhandenen Artikel-Analysen.
-import { aiClient } from './analyze.js';
+import { aiClient } from '../../core/ai-client.js';
 import { config } from '../../core/config.js';
 import { log } from '../../core/logger.js';
 

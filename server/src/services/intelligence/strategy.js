@@ -4,7 +4,7 @@
 // Watchlist. Das ist die „Kontrollzentrum"-Antwort auf: Was mache ich HEUTE zuerst?
 // Kostendesign: max. 1 LLM-Call pro Tag (Briefing wird in der DB gecacht).
 // Ohne API-Key: deterministisches Briefing aus Alerts + Trend-Empfehlungen.
-import { aiClient } from './analyze.js';
+import { aiClient } from '../../core/ai-client.js';
 import { queryTrends, queryAlerts, getStrategyBrief, saveStrategyBrief } from '../../data/db.js';
 import { config } from '../../core/config.js';
 import { log } from '../../core/logger.js';

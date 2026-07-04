@@ -1,8 +1,12 @@
 // ═══ KI-Relevanzanalyse (Phase 3) ═══
 // EIN API-Call pro Artikel liefert Analyse UND Summary (Kosteneffizienz: kein zweiter Call).
 // Strukturierte Outputs (output_config.format) garantieren valides JSON — kein Parsing-Gefrickel.
-import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../../core/config.js';
+import { aiClient } from '../../core/ai-client.js';
+
+// Client-Fabrik liegt in der Infrastruktur (core/ai-client.js);
+// Re-Export hält bestehende Importe (Tests, Module) stabil.
+export { aiClient, aiEnabled } from '../../core/ai-client.js';
 
 export const AI_CATEGORIES = ['recht', 'ppc', 'produktrecherche', 'logistik', 'steuern', 'events', 'trends', 'sonstiges'];
 
@@ -60,19 +64,6 @@ const ANALYSIS_SCHEMA = {
   required: ['relevance_score', 'category', 'urgency', 'impact', 'reasoning', 'summary', 'topic', 'opportunity', 'affected'],
   additionalProperties: false,
 };
-
-let _client = null;
-/** Lazy-Init; clientOverride ermöglicht Tests ohne echten API-Key. */
-export function aiClient(clientOverride) {
-  if (clientOverride) { _client = clientOverride; return _client; }
-  if (!_client) {
-    if (!config.anthropicApiKey) return null;
-    // SDK-Retries übernehmen 429/5xx mit exponentiellem Backoff — kein Hand-Rollen nötig
-    _client = new Anthropic({ apiKey: config.anthropicApiKey, maxRetries: 3, timeout: 60000 });
-  }
-  return _client;
-}
-export function aiEnabled() { return !!(config.anthropicApiKey || _client); }
 
 /**
  * Analysiert einen Artikel. Wirft bei API-Fehlern (Queue kümmert sich um Retry/Abbruch).

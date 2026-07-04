@@ -26,8 +26,9 @@ AI-native Kontrollzentrum für Amazon-Seller im DACH-Raum: Risiken erkennen (**R
 │ die Pipeline-Reihenfolge in intelligence/registry.js.                  │
 └──────┬─────────────────────────────────────────────────────────────────┘
 ┌─ DATA LAYER ── src/data/ ────▼─────────────────────────────────────────┐
-│ db.js       Schema (Auto-Migration) + Repositories (einzige SQL-Stelle)│
-│ sources.js  Quellen-Katalog (Konfigurationsdaten, kein Code)           │
+│ schema.js   Pool + DDL (Auto-Migration, idempotent)                    │
+│ repos/      Repositories je Domäne: items · trends · alerts · strategy │
+│ db.js       Fassade (hält alle Importe stabil) · sources.js  Quellen   │
 └──────┬─────────────────────────────────────────────────────────────────┘
 ┌─ CORE ── src/core/ ──────────▼─────────────────────────────────────────┐
 │ config.js (ENV + Schwellen + Lexika) · logger.js · dedupe.js (Text-    │
@@ -38,6 +39,48 @@ HINTERGRUNDVERARBEITUNG (src/index.js):
 Cron → Crawl → runIntelligencePipeline()  — asynchron, blockiert NIE die API.
 Die DB ist die Queue (crash-sicher): ai_analyzed_at IS NULL = offene Arbeit.
 ```
+
+## Layer-Taxonomie (Plattform-Sicht → Code)
+
+| Plattform-Layer | Code | Enthält |
+|---|---|---|
+| **DATA LAYER** | `src/data/` + `src/services/crawler/` | Crawling, Event-Storage (`news_events`), Zeitreihen; Roh-Content bewusst NUR als ≤300-Zeichen-Anriss (Leistungsschutzrecht); Seller-Profile bewusst client-seitig (DSGVO) — Schema liegt in `services/feed/profile.js`, Tabelle kommt mit Accounts |
+| **INTELLIGENCE LAYER** | `src/services/intelligence/` | Relevanzanalyse, Trend Detection, Risk-Scoring-Input, Opportunity-Erkennung, Strategie — orchestriert über `registry.js` |
+| **APPLICATION LAYER** | `src/api/` + `src/services/feed/` + `src/services/alerts/` | Feed-Generator (Profil-Ranking), Alert-Manager (Regelwerk + Zustell-Queue), Dashboard-API |
+| **INFRASTRUCTURE LAYER** | `src/core/` + `src/index.js` | Konfiguration, Logging, LLM-Client (`ai-client.js`), Scheduling (Cron), Queue (DB-als-Queue-Konvention), Monitoring (`/api/health`), Graceful Shutdown |
+
+## Architektur-Analyse (4.7.2026) — Befunde & Status
+
+| # | Befund | Schwere | Status |
+|---|---|---|---|
+| F1 | `crawl-once.js` crawlte ohne Intelligence-Pipeline → Worker-Split-Pfad hätte nie analysiert | hoch | ✅ behoben: führt jetzt die volle Pipeline aus |
+| F2 | LLM-Client-Fabrik lag im Fachmodul `analyze.js` → interpret/strategy an analyze gekoppelt | mittel | ✅ behoben: `core/ai-client.js` (Infrastruktur), analyze re-exportiert kompatibel |
+| F3 | API importierte Service-Interna (`aiState`, `trendState`) an der Registry vorbei | mittel | ✅ behoben: `moduleState(id)` — Registry ist der einzige Zugriffsweg |
+| F4 | `db.js` (304 Zeilen) mischte 4 Domänen | mittel | ✅ behoben: `schema.js` + `repos/{items,trends,alerts,strategy}.js`, `db.js` = Fassade |
+| F5 | Kein SIGTERM-Handling → Deploy killt Requests/Pipeline hart | niedrig (DB-Queue macht es recoverable) | ✅ behoben: Graceful Shutdown in index.js |
+
+## Tech-Debt-Register (bewusst offen, mit Auslöser)
+
+| Debt | Warum ok für jetzt | Auslöser für den Fix |
+|---|---|---|
+| In-Memory-Modul-States (`aiState` …) sind prozess-lokal | 1 Prozess = 1 Wahrheit | Worker/API-Split → States aus DB ableiten (`SELECT max(ai_analyzed_at)…`) |
+| node-cron im API-Prozess | einfachster Betrieb | Worker-Split (Stufe 2): Cron extern, API cron-frei |
+| DB-als-Queue statt BullMQ/Redis | crash-sicher, null Infra | mehrere Worker-PROZESSE am selben Backlog (Locking nötig) |
+| Keyword-Lexikon statisch in config.js | transparent, versioniert | `ai_feedback`-Datensatz groß genug für datengetriebenes Nachschärfen |
+| Kein Migrations-Framework (idempotente DDL) | additive Migrationen reichen | erste DESTRUKTIVE Migration oder Accounts → node-pg-migrate |
+| Monitoring = /api/health + stdout-Logs | Railway/Render sammeln stdout | zahlende Kunden → Uptime-Alarm + Fehlerbudget (z.B. Betterstack) |
+
+**Bewusste Entscheidungen (KEIN Debt):** kein Volltext-Storage (Leistungsschutzrecht) · Profile client-seitig (DSGVO-Minimalismus) · Trigram statt Embeddings (Volumen) — Begründungen in den jeweiligen Modul-Headern.
+
+## Migrationsstrategie (ohne Downtime)
+
+Die Plattform ist so gebaut, dass jeder Deploy unterbrechungsfrei ist:
+
+1. **Additive, idempotente Migrationen** (`IF NOT EXISTS`) laufen beim Boot — alte und neue Version können parallel gegen dieselbe DB laufen (Blue/Green- oder Rolling-Deploy des Hosters reicht).
+2. **Graceful Shutdown** (SIGTERM): offene Requests werden zu Ende bedient; eine laufende Pipeline darf abbrechen, weil die **DB-als-Queue** jeden Lauf wiederaufnehmbar macht (`ai_analyzed_at IS NULL` = offene Arbeit; Alerts/Trends idempotent per `ON CONFLICT`).
+3. **Boot-Crawl** füllt nach jedem Deploy sofort nach (`CRAWL_ON_BOOT`).
+4. **Frontend entkoppelt:** Das Widget cached die letzte Antwort in localStorage und rendert defensiv — API-Neustarts sind für Nutzer unsichtbar.
+5. **Worker-Split später ohne Umbau:** Schritt 1: zweite Instanz mit `npm run crawl` + externem Cron; Schritt 2: `CRAWL_ON_BOOT=false` und Cron im API-Prozess deaktivieren. Kein Code-Change, nur ENV.
 
 ## Kernmodule → Code-Mapping
 

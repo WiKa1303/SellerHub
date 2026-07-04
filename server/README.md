@@ -12,8 +12,8 @@ server/
 ├── src/
 │   ├── index.js              ← Boot: DB + API + Cron + Intelligence-Pipeline
 │   ├── crawl-once.js         ← Einmal-Lauf für externe Scheduler
-│   ├── core/                 ← config.js (ENV/Schwellen/Lexika) · logger.js · dedupe.js
-│   ├── data/                 ← db.js (Schema + Repositories, einzige SQL-Stelle) · sources.js
+│   ├── core/                 ← config.js · logger.js · dedupe.js · ai-client.js (LLM-Infrastruktur)
+│   ├── data/                 ← schema.js (DDL) · repos/{items,trends,alerts,strategy}.js · db.js (Fassade) · sources.js
 │   ├── api/routes.js         ← REST: news/events/dashboard-feed/trends/alerts/market-intelligence/strategy/health
 │   └── services/
 │       ├── crawler/          ← rss.js · normalize.js · scoring.js · run.js

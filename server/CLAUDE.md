@@ -16,7 +16,7 @@ npm run crawl         # einmaliger Crawl für externe Scheduler
 
 ## Struktur (Kurzform — Details in ARCHITEKTUR.md)
 
-- `src/core/` ENV/Logger/Text-Utils · `src/data/` Schema+Repositories (EINZIGE SQL-Stelle) + Quellen-Katalog
+- `src/core/` ENV/Logger/Text-Utils/LLM-Client (`ai-client.js`) · `src/data/` `schema.js` (DDL) + `repos/` je Domäne (EINZIGE SQL-Stellen), `db.js` = Fassade + Quellen-Katalog
 - `src/services/` crawler · intelligence (AI-Layer) · alerts · feed — Services reden nur über data/ miteinander
 - `src/api/routes.js` REST (keine Geschäftslogik!) · `src/index.js` Boot + Cron + Pipeline
 
@@ -36,7 +36,7 @@ npm run crawl         # einmaliger Crawl für externe Scheduler
 1. `src/services/intelligence/<modul>.js`: exportiert `async run()`-Funktion + `<modul>State`-Objekt (für /api/health).
 2. Regeln aus ARCHITEKTUR.md → „Verbindliche Modul-Regeln" (async, Degradation, Kostenbremse, Erklärbarkeit, Idempotenz).
 3. In `registry.js` registrieren — **Position = Ausführungsreihenfolge** (nach den Daten, die das Modul braucht).
-4. Neue Tabellen/Spalten idempotent in `data/db.js` (`IF NOT EXISTS`), Repository-Funktionen ebenfalls dort.
+4. Neue Tabellen/Spalten idempotent in `data/schema.js` (`IF NOT EXISTS`); Queries in `data/repos/<domäne>.js`, Re-Export in `data/db.js` ergänzen.
 5. Endpunkte in `api/routes.js` (nur delegieren), Widget-Anbindung optional in `../js/app.js` (`radarWidgetHtml`).
 6. Tests + README-Abschnitt.
 

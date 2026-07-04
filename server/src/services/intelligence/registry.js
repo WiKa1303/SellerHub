@@ -22,6 +22,11 @@ export const AI_MODULES = [
   { id: 'strategy',  description: 'Strategy Engine: tägliches Strategie-Briefing aus der Gesamtlage',          run: updateStrategyBrief, state: strategyState },
 ];
 
+/** Laufzeit-Zustand eines Moduls (für /api/health & Meta-Felder) — einziger Weg für die API-Schicht. */
+export function moduleState(id) {
+  return AI_MODULES.find(m => m.id === id)?.state || {};
+}
+
 /** Führt alle Module sequenziell aus; Fehler werden isoliert und gemeldet. */
 export async function runIntelligencePipeline() {
   const results = {};

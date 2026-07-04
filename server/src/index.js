@@ -26,7 +26,18 @@ async function main() {
   await initDb();
 
   const app = buildApi();
-  app.listen(config.port, () => log.info(`API läuft auf Port ${config.port}`));
+  const server = app.listen(config.port, () => log.info(`API läuft auf Port ${config.port}`));
+
+  // Graceful Shutdown: Deploy/Restart killt keine offenen Requests. Eine evtl.
+  // laufende Pipeline darf abbrechen — die DB-als-Queue macht den Lauf wiederaufnehmbar
+  // (offene Items bleiben ai_analyzed_at IS NULL und werden beim nächsten Lauf geholt).
+  for (const sig of ['SIGTERM', 'SIGINT']) {
+    process.on(sig, () => {
+      log.info(`${sig} empfangen — fahre herunter (offene Pipeline-Arbeit wird beim nächsten Lauf fortgesetzt)`);
+      server.close(() => process.exit(0));
+      setTimeout(() => process.exit(0), 8000).unref(); // Fallback, falls Verbindungen hängen
+    });
+  }
 
   // Scheduling: node-cron im selben Prozess. 2× täglich reicht – News sind kein Echtzeit-Problem.
   cron.schedule(config.crawlCron, () => {
