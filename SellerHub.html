@@ -1321,6 +1321,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <div style="display:flex;gap:4px;margin-top:4px">
       <button onclick="wikaExportAll()" title="Alle Daten als sellerhub-data.json herunterladen (für Portable-Version)" style="flex:1;background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 6px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">⬇ Export</button>
       <button onclick="wikaImportAll()" title="Daten aus sellerhub-data.json importieren" style="flex:1;background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 6px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">⬆ Import</button>
+      <button onclick="backupOpen()" title="Backups: tägliche Auto-Snapshots ansehen & wiederherstellen" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 8px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">🛟</button>
     </div>
   </div>
 </aside>
@@ -3965,6 +3966,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
     <!-- ─── FOKUS: PRODUKTRECHERCHE-FAHRPLAN (geführt) ─── -->
     <div id="dashRoadmap" style="margin-bottom:18px"></div>
+    <div id="dashBackupHint"></div>
 
     <!-- ─── DEINE PRODUKTSUCHEN (mehrere parallel, je 5 Schritte) ─── -->
     <div id="dashSearches" style="margin-bottom:24px"></div>
@@ -5254,6 +5256,7 @@ function _doSave(){
     var el=document.getElementById('lastSaved');
     if(el)el.textContent='Gespeichert '+new Date().toLocaleTimeString('de-DE');
     _saveQuotaWarned=false;
+    if(typeof SHBackup!=='undefined')SHBackup.snapshotIfDue(); // Auto-Backup: 1 Snapshot/Tag (billig dank Tages-Flag)
   }catch(e){
     // QuotaExceededError (Speicher voll) oder anderer Schreibfehler
     var isQuota=e&&(e.name==='QuotaExceededError'||e.code===22||e.code===1014);
@@ -5285,6 +5288,97 @@ window.addEventListener('beforeunload',function(){
   if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null;_doSave();}
 });
 
+// ─── Auto-Backup (Phase 1.3): tägliche Snapshots in IndexedDB ───
+// Schützt vor Fehlbedienung/kaputten Daten/vollem localStorage. Getrennter Speicher (IndexedDB),
+// aber gleiche Browser-Origin → gegen Browser-Datenlöschung hilft NUR der Datei-Export (Erinnerung s. Dashboard).
+var SHBackup=(function(){
+  var DBN='sellerhub_backups',STORE='snapshots',KEEP=10;
+  function openDb(cb){
+    try{
+      var rq=indexedDB.open(DBN,1);
+      rq.onupgradeneeded=function(){rq.result.createObjectStore(STORE,{keyPath:'id'});};
+      rq.onsuccess=function(){cb(rq.result);};
+      rq.onerror=function(){cb(null);};
+    }catch(e){cb(null);}
+  }
+  function hasData(){
+    return !!((D.products&&D.products.length)||(D.ideen&&D.ideen.length)||(D.research&&D.research.candidates&&D.research.candidates.length)||(D.research&&D.research.shortlist&&D.research.shortlist.length));
+  }
+  // Ein Snapshot pro Tag (Tages-Flag in localStorage vermeidet IndexedDB-Zugriff bei jedem save)
+  function snapshotIfDue(){
+    if(!hasData())return;
+    var today=new Date().toISOString().slice(0,10);
+    try{if(localStorage.getItem('wika_lastSnapshotDay')===today)return;}catch(e){}
+    var raw;try{raw=localStorage.getItem(SK);}catch(e){}
+    if(!raw)raw=JSON.stringify(D);
+    writeSnap(today,raw,function(ok){
+      if(ok){try{localStorage.setItem('wika_lastSnapshotDay',today);}catch(e){}}
+    });
+  }
+  function writeSnap(id,raw,cb){
+    openDb(function(db){
+      if(!db){if(cb)cb(false);return;}
+      try{
+        var tx=db.transaction(STORE,'readwrite'),st=tx.objectStore(STORE);
+        st.put({id:id,ts:new Date().toISOString(),bytes:raw.length,data:raw});
+        var kq=st.getAllKeys();
+        kq.onsuccess=function(){
+          var keys=(kq.result||[]).slice().sort();
+          while(keys.length>KEEP){st.delete(keys.shift());}
+        };
+        tx.oncomplete=function(){db.close();if(cb)cb(true);};
+        tx.onerror=function(){db.close();if(cb)cb(false);};
+      }catch(e){if(cb)cb(false);}
+    });
+  }
+  function list(cb){
+    openDb(function(db){
+      if(!db){cb([]);return;}
+      try{
+        var rq=db.transaction(STORE,'readonly').objectStore(STORE).getAll();
+        rq.onsuccess=function(){var a=rq.result||[];a.sort(function(x,y){return x.id<y.id?1:-1});db.close();cb(a);};
+        rq.onerror=function(){db.close();cb([]);};
+      }catch(e){cb([]);}
+    });
+  }
+  function get(id,cb){
+    openDb(function(db){
+      if(!db){cb(null);return;}
+      try{
+        var rq=db.transaction(STORE,'readonly').objectStore(STORE).get(id);
+        rq.onsuccess=function(){db.close();cb(rq.result||null);};
+        rq.onerror=function(){db.close();cb(null);};
+      }catch(e){cb(null);}
+    });
+  }
+  function restore(id){
+    get(id,function(snap){
+      if(!snap){toast('Snapshot nicht gefunden');return;}
+      if(!confirm('Daten-Stand vom '+id+' wiederherstellen?\n\nDer AKTUELLE Stand wird überschrieben (wird vorher als Sicherheits-Snapshot gesichert). Die App lädt danach neu.'))return;
+      var cur;try{cur=localStorage.getItem(SK);}catch(e){}
+      var fin=function(){
+        try{localStorage.setItem(SK,snap.data);localStorage.removeItem('wika_lastSnapshotDay');}catch(e){alert('Wiederherstellen fehlgeschlagen: '+e.message);return;}
+        location.reload();
+      };
+      if(cur)writeSnap(new Date().toISOString().slice(0,10)+'_vor-restore',cur,fin);else fin();
+    });
+  }
+  function download(id){
+    get(id,function(snap){
+      if(!snap){toast('Snapshot nicht gefunden');return;}
+      var blob=new Blob([snap.data],{type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;a.download='sellerhub-snapshot-'+id+'.json';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    });
+  }
+  return {snapshotIfDue:snapshotIfDue,list:list,restore:restore,download:download};
+})();
+// Beim App-Start (nach load): Tages-Snapshot anlegen, falls heute noch keiner existiert
+setTimeout(function(){try{SHBackup.snapshotIfDue();}catch(e){}},2500);
+
 // Export all wika data for migration to portable version
 function wikaExportAll(){
   if(typeof saveNow==='function')saveNow(); // ausstehende Änderungen sofort schreiben
@@ -5306,6 +5400,8 @@ function wikaExportAll(){
   document.body.appendChild(a);
   a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  try{localStorage.setItem('wika_lastExport',new Date().toISOString());}catch(e){}
+  if(typeof renderBackupHint==='function')renderBackupHint();
   if(window.toast)toast('✅ Daten exportiert: sellerhub-data.json');
 }
 
@@ -5339,6 +5435,55 @@ function wikaImportAll(){
     reader.readAsText(file);
   };
   input.click();
+}
+
+// ─── Backup-Center: Snapshots ansehen/wiederherstellen + Export-Erinnerung ───
+function backupOpen(){
+  var old=document.getElementById('backupModal');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='backupModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var last=null;try{last=localStorage.getItem('wika_lastExport');}catch(e){}
+  var lastTxt=last?new Date(last).toLocaleDateString('de-DE')+' '+new Date(last).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr':'noch nie';
+  ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:620px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">🛟 Backups</h2><button onclick="document.getElementById(\'backupModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
+    '<div style="padding:18px 20px">'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">SellerHub sichert deine Daten <b>automatisch 1× täglich</b> als Snapshot im Browser (letzte 10 Tage). Snapshots schützen vor Fehlbedienung und kaputten Daten – <b>nicht</b> vor dem Löschen der Browser-Daten. Dagegen hilft nur der <b>Datei-Export</b> (letzter: <b>'+lastTxt+'</b>).</div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="wikaExportAll();document.getElementById(\'backupModal\').remove()">⬇ Jetzt als Datei exportieren</button><button class="btn btn-sm" onclick="wikaImportAll()">⬆ Datei importieren</button></div>'+
+      '<div style="font-weight:700;font-size:13px;color:var(--tx);margin-bottom:8px">Automatische Snapshots</div>'+
+      '<div id="backupList" style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--tx3)">Lade …</div></div>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(ov);
+  SHBackup.list(function(snaps){
+    var el=document.getElementById('backupList');if(!el)return;
+    if(!snaps.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3)">Noch keine Snapshots – der erste wird automatisch angelegt, sobald Daten vorhanden sind.</div>';return;}
+    el.innerHTML=snaps.map(function(s){
+      var kb=Math.max(1,Math.round((s.bytes||0)/1024));
+      var n={p:0,i:0,k:0};
+      try{var d=JSON.parse(s.data);n.p=(d.products||[]).length;n.i=(d.ideen||[]).length;n.k=(d.research&&d.research.candidates||[]).length;}catch(e){}
+      return '<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px">'+
+        '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:12.5px;color:var(--tx)">📅 '+esc(s.id)+'</div><div style="font-size:10.5px;color:var(--tx3)">'+n.p+' Produkte · '+n.i+' Ideen · '+n.k+' Kandidaten · '+kb+' KB</div></div>'+
+        '<button class="btn btn-sm" onclick="SHBackup.download(\''+esc(s.id)+'\')" title="Als JSON-Datei herunterladen" style="font-size:10.5px">⬇</button>'+
+        '<button class="btn btn-sm" onclick="SHBackup.restore(\''+esc(s.id)+'\')" title="Diesen Stand wiederherstellen" style="font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">↩ Wiederherstellen</button>'+
+      '</div>';
+    }).join('');
+  });
+}
+
+// Dashboard-Hinweis: Datei-Export älter als 7 Tage (oder nie) → Erinnerung
+function renderBackupHint(){
+  var el=document.getElementById('dashBackupHint');if(!el)return;
+  var hasData=!!((D.products&&D.products.length)||(D.ideen&&D.ideen.length)||(D.research&&D.research.candidates&&D.research.candidates.length));
+  var last=null;try{last=localStorage.getItem('wika_lastExport');}catch(e){}
+  var days=last?Math.floor((Date.now()-new Date(last).getTime())/864e5):null;
+  if(!hasData||(days!==null&&days<7)){el.innerHTML='';return;}
+  el.innerHTML='<div style="background:var(--acd);border:1px solid var(--ac);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+    '<div style="flex:1;min-width:200px;font-size:12.5px;color:var(--tx)">🛟 <b>Backup-Erinnerung:</b> '+(days===null?'Deine Daten wurden noch nie als Datei gesichert':'Letzte Datei-Sicherung vor '+days+' Tagen')+'. Browser-Speicher kann verloren gehen – 1 Klick genügt.</div>'+
+    '<button class="btn btn-p btn-sm" onclick="wikaExportAll()" style="font-size:11px">⬇ Jetzt sichern</button>'+
+    '<button class="btn btn-sm" onclick="backupOpen()" style="font-size:11px">🛟 Backups</button>'+
+  '</div>';
 }
 
 // ═══════════════ NAVIGATION ═══════════════
@@ -16555,6 +16700,7 @@ function renderDash(){
 
   // ─── Produktrecherche-Fahrplan (geführt) ───
   if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
+  if(typeof renderBackupHint==='function')renderBackupHint();
   if(typeof renderDashSearches==='function')renderDashSearches();
 
   // ─── License Countdown Panel ───
