@@ -1985,7 +1985,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="help-body">
         <div class="help-title">FBA-Kalkulator: dein vollständiger Profit-Check</div>
         <div class="help-text">
-          Berechnet <b>alle Amazon-FBA-Kosten und Profit-Kennzahlen</b> live: Referral Fee, FBA-Versandgebühr (echte Gewichtsstaffeln), Lagerkosten (saisonal), PPC, Selling-Plan-Anteil, Marge, ROI und Break-even. <b>✅ Versand- &amp; Lagergebühren sind 1:1 aus der offiziellen <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Amazon FBA-Tarifübersicht (gültig ab 1. Feb 2026)</a> übernommen.</b> Nur einzelne Verkaufsgebühren-Prozentsätze je Kategorie sind noch Annahmen (im ⚙️ als <b style="color:var(--or)">ANNAHME</b> markiert) — exakte Sätze in Seller Central prüfen.<br>
+          Berechnet <b>alle Amazon-FBA-Kosten und Profit-Kennzahlen</b> live: Referral Fee, FBA-Versandgebühr, Fuel-Surcharge, Lagerkosten, PPC, Selling-Plan-Anteil, Marge, ROI und Break-even. <b>Wichtig:</b> Die hinterlegten Gebühren basieren auf der offiziellen <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Amazon FBA-Tarifübersicht (gültig ab 1. Feb 2026)</a>, sind aber teils <b>Annahmen</b> – prüfe & ersetze sie über das ⚙️-Symbol mit deinen echten Werten.<br>
           <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Für 100% exakte Gebühren nutze immer den <a href="https://sellercentral.amazon.de/fba/profitabilitycalculator" target="_blank" rel="noopener" style="color:var(--ac)">Amazon Profitability Calculator</a> mit deiner echten ASIN.</span>
         </div>
       </div>
@@ -2065,7 +2065,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           <div class="fi"><label>Selling Plan <span class="wika-help" data-tooltip="Professional: 39 €/Monat (lohnt ab ~40 Verkäufen/Monat).&#10;Individual: 0,99 €/Artikel (für Gelegenheitsverkäufer).">ⓘ</span></label><select id="fbPlan" onchange="fbaCalc()"><option value="professional">Professional (39 €/Mon.)</option><option value="individual">Individual (0,99 €/Stk.)</option></select></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Sicherheitspuffer auf FBA-Gebühr <span class="wika-help" data-tooltip="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — Standard ist 0%. Optional kannst du im ⚙️ einen eigenen Prozent-Puffer auf die FBA-Gebühr legen (z.B. für künftige Erhöhungen).">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" checked onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Fuel- & Logistik-Zuschlag berücksichtigen <span class="wika-help" data-tooltip="Amazon erhebt teils einen variablen Treibstoff- und Logistikzuschlag auf die FBA-Versandgebühr. Annahme hier: 1,5% (im ⚙️ anpassbar).">ⓘ</span></label>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbCep" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Ohne Zentraleuropa-Programm (+0,26 €/Einheit) <span class="wika-help" data-tooltip="Wenn dein Lager in DE liegt und du NICHT am Zentraleuropa-Programm (CEP) teilnimmst, berechnet Amazon +0,26 €/Einheit.">ⓘ</span></label>
         </div>
@@ -8407,98 +8407,69 @@ var feeConfig={
   },
 
   // ─── Referral Fees (Verkaufsprovision) ───
-  // VERIFIZIERT: min 0,30€, Schmuck 20%, Amazon-Geräte 45% (Amazon Gebührenordnung).
-  // 2026er Schwellpreis-Regeln VERIFIZIERT aus der offiziellen Amazon-Ankündigung
-  // „Aktualisierung der Verkaufsgebühren in Europa 2026" (Seller Central, Jan 2026):
-  // Kleidung ≤15€→5% / 15–20€→10% (ab 15.12.2025) · Heimbedarf ≤20€→8% ·
-  // Tiernahrung ≤10€→5% · Lebensmittel ≤10€→5% · Vitamine/Nahrungserg. ≤10€→5% (ab 1.2.2026).
-  // priceTiers = preisabhängige Sätze (erste passende Stufe gewinnt, sonst pct).
-  // Übrige Prozentsätze je Kategorie sind ANNAHME — exakt in Seller Central prüfen.
+  // VERIFIZIERT: Spannen 7-15%, min 0,30€, Schmuck 20%, Amazon-Geräte 45%
+  // (Namox 2026, Amazon Gebührenordnung). Prozentsätze je Kategorie sind
+  // teils ANNAHME — exakte Werte pro Kategorie in Seller Central prüfen.
   referralFees:{
     minFee:0.30, // VERIFIZIERT: Mindest-Verkaufsgebühr 0,30 € / Artikel
     categories:[
       {id:'standard',  name:'Standard / Sonstiges',          pct:15.0, note:'VERIFIZIERT (Default-Satz vieler Kategorien)'},
-      {id:'home',      name:'Haus & Küche (Heimbedarf)',     pct:15.0, priceTiers:[{upTo:20,pct:8}], note:'VERIFIZIERT (ab 1.2.2026: ≤20€→8%, sonst 15%)'},
+      {id:'home',      name:'Haus & Küche',                  pct:15.0, note:'ANNAHME'},
       {id:'garden',    name:'Garten',                        pct:15.0, note:'ANNAHME'},
       {id:'diy',       name:'Baumarkt / Heimwerker',         pct:15.0, note:'ANNAHME'},
       {id:'sports',    name:'Sport & Freizeit',              pct:15.0, note:'ANNAHME'},
-      {id:'beauty',    name:'Beauty / Drogerie',             pct:15.0, priceTiers:[{upTo:10,pct:8}], note:'ANNAHME (üblich: ≤10€→8%, sonst 15%)'},
-      {id:'health',    name:'Gesundheit & Haushalt',         pct:15.0, priceTiers:[{upTo:10,pct:8}], note:'ANNAHME (üblich: ≤10€→8%, sonst 15%)'},
-      {id:'vms',       name:'Vitamine & Nahrungsergänzung',  pct:8.0,  priceTiers:[{upTo:10,pct:5}], note:'VERIFIZIERT (neue Kategorie ab 1.2.2026: ≤10€→5%; Basissatz 8% ANNAHME)'},
+      {id:'beauty',    name:'Beauty / Drogerie',             pct:8.0,  note:'ANNAHME (oft 8% über Schwellpreis)'},
+      {id:'health',    name:'Gesundheit & Haushalt',         pct:15.0, note:'ANNAHME'},
       {id:'electronics',name:'Elektronik (Unterhaltung)',    pct:7.0,  note:'ANNAHME (Consumer Electronics ~7%)'},
       {id:'computer',  name:'Computer & Zubehör',            pct:7.0,  note:'ANNAHME'},
       {id:'appliances',name:'Großgeräte',                    pct:7.0,  note:'ANNAHME'},
       {id:'auto',      name:'Auto & Motorrad',               pct:15.0, note:'ANNAHME'},
       {id:'toys',      name:'Spielzeug',                     pct:15.0, note:'ANNAHME'},
-      {id:'baby',      name:'Baby',                          pct:15.0, priceTiers:[{upTo:10,pct:8}], note:'ANNAHME (teils 8% unter Schwellpreis)'},
-      {id:'clothing',  name:'Kleidung & Accessoires',        pct:15.0, priceTiers:[{upTo:15,pct:5},{upTo:20,pct:10}], note:'VERIFIZIERT (ab 15.12.2025: ≤15€→5%, 15–20€→10%, sonst 15%)'},
+      {id:'baby',      name:'Baby',                          pct:15.0, note:'ANNAHME (teils 8% unter Schwellpreis)'},
+      {id:'clothing',  name:'Kleidung & Accessoires',        pct:15.0, note:'ANNAHME (5% für Artikel ≤15€ seit 12/2025)'},
       {id:'shoes',     name:'Schuhe',                        pct:15.0, note:'ANNAHME'},
       {id:'jewelry',   name:'Schmuck',                       pct:20.0, note:'VERIFIZIERT (bis 20%)'},
       {id:'amazondev', name:'Amazon-Geräte-Zubehör',         pct:45.0, note:'VERIFIZIERT (45%)'},
-      {id:'grocery',   name:'Lebensmittel & Feinkost',       pct:8.0,  priceTiers:[{upTo:10,pct:5}], note:'VERIFIZIERT (ab 1.2.2026: ≤10€→5%; Basissatz 8%)'},
-      {id:'petfood',   name:'Tierbedarf & -nahrung',         pct:15.0, priceTiers:[{upTo:10,pct:5}], note:'VERIFIZIERT (ab 1.2.2026: ≤10€→5%, sonst 15%)'}
+      {id:'grocery',   name:'Lebensmittel & Feinkost',       pct:15.0, note:'ANNAHME (oft 8% / 5% unter Schwelle)'},
+      {id:'petfood',   name:'Tierbedarf & -nahrung',         pct:15.0, note:'ANNAHME (5% für Artikel ≤10€ seit 01/2026)'}
     ]
   },
 
   // ─── FBA-Versandgebühren (Standardversand, lokal DE) ───
-  // ✅ VERIFIZIERT: 1:1 aus der offiziellen Amazon FBA-Tarifübersicht DE
-  // (260114-FBA-Rate-Card-DE.pdf, gültig ab 1.2.2026), Spalte „CEP (DE/PL/CZ)".
-  // Ohne CEP-Teilnahme +0,26€/Einheit (surcharges.cepPerUnit, Checkbox im UI).
-  // Jeder Tier: Maß-Limits (cm, längste→kürzeste Seite), maxWeight = Stückgewicht (g),
-  // maxVolWeight = Volumengewicht-Limit (g), brackets = Gewichtsstaffeln
-  // {w: bis Versandgewicht g, fee: Standard-Tarif €, lp: Niedrigpreis-Tarif €}.
-  // overage = €/kg-Aufschlag über der letzten Staffel (Übergrößen).
-  // Vereinfachung: Versandgewicht = max(Stückgewicht, Volumengewicht).
+  // ⚠️ GRÖSSTENTEILS ANNAHME! Nur Standardpaket <2,9kg = 4,55€ ist als
+  // Referenz aus 2026-Quellen bestätigt (Namox: "4,55€ außerhalb Peak").
+  // Alle anderen Werte sind plausible ANNAHMEN, abgeleitet aus typischen
+  // FBA-Tarifen — UNBEDINGT mit echter Rate Card (PDF) ersetzen!
+  // Größenklassen-Definition (Maße/Gewicht) nach Amazon-Logik.
   fbaFees:{
     // tiers werden der Reihe nach geprüft; erster passender Tier gewinnt.
+    // maxL/maxB/maxH in cm (längste→kürzeste Seite), maxWeight in g
     tiers:[
-      {id:'env_light', name:'Leichter Umschlag',    maxLongest:33, maxMid:23, maxShort:2.5, maxWeight:100,
-       brackets:[{w:20,fee:2.07,lp:1.61},{w:40,fee:2.11,lp:1.64},{w:60,fee:2.13,lp:1.66},{w:80,fee:2.26,lp:1.80},{w:100,fee:2.28,lp:1.83}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'env_std',   name:'Standardumschlag',     maxLongest:33, maxMid:23, maxShort:2.5, maxWeight:460,
-       brackets:[{w:210,fee:2.31,lp:1.86},{w:460,fee:2.42,lp:2.02}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'env_large', name:'Großer Umschlag',      maxLongest:33, maxMid:23, maxShort:4,   maxWeight:960,
-       brackets:[{w:960,fee:2.78,lp:2.39}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'env_xl',    name:'Extra großer Umschlag',maxLongest:33, maxMid:23, maxShort:6,   maxWeight:960,
-       brackets:[{w:960,fee:3.16,lp:2.78}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'parcel_s',  name:'Kleines Paket',        maxLongest:35, maxMid:25, maxShort:12,  maxWeight:3900, maxVolWeight:2100,
-       brackets:[{w:150,fee:3.12,lp:2.78},{w:400,fee:3.13,lp:2.99},{w:900,fee:3.14},{w:1400,fee:3.15},{w:1900,fee:3.17},{w:3900,fee:4.28}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'parcel_std',name:'Standardpaket',        maxLongest:45, maxMid:34, maxShort:26,  maxWeight:11900, maxVolWeight:7960,
-       brackets:[{w:150,fee:3.13},{w:400,fee:3.16},{w:900,fee:3.18},{w:1400,fee:3.67},{w:1900,fee:3.69},{w:2900,fee:4.29},{w:3900,fee:4.83},{w:5900,fee:4.96},{w:8900,fee:5.77},{w:11900,fee:6.39}], note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'oversize_s',    name:'Kleine Übergröße',          maxLongest:61, maxMid:46, maxShort:46, maxWeight:1760,  maxVolWeight:25820,
-       brackets:[{w:760,fee:4.30}], overage:{baseW:760, perKg:0.18}, note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'oversize_light',name:'Standardübergröße leicht',  maxLongest:101,maxMid:60, maxShort:60, maxWeight:15000, maxVolWeight:72720,
-       brackets:[{w:760,fee:4.33}], overage:{baseW:760, perKg:0.18}, note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'oversize_heavy',name:'Standardübergröße schwer',  maxLongest:101,maxMid:60, maxShort:60, maxWeight:23000, maxVolWeight:72720,
-       brackets:[{w:15760,fee:6.99}], overage:{baseW:15760, perKg:0.07}, note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'oversize_large',name:'Standardübergröße groß',    maxLongest:120,maxMid:60, maxShort:60, maxWeight:23000, maxVolWeight:86400,
-       brackets:[{w:760,fee:5.80}], overage:{baseW:760, perKg:0.08}, note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'oversize_bulky',name:'Übergröße sperrig',         maxLongest:175,maxMid:9999,maxShort:9999, maxWeight:23000, maxVolWeight:126000,
-       brackets:[{w:760,fee:7.98}], overage:{baseW:760, perKg:0.27}, note:'VERIFIZIERT (Rate Card 1.2.2026); Gurtmaß-Regel (>360cm) nicht geprüft'},
-      {id:'oversize_xheavy',name:'Übergröße schwer (>23kg)', maxLongest:175,maxMid:9999,maxShort:9999, maxWeight:31500, maxVolWeight:126000,
-       brackets:[{w:31500,fee:12.74}], overage:{baseW:31500, perKg:0.15}, note:'VERIFIZIERT (Rate Card 1.2.2026)'},
-      {id:'special_oversize',name:'Besondere Übergröße',     maxLongest:9999,maxMid:9999,maxShort:9999, maxWeight:9999999,
-       brackets:[{w:30000,fee:21.30},{w:40000,fee:24.19},{w:50000,fee:47.98},{w:60000,fee:51.99}], overage:{baseW:60000, perKg:0.36}, noCep:true, note:'VERIFIZIERT (Rate Card 1.2.2026, Nur-DE-Tarif — kein CEP möglich)'}
+      {id:'env_small',  name:'Kleiner Umschlag',     maxLongest:33, maxMid:23, maxShort:2.5, maxWeight:100,  fee:2.10, note:'ANNAHME'},
+      {id:'env_std',    name:'Standardumschlag',     maxLongest:33, maxMid:23, maxShort:4,   maxWeight:460,  fee:2.65, note:'ANNAHME'},
+      {id:'env_large',  name:'Großer Umschlag',      maxLongest:33, maxMid:23, maxShort:6,   maxWeight:960,  fee:3.10, note:'ANNAHME'},
+      {id:'parcel_s',   name:'Kleines Paket',        maxLongest:35, maxMid:25, maxShort:12,  maxWeight:1000, fee:3.60, note:'ANNAHME'},
+      {id:'parcel_std', name:'Standardpaket <2,9kg', maxLongest:45, maxMid:34, maxShort:26,  maxWeight:2900, fee:4.55, note:'REFERENZ 2026 (Namox): 4,55€ außerhalb Peak'},
+      {id:'parcel_l',   name:'Standardpaket <5kg',   maxLongest:61, maxMid:46, maxShort:46,  maxWeight:5000, fee:5.80, note:'ANNAHME'},
+      {id:'parcel_xl',  name:'Standardpaket <12kg',  maxLongest:61, maxMid:46, maxShort:46,  maxWeight:12000,fee:7.20, note:'ANNAHME'},
+      {id:'oversize_s', name:'Übergröße klein',      maxLongest:100,maxMid:60, maxShort:60,  maxWeight:15000,fee:8.90, note:'ANNAHME'},
+      {id:'oversize_l', name:'Übergröße groß',       maxLongest:175,maxMid:120,maxShort:120, maxWeight:30000,fee:14.50,note:'ANNAHME'},
+      {id:'oversize_xl',name:'Sperrgut',             maxLongest:9999,maxMid:9999,maxShort:9999,maxWeight:9999999,fee:32.00,note:'ANNAHME'}
     ],
-    // Low-Price-FBA (Niedrigpreisversand): eigener Tarif (lp in brackets) für Artikel
-    // ≤20€ inkl. USt. (VERIFIZIERT, Rate Card 1.2.2026). In den Sonderkategorien
-    // Beauty/Gesundheit, Business/Industrie, Bürobedarf, Lebensmittel, Bücher,
-    // Amazon-Gerätezubehör, Küche gilt ≤12€. Nur bis „Kleines Paket ≤400g";
-    // Volumengewicht zählt beim Niedrigpreisversand NICHT (hier vereinfacht ignoriert).
-    lowPriceThresholdSpecial:12,
-    // Peak-Zuschlag (15. Okt – 14. Jan): Peak-Tarife 2026 gibt Amazon erst am
-    // 15.9.2026 bekannt (Rate Card S.5). Bis dahin 0; im ⚙️ als €/Stk setzbar.
-    peakSurcharge:0.00
+    // Low-Price-FBA: günstigerer Tarif für Artikel ≤ Schwellpreis (20€ inkl.)
+    // ⚠️ ANNAHME: pauschaler Abschlag. Echte Low-Price-Tarife haben eigene Tabelle!
+    lowPriceDiscount:0.40, // ANNAHME: 0,40€ günstiger pro Einheit
+    // Peak-Zuschlag (15. Okt – 14. Jan): VERIFIZIERT, dass es ihn gibt (~+0,89€ Beispiel)
+    peakSurcharge:0.00 // Default aus; im ⚙️ aktivierbar
   },
 
   // ─── Lagergebühren ───
-  // ✅ VERIFIZIERT (Rate Card 1.2.2026, S.17): €/m³/Monat, nicht gefährliche Güter,
-  // Standardgröße „alle anderen Kategorien" (nicht Kleidung/Schuhe/Taschen).
-  // Saison-Staffelung: Jan–Sep günstiger, Okt–Dez teurer. Der zusätzliche
-  // Lagernutzungszuschlag (bei Nutzungsgrad >22 Wochen) ist hier NICHT enthalten.
+  // ⚠️ ANNAHME: Standard-Lagergebühr pro m³/Monat. Amazon rechnet
+  // tatsächlich pro Kubikmeter mit Saison-Staffelung (Jan-Sep günstiger,
+  // Okt-Dez teurer). Hier vereinfacht als Durchschnitt.
   storageFees:{
-    standardJanSep:27.54, standardOktDez:52.20,
-    oversizeJanSep:21.78, oversizeOktDez:34.49,
-    note:'VERIFIZIERT (Rate Card 1.2.2026) — Kleidung/Schuhe günstiger (19,99/29,23); Gefahrgut teurer'
+    perCubicMeterPerMonth:30.00, // ANNAHME (~26-45€/m³ je nach Saison)
+    note:'ANNAHME — Amazon staffelt nach Saison (Q4 teurer) und Größe'
   },
 
   // ─── Selling Plan ───
@@ -8510,12 +8481,10 @@ var feeConfig={
 
   // ─── Zuschläge ───
   surcharges:{
-    fuelLogisticsPct:0,    // VERIFIZIERT: Rate Card 1.2.2026 kennt KEINEN separaten
-                           // Treibstoff-/Logistikzuschlag mehr → 0. Im ⚙️ als eigener
-                           // Sicherheitspuffer (%) auf die FBA-Gebühr setzbar.
+    fuelLogisticsPct:1.5,  // ANNAHME: 1,5% auf FBA-Versandgebühr
     cepPerUnit:0.26,       // VERIFIZIERT: 0,26€/Einheit ohne Zentraleuropa-Programm
     lithiumPerUnit:0.10,   // VERIFIZIERT: 0,10€/Einheit für Lithium/Gefahrgut
-    note:'Alle Werte VERIFIZIERT (Rate Card 1.2.2026); fuelLogisticsPct=0 = optionaler Eigen-Puffer'
+    note:'fuelLogisticsPct ist ANNAHME; cepPerUnit & lithium VERIFIZIERT (Rate Card 2026)'
   }
 };
 
@@ -8539,34 +8508,24 @@ function calculateVat(price, vatRate, mode){
 }
 
 // Referral Fee (auf Brutto-Verkaufspreis, min-Fee beachtet)
-// priceTiers: preisabhängige Sätze (z.B. Kleidung ≤15€→5%), erste passende Stufe gewinnt.
 function calculateReferralFee(grossPrice, categoryId){
   grossPrice=grossPrice||0;
   var cat=feeConfig.referralFees.categories.find(function(c){return c.id===categoryId});
   var pct=cat?cat.pct:15;
-  if(cat && cat.priceTiers){
-    for(var i=0;i<cat.priceTiers.length;i++){
-      if(grossPrice<=cat.priceTiers[i].upTo){pct=cat.priceTiers[i].pct;break;}
-    }
-  }
   var fee=grossPrice*(pct/100);
   return Math.max(fee, feeConfig.referralFees.minFee);
 }
 
-// Size Tier automatisch ermitteln aus Maßen + Gewicht.
-// Amazon-Logik: Tier-Zuordnung über Maße + Stückgewicht (maxWeight) + ggf.
-// Volumengewicht-Limit (maxVolWeight); die Gebühren-Staffel nutzt das
-// Versandgewicht = max(Stückgewicht, Volumengewicht).
+// Size Tier automatisch ermitteln aus Maßen + Gewicht
 function calculateSizeTier(lengthCm, widthCm, heightCm, weightG){
   var dims=[lengthCm||0, widthCm||0, heightCm||0].sort(function(a,b){return b-a;});
   var longest=dims[0], mid=dims[1], shortest=dims[2];
-  var volWeight=(longest*mid*shortest)/5000*1000; // cm³/5000 → kg, ×1000 → g
+  // Volumengewicht (cm³ / 5000 * 1000 = g) vs. Stückgewicht → größerer Wert
+  var volWeight=(longest*mid*shortest)/5000*1000; // in g
   var shipWeight=Math.max(weightG||0, volWeight);
   for(var i=0;i<feeConfig.fbaFees.tiers.length;i++){
     var t=feeConfig.fbaFees.tiers[i];
-    if(longest<=t.maxLongest && mid<=t.maxMid && shortest<=t.maxShort
-       && (weightG||0)<=t.maxWeight
-       && (!t.maxVolWeight || volWeight<=t.maxVolWeight)){
+    if(longest<=t.maxLongest && mid<=t.maxMid && shortest<=t.maxShort && shipWeight<=t.maxWeight){
       return {tier:t, shipWeight:shipWeight, volWeight:volWeight};
     }
   }
@@ -8574,25 +8533,13 @@ function calculateSizeTier(lengthCm, widthCm, heightCm, weightG){
   return {tier:last, shipWeight:shipWeight, volWeight:volWeight};
 }
 
-// FBA Fulfilment Fee — Gewichtsstaffel (brackets), darüber €/kg-Aufschlag (overage).
-// lowPriceActive: Niedrigpreis-Tarif (lp) der Staffel, falls vorhanden — sonst Standard
-// (Niedrigpreis-Tarife existieren nur bis „Kleines Paket ≤400g").
-function calculateFbaFee(tierId, lowPriceActive, shipWeightG){
+// FBA Fulfilment Fee
+function calculateFbaFee(tierId, lowPriceActive){
   var tier=feeConfig.fbaFees.tiers.find(function(t){return t.id===tierId});
   if(!tier)return 0;
-  var peak=feeConfig.fbaFees.peakSurcharge||0;
-  var w=shipWeightG||0, br=tier.brackets, fee=null;
-  for(var i=0;i<br.length;i++){
-    if(w<=br[i].w){
-      fee=(lowPriceActive && br[i].lp!=null)?br[i].lp:br[i].fee;
-      break;
-    }
-  }
-  if(fee==null){
-    fee=br[br.length-1].fee;
-    if(tier.overage)fee+=Math.max(0,(w-tier.overage.baseW)/1000)*tier.overage.perKg;
-  }
-  return fee+peak;
+  var fee=tier.fee;
+  if(lowPriceActive)fee=Math.max(0, fee-feeConfig.fbaFees.lowPriceDiscount);
+  return fee;
 }
 
 // Fuel & Logistics Surcharge (auf FBA-Fee)
@@ -8601,14 +8548,10 @@ function calculateFuelSurcharge(fbaFee, active){
   return fbaFee*(feeConfig.surcharges.fuelLogisticsPct/100);
 }
 
-// Lagerkosten pro Einheit — saisonale Rate-Card-Sätze (Jan–Sep / Okt–Dez),
-// getrennt nach Standard-/Übergröße; Saison automatisch nach aktuellem Monat.
-function calculateStorageFee(lengthCm, widthCm, heightCm, months, oversize){
+// Lagerkosten pro Einheit
+function calculateStorageFee(lengthCm, widthCm, heightCm, months){
   var volM3=((lengthCm||0)*(widthCm||0)*(heightCm||0))/1000000; // cm³ → m³
-  var s=feeConfig.storageFees;
-  var q4=(new Date().getMonth())>=9; // Okt(9)–Dez(11)
-  var rate=oversize?(q4?s.oversizeOktDez:s.oversizeJanSep):(q4?s.standardOktDez:s.standardJanSep);
-  return volM3*rate*(months||0);
+  return volM3*feeConfig.storageFees.perCubicMeterPerMonth*(months||0);
 }
 
 // PPC-Kosten pro Sale
@@ -8647,12 +8590,10 @@ function calculateProfitMetrics(input){
       ? calculateSizeTier(input.length,input.width,input.height,input.weight)
       : {tier:feeConfig.fbaFees.tiers.find(function(t){return t.id===input.sizeTierId;}),shipWeight:input.weight,volWeight:0};
   var tierId=sizeRes.tier?sizeRes.tier.id:'parcel_std';
-  var isOversize=/^(oversize|special)/.test(tierId);
-  var fbaFee=calculateFbaFee(tierId, input.lowPrice, sizeRes.shipWeight||input.weight||0);
+  var fbaFee=calculateFbaFee(tierId, input.lowPrice);
   var fuel=calculateFuelSurcharge(fbaFee, input.fuel);
-  // Besondere Übergröße nutzt den Nur-DE-Tarif → CEP-Zuschlag entfällt (noCep)
-  var cep=(input.cep && !(sizeRes.tier&&sizeRes.tier.noCep))?feeConfig.surcharges.cepPerUnit:0;
-  var storage=calculateStorageFee(input.length,input.width,input.height,input.storageMonths,isOversize);
+  var cep=input.cep?feeConfig.surcharges.cepPerUnit:0;
+  var storage=calculateStorageFee(input.length,input.width,input.height,input.storageMonths);
   var ppc=calculatePpcCost(input.ppcMode,{cpc:input.cpc,cr:input.cr,acos:input.acos,grossPrice:grossPrice,ppcShare:input.ppcShare});
   var planCost=calculatePlanCostPerUnit(input.plan, input.salesPerMonth);
   var extra=(input.extra||0);
@@ -8849,7 +8790,7 @@ function fbaRenderWarnings(input, m, be){
   var cat=feeConfig.referralFees.categories.find(function(c){return c.id===input.categoryId;});
   if(cat && cat.pct>=20)warns.push({c:'pk',t:'Referral Fee dieser Kategorie ist besonders hoch ('+cat.pct+'%).'});
   var mp=feeConfig.marketplaces[input.market];
-  if(mp && m.grossPrice>0 && m.grossPrice<=mp.lowPriceThreshold && !input.lowPrice)warns.push({c:'bl',t:'Low-Price-FBA könnte möglich sein (Preis ≤ '+mp.lowPriceThreshold+' '+mp.currency+' inkl. USt.; in Sonderkategorien wie Beauty/Lebensmittel/Bücher/Küche gilt ≤ '+feeConfig.fbaFees.lowPriceThresholdSpecial+' €) — Option aktivieren & prüfen.'});
+  if(mp && m.grossPrice>0 && m.grossPrice<=mp.lowPriceThreshold && !input.lowPrice)warns.push({c:'bl',t:'Low-Price-FBA könnte möglich sein (Preis ≤ '+mp.lowPriceThreshold+' '+mp.currency+') — Option aktivieren & prüfen.'});
   if(input.plan==='professional' && input.salesPerMonth>0 && input.salesPerMonth<40)warns.push({c:'cy',t:'Bei nur '+input.salesPerMonth+' Verkäufen/Monat könnte der Individual-Plan (0,99€/Stk.) günstiger sein.'});
 
   var box=document.getElementById('fbWarnings');
@@ -8956,29 +8897,18 @@ function fbaTogglePpc(){
   document.getElementById('fbPpcAcosFields').style.display=mode==='acos'?'':'none';
 }
 
-// ─── Dropdown-Beschriftungen ───
-function fbaCatLabel(c){
-  if(!c.priceTiers)return c.name+' ('+c.pct+'%)';
-  return c.name+' ('+c.priceTiers.map(function(t){return '≤'+t.upTo+'€ '+t.pct+'%';}).join(' · ')+' · sonst '+c.pct+'%)';
-}
-function fbaTierLabel(t){
-  var br=t.brackets, min=br[0].fee, max=br[br.length-1].fee;
-  var range=min===max?min.toFixed(2)+'€':min.toFixed(2)+'–'+max.toFixed(2)+'€';
-  return t.name+' ('+range+(t.overage?' +'+t.overage.perKg.toFixed(2)+'€/kg':'')+')';
-}
-
 // ─── Kategorie-Dropdown füllen ───
 function fbaPopulateSelects(){
   var catSel=document.getElementById('fbCat');
   if(catSel && catSel.options.length===0){
     feeConfig.referralFees.categories.forEach(function(c){
-      var o=document.createElement('option');o.value=c.id;o.textContent=fbaCatLabel(c);catSel.appendChild(o);
+      var o=document.createElement('option');o.value=c.id;o.textContent=c.name+' ('+c.pct+'%)';catSel.appendChild(o);
     });
   }
   var sizeSel=document.getElementById('fbSize');
   if(sizeSel && sizeSel.options.length<=1){
     feeConfig.fbaFees.tiers.forEach(function(t){
-      var o=document.createElement('option');o.value=t.id;o.textContent=fbaTierLabel(t);sizeSel.appendChild(o);
+      var o=document.createElement('option');o.value=t.id;o.textContent=t.name+' ('+t.fee.toFixed(2)+'€)';sizeSel.appendChild(o);
     });
   }
 }
@@ -9023,35 +8953,23 @@ function fbaReset(){
 
 // ─── Gebühren-Konfig-Editor ───
 function fbaOpenConfig(){
-  var inpStyle='width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit';
   var html='<div style="max-height:60vh;overflow-y:auto">'+
-    '<p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-top:0">Alle FBA-Versand- und Lagergebühren stammen 1:1 aus der offiziellen <b>Amazon FBA-Tarifübersicht (gültig ab 1.2.2026)</b>. Werte mit <b style="color:var(--or)">ANNAHME</b> sind nicht offiziell verifiziert — passe sie hier an.</p>'+
-    '<h4 style="color:var(--ac);margin:14px 0 8px">FBA-Versandgebühren (€/Einheit, Gewichtsstaffeln)</h4>'+
+    '<p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-top:0">Hier kannst du die hinterlegten Gebühren an deine echten Amazon-Rate-Card-Werte anpassen. Werte mit <b style="color:var(--or)">ANNAHME</b> sind nicht offiziell verifiziert.</p>'+
+    '<h4 style="color:var(--ac);margin:14px 0 8px">FBA-Versandgebühren (€/Einheit)</h4>'+
     '<table style="width:100%;font-size:12px"><tbody>';
   feeConfig.fbaFees.tiers.forEach(function(t,i){
     var isAnnahme=t.note.indexOf('ANNAHME')>-1;
-    html+='<tr><td colspan="2" style="padding:8px 4px 2px;color:var(--tx);font-weight:600">'+esc(t.name)+(isAnnahme?' <span style="color:var(--or);font-size:10px">ANNAHME</span>':' <span style="color:var(--gn);font-size:10px">RATE CARD 2026</span>')+'</td></tr>';
-    t.brackets.forEach(function(b,j){
-      var wLbl=b.w>=1000?('≤ '+(b.w/1000).toLocaleString('de-DE')+' kg'):('≤ '+b.w+' g');
-      html+='<tr><td style="padding:2px 4px 2px 18px;color:var(--tx2)">'+wLbl+(b.lp!=null?' <span style="color:var(--bl);font-size:10px" title="Niedrigpreis-Tarif (Low-Price FBA)">LP '+b.lp.toFixed(2)+'€</span>':'')+'</td><td style="padding:2px 4px;width:90px"><input type="number" step="0.01" value="'+b.fee+'" onchange="feeConfig.fbaFees.tiers['+i+'].brackets['+j+'].fee=parseFloat(this.value)||0;fbaPopulateSelectsRefresh();fbaCalc()" style="'+inpStyle+'"></td></tr>';
-    });
-    if(t.overage)html+='<tr><td style="padding:2px 4px 2px 18px;color:var(--tx3);font-size:11px">darüber je kg</td><td style="padding:2px 4px"><input type="number" step="0.01" value="'+t.overage.perKg+'" onchange="feeConfig.fbaFees.tiers['+i+'].overage.perKg=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>';
+    html+='<tr><td style="padding:4px;color:var(--tx2)">'+esc(t.name)+(isAnnahme?' <span style="color:var(--or);font-size:10px">ANNAHME</span>':' <span style="color:var(--gn);font-size:10px">REF</span>')+'</td><td style="padding:4px;width:90px"><input type="number" step="0.01" value="'+t.fee+'" onchange="feeConfig.fbaFees.tiers['+i+'].fee=parseFloat(this.value)||0;fbaPopulateSelectsRefresh();fbaCalc()" style="width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit"></td></tr>';
   });
   html+='</tbody></table>'+
-    '<h4 style="color:var(--ac);margin:14px 0 8px">Lagergebühren (€/m³/Monat) <span style="color:var(--gn);font-size:10px">RATE CARD 2026</span></h4>'+
-    '<table style="width:100%;font-size:12px"><tbody>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Standardgröße Jan–Sep</td><td style="padding:4px;width:90px"><input type="number" step="0.01" value="'+feeConfig.storageFees.standardJanSep+'" onchange="feeConfig.storageFees.standardJanSep=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Standardgröße Okt–Dez</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.standardOktDez+'" onchange="feeConfig.storageFees.standardOktDez=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Übergröße Jan–Sep</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.oversizeJanSep+'" onchange="feeConfig.storageFees.oversizeJanSep=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Übergröße Okt–Dez</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.oversizeOktDez+'" onchange="feeConfig.storageFees.oversizeOktDez=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '</tbody></table>'+
     '<h4 style="color:var(--ac);margin:14px 0 8px">Zuschläge</h4>'+
     '<table style="width:100%;font-size:12px"><tbody>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Eigener Puffer % auf FBA-Gebühr <span style="color:var(--tx3);font-size:10px" title="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — 0 ist korrekt. Optional als Sicherheitspuffer nutzbar.">(2026: 0)</span></td><td style="padding:4px;width:90px"><input type="number" step="0.1" value="'+feeConfig.surcharges.fuelLogisticsPct+'" onchange="feeConfig.surcharges.fuelLogisticsPct=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Nicht-CEP-Zuschlag €/Stk <span style="color:var(--gn);font-size:10px">VERIFIZIERT</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.surcharges.cepPerUnit+'" onchange="feeConfig.surcharges.cepPerUnit=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
-    '<tr><td style="padding:4px;color:var(--tx2)">Peak-Zuschlag €/Stk (15.10.–14.1.) <span style="color:var(--tx3);font-size:10px" title="Peak-Tarife 2026 gibt Amazon am 15.9.2026 bekannt">offen</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.fbaFees.peakSurcharge+'" onchange="feeConfig.fbaFees.peakSurcharge=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
+    '<tr><td style="padding:4px;color:var(--tx2)">Fuel-/Logistik % <span style="color:var(--or);font-size:10px">ANNAHME</span></td><td style="padding:4px"><input type="number" step="0.1" value="'+feeConfig.surcharges.fuelLogisticsPct+'" onchange="feeConfig.surcharges.fuelLogisticsPct=parseFloat(this.value)||0;fbaCalc()" style="width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit"></td></tr>'+
+    '<tr><td style="padding:4px;color:var(--tx2)">CEP-Zuschlag €/Stk <span style="color:var(--gn);font-size:10px">VERIFIZIERT</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.surcharges.cepPerUnit+'" onchange="feeConfig.surcharges.cepPerUnit=parseFloat(this.value)||0;fbaCalc()" style="width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit"></td></tr>'+
+    '<tr><td style="padding:4px;color:var(--tx2)">Lager €/m³/Monat <span style="color:var(--or);font-size:10px">ANNAHME</span></td><td style="padding:4px"><input type="number" step="0.5" value="'+feeConfig.storageFees.perCubicMeterPerMonth+'" onchange="feeConfig.storageFees.perCubicMeterPerMonth=parseFloat(this.value)||0;fbaCalc()" style="width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit"></td></tr>'+
+    '<tr><td style="padding:4px;color:var(--tx2)">Low-Price-Rabatt €/Stk <span style="color:var(--or);font-size:10px">ANNAHME</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.fbaFees.lowPriceDiscount+'" onchange="feeConfig.fbaFees.lowPriceDiscount=parseFloat(this.value)||0;fbaCalc()" style="width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit"></td></tr>'+
     '</tbody></table>'+
-    '<p style="font-size:11px;color:var(--tx3);margin-top:14px;font-style:italic">💡 Änderungen gelten nur für diese Sitzung. Für dauerhafte Werte: im Code das <code>feeConfig</code>-Objekt anpassen. Quelle: <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac)">FBA-Tarifübersicht DE (PDF)</a>.</p>'+
+    '<p style="font-size:11px;color:var(--tx3);margin-top:14px;font-style:italic">💡 Änderungen gelten nur für diese Sitzung. Für dauerhafte Werte: im Code das <code>feeConfig</code>-Objekt anpassen.</p>'+
   '</div>';
   if(document.getElementById('genModal')){
     document.getElementById('gmTitle').textContent='⚙️ Gebühren anpassen';
@@ -9066,7 +8984,7 @@ function fbaOpenConfig(){
 
 function fbaPopulateSelectsRefresh(){
   var sizeSel=document.getElementById('fbSize');
-  if(sizeSel){var cur=sizeSel.value;sizeSel.innerHTML='<option value="auto">⚙️ Automatisch ermitteln</option>';feeConfig.fbaFees.tiers.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=fbaTierLabel(t);sizeSel.appendChild(o);});sizeSel.value=cur;}
+  if(sizeSel){var cur=sizeSel.value;sizeSel.innerHTML='<option value="auto">⚙️ Automatisch ermitteln</option>';feeConfig.fbaFees.tiers.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=t.name+' ('+t.fee.toFixed(2)+'€)';sizeSel.appendChild(o);});sizeSel.value=cur;}
 }
 
 // ═══════════════════════════════════════════════════════════════
