@@ -6573,6 +6573,7 @@ function renderPipeline(){
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:10.5px" title="Scorecard öffnen">⚖️</button>'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenWorkflow(\''+c.id+'\')" style="font-size:10.5px" title="20-Schritte-Workflow">📋</button>'+
         '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬</button>'+
+        '<button class="btn btn-sm" onclick="dossierOpen(\''+c.id+'\')" style="font-size:10.5px" title="Entscheidungs-Dossier (druckfertiger One-Pager)">📄</button>'+
         '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat bearbeiten (alle Felder)">✏️</button>'+
         '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">⭐ Shortlist →</button>'+
         '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat löschen">🗑</button>'+
@@ -7130,6 +7131,7 @@ function researchRenderScore(){
     html+='</div>';
     // Footer
     html+='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn btn-sm" onclick="dossierOpen(\''+selected.id+'\')" title="Druckfertiger One-Pager: Urteil, Scorecard, Flags, Marge, Review-Insights" style="background:var(--bld);color:var(--bl);border:1px solid var(--bl);font-weight:700;font-size:11px">📄 Dossier</button>'+
       '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+selected.id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-size:11px">📋 Workflow öffnen</button>'+
       (vd.verdict==='go'?'<button class="btn btn-sm" onclick="researchPromoteToProduct(\''+selected.id+'\')" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700;font-size:11px">★ In Engere Wahl</button>':'')+
       '<button class="btn btn-sm" onclick="researchResetScore(\''+selected.id+'\')" style="background:var(--s3);color:var(--tx2);font-size:11px">↺ Manuelle Werte zurücksetzen</button>'+
@@ -7164,7 +7166,8 @@ function researchRenderScore(){
   if(go1.length){
     html+='<div style="background:var(--gnd);border:1.5px solid var(--gn);border-radius:12px;padding:16px 22px;margin-top:16px">'+
       '<div style="font-weight:700;color:var(--gn);margin-bottom:6px">💡 Empfehlung</div>'+
-      '<div style="font-size:13px;color:var(--tx);line-height:1.6"><b>'+go1.length+'</b> Kandidat'+(go1.length>1?'en':'')+' mit 🟢 GO – Favorit: <b>'+esc(go1[0].c.name)+'</b> (Score '+go1[0].vd.score+'). Vor dem Geldausgeben die finale kritische Prüfung mit Claude (Workflow-Schritt 17) machen.</div>'+
+      '<div style="font-size:13px;color:var(--tx);line-height:1.6;margin-bottom:8px"><b>'+go1.length+'</b> Kandidat'+(go1.length>1?'en':'')+' mit 🟢 GO – Favorit: <b>'+esc(go1[0].c.name)+'</b> (Score '+go1[0].vd.score+'). Vor dem Geldausgeben die finale kritische Prüfung mit Claude (Workflow-Schritt 17) machen.</div>'+
+      '<button class="btn btn-sm" onclick="dossierOpen(\''+go1[0].c.id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700;font-size:11px">📄 Entscheidungs-Dossier für „'+esc(go1[0].c.name.substring(0,30))+'" öffnen</button>'+
     '</div>';
   }
 
@@ -7367,6 +7370,191 @@ function nischenScanResultHtml(d){
   h+=stat('Reviews-Spanne',(d.minReviews!=null?d.minReviews:'—')+'–'+(d.maxReviews!=null?d.maxReviews:'—'));
   h+=stat('Schwache Listings','&lt;300: '+d.beatable,d.beatable>0?'gn':'tx');
   h+='</div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ENTSCHEIDUNGS-DOSSIER (Phase 3): 1-Klick druckfertiger One-Pager
+// Feste Druckfarben (themeunabhängig), Print-Isolation via @media print
+// ═══════════════════════════════════════════════════════════════
+var DOSSIER_COL={gn:'#1e8e3e',ac:'#b26a00',rd:'#c5221f',tx3:'#8a94a0',tx:'#1a2330',mut:'#5b6673',bd:'#d8dee6',bg:'#f4f6f9'};
+
+function dossierOpen(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c){toast('Kandidat nicht gefunden');return;}
+  decisionMigrate(c);
+  var old=document.getElementById('dossierModal');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='dossierModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99998;display:flex;flex-direction:column;align-items:center;padding:18px;overflow:auto';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML=
+    '<style>@media print{'+
+      'body>*:not(#dossierModal){display:none!important}'+
+      '#dossierModal{position:static!important;background:#fff!important;padding:0!important;overflow:visible!important;display:block!important}'+
+      '#dossierModal .no-print{display:none!important}'+
+      '#dossierModal .dossier-sheet{box-shadow:none!important;width:auto!important;max-width:none!important;border-radius:0!important;margin:0!important;padding:0!important}'+
+      '#dossierModal *{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+    '}</style>'+
+    '<div class="no-print" style="display:flex;gap:8px;width:100%;max-width:820px;justify-content:flex-end;margin-bottom:10px;flex-shrink:0">'+
+      '<button class="btn btn-p btn-sm" onclick="window.print()">🖨️ Drucken / als PDF sichern</button>'+
+      '<button class="btn btn-sm" onclick="document.getElementById(\'dossierModal\').remove()">✕ Schließen</button>'+
+    '</div>'+
+    '<div class="dossier-sheet" style="background:#fff;color:'+DOSSIER_COL.tx+';width:100%;max-width:820px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);padding:34px 40px;box-sizing:border-box;flex-shrink:0">'+dossierHtml(c)+'</div>';
+  document.body.appendChild(ov);
+}
+
+// Urteils-Begründung in Klartext (aus Verdict + Konfidenz + Flags abgeleitet)
+function dossierReasoning(c,vd,cf){
+  var K=DOSSIER_COL;
+  var s=[];
+  if(vd.verdict==='offen')return 'Noch keine Bewertung möglich – es sind keine Dimensionen bewertet. Erst Daten erfassen (Xray-Paste, Gebühren-Rechner), dann entscheiden.';
+  var strongest=null;
+  DECISION_DIMS.forEach(function(d){var v=decisionEff(c,d.key);if(typeof v==='number'&&(!strongest||v>strongest.val))strongest={label:d.label,val:v};});
+  if(vd.verdict==='go')s.push('<b style="color:'+K.gn+'">GO:</b> Score '+vd.score+'/100 (Schwelle 70) über '+vd.rated+' von '+vd.total+' Dimensionen, ohne harte Red Flags.');
+  else if(vd.verdict==='nogo')s.push('<b style="color:'+K.rd+'">NO-GO:</b> '+(vd.hard>0?vd.hard+' harte Red Flag'+(vd.hard>1?'s':'')+' bei Score '+vd.score+'/100.':'Score '+vd.score+'/100 liegt unter der 50er-Schwelle.'));
+  else s.push('<b style="color:'+K.ac+'">PRÜFEN:</b> Score '+vd.score+'/100 – weder klares GO (≥70 ohne harte Flags) noch NO-GO (<50).');
+  if(strongest)s.push('Stärkste Dimension: '+strongest.label+' ('+strongest.val+'/10).');
+  if(vd.weakest)s.push('Größter Schwachpunkt: '+vd.weakest.label+' ('+vd.weakest.val+'/10).');
+  s.push('Das Urteil stützt sich auf <b>'+cf.data+'/'+cf.total+' echte Datenpunkte</b>'+(cf.manual?' und '+cf.manual+' manuelle Schätzung'+(cf.manual>1?'en':''):'')+' (Konfidenz: '+cf.level+').');
+  if((vd.verdict==='go'||vd.verdict==='nogo')&&cf.data<3)s.push('<b style="color:'+K.rd+'">⚠️ Achtung:</b> Für ein belastbares '+vd.label+' fehlen echte Daten – erst nachtragen, dann final entscheiden.');
+  return s.join(' ');
+}
+
+function dossierHtml(c){
+  var K=DOSSIER_COL;
+  var vd=decisionVerdict(c);
+  var cf=decisionConfidence(c);
+  var vcol=K[vd.color]||K.tx3;
+  var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+  var now=new Date();
+  function sec(t){return '<h3 style="font-size:13px;margin:22px 0 8px;padding-bottom:5px;border-bottom:2px solid '+K.bd+';color:'+K.tx+';text-transform:uppercase;letter-spacing:1px">'+t+'</h3>';}
+  function kv(label,val,hint){return '<tr><td style="padding:5px 10px 5px 0;color:'+K.mut+';font-size:12px;white-space:nowrap">'+label+'</td><td style="padding:5px 0;font-weight:700;font-size:12.5px;color:'+K.tx+'">'+val+'</td>'+(hint!==undefined?'<td style="padding:5px 0 5px 14px;font-size:11px;color:'+K.mut+'">'+hint+'</td>':'')+'</tr>';}
+  function eur(v){return v!=null?fmt(v)+' €':'<span style="color:'+K.ac+'">offen</span>';}
+  var h='';
+
+  // ── Kopf ──
+  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid '+K.tx+';padding-bottom:10px;margin-bottom:14px">'+
+    '<div style="font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase">⚖️ Entscheidungs-Dossier</div>'+
+    '<div style="font-size:11px;color:'+K.mut+'">SellerHub · '+now.toLocaleDateString('de-DE')+'</div>'+
+  '</div>';
+  h+='<div style="font-family:\'Playfair Display\',serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:4px">'+esc(c.name)+'</div>';
+  var meta=[];
+  if(c.kategorie)meta.push(esc(c.kategorie));
+  if(c.hauptkeyword&&c.hauptkeyword!==c.name)meta.push('Keyword: '+esc(c.hauptkeyword));
+  if(c.compAsin)meta.push('Referenz-ASIN: '+esc(c.compAsin));
+  if(meta.length)h+='<div style="font-size:12px;color:'+K.mut+';margin-bottom:16px">'+meta.join(' · ')+'</div>';
+
+  // ── Urteil ──
+  h+='<div style="border:2px solid '+vcol+';border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:'+K.bg+'">'+
+    '<div style="text-align:center"><div style="font-size:38px;font-weight:800;color:'+vcol+';line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:9px;color:'+K.mut+';text-transform:uppercase;letter-spacing:1px">Score /100</div></div>'+
+    '<div style="background:'+vcol+';color:#fff;font-weight:800;font-size:16px;padding:8px 18px;border-radius:9px">'+emoji+' '+vd.label+'</div>'+
+    '<div style="flex:1;min-width:180px;font-size:11.5px;color:'+K.mut+'">Daten-Konfidenz: <b style="color:'+(K[cf.color]||K.tx)+'">'+cf.level.toUpperCase()+'</b> · '+cf.data+'/'+cf.total+' echte Datenpunkte'+(cf.manual?' · '+cf.manual+' manuell':'')+(cf.open?' · '+cf.open+' offen':'')+'</div>'+
+  '</div>';
+  h+='<div style="font-size:12.5px;line-height:1.65;margin:12px 0 0;color:'+K.tx+'">'+dossierReasoning(c,vd,cf)+'</div>';
+
+  // ── Scorecard ──
+  h+=sec('Scorecard – 6 Dimensionen');
+  h+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  h+='<tr style="text-align:left;color:'+K.mut+';font-size:10.5px;text-transform:uppercase;letter-spacing:.5px"><th style="padding:4px 0;font-weight:600">Dimension</th><th style="padding:4px 8px;font-weight:600">Gewicht</th><th style="padding:4px 8px;font-weight:600">Wert</th><th style="padding:4px 8px;font-weight:600">Basis</th></tr>';
+  DECISION_DIMS.forEach(function(d){
+    var eff=decisionEff(c,d.key);
+    var a=decisionAuto(c,d.key);
+    var ov2=c.score2&&c.score2[d.key];
+    var manual=typeof ov2==='number'&&ov2>0;
+    var dcol=eff==null?K.tx3:eff>=7?K.gn:eff>=4?K.ac:K.rd;
+    var basis=manual?'✏️ manuell gesetzt'+(a.val!=null?' (Auto: '+a.val+')':''):(eff==null?'– '+esc(a.reason):'⚙️ '+esc(a.reason));
+    h+='<tr style="border-top:1px solid '+K.bd+'">'+
+      '<td style="padding:6px 0;font-weight:700">'+esc(d.label)+'</td>'+
+      '<td style="padding:6px 8px;color:'+K.mut+'">'+d.weight+' %</td>'+
+      '<td style="padding:6px 8px;font-weight:800;color:'+dcol+';white-space:nowrap">'+(eff==null?'– /10':eff+' /10')+'</td>'+
+      '<td style="padding:6px 8px;font-size:11px;color:'+K.mut+'">'+basis+'</td>'+
+    '</tr>';
+  });
+  h+='</table>';
+
+  // ── Red Flags ──
+  if(vd.flags.length){
+    h+=sec('Red Flags ('+vd.hard+' hart · '+(vd.flags.length-vd.hard)+' weich)');
+    h+='<div style="display:flex;flex-direction:column;gap:4px">';
+    vd.flags.slice().sort(function(a,b){return (b.hard?1:0)-(a.hard?1:0);}).forEach(function(f){
+      var fc=f.hard?K.rd:K.ac;
+      h+='<div style="font-size:12px;color:'+fc+';border:1px solid '+fc+';border-radius:7px;padding:5px 10px">'+(f.hard?'🔴 HART':'🟡 weich')+' · '+esc(f.t)+'</div>';
+    });
+    h+='</div>';
+  }
+
+  // ── Markt & Wettbewerb ──
+  var ns=c.nischenScan;
+  if(c.top10Umsatz!=null||c.avgReviews!=null||ns){
+    h+=sec('Markt &amp; Wettbewerb');
+    h+='<table style="border-collapse:collapse">';
+    if(c.top10Umsatz!=null)h+=kv('⌀ Umsatz Top-Konkurrenz',Math.round(c.top10Umsatz).toLocaleString('de-DE')+' €/Monat');
+    if(ns&&ns.totalRevenue!=null)h+=kv('Nische gesamt',Math.round(ns.totalRevenue).toLocaleString('de-DE')+' €/Monat');
+    if(c.avgReviews!=null)h+=kv('⌀ Reviews Top-10',Math.round(c.avgReviews).toLocaleString('de-DE'),ns&&ns.minReviews!=null?('Spanne '+ns.minReviews+'–'+ns.maxReviews):'');
+    if(ns&&ns.beatable!=null)h+=kv('Schwache Listings (&lt;300 Rev.)',String(ns.beatable),'angreifbare Plätze in den Top-'+(ns.count||10));
+    if(ns&&ns.avgRating!=null)h+=kv('⌀ Rating','⭐ '+ns.avgRating.toFixed(1));
+    if(ns&&ns.avgPrice!=null)h+=kv('⌀ Marktpreis',fmt(ns.avgPrice)+' €');
+    h+='</table>';
+    if(ns)h+='<div style="font-size:10.5px;color:'+K.mut+';margin-top:5px">Quelle: '+(ns.source==='xray-paste'?'⚡ Xray-Paste ('+ns.count+' Top-Produkte aggregiert)':'🔍 Nischen-Scan ('+ns.okCount+'/'+ns.count+' ASINs abgerufen)')+' · Stand '+new Date(ns.at).toLocaleDateString('de-DE')+'</div>';
+  }
+
+  // ── Margenrechnung ──
+  h+=sec('Margenrechnung (je Stück)');
+  h+='<table style="border-collapse:collapse">';
+  h+=kv('Verkaufspreis (VK)',eur(c.vk));
+  h+=kv('Einkaufspreis (EK)',eur(c.ek));
+  h+=kv('FBA-Gebühren',eur(c.fbaGebuehren),'inkl. Versand durch Amazon');
+  h+=kv('Netto-Marge',c.nettoMarge!=null?('<span style="color:'+(c.nettoMarge>=25?K.gn:c.nettoMarge>=15?K.ac:K.rd)+'">'+c.nettoMarge+' %</span>'):'<span style="color:'+K.ac+'">offen</span>','nach FBA + PPC; Ziel ≥ 25 %');
+  if(c.vk!=null&&c.nettoMarge!=null)h+=kv('Gewinn je Stück',fmt(c.vk*c.nettoMarge/100)+' €');
+  if(c.ek!=null&&c.ek>0)h+=kv('Startbudget (500 Stück)','~'+Math.round(c.ek*500).toLocaleString('de-DE')+' €','EK × 500, ohne PPC-Anlauf');
+  h+='</table>';
+  if(c.nettoMarge==null||c.fbaGebuehren==null)h+='<div style="font-size:10.5px;color:'+K.ac+';margin-top:5px">⚠️ Margenrechnung unvollständig – im 💶 Gebühren-Rechner mit der echten Amazon-Rate-Card (Stand 1.2.2026) ermitteln.</div>';
+
+  // ── Review-Insights ──
+  var rm=c.reviewMining;
+  if(rm){
+    h+=sec('Review-Insights (Differenzierungs-Chance: '+(rm.score!=null?rm.score+'/10':'–')+')');
+    if(rm.complaints&&rm.complaints.length){
+      h+='<div style="font-size:11px;font-weight:700;color:'+K.mut+';margin-bottom:4px">😖 TOP-BESCHWERDEN DER KONKURRENZ</div><ul style="margin:0 0 10px;padding-left:18px;font-size:12px;line-height:1.6">';
+      rm.complaints.forEach(function(x){h+='<li>'+esc(x.text||'')+(x.freq||x.severity?' <span style="color:'+K.mut+';font-size:10.5px">('+[x.freq,x.severity].filter(Boolean).map(esc).join(' · ')+')</span>':'')+'</li>';});
+      h+='</ul>';
+    }
+    if(rm.wishes&&rm.wishes.length)h+='<div style="font-size:11px;font-weight:700;color:'+K.mut+';margin-bottom:4px">💭 KUNDENWÜNSCHE</div><div style="font-size:12px;line-height:1.6;margin-bottom:10px">'+rm.wishes.map(esc).join(' · ')+'</div>';
+    if(rm.diffIdeas&&rm.diffIdeas.length){
+      h+='<div style="font-size:11px;font-weight:700;color:'+K.mut+';margin-bottom:4px">🚀 DIFFERENZIERUNGS-IDEEN</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.6">';
+      rm.diffIdeas.forEach(function(x){h+='<li>'+esc(x)+'</li>';});
+      h+='</ul>';
+    }
+  }
+
+  // ── Differenzierung / Notizen ──
+  if((c.differenzierung||'').trim())h+=sec('Geplante Differenzierung')+'<div style="font-size:12.5px;line-height:1.65">'+esc(c.differenzierung)+'</div>';
+  if((c.notes||'').trim())h+=sec('Notizen')+'<div style="font-size:12px;line-height:1.6;color:'+K.mut+'">'+esc(c.notes)+'</div>';
+
+  // ── Nächste Schritte (offene Datenpunkte) ──
+  var nextSteps=[];
+  var stepMap={nachfrage:'Nachfrage-Daten holen: ⚡ Xray-Paste oder 📥 Helium-Import (Top-10-Umsatz)',
+    wettbewerb:'Wettbewerb erfassen: ⚡ Xray-Paste oder 🔍 Nischen-Scan (⌀ Reviews)',
+    wirtschaft:'Marge rechnen: 💶 Gebühren-Rechner mit echter Rate-Card (EK, FBA, Netto-Marge)',
+    differenz:'Differenzierung finden: 🔬 Review-Mining der Konkurrenz-Rezensionen',
+    risiko:'Red-Flag-Check im Kandidaten-Editor: Gewicht, Saisonalität, Gating, IP-Risiko',
+    kapital:'Einkaufspreis (EK) erfassen → Startbudget-Schätzung'};
+  cf.dims.forEach(function(x,i){if(x.src==='none'&&stepMap[DECISION_DIMS[i].key])nextSteps.push(stepMap[DECISION_DIMS[i].key]);});
+  if(vd.verdict==='go')nextSteps.push('Finale kritische Prüfung mit Claude (Workflow-Schritt 17), dann Muster bestellen');
+  if(nextSteps.length){
+    h+=sec('Nächste Schritte');
+    h+='<ol style="margin:0;padding-left:20px;font-size:12.5px;line-height:1.8">';
+    nextSteps.forEach(function(x){h+='<li>'+x+'</li>';});
+    h+='</ol>';
+  }
+
+  // ── Fußzeile ──
+  h+='<div style="margin-top:26px;padding-top:10px;border-top:1px solid '+K.bd+';display:flex;justify-content:space-between;font-size:10px;color:'+K.mut+'">'+
+    '<span>Erstellt mit SellerHub – Entscheidungs-Cockpit für Amazon-Produktrecherche</span>'+
+    '<span>'+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr · alle Werte aus eigenen Eingaben &amp; Importen</span>'+
+  '</div>';
   return h;
 }
 
