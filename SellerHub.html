@@ -5693,6 +5693,21 @@ function decisionVerdict(c){
   else{verdict='pruefen';label='PRÜFEN';color='ac';}
   return {score:score,verdict:verdict,label:label,color:color,flags:flags,hard:hard,weakest:weakest,rated:rated,total:DECISION_DIMS.length};
 }
+// Daten-Konfidenz: worauf beruht das Urteil? Pro Dimension: echte Daten (Auto) / manuell geschätzt / offen
+function decisionConfidence(c){
+  var data=0,manual=0,dims=[];
+  DECISION_DIMS.forEach(function(d){
+    var ov=c.score2&&c.score2[d.key];
+    var isManual=typeof ov==='number'&&ov>0;
+    var src=isManual?'manual':(decisionAuto(c,d.key).val!=null?'data':'none');
+    if(src==='data')data++;else if(src==='manual')manual++;
+    dims.push({label:d.label,src:src});
+  });
+  var total=DECISION_DIMS.length;
+  return {data:data,manual:manual,open:total-data-manual,total:total,
+    level:data>=4?'hoch':data>=2?'mittel':'niedrig',
+    color:data>=4?'gn':data>=2?'ac':'rd',dims:dims};
+}
 
 // ═══════════════════════════════════════════════════════════════
 // CORE FUNCTIONS
@@ -6394,9 +6409,10 @@ function renderPipeline(){
   cands.forEach(function(c){
     var vd=decisionVerdict(c);
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    var cf=decisionConfidence(c);
     c2+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
       '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
-      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+'</div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span></div>'+
       pipeFlagChips(vd.flags)+
       '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:10.5px" title="Scorecard öffnen">⚖️</button>'+
@@ -6892,7 +6908,7 @@ function researchRenderScore(){
 
   var html='';
 
-  html+=helpBox('⚖️','Entscheidungs-Scorecard – ein Urteil','<b>6 gewichtete Dimensionen</b> (Nachfrage 25 % · Wettbewerb 25 % · Wirtschaftlichkeit 20 % · Differenzierung 15 % · Risiko 10 % · Kapital 5 %) → Score 0–100 + Ampel <b>🟢 GO / 🟡 PRÜFEN / 🔴 NO-GO</b>. Wo Daten vorliegen, wird automatisch geschätzt – per Regler überschreibbar. <b>Rote Flags</b> (Preis&lt;15 €, &gt;2.000 Reviews, Marge&lt;15 %) verhindern ein GO.',{variant:'gold',lessonId:'rp_6'});
+  html+=helpBox('⚖️','Entscheidungs-Scorecard – ein Urteil','<b>6 gewichtete Dimensionen</b> (Nachfrage 25 % · Wettbewerb 25 % · Wirtschaftlichkeit 20 % · Differenzierung 15 % · Risiko 10 % · Kapital 5 %) → Score 0–100 + Ampel <b>🟢 GO / 🟡 PRÜFEN / 🔴 NO-GO</b>. Wo Daten vorliegen, wird automatisch geschätzt – per Regler überschreibbar. <b>Rote Flags</b> (Preis&lt;15 €, &gt;2.000 Reviews, Marge&lt;15 %) verhindern ein GO. Die <b>Daten-Konfidenz</b> zeigt, auf wie vielen <b>echten Datenpunkten</b> das Urteil beruht (⚙️ Daten · ✏️ manuell · – offen) – einem GO auf reinem Bauchgefühl nicht trauen.',{variant:'gold',lessonId:'rp_6'});
 
   var selected=researchSelectedCandidate?cands.find(function(c){return c.id===researchSelectedCandidate}):null;
 
@@ -6910,6 +6926,16 @@ function researchRenderScore(){
         '<div style="text-align:center"><div style="font-size:40px;font-weight:800;color:var(--'+col+');line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score /100</div></div>'+
         '<div style="background:var(--'+col+');color:#fff;font-weight:800;font-size:15px;padding:8px 16px;border-radius:10px;white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
       '</div>'+
+    '</div>';
+    // Daten-Konfidenz: worauf beruht das Urteil? (Phase 1.2)
+    var cf=decisionConfidence(selected);
+    var cfIcon={data:'⚙️',manual:'✏️',none:'–'};
+    var cfTip={data:'aus echten Daten berechnet',manual:'manuell geschätzt (Regler)',none:'nicht bewertet'};
+    html+='<div style="font-size:12.5px;color:var(--tx);background:var(--s1);border:1px solid var(--'+cf.color+');border-radius:8px;padding:9px 12px;margin-bottom:10px">'+
+      '<span style="background:var(--'+cf.color+'d);color:var(--'+cf.color+');font-weight:800;font-size:10px;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.5px;margin-right:7px">Daten-Konfidenz '+cf.level+'</span>'+
+      (vd.score>0?'<b>'+vd.label+'</b>':'Das Urteil')+' basiert auf <b>'+cf.data+'/'+cf.total+'</b> echten Datenpunkten'+(cf.manual?' · '+cf.manual+' manuell geschätzt':'')+(cf.open?' · '+cf.open+' offen':'')+
+      '<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">'+cf.dims.map(function(x){return '<span title="'+cfTip[x.src]+'" style="font-size:10px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:2px 7px;color:var(--'+(x.src==='data'?'gn':x.src==='manual'?'ac':'tx3')+')">'+cfIcon[x.src]+' '+esc(x.label)+'</span>';}).join('')+'</div>'+
+      ((vd.verdict==='go'||vd.verdict==='nogo')&&cf.data<3?'<div style="margin-top:7px;font-size:11.5px;color:var(--rd)">⚠️ Das Urteil beruht kaum auf echten Daten – erst Zahlen nachtragen (📥 Helium-Import, 🔍 Nischen-Scan, 🔬 Review-Mining), dann entscheiden.</div>':'')+
     '</div>';
     // Größter Schwachpunkt
     if(vd.weakest&&vd.score>0){
@@ -6967,10 +6993,11 @@ function researchRenderScore(){
     var c=item.c,vd=item.vd,s=vd.score;
     var cfg=PIPELINE_STATUS[normalizeStatus(c.status)]||PIPELINE_STATUS.idee;
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+    var rcf=decisionConfidence(c);
     var isTop3=idx<3&&s>0;
     html+='<div onclick="researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+(isTop3?'var(--'+vd.color+'d)':'var(--s2)')+';border:1px solid '+(isTop3?'var(--'+vd.color+')':'var(--bd)')+';border-radius:10px;cursor:pointer'+(researchSelectedCandidate===c.id?';box-shadow:0 0 0 2px var(--ac)':'')+'" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+
       '<div style="font-size:16px;font-weight:800;color:var(--tx3);min-width:28px;text-align:center">#'+(idx+1)+'</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+'</div></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+' · <span style="color:var(--'+rcf.color+')" title="Daten-Konfidenz: '+rcf.data+' von '+rcf.total+' Dimensionen aus echten Daten">⚙️ '+rcf.data+'/'+rcf.total+' Daten</span></div></div>'+
       '<div style="font-size:12px;font-weight:700;color:var(--'+vd.color+');white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
       '<div style="text-align:right;min-width:46px"><div style="font-size:22px;font-weight:800;color:var(--'+vd.color+');line-height:1">'+(s>0?s:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score</div></div>'+
     '</div>';
