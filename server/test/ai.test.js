@@ -2,7 +2,8 @@
 // Läuft OHNE echten API-Key: der Anthropic-Client wird gemockt (aiClient-Override).
 //   node test/ai.test.js
 import { newDb } from 'pg-mem';
-import { initDb, insertItem, pendingAiItems, queryNews } from '../src/data/db.js';
+import { initDb, insertItem, pendingAiItems, queryNews, recentAiCalls, aiCallStats } from '../src/data/db.js';
+import { PROMPTS } from '../src/core/prompt-registry.js';
 import { aiClient, analyzeItem } from '../src/services/intelligence/analyze.js';
 import { drainQueue, aiState } from '../src/services/intelligence/queue.js';
 import { parseProfile, personalizedScore, rankForProfile } from '../src/services/feed/profile.js';
@@ -78,6 +79,15 @@ t('KI-Felder in DB gespeichert', recht.ai_score === 88 && recht.ai_category === 
 t('ai_summary als Array deserialisiert', Array.isArray(recht.ai_summary) && recht.ai_summary.length === 3);
 t('Sortierung nutzt KI-Score (recht zuerst)', newsAfter[0].id === 'item-recht');
 t('Irrelevantes Item fällt unter Default-Schwelle', !(await queryNews({ limit: 10, minScore: 25 })).some(n => n.id === 'item-egal'));
+
+// ── 2b) Prompt-Versionierung: jeder Call in ai_calls protokolliert ──
+const calls = await recentAiCalls(50);
+t('ai_calls: 4 Calls protokolliert (1 direkt + 3 Queue)', calls.length === 4, calls.length);
+t('ai_calls: key/version/model/tokens gespeichert', calls.every(c =>
+  c.prompt_key === 'relevance_analysis' && c.prompt_version === PROMPTS.relevance_analysis.version
+  && c.model === 'claude-opus-4-8' && c.tokens_in === 820 && c.tokens_out === 210));
+const stats = await aiCallStats();
+t('aiCallStats aggregiert Token-Summen je Prompt-Version', stats.length === 1 && Number(stats[0].calls) === 4 && Number(stats[0].tokens_in) === 4 * 820);
 
 // ── 3) Retry/Kostenbremse: Fehler zählen hoch, nach maxAttempts endgültig raus ──
 await insertItem(mk('item-fail', 'Amazon Gebühr Test-Fehlerfall'));

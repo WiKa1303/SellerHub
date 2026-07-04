@@ -5,24 +5,13 @@
 // Kostendesign: max. 1 LLM-Call pro Tag (Briefing wird in der DB gecacht).
 // Ohne API-Key: deterministisches Briefing aus Alerts + Trend-Empfehlungen.
 import { aiClient } from '../../core/ai-client.js';
-import { queryTrends, queryAlerts, getStrategyBrief, saveStrategyBrief } from '../../data/db.js';
-import { config } from '../../core/config.js';
+import { PROMPTS } from '../../core/prompt-registry.js';
+import { queryTrends, queryAlerts, getStrategyBrief, saveStrategyBrief, logAiCall } from '../../data/db.js';
+
+const PROMPT = PROMPTS.strategy_brief; // Template/Version/Modell zentral in der Registry
 import { log } from '../../core/logger.js';
 
 export const strategyState = { lastRun: null, generated: 0 };
-
-const SYSTEM_PROMPT = `Du bist Chefstratege eines Amazon-FBA-Sellers im DACH-Raum.
-Du bekommst die aktuelle Marktlage (Trend-Themen, kritische Alerts, Chancen) und verdichtest sie
-zu einem täglichen Strategie-Briefing. Regeln:
-
-- headline: 1 Satz — die wichtigste Erkenntnis des Tages, konkret, kein Floskel-Deutsch.
-- situation: 2-3 Sätze Gesamtlage. Was bewegt sich, was bleibt ruhig.
-- priorities: MAXIMAL 3, nach Wichtigkeit sortiert. Jede Priorität:
-  - title: kurz · why: 1 Satz Begründung (monetär gedacht)
-  - action: EIN konkreter Schritt für diese Woche (kein "beobachten")
-  - type: risiko | chance · urgency: hoch | mittel | niedrig
-- watchlist: 0-4 Themen, die man im Blick behalten sollte (nur Namen).
-Schreibe per Du. Wenn die Lage ruhig ist, sag das ehrlich — erfinde keine Dringlichkeit.`;
 
 const BRIEF_SCHEMA = {
   type: 'object',
@@ -71,12 +60,13 @@ export async function updateStrategyBrief() {
         chancen: chances.map(c => ({ thema: c.topic_name, zusammenfassung: c.summary })),
       };
       const response = await client.messages.create({
-        model: config.aiModel,
-        max_tokens: 1800,
-        system: SYSTEM_PROMPT,
-        output_config: { effort: 'low', format: { type: 'json_schema', schema: BRIEF_SCHEMA } },
+        model: PROMPT.model,
+        max_tokens: PROMPT.maxTokens,
+        system: PROMPT.template,
+        output_config: { effort: PROMPT.effort, format: { type: 'json_schema', schema: BRIEF_SCHEMA } },
         messages: [{ role: 'user', content: JSON.stringify(payload) }],
       });
+      await logAiCall(PROMPT, response, today); // Telemetrie (fail-soft)
       brief = JSON.parse(response.content.find(b => b.type === 'text')?.text);
       brief.priorities = (brief.priorities || []).slice(0, 3);
       model = response.model;

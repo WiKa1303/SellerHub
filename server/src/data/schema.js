@@ -109,7 +109,20 @@ export async function initDb(poolOverride) {
       PRIMARY KEY (tenant_id, item_id)
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs, feedback)');
+  // ── AI-Call-Telemetrie (Owner: intelligence) — Prompt-Versionierung & Kosten je Call ──
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ai_calls (
+      id             TEXT PRIMARY KEY,               -- call_<ts>_<seq>
+      prompt_key     TEXT NOT NULL,
+      prompt_version INTEGER NOT NULL,
+      model          TEXT NOT NULL,                  -- tatsächliches Modell aus der API-Antwort
+      temperature    REAL,                           -- null auf Opus 4.7+ (Sampling-Parameter entfernt)
+      tokens_in      INTEGER, tokens_out INTEGER,
+      ref            TEXT,                           -- Bezug: Artikel-Id / Topic-Liste / Briefing-Tag
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs, feedback, ai_calls)');
   return pool;
 }
 

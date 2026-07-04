@@ -6,6 +6,8 @@ import { db, queryTrends, queryAlerts, queryNews } from '../data/db.js';
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { crawlState } from '../services/crawler/run.js';
 import { AI_MODULES } from '../services/intelligence/registry.js';
+import { PROMPTS } from '../core/prompt-registry.js';
+import { recentAiCalls, aiCallStats } from '../data/db.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const num = n => Number(n ?? 0).toLocaleString('de-DE');
@@ -37,6 +39,9 @@ export async function renderInternal(req, res) {
       `SELECT title, source, ai_score, ai_impact, ai_urgency, ai_reasoning, ai_category, ai_analyzed_at
        FROM news_events WHERE ai_analyzed_at IS NOT NULL
        ORDER BY ai_analyzed_at DESC LIMIT 20`)).rows;
+
+    // ── PROMPTS: Registry + Call-Telemetrie ──
+    const [aiCalls, callStats] = await Promise.all([recentAiCalls(20), aiCallStats()]);
 
     // ── TRENDS / ALERTS über bestehende Repos ──
     const trends = await queryTrends({ limit: 10, maxAgeDays: 30 });
@@ -82,6 +87,25 @@ export async function renderInternal(req, res) {
 <div class="kpi"><b>${num(cAnalyzed.rows[0].n)}</b>davon KI-analysiert</div>
 <div class="kpi"><b>${num(cAlerts.rows[0].n)}</b>Alerts</div>
 <table><tr><th>Intelligence-Modul</th><th>Beschreibung</th><th>Laufzeit-State</th></tr>${modRows}</table>
+
+<h2>Prompts — Registry & Versionen</h2>
+<table><tr><th>prompt_key</th><th>Version</th><th>Modell</th><th>effort</th><th>temperature</th><th>max_tokens</th><th>Beschreibung</th></tr>
+${Object.values(PROMPTS).map(pr => `<tr><td class="mono"><b>${esc(pr.key)}</b></td><td><b>v${pr.version}</b></td>
+  <td class="mono">${esc(pr.model)}</td><td>${esc(pr.effort)}</td>
+  <td class="muted">${pr.temperature ?? '— (auf Opus 4.7+ entfernt)'}</td><td>${pr.maxTokens}</td>
+  <td class="muted">${esc(pr.description)}</td></tr>`).join('')}
+</table>
+
+<h2>AI-Calls — Token-Verbrauch je Prompt-Version</h2>
+<table><tr><th>prompt_key</th><th>Version</th><th>Calls</th><th>Tokens in</th><th>Tokens out</th></tr>
+${callStats.map(cs => `<tr><td class="mono">${esc(cs.prompt_key)}</td><td>v${cs.prompt_version}</td>
+  <td>${num(cs.calls)}</td><td>${num(cs.tokens_in)}</td><td>${num(cs.tokens_out)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">noch keine AI-Calls</td></tr>'}
+</table>
+<table style="margin-top:8px"><tr><th>Zeitpunkt</th><th>prompt_key</th><th>Version</th><th>Modell</th><th>Tokens in/out</th><th>Bezug</th></tr>
+${aiCalls.map(c => `<tr><td class="mono">${dt(c.created_at)}</td><td class="mono">${esc(c.prompt_key)}</td>
+  <td>v${c.prompt_version}</td><td class="mono">${esc(c.model)}</td>
+  <td>${num(c.tokens_in)} / ${num(c.tokens_out)}</td><td class="mono">${esc(c.ref || '—')}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">noch keine AI-Calls (KI-Key gesetzt? Pipeline gelaufen?)</td></tr>'}
+</table>
 
 <h2>Intelligence — letzte ${analyzed.length} analysierte Artikel</h2>
 <table><tr><th>Analysiert</th><th>Artikel</th><th>Score</th><th>Impact</th><th>Urgency</th><th>Reasoning</th></tr>

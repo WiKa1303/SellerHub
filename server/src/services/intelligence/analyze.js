@@ -1,51 +1,17 @@
 // ═══ KI-Relevanzanalyse (Phase 3) ═══
 // EIN API-Call pro Artikel liefert Analyse UND Summary (Kosteneffizienz: kein zweiter Call).
 // Strukturierte Outputs (output_config.format) garantieren valides JSON — kein Parsing-Gefrickel.
-import { config } from '../../core/config.js';
 import { aiClient } from '../../core/ai-client.js';
+import { PROMPTS } from '../../core/prompt-registry.js';
+import { logAiCall } from '../../data/db.js';
+
+const PROMPT = PROMPTS.relevance_analysis; // Template/Version/Modell zentral in der Registry
 
 // Client-Fabrik liegt in der Infrastruktur (core/ai-client.js);
 // Re-Export hält bestehende Importe (Tests, Module) stabil.
 export { aiClient, aiEnabled } from '../../core/ai-client.js';
 
 export const AI_CATEGORIES = ['recht', 'ppc', 'produktrecherche', 'logistik', 'steuern', 'events', 'trends', 'sonstiges'];
-
-// System-Prompt: STABIL halten (keine Zeitstempel/IDs) — Voraussetzung für späteres Prompt-Caching.
-const SYSTEM_PROMPT = `Du bist Analyst für Amazon-FBA-Seller im DACH-Raum (Deutschland, Österreich, Schweiz).
-Du bewertest Nachrichtenartikel ausschließlich aus der Perspektive: "Was bedeutet das für einen Amazon-FBA-Händler geschäftlich?"
-
-Bewerte den Artikel:
-
-1. relevance_score (0-100): Wie relevant für FBA-Seller?
-   - 80-100: unmittelbar geschäftskritisch (Gebührenänderung, Gesetz mit Frist, Kontosperr-Risiko)
-   - 50-79: sollte man kennen (Policy-Updates, Markttrends mit Handlungsoptionen)
-   - 25-49: Hintergrundwissen (allgemeine E-Commerce-Entwicklung)
-   - 0-24: irrelevant für FBA-Seller
-
-2. category: genau eine aus recht | ppc | produktrecherche | logistik | steuern | events | trends | sonstiges
-
-3. urgency: hoch (Frist/sofortiger Handlungsbedarf) | mittel (in den nächsten Wochen relevant) | niedrig (kein Zeitdruck)
-
-4. impact: high (kostet/bringt direkt Geld oder bedroht das Konto) | medium (beeinflusst Marge/Prozesse) | low (nice to know)
-
-5. reasoning: 1-2 Sätze, WARUM diese Bewertung — konkret, kein Floskel-Deutsch.
-
-6. summary: 3-5 Bulletpoints, HANDLUNGSORIENTIERT für den Seller formuliert.
-   - Jeder Punkt beantwortet: "Was bedeutet das konkret für mich / was sollte ich tun?"
-   - KEINE generische Nachrichtenzusammenfassung ("Amazon hat angekündigt...")
-   - RICHTIG: "Prüfe bis 1.9., ob deine Größenklassen-Einstufung noch stimmt — sonst zahlst du drauf."
-   - Bei irrelevanten Artikeln (score < 25): 1 kurzer Punkt genügt, warum es nicht relevant ist.
-
-7. topic: normalisierter Themen-Slug für die Trend-Erkennung.
-   - kleingeschrieben, bindestrich-getrennt, max. 4 Wörter, DAS Kernthema (nicht der Einzelfall)
-   - Artikel zum selben Thema MÜSSEN denselben Slug bekommen: "gpsr-produktsicherheit", "amazon-fba-gebuehren", "ppc-gebotsstrategien", "temu-konkurrenz"
-   - kein Datum, keine Quellennamen im Slug
-
-8. opportunity: chance (Seller kann Geld verdienen/Vorteil sichern) | risiko (kostet Geld/bedroht Konto) | neutral
-
-9. affected: WER ist betroffen, kurz. z.B. "alle FBA-Seller", "Private-Label-Seller in Spielzeug", "Seller mit AT-Kunden"
-
-Sei streng: Ein Generalisten-Tech-Artikel ohne Seller-Bezug bekommt einen niedrigen Score, egal wie interessant er klingt.`;
 
 // JSON-Schema für strukturierte Outputs (additionalProperties:false ist Pflicht)
 const ANALYSIS_SCHEMA = {
@@ -74,12 +40,12 @@ export async function analyzeItem(item) {
   if (!client) throw new Error('KI nicht konfiguriert (ANTHROPIC_API_KEY fehlt)');
 
   const response = await client.messages.create({
-    model: config.aiModel,
-    max_tokens: 1500,
-    system: SYSTEM_PROMPT,
+    model: PROMPT.model,
+    max_tokens: PROMPT.maxTokens,
+    system: PROMPT.template,
     // effort:low — Klassifikation kurzer Snippets braucht keine tiefe Denkarbeit; spart Output-Tokens
     output_config: {
-      effort: 'low',
+      effort: PROMPT.effort,
       format: { type: 'json_schema', schema: ANALYSIS_SCHEMA },
     },
     messages: [{
@@ -88,6 +54,7 @@ export async function analyzeItem(item) {
     }],
   });
 
+  await logAiCall(PROMPT, response, item.id); // Telemetrie: Prompt-Version + Tokens (fail-soft)
   const text = response.content.find(b => b.type === 'text')?.text;
   if (!text) throw new Error('Leere KI-Antwort (stop_reason: ' + response.stop_reason + ')');
   const analysis = JSON.parse(text); // durch output_config.format garantiert valide

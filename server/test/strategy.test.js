@@ -6,6 +6,7 @@ import { aiClient } from '../src/services/intelligence/analyze.js';
 import { AI_MODULES, runIntelligencePipeline } from '../src/services/intelligence/registry.js';
 import { fallbackBrief, updateStrategyBrief } from '../src/services/intelligence/strategy.js';
 import { buildApi } from '../src/api/routes.js';
+import { recentAiCalls } from '../src/data/db.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -74,6 +75,10 @@ const saved = await getStrategyBrief(today);
 t('Briefing in DB gecacht', saved && saved.brief.headline.includes('GPSR') && saved.brief.priorities.length === 1);
 const again = await updateStrategyBrief();
 t('Kostenbremse: max. 1 Briefing/Tag (2. Lauf übersprungen)', again.skipped && strategyCalls === 1, JSON.stringify(again));
+
+// ── Prompt-Telemetrie: Interpretation + Strategie als eigene Keys protokolliert ──
+const keys = (await recentAiCalls(20)).map(c => c.prompt_key);
+t('ai_calls enthält trend_impact_interpretation + strategy_brief', keys.includes('trend_impact_interpretation') && keys.includes('strategy_brief'), keys.join(','));
 
 // ── Fallback ohne KI: deterministisch + ehrlich ──
 const fb = fallbackBrief(

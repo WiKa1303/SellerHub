@@ -59,6 +59,7 @@ const ihtml = await internal.text();
 t('/internal antwortet 200 mit allen Sektionen', internal.status === 200
   && ihtml.includes('System') && ihtml.includes('Intelligence') && ihtml.includes('Trends')
   && ihtml.includes('Alerts') && ihtml.includes('Personalisierter Feed'));
+t('/internal zeigt Prompt-Registry mit Versionen', ihtml.includes('Prompts — Registry') && ihtml.includes('relevance_analysis') && ihtml.includes('strategy_brief'));
 t('/internal ist read-only (kein POST-Formular)', !ihtml.includes('method="post"'));
 const internalProf = await fetch(base + '/internal?profil=arb&tenant=kunde-42');
 t('/internal mit Profil+Tenant rendert', internalProf.status === 200 && (await internalProf.text()).includes('kunde-42'));

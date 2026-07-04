@@ -25,7 +25,8 @@ npm run crawl         # einmaliger Crawl für externe Scheduler
 - **Deutsch** in Kommentaren, Logs, API-Fehlermeldungen; Bezeichner englisch.
 - **Degradations-Pfad**: Jedes KI-Feature muss ohne `ANTHROPIC_API_KEY` sinnvoll degradieren (Fallback/Skip) — nie hart abhängen.
 - **Kostenbremsen**: neue LLM-Nutzung immer mit Obergrenze (Vorbilder: `AI_MAX_PER_RUN`, 1-Call-Batching in `interpret.js`, 1×/Tag-Cache in `strategy.js`).
-- **Claude API**: strukturierte Outputs via `output_config.format` + JSON-Schema (`additionalProperties:false`); Modell aus `config.aiModel`; KEIN `temperature`/`top_p` (auf Opus 4.7+ entfernt → 400); Retries macht das SDK (`maxRetries`).
+- **Claude API**: strukturierte Outputs via `output_config.format` + JSON-Schema (`additionalProperties:false`); KEIN `temperature`/`top_p` (auf Opus 4.7+ entfernt → 400); Retries macht das SDK (`maxRetries`).
+- **Prompts**: Templates/Modell-Parameter liegen ZENTRAL in `core/prompt-registry.js` — **jede Prompt-Änderung = `version` +1 (Pflicht)**; jeder LLM-Call wird via `logAiCall()` in `ai_calls` protokolliert (fail-soft, sichtbar unter /internal). A/B-Test später = zweiter Registry-Eintrag gleicher key, andere version.
 - **Erklärbarkeit**: Scores deterministisch, jede Bewertung mit Begründung (`why[]`, `reasoning`, Log-Zeile).
 - **Idempotenz**: Wiederholte Läufe erzeugen keine Dubletten (`ON CONFLICT`, PK-Konventionen wie `alerts.id = article_id`).
 - **pg-mem-Kompatibilität**: kein SQL-Datums-Arithmetik (`interval`), Datumsgrenzen als Parameter aus JS übergeben; nur einfache SQL-Features nutzen.

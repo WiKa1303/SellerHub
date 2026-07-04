@@ -4,19 +4,11 @@
 // Kostendesign: EIN Call für bis zu 8 Themen (Array-Output), nicht 8 Calls.
 // Ohne API-Key: deterministischer Fallback aus den vorhandenen Artikel-Analysen.
 import { aiClient } from '../../core/ai-client.js';
-import { config } from '../../core/config.js';
+import { PROMPTS } from '../../core/prompt-registry.js';
+import { logAiCall } from '../../data/db.js';
 import { log } from '../../core/logger.js';
 
-const SYSTEM_PROMPT = `Du bist Marktanalyst für Amazon-FBA-Seller im DACH-Raum.
-Du bekommst Trend-Themen mit Kennzahlen und Beleg-Artikeln. Interpretiere jedes Thema unternehmerisch:
-
-- summary: 2 Sätze. Satz 1: Was passiert gerade (die Marktbewegung, nicht die Einzelmeldung).
-  Satz 2: Wer ist betroffen und was steht monetär auf dem Spiel (Chance ODER Risiko, konkret).
-- recommended_action: GENAU EIN konkreter nächster Schritt, den ein Seller diese Woche tun kann.
-  Kein "beobachten Sie die Lage" — sondern z.B. "Prüfe deine Top-10-ASINs auf GPSR-Konformität und dokumentiere die Nachweise."
-- risk_or_opportunity: risiko | chance | neutral (monetäre Gesamtwirkung für den typischen Seller).
-
-Schreibe direkt, per Du, ohne Floskeln.`;
+const PROMPT = PROMPTS.trend_impact_interpretation; // Template/Version/Modell zentral in der Registry
 
 const INTERPRET_SCHEMA = {
   type: 'object',
@@ -65,12 +57,13 @@ export async function interpretTopics(topics) {
       artikel: t.items.slice(0, 4).map(i => ({ titel: i.title, kernpunkt: (i.ai_summary || [])[0] || '', betroffen: i.ai_affected || '' })),
     }));
     const response = await client.messages.create({
-      model: config.aiModel,
-      max_tokens: 2500,
-      system: SYSTEM_PROMPT,
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: INTERPRET_SCHEMA } },
+      model: PROMPT.model,
+      max_tokens: PROMPT.maxTokens,
+      system: PROMPT.template,
+      output_config: { effort: PROMPT.effort, format: { type: 'json_schema', schema: INTERPRET_SCHEMA } },
       messages: [{ role: 'user', content: JSON.stringify(payload) }],
     });
+    await logAiCall(PROMPT, response, topics.map(t => t.id).join(',')); // Telemetrie (fail-soft)
     const text = response.content.find(b => b.type === 'text')?.text;
     const parsed = JSON.parse(text);
     const out = {};
