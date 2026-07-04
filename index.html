@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SellerHub — Smarte Werkzeuge für E-Commerce-Profis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+
+<!-- ═══ LOGIN OVERLAY + USER MANAGEMENT ═══ -->
+<div id="wikaLoginOverlay" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f1729 0%,#1a2233 50%,#0f1729 100%);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;overflow-y:auto">
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(217,119,6,.15),transparent 50%),radial-gradient(circle at 70% 80%,rgba(217,119,6,.10),transparent 50%);pointer-events:none"></div>
+  <div id="wikaLoginBox" style="position:relative;width:100%;max-width:420px;background:#fff;border-radius:18px;padding:42px 38px;box-shadow:0 25px 60px rgba(0,0,0,.4),0 10px 25px rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);margin:auto">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="width:72px;height:72px;margin:0 auto 18px;background:linear-gradient(135deg,#d97706,#a85a04);border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,.45)">S</div>
+      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#0f1729;margin-bottom:4px">Seller<span style="color:#d97706">Hub</span></div>
+      <div style="font-size:10px;color:#475066;letter-spacing:1.5px;text-transform:uppercase;font-weight:600">Smarte Werkzeuge für E-Commerce-Profis</div>
+    </div>
+
+    <!-- TAB SWITCHER (Login / Register) -->
+    <div id="wikaAuthTabs" style="display:flex;gap:0;margin-bottom:24px;border-radius:10px;padding:4px;background:#f1f4f9;border:1px solid #e8ecf2">
+      <button type="button" id="wikaTabLogin" onclick="wikaSwitchTab('login')"
+        style="flex:1;padding:10px;border:none;border-radius:7px;background:#fff;color:#0f1729;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,41,.08);transition:all .15s">
+        🔒 Anmelden
+      </button>
+      <button type="button" id="wikaTabReg" onclick="wikaSwitchTab('register')"
+        style="flex:1;padding:10px;border:none;border-radius:7px;background:transparent;color:#475066;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">
+        ＋ Registrieren
+      </button>
+    </div>
+
+    <!-- LOGIN VIEW -->
+    <div id="wikaViewLogin">
+      <div style="margin-bottom:24px">
+        <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">🔒 Anmeldung</div>
+        <div style="font-size:13px;color:#6b7488;text-align:center">Bitte gib deine Zugangsdaten ein</div>
+      </div>
+
+      <form id="wikaLoginForm" autocomplete="off" onsubmit="return wikaTryLogin(event)">
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Benutzername</label>
+          <input type="text" id="wikaLoginUser" autocomplete="off" autofocus
+            style="width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;transition:all .15s;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort</label>
+          <div style="position:relative">
+            <input type="password" id="wikaLoginPass" autocomplete="off"
+              style="width:100%;padding:13px 46px 13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;transition:all .15s;box-sizing:border-box"
+              onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+              onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+            <button type="button" onclick="wikaTogglePw('wikaLoginPass','wikaPwToggle')" id="wikaPwToggle"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px 8px;color:#6b7488"
+              title="Passwort anzeigen/verbergen">👁️</button>
+          </div>
+        </div>
+
+        <div id="wikaLoginError" style="display:none;background:rgba(220,38,38,.10);border:1px solid rgba(220,38,38,.3);color:#dc2626;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center"></div>
+
+        <button type="submit"
+          style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 4px 14px rgba(217,119,6,.35);letter-spacing:.3px"
+          onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(217,119,6,.45)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(217,119,6,.35)'">
+          Anmelden →
+        </button>
+
+        <div style="text-align:center;margin-top:16px">
+          <button type="button" onclick="wikaForgotPw()"
+            style="background:none;border:none;color:#6b7488;font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:4px">
+            Passwort vergessen?
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- REGISTER VIEW -->
+    <div id="wikaViewRegister" style="display:none">
+      <div style="margin-bottom:20px">
+        <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">＋ Konto erstellen</div>
+        <div style="font-size:13px;color:#6b7488;text-align:center">14 Tage Probe-Lizenz · per E-Mail bestätigen</div>
+      </div>
+
+      <form id="wikaRegForm" autocomplete="off" onsubmit="return wikaTryRegister(event)">
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Benutzername</label>
+          <input type="text" id="wikaRegUser" autocomplete="off" placeholder="z.B. max_mustermann"
+            style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">E-Mail-Adresse *</label>
+          <input type="email" id="wikaRegEmail" autocomplete="off" placeholder="name@example.com" required
+            style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort</label>
+          <div style="position:relative">
+            <input type="password" id="wikaRegPw" autocomplete="new-password" placeholder="min. 6 Zeichen"
+              style="width:100%;padding:12px 44px 12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+              onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+              onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+            <button type="button" onclick="wikaTogglePw('wikaRegPw','wikaRegPwToggle')" id="wikaRegPwToggle"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px 8px;color:#6b7488">👁️</button>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort wiederholen</label>
+          <input type="password" id="wikaRegPw2" autocomplete="new-password"
+            style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+
+        <div id="wikaRegError" style="display:none;background:rgba(220,38,38,.10);border:1px solid rgba(220,38,38,.3);color:#dc2626;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:14px;text-align:center"></div>
+
+        <button type="submit"
+          style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35)">
+          Registrieren & Lizenzkey erhalten →
+        </button>
+      </form>
+    </div>
+
+    <!-- REGISTRATION SUCCESS VIEW -->
+    <div id="wikaViewRegSuccess" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:48px;margin-bottom:10px">✅</div>
+        <div style="font-size:20px;font-weight:700;color:#0f1729;margin-bottom:6px">Registrierung erfolgreich!</div>
+        <div style="font-size:13px;color:#6b7488">Dein 14-Tage-Lizenzkey wurde erstellt</div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #d97706;border-radius:12px;padding:18px;margin-bottom:18px;text-align:center">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#92400e;font-weight:700;margin-bottom:6px">🔑 Dein Lizenzkey</div>
+        <div id="wikaRegLicenseKey" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:18px;font-weight:700;color:#92400e;letter-spacing:1.5px;word-break:break-all"></div>
+        <div id="wikaRegValidUntil" style="font-size:12px;color:#92400e;margin-top:8px;font-weight:600"></div>
+      </div>
+
+      <div style="background:#f1f4f9;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#475066;line-height:1.5">
+        <b style="color:#0f1729">📧 Nächster Schritt:</b><br>
+        Klicke auf "E-Mail öffnen" — dein Mail-Programm öffnet sich mit einer vorbereiteten Bestätigungs-Mail. Sende sie ab, um deine Registrierung abzuschließen.
+      </div>
+
+      <button type="button" onclick="wikaOpenRegMail()" id="wikaOpenMailBtn"
+        style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35);margin-bottom:10px">
+        ✉️ E-Mail öffnen & senden
+      </button>
+      <button type="button" onclick="wikaCopyRegKey()"
+        style="width:100%;padding:11px 20px;border-radius:10px;border:1.5px solid #c4cdd9;background:#fff;color:#475066;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
+        📋 Lizenzkey kopieren
+      </button>
+      <button type="button" onclick="wikaSwitchTab('login')"
+        style="width:100%;padding:11px 20px;border-radius:10px;border:none;background:transparent;color:#6b7488;font-family:inherit;font-size:12px;cursor:pointer">
+        ← Zurück zur Anmeldung
+      </button>
+    </div>
+
+    <!-- PASSWORD CHANGE VIEW (forced on expiry or first login) -->
+    <div id="wikaViewChangePw" style="display:none">
+      <div style="margin-bottom:18px">
+        <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">🔄 Passwort ändern</div>
+        <div id="wikaChangePwReason" style="font-size:13px;color:#6b7488;text-align:center"></div>
+      </div>
+
+      <form autocomplete="off" onsubmit="return wikaSubmitNewPw(event)">
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Neues Passwort</label>
+          <div style="position:relative">
+            <input type="password" id="wikaNewPw1" autocomplete="off" autofocus
+              style="width:100%;padding:13px 46px 13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+              onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+              onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+            <button type="button" onclick="wikaTogglePw('wikaNewPw1','wikaNewPw1Toggle')" id="wikaNewPw1Toggle"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px 8px;color:#6b7488">👁️</button>
+          </div>
+          <div style="font-size:11px;color:#8a96aa;margin-top:4px">Mindestens 6 Zeichen</div>
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort wiederholen</label>
+          <input type="password" id="wikaNewPw2" autocomplete="off"
+            style="width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+
+        <div id="wikaChangePwError" style="display:none;background:rgba(220,38,38,.10);border:1px solid rgba(220,38,38,.3);color:#dc2626;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center"></div>
+
+        <button type="submit"
+          style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35)">
+          Passwort speichern →
+        </button>
+      </form>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e8ecf2;text-align:center;font-size:11px;color:#8a96aa">
+      <div style="font-weight:700;color:#475066;font-size:12px;margin-bottom:2px">SellerHub</div>
+      Smarte Werkzeuge für E-Commerce-Profis · Geschützter Bereich
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">S</div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span class="brand">Seller<span>Hub</span></span>
+      <span style="font-size:8px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;font-weight:600">E-Commerce-Werkzeuge</span>
+    </div>
+  </div>
+
+  <!-- Global Search Trigger + Notification Bell -->
+  <div style="display:flex;gap:6px;margin:12px 12px 6px;align-items:stretch">
+  <button onclick="openGlobalSearch()" id="globalSearchBtn" style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:13px;text-align:left" onmouseover="this.style.borderColor='var(--ac)';this.style.background='rgba(217,119,6,.15)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.background='rgba(255,255,255,.06)';this.style.color='#a8b1cc'">
+    <span style="font-size:14px">🔍</span>
+    <span style="flex:1">Suche…</span>
+    <kbd style="font-family:'DM Sans',sans-serif;font-size:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:2px 6px;color:#a8b1cc;font-weight:600">⌘K</kbd>
+  </button>
+  <button onclick="notifToggle()" id="notifBell" title="Benachrichtigungen" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.color='#a8b1cc'">
+    🔔<span id="notifBellBadge" style="position:absolute;top:5px;right:5px;background:var(--rd);color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px">0</span>
+  </button>
+  </div>
+  <!-- Notification Panel -->
+  <div id="notifPanel" style="display:none;position:fixed;top:64px;left:18px;width:340px;max-height:70vh;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column"></div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" onclick="go('dashboard')" style="margin-bottom:8px"><span class="ico">🏠</span>Dashboard</button>
+
+    <!-- ═══ KERN: PRODUKTRECHERCHE ═══ -->
+    <div class="nav-group open has-active" id="navgrp-recherche">
+      <button class="nav-group-header" onclick="toggleNavGroup('recherche')"><span class="grp-ico">🔎</span><span class="grp-label">Produktrecherche</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+      <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('pipeline')" title="Dein Recherche-Trichter: Idee → Validieren → Shortlist → Entscheidung"><span class="ico">🗂️</span><span class="nav-lbl"><span>Pipeline</span><span class="nav-sub">dein Trichter – hier arbeitest du</span></span><span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <div class="nav-sec">Werkzeuge</div>
+        <button class="nav-btn" onclick="go('helium')" title="Helium-10-Exporte (Black Box/Xray/Cerebro) importieren – füttert Ideen & Kandidaten"><span class="ico">📥</span><span class="nav-lbl"><span>Daten holen</span><span class="nav-sub">Helium-10-Import</span></span></button>
+        <button class="nav-btn" onclick="go('nischen')" title="Mehrere Nischen objektiv vergleichen und ranken"><span class="ico">🧭</span><span class="nav-lbl"><span>Nischen vergleichen</span><span class="nav-sub">mehrere Nischen ranken</span></span></button>
+        <button class="nav-btn" onclick="go('gebuehren')" title="FBA-Profit, Marge, ROI, Break-even & BSR→Verkäufe-Schätzer"><span class="ico">💶</span><span class="nav-lbl"><span>Marge rechnen</span><span class="nav-sub">FBA-Profit & BSR-Schätzer</span></span></button>
+      </div>
+    </div>
+
+    <!-- ═══ BETRIEB (nach der GO-Entscheidung) ═══ -->
+    <div class="nav-group" id="navgrp-betrieb">
+      <button class="nav-group-header" onclick="toggleNavGroup('betrieb')"><span class="grp-ico">🛠️</span><span class="grp-label">Betrieb (nach GO)</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+      <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('produkte')"><span class="ico">📋</span>Produktliste</button>
+        <button class="nav-btn" onclick="go('keywords')"><span class="ico">🔑</span>Keyword-Center</button>
+        <button class="nav-btn" onclick="go('listing')"><span class="ico">📝</span>Listing-Editor</button>
+        <button class="nav-btn" onclick="go('inhalt')"><span class="ico">✨</span>KI-Bildstudio</button>
+        <button class="nav-btn" onclick="go('launch')"><span class="ico">🚀</span>Launch-Planer</button>
+        <button class="nav-btn" onclick="go('lager')"><span class="ico">📦</span>Lagerbestand</button>
+      </div>
+    </div>
+
+    <!-- ═══ MEHR ═══ -->
+    <div class="nav-group" id="navgrp-mehr">
+      <button class="nav-group-header" onclick="toggleNavGroup('mehr')"><span class="grp-ico">📚</span><span class="grp-label">Mehr</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
+      <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('tasks')"><span class="ico">✅</span>Aufgaben-Board <span id="tasksBadge" style="margin-left:auto;background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <button class="nav-btn" onclick="go('coaching')"><span class="ico">🎓</span>Lernzentrum <span id="coachingBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+      </div>
+    </div>
+
+    <div class="nav-group" id="navgrp-admin" data-admin-only="1">
+      <button class="nav-group-header" onclick="toggleNavGroup('admin')"><span class="grp-ico">🛡️</span><span class="grp-label">Admin</span><span class="grp-arrow">▸</span></button>
+      <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('admin')"><span class="ico">🛡️</span>Benutzerverwaltung</button>
+      </div>
+    </div>
+  </nav>
+  <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span id="versionDisplay" style="font-weight:600;color:var(--ac);font-size:11px">v—</span>
+      <span id="buildDate" style="font-size:9px;color:var(--tx3)"></span>
+    </div>
+    <div id="lastSaved" style="font-size:10px;color:var(--tx3)">Bereit</div>
+    <div style="display:flex;gap:4px;margin-top:4px">
+      <button onclick="wikaExportAll()" title="Alle Daten als sellerhub-data.json herunterladen (für Portable-Version)" style="flex:1;background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 6px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">⬇ Export</button>
+      <button onclick="wikaImportAll()" title="Daten aus sellerhub-data.json importieren" style="flex:1;background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 6px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">⬆ Import</button>
+      <button onclick="backupOpen()" title="Backups: tägliche Auto-Snapshots ansehen & wiederherstellen" style="background:var(--s2);border:1px solid var(--bd);color:var(--tx2);font-size:9px;padding:5px 8px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600">🛟</button>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" onclick="document.querySelector('.sidebar').classList.remove('open')"></div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: RECHERCHE-PIPELINE (Kanban über alle Stufen)            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-pipeline">
+  <div class="page-header"><h1><span class="hico">🗂️</span>Recherche-Pipeline <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Idee → Validieren → Shortlist → Entscheidung</span></h1></div>
+  <div class="page-body">
+    <div class="help-box purple"><div class="help-icon">🗂️</div><div class="help-body">
+      <div class="help-title">Dein Recherche-Trichter auf einen Blick</div>
+      <div class="help-text">Du recherchierst <b>beliebig viele Produkte parallel</b> – jeder Kandidat ist eine eigene, gespeicherte Recherche und wandert eigenständig von links nach rechts. Mit „→" schiebst du ihn in die nächste Stufe; Bewertung &amp; Ampel kommen aus dem <b>Scorecard</b>.</div>
+    </div></div>
+    <!-- Start-Leiste: Recherche direkt hier starten -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+      <span style="font-size:12px;color:var(--tx2);font-weight:700;margin-right:2px">Neue Recherche starten:</span>
+      <button class="btn btn-sm" onclick="xrayPasteOpen()" title="Xray-Tabelle einfügen → Nischen-Kandidat mit Ampel in 10 Sekunden" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700">⚡ Xray-Paste</button>
+      <button class="btn btn-p btn-sm" onclick="go('helium')">📥 Helium-Import</button>
+      <button class="btn btn-sm" onclick="go('research');setTimeout(function(){var e=document.getElementById('researchAsinInput');if(e){e.focus();e.scrollIntoView({block:'center'})}},160)">🔗 ASIN analysieren</button>
+      <button class="btn btn-sm" onclick="openIdeeModal()">➕ Idee</button>
+      <button class="btn btn-sm" onclick="pipelineAddCandidate()">➕ Kandidat</button>
+    </div>
+    <div id="pipelineBoard" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PRODUKTLISTE                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-produkte">
+  <div class="page-header"><h1><span class="hico">📋</span>Produktliste<span class="wika-help" data-tooltip="Hier verwaltest du alle Produkte, die du tatsächlich verkaufst oder zur Bestellung freigegeben hast.&#10;&#10;Für jedes Produkt: Marge, Status, Lagerbestand, Listing-Details.&#10;&#10;Ideen und Recherche-Kandidaten gehören in den Bereich „Produktfindung".">ⓘ</span></h1><span class="meta" id="prodCount"></span></div>
+  <div class="page-body">
+
+    <!-- Help-Box -->
+    <div class="help-box gold">
+      <div class="help-icon">📋</div>
+      <div class="help-body">
+        <div class="help-title">Produktliste: aktive und geplante Produkte</div>
+        <div class="help-text">
+          Hier verwaltest du <b>Produkte, die schon spruchreif sind</b>: vollständige Kalkulation (EK, VK, Gebühren, Marge), Status (Idee → Recherche → Analyse → Bestellt → Aktiv), Sourcing-Notizen.<br>
+          <b>Tipp:</b> Frische Ideen gehören eher in den <b>Produktfindung-Hub</b> (Pipeline). Erst wenn ein Produkt konkret werden soll, lege es hier an.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Über die Toolbar kannst du Produkte als CSV exportieren oder die Daten als JSON-Backup sichern.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-c"><span class="sl">Gesamt</span><span class="sv" style="color:var(--ac)" id="stTotal">0</span></div>
+      <div class="stat-c"><span class="sl">Ideen</span><span class="sv" style="color:var(--bl)" id="stIdee">0</span></div>
+      <div class="stat-c"><span class="sl">In Analyse</span><span class="sv" style="color:var(--pu)" id="stAna">0</span></div>
+      <div class="stat-c"><span class="sl">Bestellt</span><span class="sv" style="color:var(--gn)" id="stBest">0</span></div>
+      <div class="stat-c"><span class="sl">Ø Marge</span><span class="sv" style="color:var(--ac)" id="stMarge">—</span></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-p" onclick="openProdModal()">＋ Neues Produkt</button>
+      <div class="search-wrap"><input class="sinput" placeholder="Suchen…" id="prodSearch" oninput="renderProds()"></div>
+      <select class="fsel" id="fStatus" onchange="renderProds()"><option value="">Alle Status</option><option value="Idee">💡 Idee</option><option value="Recherche">🔍 Recherche</option><option value="Analyse">📊 Analyse</option><option value="Bestellt">✅ Bestellt</option><option value="Abgelehnt">❌ Abgelehnt</option></select>
+      <select class="fsel" id="fKat" onchange="renderProds()"><option value="">Alle Kategorien</option></select>
+      <button class="btn btn-g btn-sm" onclick="exportCSV()">📥 CSV</button>
+      <button class="btn btn-sm" onclick="exportJSON()">💾 Backup</button>
+      <button class="btn btn-sm" onclick="document.getElementById('impFile').click()">📂 Import</button>
+      <div style="margin-left:auto;display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden">
+        <button id="prodViewTable" class="btn btn-sm" onclick="setProdView('table')" style="border:none;border-radius:0;background:var(--ac);color:#fff" title="Tabellen-Ansicht">📋 Tabelle</button>
+        <button id="prodViewCards" class="btn btn-sm" onclick="setProdView('cards')" style="border:none;border-radius:0;background:transparent;color:var(--tx2)" title="Kachel-Ansicht">🔲 Kacheln</button>
+      </div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:16px">💡</span>
+      <span><b style="color:var(--ac)">Tipp:</b> Klicke auf eine Produkt-Zeile um die Detail-Ansicht zu öffnen mit <b>4 Tabs</b>: 📊 Übersicht · 🔍 Recherche · 🧮 Kalkulation · 🏭 Hersteller</span>
+    </div>
+
+    <!-- Bulk action bar (hidden when no selection) -->
+    <div id="prodBulkBar" style="display:none;background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:10px;padding:10px 16px;margin-bottom:14px;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-weight:700;color:var(--ac)" id="prodBulkCount">0 ausgewählt</span>
+      <button class="btn btn-sm" onclick="prodBulkSetStatus('Recherche')" style="border-color:var(--bl);color:var(--bl)">🔍 Recherche</button>
+      <button class="btn btn-sm" onclick="prodBulkSetStatus('Analyse')" style="border-color:var(--pu);color:var(--pu)">📊 Analyse</button>
+      <button class="btn btn-sm" onclick="prodBulkSetStatus('Bestellt')" style="border-color:var(--gn);color:var(--gn)">✅ Bestellt</button>
+      <button class="btn btn-sm" onclick="prodBulkSetStatus('Abgelehnt')" style="border-color:var(--or);color:var(--or)">❌ Abgelehnt</button>
+      <button class="btn btn-sm btn-d" onclick="prodBulkDelete()">🗑️ Löschen</button>
+      <button class="btn btn-sm" onclick="prodClearSelection()" style="margin-left:auto">Auswahl aufheben</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table id="prodTable"><thead><tr>
+        <th style="width:36px;text-align:center"><input type="checkbox" id="prodSelAll" onchange="prodToggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></th>
+        <th onclick="psort('name')">Produkt</th><th onclick="psort('kategorie')">Kat.</th><th onclick="psort('status')">Status</th>
+        <th class="nc" onclick="psort('einkaufspreis')">EK</th><th class="nc" onclick="psort('verkaufspreis')">VK</th>
+        <th class="nc" onclick="psort('marge')">Marge</th><th class="nc" onclick="psort('profit')">Gewinn</th><th class="nc" onclick="psort('roi')">ROI</th>
+        <th class="nc" onclick="psort('bsr')">BSR</th><th class="nc" onclick="psort('bewertung')">Rating</th>
+        <th>Quelle</th><th>Notizen</th><th onclick="psort('datum')">Datum</th><th>Aktion</th>
+      </tr></thead><tbody id="prodBody"></tbody></table>
+    </div>
+    <div id="prodCards" style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
+    <div class="empty" id="prodEmpty" style="display:none"><div class="eico">📦</div><h3>Keine Produkte</h3><p>Starte mit „+ Neues Produkt"</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PRODUKTRECHERCHE (Helium 10 Workflow)                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PRODUKTRECHERCHE - Operativer Arbeitsbereich              -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PRODUKTFINDUNG HUB (Pipeline-Übersicht)                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-research">
+  <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Validieren" · ← zurück</button>
+  </div>
+  <div class="page-body">
+
+    <!-- ─── TAB-NAVIGATION ─── -->
+    <div id="researchTabNav" style="display:flex;gap:2px;margin-bottom:18px;border-bottom:2px solid var(--bd);padding-bottom:0;flex-wrap:wrap">
+      <button class="researchTab" data-tab="overview" onclick="researchShowTab('overview')" title="Übersicht aller Kandidaten mit allen Recherche-Feldern" style="padding:12px 20px;background:var(--s1);border:1.5px solid var(--pu);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--pu);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;margin-bottom:-2px">🗂️ Master-Tabelle</button>
+      <button class="researchTab" data-tab="workflow" onclick="researchShowTab('workflow')" title="20-Schritte-Workflow pro Kandidat mit Checklisten und Prompts" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">📋 Workflow-Tracker</button>
+      <button class="researchTab" data-tab="score" onclick="researchShowTab('score')" title="Entscheidungs-Scorecard: 6 Dimensionen → GO/PRÜFEN/NO-GO" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">⚖️ Scorecard</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 12px">
+        <button class="btn btn-sm" onclick="researchOpenLearnLink()" title="Die komplette Methodik im Lernzentrum nachlesen" style="font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📖 Methodik im Lernzentrum</button>
+      </div>
+    </div>
+
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- TAB 1: MASTER-TABELLE                                          -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div id="researchView_overview">
+
+      <!-- Erklär-Box -->
+      <div class="help-box purple">
+        <div class="help-icon">🗂️</div>
+        <div class="help-body">
+          <div class="help-title">Master-Tabelle: alle deine Recherche-Kandidaten</div>
+          <div class="help-text">
+            Hier landen alle Produktideen, die du <b>tiefer prüfst</b>. Jeder Kandidat hat 18 Felder (Preis, Konkurrenz, Marge, Risiko, …) und einen eigenen 20-Schritte-Workflow.<br>
+            <b>So fängst du an:</b> Klick auf „➕ Neuer Kandidat" oder importiere bestehende Ideen aus dem Ideen-Pool. Dann fülle die Felder Stück für Stück, während du den Workflow durchläufst.<br>
+            <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Spalten haben Info-Symbole ⓘ — Hover für Erklärung jeder Spalte.</span>
+          </div>
+          <a class="help-link" onclick="researchOpenLesson('rp_3');return false" style="cursor:pointer">📖 Lektion: Schritte 1-5 (Master-Tabelle aufbauen) →</a>
+        </div>
+      </div>
+
+      <!-- Stats-Bar -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px" id="researchStatsBar"></div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="researchAddCandidate()">➕ Neuer Kandidat</button>
+        <button class="btn btn-sm" onclick="researchImportFromIdeen()" title="Aus Ideen-Pool importieren">📥 Aus Ideen-Pool</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="researchFilterStatus" onchange="researchRenderTable()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px">
+            <option value="">Alle Status</option>
+            <option value="recherche">🔍 In Recherche</option>
+            <option value="kandidat">⭐ Kandidat</option>
+            <option value="muster">📦 Muster bestellt</option>
+            <option value="aktiv">🚀 Aktiv</option>
+            <option value="abgelehnt">❌ Abgelehnt</option>
+          </select>
+          <input type="text" id="researchSearch" placeholder="🔍 Suchen..." oninput="researchRenderTable()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px;width:180px">
+        </div>
+      </div>
+
+      <!-- Konkurrenz per ASIN / Amazon-Link analysieren -->
+      <div class="card" style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span style="font-size:24px">🔗</span>
+          <div>
+            <div style="font-weight:700;color:var(--tx);font-size:15px">Konkurrenz per ASIN / Amazon-Link analysieren</div>
+            <div style="font-size:12.5px;color:var(--tx2)">Holt Titel, USPs &amp; Produktbilder eines Konkurrenz-Listings und legt daraus einen Recherche-Kandidaten an. Optional leitet die KI besseres Marketing ab – im <b>KI-Bildstudio</b> ladbar.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="researchAsinInput" placeholder="Amazon-Link (…/dp/B0…) oder ASIN (z. B. B0CVBBBCZN)" style="flex:1;min-width:240px;min-height:46px;box-sizing:border-box;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;padding:0 14px;font-size:13.5px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')researchAnalyzeAsin()">
+          <button class="btn btn-p" id="researchAsinBtn" onclick="researchAnalyzeAsin()" style="white-space:nowrap;min-height:46px">🔍 Analysieren</button>
+        </div>
+        <div id="researchAsinResult"></div>
+      </div>
+
+      <!-- Master-Tabelle -->
+      <div style="overflow-x:auto;background:var(--s1);border:1px solid var(--bd);border-radius:10px">
+        <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:640px">
+          <thead>
+            <tr>
+              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:200px">Produktname <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Name des analysierten Konkurrenz-Produkts – editierbar.</span></span></th>
+              <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
+              <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis aus dem Konkurrenz-Listing. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
+              <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
+              <th class="nc">Score <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Auto-Score 1–100 aus der Detail-Bewertung (⚖️ Score-Matrix). <b>&gt; 70 top, &gt; 50 okay.</b></span></span></th>
+              <th style="text-align:right;min-width:190px">Aktionen <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below left">★ = in den Bereich „Produkte" übernehmen · ⚖️ Score-Matrix · 📋 Workflow · 🗑 löschen.</span></span></th>
+            </tr>
+          </thead>
+          <tbody id="researchTableBody"></tbody>
+        </table>
+        <div id="researchTableEmpty" style="display:none;padding:50px 30px;text-align:center;color:var(--tx2);font-size:14px">
+          <div style="font-size:48px;margin-bottom:14px">🎯</div>
+          <div style="font-weight:700;color:var(--tx);margin-bottom:6px;font-size:16px">Noch keine Kandidaten</div>
+          <div style="font-size:13px;margin-bottom:18px">Starte deine systematische Produktrecherche. Lege Kandidaten an und durchlaufe den 20-Schritte-Workflow.</div>
+          <button class="btn btn-p" onclick="researchAddCandidate()">➕ Ersten Kandidaten anlegen</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;font-size:11px;color:var(--tx3);font-style:italic">💡 Tipp: Klick auf einen Kandidaten, um den Workflow-Tracker oder die Score-Matrix zu öffnen.</div>
+    </div>
+
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- TAB 2: WORKFLOW-TRACKER                                        -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div id="researchView_workflow" style="display:none">
+      <div id="researchWorkflowContent"></div>
+    </div>
+
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- TAB 3: SCORE-MATRIX                                            -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div id="researchView_score" style="display:none">
+      <div id="researchScoreContent"></div>
+    </div>
+
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- TAB 4: PROMPT-BIBLIOTHEK                                       -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: IDEEN-POOL                                               -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-auswahl">
+  <div class="page-header">
+    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Shortlist & Entscheidung" · ← zurück</button>
+  </div>
+  <div class="page-body">
+    <div class="help-box gold">
+      <div class="help-icon">⭐</div>
+      <div class="help-body">
+        <div class="help-title">Deine Entscheidungs-Werkbank</div>
+        <div class="help-text">Produkte, die du in der <b>⚔️ Konkurrenz-Tabelle</b> mit „★ Produkt" übernimmst, erscheinen hier als Karte – mit Bildern, USPs, Preis und Score. Triff hier die Entscheidung: <b>📦 Muster bestellen</b> (→ wandert in die Produktliste), <b>🔍 weiter prüfen</b> oder <b>❌ ablehnen</b>.</div>
+      </div>
+    </div>
+    <div id="auswahlStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div id="auswahlList"></div>
+  </div>
+</div>
+
+<div class="page" id="p-ideen">
+  <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline" style="margin-left:12px">🗂️ Pipeline-Stufe „Idee" · ← zurück</button></div>
+  <div class="page-body">
+
+    <!-- Help-Box -->
+    <div class="help-box purple">
+      <div class="help-icon">💡</div>
+      <div class="help-body">
+        <div class="help-title">Ideen-Pool: dein Brainstorming-Bereich</div>
+        <div class="help-text">
+          Hier sammelst du <b>rohe Produktideen</b>, bevor du sie tiefer prüfst. Jede Idee braucht erstmal nur einen Namen – Bewertung kommt später.<br>
+          <b>So fängst du an:</b> Klick auf „＋ Idee hinzufügen" oder nutze den AI-Generator unten (Perplexity/Claude liefern dir 30-50 Ideen in 10 Min). Vielversprechende Ideen wanderst du dann mit dem 📥-Button in den Bereich „Recherche-Kandidaten".<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Faustregel: 50-100 Ideen pro Woche sammeln, davon werden 5-10 zu echten Kandidaten.</span>
+        </div>
+        <a class="help-link" onclick="researchOpenLesson('rp_3');return false" style="cursor:pointer">📖 Lektion: Schritt 2 (Ideen sammeln mit AI) →</a>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-c"><span class="sl">Gesamt Ideen</span><span class="sv" style="color:var(--ac)" id="istTotal">0</span></div>
+      <div class="stat-c"><span class="sl">Hohes Potenzial</span><span class="sv" style="color:var(--gn)" id="istHoch">0</span></div>
+      <div class="stat-c"><span class="sl">Zu prüfen</span><span class="sv" style="color:var(--bl)" id="istPruefen">0</span></div>
+      <div class="stat-c"><span class="sl">Verworfen</span><span class="sv" style="color:var(--rd)" id="istVerworfen">0</span></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-p" onclick="openIdeeModal()">＋ Idee hinzufügen</button>
+      <button class="btn" style="border-color:var(--cy);color:var(--cy)" onclick="openImportModal()">🤖 KI-Import</button>
+      <button class="btn" onclick="openPromptModal()">📋 Prompt-Vorlage</button>
+      <div class="search-wrap"><input class="sinput" placeholder="Suchen…" id="ideenSearch" oninput="renderIdeen()"></div>
+      <select class="fsel" id="fIdeeStatus" onchange="renderIdeen()">
+        <option value="">Alle Status</option>
+        <option value="Neu">🆕 Neu</option>
+        <option value="Zu prüfen">🔍 Zu prüfen</option>
+        <option value="Hohes Potenzial">⭐ Hohes Potenzial</option>
+        <option value="Recherchiert">📊 Recherchiert</option>
+        <option value="Verworfen">❌ Verworfen</option>
+      </select>
+      <select class="fsel" id="fIdeeQuelle" onchange="renderIdeen()">
+        <option value="">Alle Quellen</option>
+        <option>Claude</option>
+        <option>Perplexity</option>
+        <option>Gemini</option>
+        <option>ChatGPT</option>
+        <option>Manuell</option>
+        <option>Sonstige</option>
+      </select>
+      <button class="btn btn-sm" onclick="repairIdeen()" title="Kaputte Zeichen wie „KÃ¼che" reparieren">🔧 Zeichen reparieren</button>
+    </div>
+
+    <!-- Bulk action bar (hidden when no selection) -->
+    <div id="bulkBar" style="display:none;background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:10px;padding:10px 16px;margin-bottom:14px;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-weight:700;color:var(--ac)" id="bulkCount">0 ausgewählt</span>
+      <button class="btn btn-sm" onclick="bulkSetStatus('Hohes Potenzial')" style="border-color:var(--gn);color:var(--gn)">⭐ Hohes Potenzial</button>
+      <button class="btn btn-sm" onclick="bulkSetStatus('Zu prüfen')" style="border-color:var(--bl);color:var(--bl)">🔍 Zu prüfen</button>
+      <button class="btn btn-sm" onclick="bulkSetStatus('Verworfen')" style="border-color:var(--or);color:var(--or)">❌ Verworfen</button>
+      <button class="btn btn-sm btn-d" onclick="bulkDelete()">🗑️ Löschen</button>
+      <button class="btn btn-sm" onclick="clearSelection()" style="margin-left:auto">Auswahl aufheben</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table id="ideenTable"><thead><tr>
+        <th style="width:32px"><input type="checkbox" id="ideenSelAll" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></th>
+        <th style="width:60px">Bild</th>
+        <th onclick="isort('name')">Produktidee</th>
+        <th onclick="isort('kategorie')">Kategorie</th>
+        <th onclick="isort('potenzial')">Potenzial</th>
+        <th class="nc" onclick="isort('vkPreis')">VK €</th>
+        <th>Marktgröße</th>
+        <th>Zielgruppe</th>
+        <th>Differenzierung</th>
+        <th>Warum interessant</th>
+        <th>Risiken</th>
+        <th onclick="isort('status')">Status</th>
+        <th onclick="isort('quelle')">Quelle</th>
+        <th style="min-width:160px">Amazon</th>
+        <th style="min-width:140px">Hersteller</th>
+        <th onclick="isort('datum')">Datum</th>
+        <th>Aktion</th>
+      </tr></thead><tbody id="ideenBody"></tbody></table>
+    </div>
+    <div class="empty" id="ideenEmpty" style="display:none">
+      <div class="eico">💡</div><h3>Noch keine Ideen</h3>
+      <p>Nutze <b>🤖 KI-Import</b> um Ideen von Claude/Gemini reinzuladen, oder lege manuell an.</p>
+    </div>
+    <!-- Prompt-Bibliothek (aus der Konkurrenz-Tabelle hierher verschoben) -->
+    <details id="ideenPromptLib" style="margin-top:20px;background:var(--s1);border:1.5px solid var(--gn);border-radius:12px;padding:2px 18px" ontoggle="if(this.open&&!this._loaded){if(typeof researchRenderPrompts==='function')researchRenderPrompts();this._loaded=true;}">
+      <summary style="cursor:pointer;font-weight:700;color:var(--gn);font-size:15px;padding:14px 0">📚 Prompt-Bibliothek <span style="font-size:12px;color:var(--tx2);font-weight:400">— alle Profi-Prompts für die Produktrecherche (klicken zum Aufklappen)</span></summary>
+      <div id="researchPromptsContent" style="padding-bottom:16px"></div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PRODUKT-DETAIL (mit Sub-Tabs)                            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-detail">
+  <div class="detail-header">
+    <button class="detail-back" onclick="go('produkte')">← Zurück zur Liste</button>
+    <div class="detail-title">
+      <h1 style="cursor:pointer" onclick="editTitleInline()" title="Klick zum Bearbeiten des Produktnamens">📋 <span class="pname" id="dTitle">—</span> <span style="font-size:14px;color:var(--tx3);margin-left:6px">✏️</span></h1>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="dSaveStatus" style="font-size:12px;color:var(--gn);display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:var(--s2)">✓ Gespeichert</span>
+        <button class="btn btn-p" id="dSaveBtn" onclick="saveDetailManual()" style="background:linear-gradient(135deg,var(--ac),var(--ac2));border:none;color:#fff;font-weight:700;padding:8px 16px">💾 Speichern</button>
+        <button class="btn btn-sm" onclick="duplicateCurrentProd()" title="Duplizieren">📋 Duplizieren</button>
+        <button class="btn btn-sm btn-d" onclick="deleteCurrentProd()" title="Löschen">🗑️ Löschen</button>
+      </div>
+    </div>
+    <div class="detail-meta">
+      <span id="dStatus" class="badge">—</span>
+      <span id="dKategorie">—</span>
+      <span id="dAsin" style="font-family:monospace;color:var(--tx3)"></span>
+      <span id="dDatum"></span>
+    </div>
+    <div class="subtabs">
+      <button class="subtab active" data-sub="overview" onclick="goSub('overview')"><span>📊</span>Übersicht</button>
+      <button class="subtab" data-sub="recherche" onclick="goSub('recherche')"><span>🔍</span>Recherche</button>
+      <button class="subtab" data-sub="kalkulation" onclick="goSub('kalkulation')"><span>🧮</span>Kalkulation</button>
+      <button class="subtab" data-sub="hersteller" onclick="goSub('hersteller')"><span>🏭</span>Hersteller <span class="count" id="herCount">0</span></button>
+      <button class="subtab" data-sub="sales" onclick="goSub('sales')"><span>📈</span>Marktdaten (Helium 10) <span class="count" id="salesCount" style="display:none">●</span></button>
+    </div>
+  </div>
+
+  <div class="detail-body">
+
+    <!-- ─── SUB: ÜBERSICHT ─── -->
+    <div class="subpage active" id="sub-overview">
+      <div class="detail-row three">
+        <div class="card">
+          <h3>📊 Status</h3>
+          <div class="fi"><label>Status</label><select id="dfStatus" onchange="saveDetailField('status',this.value)"><option>Idee</option><option>Recherche</option><option>Analyse</option><option>Bestellt</option><option>Abgelehnt</option></select></div>
+          <div class="fi" style="margin-top:10px"><label>Bewertung</label><select id="dfBewertung" onchange="saveDetailField('bewertung',parseInt(this.value))"><option value="0">—</option><option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5">⭐⭐⭐⭐⭐</option></select></div>
+        </div>
+        <div class="card">
+          <h3>💰 Wirtschaftlichkeit</h3>
+          <div class="cg" style="grid-template-columns:1fr 1fr">
+            <div class="ci"><span class="cl">Marge</span><span class="cv" id="dMarge">—</span></div>
+            <div class="ci"><span class="cl">Gewinn/Stk</span><span class="cv" id="dGewinn">—</span></div>
+            <div class="ci"><span class="cl">ROI</span><span class="cv" id="dROI">—</span></div>
+            <div class="ci"><span class="cl">VK €</span><span class="cv" id="dVK" style="color:var(--tx)">—</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📈 Marktdaten</h3>
+          <div class="cg" style="grid-template-columns:1fr 1fr">
+            <div class="ci"><span class="cl">BSR</span><span class="cv" id="dBSR" style="color:var(--bl)">—</span></div>
+            <div class="ci"><span class="cl">Wettbewerber</span><span class="cv" id="dWb" style="color:var(--or)">—</span></div>
+            <div class="ci"><span class="cl">Bewertungen Ø</span><span class="cv" id="dBe" style="color:var(--pu)">—</span></div>
+            <div class="ci"><span class="cl">Suchvolumen</span><span class="cv" id="dSv" style="color:var(--cy)">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="card">
+          <h3>📦 Produkt-Info</h3>
+          <div class="fg2">
+            <div class="fi"><label>Produktname</label><input id="dfName" oninput="saveDetailField('name',this.value)"></div>
+            <div class="fi"><label>Kategorie</label><input id="dfKategorie" oninput="saveDetailField('kategorie',this.value)"></div>
+            <div class="fi"><label>ASIN</label><input id="dfAsin" oninput="saveDetailField('asin',this.value)"></div>
+            <div class="fi"><label>Quelle</label><input id="dfQuelle" oninput="saveDetailField('quelle',this.value)"></div>
+            <div class="fi"><label>Gewicht (g)</label><input type="number" id="dfGewicht" oninput="saveDetailField('gewicht',parseInt(this.value)||0)"></div>
+            <div class="fi"><label>Maße (cm)</label><input id="dfMasse" oninput="saveDetailField('masse',this.value)"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📝 Notizen</h3>
+          <div class="fi full"><label>Allgemeine Notizen</label><textarea id="dfNotizen" oninput="saveDetailField('notizen',this.value)" style="min-height:160px"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SUB: RECHERCHE ─── -->
+    <div class="subpage" id="sub-recherche">
+      <div class="detail-row">
+        <div class="card">
+          <h3>📝 Lange Beschreibung</h3>
+          <div class="fi full"><label>Detaillierte Produktbeschreibung</label><textarea id="dfBeschreibung" oninput="saveDetailField('beschreibung',this.value)" style="min-height:140px" placeholder="Was genau ist dieses Produkt? Welche Features hat es? Welches Problem löst es?"></textarea></div>
+        </div>
+        <div class="card">
+          <h3>📊 Marktanalyse</h3>
+          <div class="fi full"><label>Marktgröße, Trend, Saisonalität</label><textarea id="dfMarktanalyse" oninput="saveDetailField('marktanalyse',this.value)" style="min-height:140px" placeholder="Wie groß ist der Markt? Wie entwickelt er sich? Saisonale Schwankungen?"></textarea></div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="card">
+          <h3>⚔️ Konkurrenz-Analyse</h3>
+          <div class="fi full"><label>Hauptkonkurrenten und ihre Stärken/Schwächen</label><textarea id="dfKonkurrenz" oninput="saveDetailField('konkurrenz',this.value)" style="min-height:120px" placeholder="Wer sind die Top-3-Konkurrenten? Was machen sie gut? Wo haben sie Lücken?"></textarea></div>
+        </div>
+        <div class="card">
+          <h3>📸 Wettbewerbs-Snapshots</h3>
+          <div class="fi full"><label>Konkrete Beobachtungen aus Listings (Preise, Bilder, Bullets)</label><textarea id="dfSnapshots" oninput="saveDetailField('snapshots',this.value)" style="min-height:120px" placeholder="Top-Konkurrent A: 24,99€, 1.200 Reviews, ⭐4.3, schwache Bilder...&#10;Top-Konkurrent B: 19,90€, 800 Reviews, ⭐4.5..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="card">
+          <h3>⭐ Reviews-Insights</h3>
+          <div class="fi full"><label>Häufige Beschwerden & Wünsche aus Konkurrenz-Reviews</label><textarea id="dfReviews" oninput="saveDetailField('reviewsInsight',this.value)" style="min-height:120px" placeholder="❌ Beschwerden: zu klein, schwer zu reinigen, riecht nach Plastik&#10;✅ Wünsche: größere Variante, BPA-frei, mit Aufhängung..."></textarea></div>
+        </div>
+        <div class="card">
+          <h3>📈 Trends & Timing</h3>
+          <div class="fi full"><label>Aktuelle Trends, Wachstumsraten, Hype-Risiko</label><textarea id="dfTrends" oninput="saveDetailField('trends',this.value)" style="min-height:120px" placeholder="Google Trends: stetig wachsend seit 2023&#10;Saisonpeak: Oktober-Januar&#10;Trendrisiko: niedrig (Evergreen)"></textarea></div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="card">
+          <h3>✅ Pro</h3>
+          <div class="fi full"><label>Gründe FÜR dieses Produkt</label><textarea id="dfPro" oninput="saveDetailField('pro',this.value)" style="min-height:120px;border-left:3px solid var(--gn)" placeholder="• Hohe Marge möglich&#10;• Wenig Konkurrenz Premium-Segment&#10;• Klares Differenzierungspotenzial"></textarea></div>
+        </div>
+        <div class="card">
+          <h3>❌ Contra</h3>
+          <div class="fi full"><label>Gründe GEGEN dieses Produkt</label><textarea id="dfContra" oninput="saveDetailField('contra',this.value)" style="min-height:120px;border-left:3px solid var(--rd)" placeholder="• Zertifizierungs-Aufwand hoch&#10;• Hohe Mindestbestellmenge nötig&#10;• Markenrechts-Risiko"></textarea></div>
+        </div>
+      </div>
+
+      <div class="detail-row full">
+        <div class="card">
+          <h3>🧠 Eigene Analyse & Schlussfolgerung</h3>
+          <div class="fi full"><label>Deine persönliche Einschätzung & Entscheidung</label><textarea id="dfAnalyse" oninput="saveDetailField('analyse',this.value)" style="min-height:140px" placeholder="Meine Einschätzung: vielversprechend, aber Sample bestellen&#10;Nächste Schritte: 3 Hersteller anfragen, Wettbewerb tiefer analysieren&#10;Entscheidung: WEITERVERFOLGEN / VERWERFEN"></textarea></div>
+        </div>
+      </div>
+
+      <div class="detail-row full">
+        <div class="card">
+          <h3>📚 Recherche-Quellen</h3>
+          <div class="fi full"><label>URLs zu Quellen, Studien, Tools (eine pro Zeile)</label><textarea id="dfQuellen" oninput="saveDetailField('quellen',this.value)" style="min-height:80px;font-family:monospace;font-size:11px" placeholder="https://...&#10;https://..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SUB: KALKULATION ─── -->
+    <div class="subpage" id="sub-kalkulation">
+      <div class="detail-row">
+        <div class="card">
+          <h3>💰 Einkauf & Verkauf</h3>
+          <div class="fg2">
+            <div class="fi"><label>Einkaufspreis €</label><input type="number" step=".01" id="dfEK" oninput="saveDetailField('einkaufspreis',parseFloat(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>Verkaufspreis €</label><input type="number" step=".01" id="dfVK" oninput="saveDetailField('verkaufspreis',parseFloat(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>FBA Gebühren €</label><input type="number" step=".01" id="dfFBA" oninput="saveDetailField('fbaGebuehren',parseFloat(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>Versand €</label><input type="number" step=".01" id="dfVersand" oninput="saveDetailField('versand',parseFloat(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>Zoll €</label><input type="number" step=".01" id="dfZoll" oninput="saveDetailField('zoll',parseFloat(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>Sonstige Kosten €</label><input type="number" step=".01" id="dfSonstige" oninput="saveDetailField('sonstigeKosten',parseFloat(this.value)||0);recalcDetail()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📦 Mengen & PPC</h3>
+          <div class="fg2">
+            <div class="fi"><label>Bestellmenge (Stk)</label><input type="number" id="dfMenge" oninput="saveDetailField('bestellmenge',parseInt(this.value)||0);recalcDetail()"></div>
+            <div class="fi"><label>Verkäufe / Monat</label><input type="number" id="dfVerkaeufe" oninput="saveDetailField('verkaeufeMonat',parseInt(this.value)||0);recalcDetail()"></div>
+            <div class="fi full"><label>PPC / Monat €</label><input type="number" step=".01" id="dfPPC" oninput="saveDetailField('ppcMonat',parseFloat(this.value)||0);recalcDetail()"></div>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:var(--s2);border-radius:8px;font-size:12px;color:var(--tx2)">
+            💡 Bestellmenge × EK = <b style="color:var(--ac)" id="dInvest">—</b> Investment
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Result Card -->
+      <div class="card">
+        <h3>📊 Live-Ergebnis</h3>
+        <div class="cg">
+          <div class="ci"><span class="cl">Gesamtkosten/Stk</span><span class="cv" id="dlcKosten" style="color:var(--tx)">—</span></div>
+          <div class="ci"><span class="cl">Gewinn/Stk</span><span class="cv" id="dlcGewinn">—</span></div>
+          <div class="ci"><span class="cl">Marge</span><span class="cv" id="dlcMarge">—</span></div>
+          <div class="ci"><span class="cl">ROI</span><span class="cv" id="dlcROI">—</span></div>
+          <div class="ci"><span class="cl">Break-Even (Stk)</span><span class="cv" id="dlcBE" style="color:var(--bl)">—</span></div>
+          <div class="ci"><span class="cl">Gewinn/Monat</span><span class="cv" id="dlcMonatlich" style="color:var(--gn)">—</span></div>
+        </div>
+        <div class="meter" style="margin-top:14px"><div class="meter-fill" id="dMeter" style="width:0"></div></div>
+        <div class="meter-labels"><span>0%</span><span>15%</span><span>30%</span><span>50%+</span></div>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="card">
+        <h3>📈 Szenario-Vergleich (pro Monat)</h3>
+        <div class="scen-grid">
+          <div class="scen"><div class="st" style="color:var(--rd)">🔻 Pessimistisch (−30%)</div><div class="sr"><span>Verkäufe</span><span id="dspS">—</span></div><div class="sr"><span>Umsatz</span><span id="dspU">—</span></div><div class="sr"><span>Gewinn</span><span id="dspG">—</span></div></div>
+          <div class="scen"><div class="st" style="color:var(--ac)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="dsrS">—</span></div><div class="sr"><span>Umsatz</span><span id="dsrU">—</span></div><div class="sr"><span>Gewinn</span><span id="dsrG">—</span></div></div>
+          <div class="scen"><div class="st" style="color:var(--gn)">🔺 Optimistisch (+30%)</div><div class="sr"><span>Verkäufe</span><span id="dsoS">—</span></div><div class="sr"><span>Umsatz</span><span id="dsoU">—</span></div><div class="sr"><span>Gewinn</span><span id="dsoG">—</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SUB: HERSTELLER ─── -->
+    <div class="subpage" id="sub-hersteller">
+      <div class="card" style="margin-bottom:14px">
+        <h3>🔍 Hersteller-Suche (Quick Links)</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="dHerstellerLinks"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="margin:0">🏭 Lieferanten-Vergleich</h3>
+          <button class="btn btn-sm btn-p" onclick="addDetailSupplier()">＋ Lieferant</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="dSupplierTable"><thead><tr>
+            <th>Name</th><th>Plattform</th><th class="nc">Stückpreis €</th><th class="nc">MOQ</th>
+            <th class="nc">Lieferzeit (T)</th><th class="nc">Musterkosten €</th><th class="nc">Score</th>
+            <th>Zertifikate</th><th>Notiz</th><th>Link</th><th>Aktion</th>
+          </tr></thead><tbody id="dSupplierBody"></tbody></table>
+        </div>
+        <div class="empty" id="dSupplierEmpty" style="display:none;padding:30px"><div class="eico" style="font-size:28px">🏭</div><p>Noch keine Lieferanten erfasst</p></div>
+      </div>
+    </div>
+
+    <!-- ─── SUB: VERKAUFSDATEN ─── -->
+    <div class="subpage" id="sub-sales">
+      <div id="dSalesContent">
+        <!-- populated dynamically by renderDetailSales() -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: GEBÜHRENRECHNER                                          -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-gebuehren">
+  <div class="page-header"><h1><span class="hico">💶</span>Kalkulations-Center<span class="wika-help" data-tooltip="Alle Profit-Berechnungen an einem Ort.&#10;&#10;⚡ Schnell-Kalkulation: schneller Was-wäre-wenn-Test ohne Produkt-Anlage.&#10;&#10;💶 FBA-Kalkulator: vollständige Berechnung mit echten Amazon-Gebühren, Steuer, Szenarien & Break-even.">ⓘ</span></h1></div>
+  <div class="page-body">
+
+    <!-- Haupt-Tab-Leiste: Schnell vs. Voll -->
+    <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
+      <button class="calcTab" data-calctab="quick" onclick="switchCalcTab('quick')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">⚡ Schnell-Kalkulation</button>
+      <button class="calcTab" data-calctab="full" onclick="switchCalcTab('full')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">💶 FBA-Kalkulator (vollständig)</button>
+      <button class="calcTab" data-calctab="bsr" onclick="switchCalcTab('bsr')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📈 BSR → Verkäufe</button>
+    </div>
+
+    <!-- TAB: BSR → VERKÄUFE-SCHÄTZER -->
+    <div id="calcTab-bsr" style="display:none">
+      <div class="help-box purple"><div class="help-icon">📈</div><div class="help-body">
+        <div class="help-title">BSR-Verkaufsschätzer (wie Xray)</div>
+        <div class="help-text">Schätzt aus dem <b>Best-Seller-Rank</b> einer Kategorie die monatlichen Verkäufe &amp; den Umsatz. Reine Schätzung per Mathematik – <b>kalibriere</b> sie mit einem Produkt, dessen echte Verkäufe du kennst, dann wird sie für diese Kategorie deutlich genauer.</div>
+      </div></div>
+      <div class="detail-row" style="align-items:start">
+        <div class="card">
+          <h3>🔢 Eingabe</h3>
+          <div class="fi"><label>Kategorie</label><select id="bsrCat"></select></div>
+          <div class="fi" style="margin-top:10px"><label>BSR (Best-Seller-Rank)</label><input id="bsrRank" type="number" placeholder="z. B. 4500" oninput="bsrCalc()"></div>
+          <div class="fi" style="margin-top:10px"><label>Verkaufspreis € (für Umsatz)</label><input id="bsrPrice" type="number" step="0.01" placeholder="z. B. 24.99" oninput="bsrCalc()"></div>
+          <div style="margin-top:6px"><button class="btn btn-p" onclick="bsrCalc()">📈 Schätzen</button></div>
+        </div>
+        <div class="card">
+          <h3>📊 Schätzung</h3>
+          <div class="cg" style="grid-template-columns:1fr 1fr">
+            <div class="ci"><span class="cl">Verkäufe / Tag</span><span class="cv" style="color:var(--gn)" id="bsrDay">—</span></div>
+            <div class="ci"><span class="cl">Verkäufe / Monat</span><span class="cv" style="color:var(--gn)" id="bsrMonth">—</span></div>
+            <div class="ci"><span class="cl">Umsatz / Monat</span><span class="cv" style="color:var(--gn);font-size:18px" id="bsrRev">—</span></div>
+            <div class="ci"><span class="cl">Kategorie-Status</span><span class="cv" style="font-size:12px" id="bsrCalibState">Standard</span></div>
+          </div>
+          <div style="margin-top:12px;font-size:11px;color:var(--tx3);font-style:italic">💡 Schätzwerte – keine Echtdaten. Genauigkeit steigt mit Kalibrierung.</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;background:var(--s1)">
+        <h3>🎯 Kalibrieren (optional, pro Kategorie)</h3>
+        <p style="color:var(--tx2);font-size:12px;margin-bottom:10px">Kennst du für die gewählte Kategorie ein Produkt mit <b>bekanntem BSR</b> und <b>bekannten Verkäufen/Monat</b> (z. B. aus einem echten Helium-Export)? Trag beides ein – der Schätzer passt sich für diese Kategorie an.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="fi" style="margin:0"><label>Bekannter BSR</label><input id="bsrCalRank" type="number" placeholder="z. B. 2000" style="width:140px"></div>
+          <div class="fi" style="margin:0"><label>Echte Verkäufe / Monat</label><input id="bsrCalSales" type="number" placeholder="z. B. 600" style="width:160px"></div>
+          <button class="btn btn-p" onclick="bsrCalibrate()">🎯 Kalibrieren</button>
+          <button class="btn btn-sm btn-d" onclick="bsrResetCalib()">↺ Zurücksetzen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SCHNELL-KALKULATION -->
+    <div id="calcTab-quick" style="display:none">
+      <div style="max-width:880px">
+        <div class="help-box">
+          <div class="help-icon">⚡</div>
+          <div class="help-body">
+            <div class="help-title">Schnell-Kalkulation: der „Lohnt sich das?"-Test</div>
+            <div class="help-text">Gib Verkaufspreis, Einkaufspreis und Kosten ein, sieh sofort Marge und Gewinn pro Stück. Ideal für Lieferanten-Vergleich und Was-wäre-wenn-Szenarien — ohne ein Produkt anzulegen.<br><span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Für die volle Berechnung mit echten Amazon-Gebühren wechsle zum Tab „FBA-Kalkulator".</span></div>
+          </div>
+        </div>
+        <div class="card"><h3>💰 Preise & Kosten</h3>
+          <div class="fg"><div class="fi"><label>Einkaufspreis €</label><input type="number" step=".01" id="qEK" oninput="qCalc()"></div><div class="fi"><label>Verkaufspreis €</label><input type="number" step=".01" id="qVK" oninput="qCalc()"></div><div class="fi"><label>FBA Gebühren €</label><input type="number" step=".01" id="qFBA" oninput="qCalc()"></div><div class="fi"><label>Versand €</label><input type="number" step=".01" id="qShip" oninput="qCalc()"></div><div class="fi"><label>Zoll €</label><input type="number" step=".01" id="qZoll" oninput="qCalc()"></div><div class="fi"><label>Sonstige €</label><input type="number" step=".01" id="qSon" oninput="qCalc()"></div></div>
+        </div>
+        <div class="card"><h3>📦 Mengen & PPC</h3>
+          <div class="fg"><div class="fi"><label>Bestellmenge</label><input type="number" id="qMenge" value="500" oninput="qCalc()"></div><div class="fi"><label>Verkäufe / Monat</label><input type="number" id="qSales" oninput="qCalc()"></div><div class="fi"><label>PPC / Monat €</label><input type="number" step=".01" id="qPPC" oninput="qCalc()"></div></div>
+        </div>
+        <div class="card" id="qRes">
+          <h3>📊 Ergebnis</h3>
+          <div class="fg4">
+            <div class="ci"><span class="cl">Kosten/Stk</span><span class="cv" id="rK" style="color:var(--tx)">—</span></div>
+            <div class="ci"><span class="cl">Gewinn/Stk</span><span class="cv" id="rG">—</span></div>
+            <div class="ci"><span class="cl">Marge</span><span class="cv" id="rM">—</span></div>
+            <div class="ci"><span class="cl">ROI</span><span class="cv" id="rR">—</span></div>
+          </div>
+          <div class="meter"><div class="meter-fill" id="qMeter" style="width:0"></div></div>
+          <div class="meter-labels"><span>0%</span><span>15%</span><span>30%</span><span>50%+</span></div>
+          <div class="scen-grid" id="qScen">
+            <div class="scen"><div class="st" style="color:var(--rd)">🔻 Pessimistisch (−30%)</div><div class="sr"><span>Verkäufe</span><span id="spS">—</span></div><div class="sr"><span>Umsatz</span><span id="spU">—</span></div><div class="sr"><span>Gewinn</span><span id="spG">—</span></div></div>
+            <div class="scen"><div class="st" style="color:var(--ac)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="srS">—</span></div><div class="sr"><span>Umsatz</span><span id="srU">—</span></div><div class="sr"><span>Gewinn</span><span id="srG">—</span></div></div>
+            <div class="scen"><div class="st" style="color:var(--gn)">🔺 Optimistisch (+30%)</div><div class="sr"><span>Verkäufe</span><span id="soS">—</span></div><div class="sr"><span>Umsatz</span><span id="soU">—</span></div><div class="sr"><span>Gewinn</span><span id="soG">—</span></div></div>
+          </div>
+          <div style="margin-top:14px;text-align:right"><button class="btn btn-p" onclick="q2List()">➕ In Produktliste</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: FBA-KALKULATOR (VOLL) -->
+    <div id="calcTab-full">
+
+    <!-- Help-Box -->
+    <div class="help-box gold">
+      <div class="help-icon">💶</div>
+      <div class="help-body">
+        <div class="help-title">FBA-Kalkulator: dein vollständiger Profit-Check</div>
+        <div class="help-text">
+          Berechnet <b>alle Amazon-FBA-Kosten und Profit-Kennzahlen</b> live: Referral Fee, FBA-Versandgebühr (echte Gewichtsstaffeln), Lagerkosten (saisonal), PPC, Selling-Plan-Anteil, Marge, ROI und Break-even. <b>✅ Versand- &amp; Lagergebühren sind 1:1 aus der offiziellen <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Amazon FBA-Tarifübersicht (gültig ab 1. Feb 2026)</a> übernommen.</b> Nur einzelne Verkaufsgebühren-Prozentsätze je Kategorie sind noch Annahmen (im ⚙️ als <b style="color:var(--or)">ANNAHME</b> markiert) — exakte Sätze in Seller Central prüfen.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Für 100% exakte Gebühren nutze immer den <a href="https://sellercentral.amazon.de/fba/profitabilitycalculator" target="_blank" rel="noopener" style="color:var(--ac)">Amazon Profitability Calculator</a> mit deiner echten ASIN.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modus-Umschalter -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button class="fbaModeBtn" data-mode="single" onclick="fbaSetMode('single')" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--ac);background:var(--ac);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">📊 Einzelkalkulation</button>
+      <button class="fbaModeBtn" data-mode="scenario" onclick="fbaSetMode('scenario')" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--bd);background:transparent;color:var(--tx2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">⚖️ Szenariovergleich</button>
+      <button class="fbaModeBtn" data-mode="target" onclick="fbaSetMode('target')" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--bd);background:transparent;color:var(--tx2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">🎯 Zielmargen-Modus</button>
+      <button onclick="fbaOpenConfig()" style="margin-left:auto;padding:8px 14px;border-radius:8px;border:1.5px solid var(--bd);background:transparent;color:var(--tx2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer" title="Gebührentabellen bearbeiten">⚙️ Gebühren anpassen</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start" id="fbaLayout">
+
+      <!-- ════ EINGABE-PANEL ════ -->
+      <div class="card" style="margin:0">
+        <h3 style="margin-top:0">📐 Eingaben</h3>
+
+        <!-- Marktplatz & Preis -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:6px 0 8px">Marktplatz & Preis</div>
+        <div class="fg">
+          <div class="fi"><label>Marktplatz</label><select id="fbMarket" onchange="fbaCalc()"><option value="DE">🇩🇪 Deutschland</option><option value="FR">🇫🇷 Frankreich</option><option value="IT">🇮🇹 Italien</option><option value="ES">🇪🇸 Spanien</option><option value="NL">🇳🇱 Niederlande</option><option value="PL">🇵🇱 Polen</option></select></div>
+          <div class="fi"><label>Verkaufspreis €</label><input type="number" step=".01" id="fbVK" placeholder="z.B. 29.99" oninput="fbaCalc()"></div>
+          <div class="fi"><label>VAT-Modus <span class="wika-help" data-tooltip="Inkl.: Verkaufspreis enthält bereits USt. (Standard für Amazon-Endkundenpreise).&#10;Exkl.: Verkaufspreis ist netto, USt. kommt obendrauf.">ⓘ</span></label><select id="fbVatMode" onchange="fbaCalc()"><option value="incl">Preis inkl. USt.</option><option value="excl">Preis exkl. USt.</option></select></div>
+          <div class="fi"><label>USt.-Satz %</label><input type="number" step=".1" id="fbVat" value="19" oninput="fbaCalc()"></div>
+        </div>
+
+        <!-- Kategorie & Größe -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Kategorie & Größe</div>
+        <div class="fg">
+          <div class="fi"><label>Produktkategorie <span class="wika-help" data-tooltip="Bestimmt die Referral Fee (Verkaufsprovision). Die meisten Kategorien liegen bei 7-15%. Ausnahmen: Schmuck bis 20%, Amazon-Geräte-Zubehör 45%.">ⓘ</span></label><select id="fbCat" onchange="fbaCalc()"></select></div>
+          <div class="fi"><label>Größenklasse <span class="wika-help" data-tooltip="Bestimmt die FBA-Versandgebühr. Wird normalerweise automatisch aus Maßen + Gewicht ermittelt — wähle „Auto", damit SellerHub das übernimmt.">ⓘ</span></label><select id="fbSize" onchange="fbaCalc()"><option value="auto">⚙️ Automatisch ermitteln</option></select></div>
+        </div>
+        <div class="fg">
+          <div class="fi"><label>Länge cm</label><input type="number" step=".1" id="fbL" placeholder="z.B. 20" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Breite cm</label><input type="number" step=".1" id="fbB" placeholder="z.B. 15" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Höhe cm</label><input type="number" step=".1" id="fbH" placeholder="z.B. 5" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Gewicht g</label><input type="number" id="fbW" placeholder="z.B. 400" oninput="fbaCalc()"></div>
+        </div>
+        <div id="fbSizeInfo" style="font-size:11px;color:var(--tx3);margin-top:4px"></div>
+
+        <!-- Kosten -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Deine Kosten pro Einheit</div>
+        <div class="fg">
+          <div class="fi"><label>Einkaufspreis / COGS €</label><input type="number" step=".01" id="fbEK" placeholder="z.B. 6.50" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Verpackung €</label><input type="number" step=".01" id="fbPack" placeholder="z.B. 0.50" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Versand z. Amazon-Lager €</label><input type="number" step=".01" id="fbInbound" placeholder="z.B. 1.20" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Sonstige Kosten €</label><input type="number" step=".01" id="fbOther" placeholder="z.B. 0.30" oninput="fbaCalc()"></div>
+        </div>
+
+        <!-- Lager & Absatz -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Lager & Absatz</div>
+        <div class="fg">
+          <div class="fi"><label>Lagerdauer (Monate)</label><input type="number" step=".1" id="fbStorage" value="2" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Verkäufe / Monat</label><input type="number" id="fbSales" value="100" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Retourenquote %</label><input type="number" step=".1" id="fbReturns" value="5" oninput="fbaCalc()"></div>
+        </div>
+
+        <!-- PPC -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Werbung (PPC)</div>
+        <div class="fg">
+          <div class="fi"><label>PPC-Modus</label><select id="fbPpcMode" onchange="fbaTogglePpc();fbaCalc()"><option value="cpc">CPC + Conversion Rate</option><option value="acos">ACoS direkt</option></select></div>
+        </div>
+        <div class="fg" id="fbPpcCpcFields">
+          <div class="fi"><label>CPC € <span class="wika-help" data-tooltip="Cost-per-Click: durchschnittliche Kosten pro Anzeigen-Klick. DE-Schnitt: 0,30-0,90 € je nach Nische.">ⓘ</span></label><input type="number" step=".01" id="fbCpc" value="0.50" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Conversion Rate % <span class="wika-help" data-tooltip="Anteil der Klicks, die zu einem Kauf führen. Amazon-Schnitt: 8-15%. Bedeutet z.B. 10% = 10 Klicks pro Verkauf.">ⓘ</span></label><input type="number" step=".1" id="fbCr" value="10" oninput="fbaCalc()"></div>
+        </div>
+        <div class="fg" id="fbPpcAcosFields" style="display:none">
+          <div class="fi"><label>ACoS % <span class="wika-help" data-tooltip="Advertising Cost of Sales: Werbekosten als % vom durch Werbung erzielten Umsatz. Niedriger = effizienter.">ⓘ</span></label><input type="number" step=".1" id="fbAcos" value="25" oninput="fbaCalc()"></div>
+          <div class="fi"><label>Anteil über PPC % <span class="wika-help" data-tooltip="Wie viel % deiner Verkäufe laufen über bezahlte Werbung? Rest ist organisch. In Launch-Phase oft 50-80%, später 20-40%.">ⓘ</span></label><input type="number" step=".1" id="fbPpcShare" value="50" oninput="fbaCalc()"></div>
+        </div>
+
+        <!-- Optionen -->
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Optionen</div>
+        <div class="fg">
+          <div class="fi"><label>Selling Plan <span class="wika-help" data-tooltip="Professional: 39 €/Monat (lohnt ab ~40 Verkäufen/Monat).&#10;Individual: 0,99 €/Artikel (für Gelegenheitsverkäufer).">ⓘ</span></label><select id="fbPlan" onchange="fbaCalc()"><option value="professional">Professional (39 €/Mon.)</option><option value="individual">Individual (0,99 €/Stk.)</option></select></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Sicherheitspuffer auf FBA-Gebühr <span class="wika-help" data-tooltip="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — Standard ist 0%. Optional kannst du im ⚙️ einen eigenen Prozent-Puffer auf die FBA-Gebühr legen (z.B. für künftige Erhöhungen).">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbCep" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Ohne Zentraleuropa-Programm (+0,26 €/Einheit) <span class="wika-help" data-tooltip="Wenn dein Lager in DE liegt und du NICHT am Zentraleuropa-Programm (CEP) teilnimmst, berechnet Amazon +0,26 €/Einheit.">ⓘ</span></label>
+        </div>
+        <div class="fg" style="margin-top:8px">
+          <div class="fi"><label>Manuelle Zusatzgebühr €/Stk <span class="wika-help" data-tooltip="Freies Feld für sonstige Gebühren: z.B. Lithium-/Gefahrgut-Zuschlag (0,10 €), Etikettierung, Sonderverpackung.">ⓘ</span></label><input type="number" step=".01" id="fbExtra" placeholder="0.00" oninput="fbaCalc()"></div>
+          <div class="fi" id="fbTargetMarginWrap" style="display:none"><label>Zielmarge % <span class="wika-help" data-tooltip="Im Zielmargen-Modus: Welche Netto-Marge willst du erreichen? SellerHub berechnet den nötigen Verkaufspreis.">ⓘ</span></label><input type="number" step=".1" id="fbTargetMargin" value="25" oninput="fbaCalc()"></div>
+        </div>
+
+        <!-- Szenario B (nur im Szenario-Modus) -->
+        <div id="fbScenarioB" style="display:none;margin-top:16px;padding-top:14px;border-top:2px dashed var(--bd2)">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--cy);font-weight:700;margin-bottom:8px">⚖️ Szenario B — Vergleichspreis</div>
+          <div class="fg">
+            <div class="fi"><label>Verkaufspreis B €</label><input type="number" step=".01" id="fbVKb" placeholder="z.B. 34.99" oninput="fbaCalc()"></div>
+            <div class="fi"><label>CPC B € (optional)</label><input type="number" step=".01" id="fbCpcB" placeholder="wie A" oninput="fbaCalc()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ ERGEBNIS-PANEL ════ -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Status-Banner -->
+        <div id="fbStatusBanner" style="border-radius:12px;padding:16px 20px;text-align:center;font-weight:700;font-size:16px;background:var(--s2);color:var(--tx2);border:1.5px solid var(--bd)">
+          Gib einen Verkaufspreis ein, um zu starten
+        </div>
+
+        <!-- KPI-Kacheln -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="fbKpis">
+          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Gewinn / Einheit</span><span class="cv" id="fbKpiProfit" style="color:var(--gn);font-size:24px">—</span></div>
+          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Netto-Marge</span><span class="cv" id="fbKpiMargin" style="color:var(--ac);font-size:24px">—</span></div>
+          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">ROI</span><span class="cv" id="fbKpiRoi" style="color:var(--bl);font-size:24px">—</span></div>
+          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Gewinn / Monat</span><span class="cv" id="fbKpiMonthly" style="color:var(--pu);font-size:24px">—</span></div>
+        </div>
+
+        <!-- Breakdown-Tabelle -->
+        <div class="card" style="margin:0">
+          <h3 style="margin-top:0">📊 Kostenaufschlüsselung</h3>
+          <table style="margin:0;font-size:13px">
+            <tbody id="fbBreakdown"></tbody>
+          </table>
+        </div>
+
+        <!-- Break-even-Metriken -->
+        <div class="card" style="margin:0">
+          <h3 style="margin-top:0">⚖️ Break-even & Grenzwerte</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="ci"><span class="cl">Break-even VK <span class="wika-help" data-tooltip="Verkaufspreis, bei dem dein Gewinn = 0 ist. Darunter machst du Verlust.">ⓘ</span></span><span class="cv" id="fbBeVk" style="color:var(--or)">—</span></div>
+            <div class="ci"><span class="cl">Break-even CPC <span class="wika-help" data-tooltip="Maximaler CPC, bei dem du noch kostendeckend bist. Darüber frisst Werbung deinen Gewinn auf.">ⓘ</span></span><span class="cv" id="fbBeCpc" style="color:var(--or)">—</span></div>
+            <div class="ci"><span class="cl">Max. tragbarer ACoS <span class="wika-help" data-tooltip="Höchster ACoS, bei dem du noch profitabel bleibst. Dein Ziel-ACoS sollte deutlich darunter liegen.">ⓘ</span></span><span class="cv" id="fbBeAcos" style="color:var(--or)">—</span></div>
+            <div class="ci"><span class="cl">Netto-Auszahlung Amazon <span class="wika-help" data-tooltip="Was Amazon dir pro Einheit auszahlt: Brutto-Umsatz minus alle Amazon-Gebühren (vor deinen eigenen Kosten).">ⓘ</span></span><span class="cv" id="fbPayout" style="color:var(--cy)">—</span></div>
+          </div>
+        </div>
+
+        <!-- Warnungen -->
+        <div id="fbWarnings" style="display:flex;flex-direction:column;gap:8px"></div>
+
+        <!-- Szenario-Vergleich-Ergebnis -->
+        <div class="card" id="fbScenarioResult" style="margin:0;display:none">
+          <h3 style="margin-top:0">⚖️ Szenario A vs. B</h3>
+          <table style="margin:0;font-size:13px"><tbody id="fbScenarioTable"></tbody></table>
+        </div>
+
+        <!-- Zielmargen-Ergebnis -->
+        <div class="card" id="fbTargetResult" style="margin:0;display:none">
+          <h3 style="margin-top:0">🎯 Zielmargen-Berechnung</h3>
+          <div id="fbTargetContent" style="font-size:14px;line-height:1.7;color:var(--tx)"></div>
+        </div>
+
+        <!-- Aktionen -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="fbaSaveToProduct()" style="font-size:12px">💾 Als Produkt speichern</button>
+          <button class="btn btn-sm" onclick="fbaReset()" style="font-size:12px;background:var(--s3);color:var(--tx)">↺ Zurücksetzen</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ STEUER / FINANZAMT BEREICH ════ -->
+    <div style="margin-top:20px">
+      <label style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(135deg,var(--s1),var(--s2));border:1.5px solid var(--bd2);border-radius:12px;cursor:pointer">
+        <input type="checkbox" id="fbTaxEnable" onchange="fbaToggleTax()" style="width:18px;height:18px;accent-color:var(--ac)">
+        <span style="font-size:15px;font-weight:700;color:var(--tx)">🏛️ Steuern / Finanzamt-Rücklage berechnen</span>
+        <span class="wika-help" data-tooltip="Berechnet auf Basis deines hochgerechneten Jahresgewinns, wie viel du fürs Finanzamt zurücklegen solltest — damit keine böse Nachzahlung kommt.">ⓘ</span>
+        <span style="margin-left:auto;font-size:12px;color:var(--tx3)">optional</span>
+      </label>
+
+      <div id="fbTaxPanel" style="display:none;margin-top:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+
+          <!-- Steuer-Eingaben -->
+          <div class="card" style="margin:0">
+            <h3 style="margin-top:0">🏛️ Steuer-Eingaben</h3>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.5">Basis ist dein <b>hochgerechneter Jahresgewinn</b> (Monatsgewinn aus der Kalkulation × 12). Passe die Werte an deine Situation an.</div>
+
+            <div class="fg">
+              <div class="fi"><label>Unternehmensart</label><select id="fbTaxForm" onchange="fbaCalcTax()">
+                <option value="einzel">Einzelunternehmen</option>
+                <option value="freiberufler">Freiberufler</option>
+                <option value="ug">UG (haftungsbeschränkt)</option>
+                <option value="gmbh">GmbH</option>
+              </select></div>
+              <div class="fi"><label>Tätigkeit</label><select id="fbTaxEmployment" onchange="fbaCalcTax()">
+                <option value="haupt">Hauptberuflich</option>
+                <option value="neben">Nebenberuflich</option>
+              </select></div>
+            </div>
+
+            <div class="fg">
+              <div class="fi"><label>Hebesatz Gemeinde % <span class="wika-help" data-tooltip="Gewerbesteuer-Hebesatz deiner Gemeinde. DE-Schnitt ~400%. Berlin 410%, München 490%, ländlich teils 250-350%. Steht im Gewerbesteuerbescheid oder auf der Gemeinde-Website.">ⓘ</span></label><input type="number" id="fbTaxHebesatz" value="400" oninput="fbaCalcTax()"></div>
+              <div class="fi"><label>Gewerbesteuerpflichtig <span class="wika-help" data-tooltip="Gewerbetreibende ja, Freiberufler nein. Bei Einzelunternehmen gilt ein Freibetrag von 24.500€ Jahresgewinn.">ⓘ</span></label><select id="fbTaxTradeLiable" onchange="fbaCalcTax()">
+                <option value="yes">Ja</option>
+                <option value="no">Nein</option>
+              </select></div>
+            </div>
+
+            <div class="fg">
+              <div class="fi"><label>Pers. ESt-Satz % <span class="wika-help" data-tooltip="Dein geschätzter persönlicher Einkommensteuersatz (Grenzsteuersatz). Wenn unbekannt, lass 0 — dann nutzt SellerHub ein konservatives Modell mit 35%. Typisch: 14-42% je nach Gesamteinkommen.">ⓘ</span></label><input type="number" step=".1" id="fbTaxEstRate" placeholder="0 = konservativ (35%)" oninput="fbaCalcTax()"></div>
+              <div class="fi"><label>USt-pflichtig <span class="wika-help" data-tooltip="Ja = Regelbesteuerung (du führst USt ab). Nein = Kleinunternehmer §19 UStG (keine USt). Die USt ist ein Durchlaufposten und KEIN Gewinn!">ⓘ</span></label><select id="fbTaxVatLiable" onchange="fbaCalcTax()">
+                <option value="yes">Ja (Regelbesteuerung)</option>
+                <option value="no">Nein (Kleinunternehmer)</option>
+              </select></div>
+            </div>
+
+            <div class="fg">
+              <div class="fi"><label>Bereits geleistete Vorauszahlungen € <span class="wika-help" data-tooltip="Steuervorauszahlungen, die du dieses Jahr schon ans Finanzamt gezahlt hast. Werden von der empfohlenen Rücklage abgezogen.">ⓘ</span></label><input type="number" step=".01" id="fbTaxPrepaid" placeholder="0" oninput="fbaCalcTax()"></div>
+              <div class="fi"><label>Sicherheitsaufschlag % <span class="wika-help" data-tooltip="Zusätzlicher Puffer auf die geschätzte Steuerlast, damit du nicht zu knapp kalkulierst. Empfehlung: 10-20%.">ⓘ</span></label><input type="number" step="1" id="fbTaxSafety" value="10" oninput="fbaCalcTax()"></div>
+            </div>
+          </div>
+
+          <!-- Steuer-Ergebnis -->
+          <div id="fbTaxResult"></div>
+
+        </div>
+      </div>
+    </div>
+
+    </div><!-- /calcTab-full -->
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: LISTING-EDITOR (Amazon HTML / WYSIWYG)                    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-listing">
+  <div class="page-header"><h1><span class="hico">📝</span>Listing-Editor<span class="wika-help" data-tooltip="Erstelle formatierte Produktbeschreibungen ohne HTML-Kenntnisse.&#10;&#10;Visuelle Toolbar (Fett, Kursiv, Listen) + Live-Vorschau.&#10;&#10;Export als HTML (für eBay/Shopify/Bestandsschutz) oder Klartext (für aktuelle Amazon-Felder).">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Formatierte Produktbeschreibungen ohne HTML-Kenntnisse</span></h1></div>
+  <div class="page-body" id="listingBody">
+    <!-- via JS gerendert -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: INHALTSGENERATOR (KI-Marketing-Visuals aus Produktbildern) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="css/bildstudio.css">
+<div class="page" id="p-inhalt">
+  <div class="page-header"><h1><span class="hico">✨</span>KI-Bildstudio<span class="wika-help" data-tooltip="Erzeugt verkaufsstarke Amazon-Marketing-Visuals (Hauptbild, USP-Infografiken, Lifestyle, Vertrauen) aus deinen Produktfotos.&#10;&#10;1. Produktbilder hochladen&#10;2. Titel, Beschreibung & USPs eintragen&#10;3. KI-Anbieter wählen und generieren&#10;&#10;Pollinations = kostenloser Test (nur Text). Gemini Nano Banana = Bild-zu-Bild, behält dein Produkt 1:1 (API-Key nötig).">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">KI-Marketing-Visuals aus deinen Produktbildern</span></h1></div>
+  <div class="page-body">
+    <div class="ig-bar" id="igBar" style="display:none">
+      <button type="button" class="ig-toggle" id="igToggleInputs">⚙ Eingaben ausblenden</button>
+      <span style="font-size:12px;color:var(--tx3)">Tipp: einzelne Bilder mit ↻ neu generieren – nicht alle.</span>
+    </div>
+    <div class="ig-keybanner" id="igKeyBanner">
+      <span class="ig-kb-ic">🔑</span>
+      <div class="ig-kb-txt"><b>Kein eigener Gemini-Key.</b> Du nutzt gerade den kostenlosen Test-Dienst – der ist oft überlastet. Mit eigenem Key läuft die KI stabil &amp; schnell (Bild-zu-Bild nutzt deine Fotos).</div>
+      <div class="ig-kb-acts">
+        <a class="ig-kb-link" href="https://aistudio.google.com/apikey" target="_blank">Key holen ↗</a>
+        <button type="button" class="ig-kb-btn" id="igKeyBannerBtn">Key eintragen</button>
+      </div>
+      <button type="button" class="ig-kb-x" id="igKeyBannerX" title="Ausblenden">×</button>
+    </div>
+    <div class="card ig-import-card" id="igLoadCandCard">
+      <div class="ig-import-head"><span class="ig-import-emoji">📥</span><div><div class="ig-import-title">Aus Recherche-Kandidat laden</div><div class="ig-import-sub">Titel, USPs &amp; Produktbilder aus deiner Produktfindung übernehmen</div></div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="igCandSelect" style="flex:1;width:auto;min-width:200px;min-height:46px;box-sizing:border-box;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;padding:0 12px;font-size:13.5px;font-family:inherit;outline:none"><option value="">– Kandidat wählen –</option></select>
+        <button class="btn btn-p" id="igLoadCandBtn" style="white-space:nowrap;min-height:46px">📥 Laden</button>
+      </div>
+      <div class="ig-hint" id="igLoadCandHint">Konkurrenz-ASINs analysierst du jetzt im Bereich <b>🎯 Produktfindung → Recherche-Kandidaten</b>. Die dort gespeicherten Daten (✨ = inkl. KI-Optimierung) erscheinen hier zur Auswahl.</div>
+    </div>
+    <div class="ig-layout" id="igLayout">
+      <div class="ig-left">
+
+        <div class="card">
+          <div class="ig-sec"><span class="ig-step">1</span><h3>Produktbilder</h3><span class="ig-badge" id="igBadge">0 HOCHGELADEN</span></div>
+          <div class="ig-drop" id="igDropMain">
+            <span class="ig-dic">🖼️</span>
+            <div style="text-align:left"><div class="ig-dt">Bilder hierher ziehen oder klicken</div><div class="ig-ds">Bis zu 10 Bilder, max. 10 MB pro Bild</div></div>
+          </div>
+          <input type="file" id="igFileMain" accept="image/*" multiple hidden>
+          <div class="ig-thumbs" id="igThumbsMain"></div>
+          <div class="ig-two" style="margin-top:18px">
+            <div>
+              <div class="ig-seclabel" style="font-size:13px">📦 Verpackung <span class="ig-badge opt">OPTIONAL</span></div>
+              <div class="ig-drop sm" id="igDropPack"><span class="ig-dic">📦</span><div class="ig-dt" style="font-size:12.5px;color:var(--tx2)">Verpackungsfoto</div></div>
+              <input type="file" id="igFilePack" accept="image/*" hidden>
+              <div class="ig-thumbs" id="igThumbsPack"></div>
+            </div>
+            <div>
+              <div class="ig-seclabel" style="font-size:13px">✋ In Benutzung <span class="ig-badge opt">OPTIONAL</span></div>
+              <div class="ig-drop sm" id="igDropUse"><span class="ig-dic">✋</span><div class="ig-dt" style="font-size:12.5px;color:var(--tx2)">Produkt in Benutzung</div></div>
+              <input type="file" id="igFileUse" accept="image/*" hidden>
+              <div class="ig-thumbs" id="igThumbsUse"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ig-sec"><span class="ig-step">2</span><h3>Produktdaten</h3><button type="button" class="ig-ai-btn ig-auto" id="igAutoAll" title="Titel, Beschreibung und USPs automatisch von der KI erstellen">✨ Auto-Ausfüllen</button></div>
+          <div class="ig-fld-row"><label class="ig-fld" style="margin:0">Produkttitel <span class="req">*</span><span class="ig-count" id="igTitleCount">0 / 200</span></label></div>
+          <div class="ig-title-row">
+            <input type="text" id="igTitle" maxlength="250" placeholder="z. B. Nattokinase 2000 FU – Hochdosiert, Laborgeprüft, 1 Jahr Vorrat">
+            <button type="button" class="ig-ai-btn" id="igTitleAi" title="Verbesserte Titel von der KI vorschlagen lassen">✨ KI</button>
+          </div>
+          <div class="ig-suggest" id="igTitleSuggest"></div>
+          <div class="ig-fld-row" style="margin-top:16px">
+            <label class="ig-fld" style="margin:0">Vollständige Beschreibung <span class="req">*</span><span class="ig-count" id="igDescCount">0 Zeichen</span></label>
+            <button type="button" class="ig-ai-btn" id="igDescAi" title="Beschreibung von der KI verbessern oder neu erstellen">✨ KI</button>
+          </div>
+          <textarea id="igDesc" placeholder="Beschreiben Sie Ihr Produkt ausführlich: Was ist es, Material, Anwendung, Zielgruppe, Vorteile …"></textarea>
+          <div class="ig-suggest" id="igDescSuggest"></div>
+          <div class="ig-fld-row" style="margin-top:16px">
+            <label class="ig-fld" style="margin:0">USPs / Alleinstellungsmerkmale <span class="req">*</span> <span class="ig-hint" style="display:inline">(mind. 3)</span></label>
+            <button type="button" class="ig-ai-btn" id="igUspAi" title="USPs aus Titel &amp; Beschreibung vorschlagen">✨ KI</button>
+          </div>
+          <div id="igUspList"></div>
+          <button class="ig-addusp" id="igAddUsp">＋ USP hinzufügen</button>
+          <div class="ig-suggest" id="igUspSuggest"></div>
+        </div>
+      </div>
+
+      <div class="ig-right">
+        <div class="card">
+          <h3>✦ Generieren</h3>
+          <div class="ig-pbar"><div class="ig-fill" id="igFill"></div></div>
+          <div class="ig-check" id="igChk-title"><span class="ig-box">1</span> Produkttitel</div>
+          <div class="ig-check" id="igChk-desc"><span class="ig-box">2</span> Beschreibung</div>
+          <div class="ig-check" id="igChk-img"><span class="ig-box">3</span> Produktbilder</div>
+          <div class="ig-check" id="igChk-usp"><span class="ig-box">4</span> Mindestens 3 USPs</div>
+
+          <div class="ig-divider"></div>
+          <div class="ig-grouplabel">Einstellungen</div>
+          <label class="ig-fld">Sprache</label>
+          <select id="igLang"><option>Deutsch</option><option>Englisch</option><option>Französisch</option><option>Italienisch</option><option>Spanisch</option><option>Niederländisch</option></select>
+          <label class="ig-fld" style="margin-top:14px">KI-Anbieter</label>
+          <select id="igProvider"><option value="gemini">Gemini Nano Banana · nutzt deine Fotos (empfohlen)</option><option value="pollinations">Pollinations · Vorschau OHNE deine Fotos (Test)</option></select>
+          <div class="ig-hint" id="igProvHint"></div>
+
+          <div class="ig-divider"></div>
+          <div class="ig-grouplabel">Welche Visuals erzeugen?</div>
+          <div class="ig-visuals" id="igVisuals"></div>
+
+          <div class="ig-divider"></div>
+          <button class="ig-gen" id="igGenBtn" disabled>✦ Bilder generieren</button>
+          <div class="ig-credits" id="igCredits" style="display:none">Dies verbraucht ca. <b>9 Credits</b></div>
+          <div class="ig-warn" id="igWarn">⚠️ Vervollständige alle Checklisten-Punkte zum Generieren</div>
+
+          <details class="ig-adv" id="igKeyBox" style="display:none">
+            <summary>⚙️ Gemini API-Key (für Bildgenerierung)</summary>
+            <input type="password" id="igApikey" placeholder="AIza… (nur lokal gespeichert)">
+            <div class="ig-keyok" id="igKeyOk">✓ Key gespeichert</div>
+            <div class="ig-hint">Benötigt aktiviertes Billing. Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ac)">aistudio.google.com/apikey</a></div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card" id="igResultsCard" style="display:none">
+        <div class="ig-sec"><span class="ig-step">3</span><h3>Ergebnisse</h3><span class="ig-resstatus" id="igResStatus"></span><div style="margin-left:auto;display:flex;gap:8px"><button type="button" class="ig-ai-btn" id="igRegenAll" style="display:none">↻ Alle neu</button><button type="button" class="ig-ai-btn ig-auto" id="igDownloadAll" style="display:none;margin:0">⭳ Alle</button></div></div>
+        <div class="ig-resgrid" id="igResGrid"></div>
+      </div>
+
+      <div class="ig-lightbox" id="igLightbox">
+        <div class="ig-lb-inner">
+          <div class="ig-lb-head"><span id="igLbTitle"></span><button type="button" class="ig-lb-x" id="igLbClose">×</button></div>
+          <div class="ig-lb-imgwrap"><img id="igLbImg" alt=""></div>
+          <div class="ig-lb-actions">
+            <button type="button" class="ig-ai-btn" id="igLbRegen">↻ Neu generieren</button>
+            <button type="button" class="ig-ai-btn ig-auto" id="igLbDownload" style="margin:0">⬇ Herunterladen</button>
+          </div>
+        </div>
+      </div>
+      <div class="ig-prog" id="igBeatProg">
+        <div class="ig-prog-card">
+          <div class="ig-prog-emoji">🔍</div>
+          <h3>KI-Konkurrenzanalyse läuft</h3>
+          <div class="ig-prog-sub">Wir vergleichen dein Produkt mit der Konkurrenz und entwickeln besseres Marketing.</div>
+          <div class="ig-prog-pct" id="igBeatProgPct">0&nbsp;%</div>
+          <div class="ig-prog-bar"><div class="ig-prog-fill" id="igBeatProgFill"></div></div>
+          <div class="ig-prog-steps" id="igBeatProgSteps"></div>
+          <div class="ig-prog-hint">Das dauert nur wenige Sekunden – bitte dieses Fenster offen lassen.</div>
+        </div>
+      </div>
+      <div class="ig-prog" id="igGenProg">
+        <div class="ig-prog-card">
+          <div class="ig-prog-emoji">🎨</div>
+          <h3>Deine Listing-Bilder werden erstellt</h3>
+          <div class="ig-prog-sub">Jedes Visual wird einzeln aus deinen Fotos, der Beschreibung und den USPs erzeugt.</div>
+          <div class="ig-prog-pct" id="igGenProgPct">0&nbsp;%</div>
+          <div class="ig-prog-bar"><div class="ig-prog-fill" id="igGenProgFill"></div></div>
+          <div class="ig-prog-steps" id="igGenProgSteps"></div>
+          <div class="ig-prog-hint">Bild-zu-Bild kann pro Visual ein paar Sekunden dauern – bitte das Fenster offen lassen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bildstudio.js"></script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: NISCHEN-ANALYZER (Portfolio-Bewertung mehrerer Nischen)   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-nischen">
+  <div class="page-header"><h1><span class="hico">🎯</span>Nischen-Analyzer<span class="wika-help" data-tooltip="Vergleiche mehrere Produktnischen objektiv und finde die profitabelste.&#10;&#10;Trage pro Nische die Marktdaten ein (aus Helium 10 Black Box / Xray oder manuell).&#10;&#10;Das Tool berechnet Attraktivität, Einstiegsbarriere, Profit-Potenzial und ein Go/No-Go-Ranking — mit transparenten, anpassbaren Gewichtungen.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Mehrere Nischen objektiv vergleichen & ranken</span></h1></div>
+  <div class="page-body" id="nischenBody">
+    <!-- via JS gerendert -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: KEYWORD-TRACKER                                          -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-keywords">
+  <div class="page-header"><h1><span class="hico">🔑</span>Keyword-Center<span class="wika-help" data-tooltip="Alles rund um Keywords an einem Ort.&#10;&#10;📍 Tracking: Pflicht-Keywords pro Produkt mit Suchvolumen, Position und Listing-Status.&#10;&#10;🧹 Backend-Reiniger: Search Terms bereinigen und aufs 250-Byte-Limit optimieren.">ⓘ</span></h1></div>
+  <div class="page-body">
+
+    <!-- Tab-Leiste -->
+    <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
+      <button class="kwTab" data-kwtab="tracking" onclick="switchKwTab('tracking')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">📍 Keyword-Tracking</button>
+      <button class="kwTab" data-kwtab="cleaner" onclick="switchKwTab('cleaner')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🧹 Backend-Reiniger</button>
+      <button class="kwTab" data-kwtab="scribbles" onclick="switchKwTab('scribbles')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📝 Listing-Abdeckung</button>
+    </div>
+
+    <!-- TAB 1: TRACKING -->
+    <div id="kwTab-tracking">
+      <!-- Help-Box -->
+      <div class="help-box">
+        <div class="help-icon">🔑</div>
+        <div class="help-body">
+          <div class="help-title">Keyword-Tracker: deine Listing-Keywords</div>
+          <div class="help-text">
+            Pro Produkt sammelst du hier die <b>20-50 wichtigsten Keywords</b> mit Suchvolumen, Wettbewerbsstärke und Relevanz. Markiere, welche du bereits ins Listing (Titel, Bullets, Backend) integriert hast.<br>
+            <b>So fängst du an:</b> Wähle ein Produkt → klick „＋ Keyword" → kopiere Keyword-Daten aus Helium 10 Cerebro oder Magnet.<br>
+            <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Faustregel: 5-10 Hauptkeywords im Titel und Bullets, weitere 30-50 im Backend.</span>
+          </div>
+          <a class="help-link" onclick="researchOpenLesson('rp_4');return false" style="cursor:pointer">📖 Lektion: Keyword-Strategie (Schritte 7-9) →</a>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <select class="fsel" id="kwProd" onchange="renderKW()"><option value="">— Produkt wählen —</option></select>
+        <button class="btn btn-p btn-sm" onclick="addKW()">＋ Keyword</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Keyword</th><th class="nc">Suchvolumen</th><th class="nc">Wettbewerb</th><th>Relevanz</th><th>Im Listing?</th><th>Notiz</th><th>Aktion</th></tr></thead><tbody id="kwBody"></tbody></table>
+      </div>
+      <div class="empty" id="kwEmpty"><div class="eico">🔑</div><h3>Keywords tracken</h3><p>Wähle ein Produkt und füge Keywords hinzu</p></div>
+    </div>
+
+    <!-- TAB 2: BACKEND-REINIGER -->
+    <div id="kwTab-cleaner" style="display:none">
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.5">Backend Search Terms bereinigen & aufs 250-Byte-Limit optimieren — entfernt Duplikate, Füllwörter, Sonderzeichen und Wörter, die schon im Listing stehen.</div>
+      <div id="keywordcleanBody">
+        <!-- via JS gerendert -->
+      </div>
+    </div>
+
+    <!-- TAB 3: LISTING-ABDECKUNG (Scribbles) -->
+    <div id="kwTab-scribbles" style="display:none">
+      <div class="help-box gold"><div class="help-icon">📝</div><div class="help-body">
+        <div class="help-title">Listing-Keyword-Abdeckung (Scribbles)</div>
+        <div class="help-text">Trag deine Ziel-Keywords ein und schreib (oder füge ein) Titel, Bullets &amp; Beschreibung. Es wird markiert, welche Keywords schon abgedeckt sind, plus ein Abdeckungs-Score.</div>
+      </div></div>
+      <div class="detail-row" style="align-items:start">
+        <div class="card">
+          <h3>🎯 Keywords</h3>
+          <div class="fi"><label>Ziel-Keywords (eins pro Zeile)</label><textarea id="scKw" rows="12" placeholder="seifenspender edelstahl&#10;seifenspender wand&#10;nachfüllbar" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+        </div>
+        <div class="card">
+          <h3>✍️ Dein Listing</h3>
+          <div class="fi"><label>Titel</label><textarea id="scTitle" rows="2" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+          <div class="fi" style="margin-top:8px"><label>Bullet Points</label><textarea id="scBullets" rows="4" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+          <div class="fi" style="margin-top:8px"><label>Beschreibung</label><textarea id="scDesc" rows="4" oninput="scribblesRun()" style="width:100%;font-family:inherit;font-size:13px;resize:vertical"></textarea></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>📊 Abdeckung</h3><div id="scOut" style="font-size:12px;color:var(--tx2)">Trag Keywords und Listing-Text ein …</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: SOURCING-VERGLEICH                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-sourcing">
+  <div class="page-header"><h1><span class="hico">🏭</span>Sourcing-Vergleich<span class="wika-help" data-tooltip="Vergleiche Angebote verschiedener Lieferanten pro Produkt: MOQ, Stückpreis, Versandkosten, Zertifikate, Reaktionszeit.&#10;&#10;Profi-Tipp: Hole immer mindestens 3 Angebote ein. Der billigste Preis ist selten der beste — Qualität, Anpassbarkeit und Verlässlichkeit zählen mehr.">ⓘ</span></h1></div>
+  <div class="page-body">
+
+    <!-- Help-Box -->
+    <div class="help-box">
+      <div class="help-icon">🏭</div>
+      <div class="help-body">
+        <div class="help-title">Sourcing: 3+ Lieferanten vergleichen, bevor du kaufst</div>
+        <div class="help-text">
+          Pro Produkt sammelst du hier <b>mindestens 3 Lieferanten</b> mit ihren Konditionen: Stückpreis, MOQ, Lieferzeit, Musterkosten, Zertifikate. Die Score-Spalte hilft dir, sie objektiv zu vergleichen.<br>
+          <b>So fängst du an:</b> Schreib die Standard-Anfrage (in der Prompt-Bibliothek!) an 5-10 Lieferanten auf Alibaba/Europages → trage Antworten hier ein → entscheide für die besten 2-3 zur Muster-Bestellung.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Niemals beim ersten Lieferanten bestellen, der antwortet – Preise variieren oft 30-50% zwischen Anbietern.</span>
+        </div>
+        <a class="help-link" onclick="researchOpenLesson('rp_5');return false" style="cursor:pointer">📖 Lektion: Lieferanten recherchieren (Schritt 14) →</a>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <select class="fsel" id="srcProd" onchange="renderSrc()"><option value="">— Produkt wählen —</option></select>
+      <button class="btn btn-p btn-sm" onclick="addSrc()">＋ Lieferant</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>Lieferant</th><th>Plattform</th><th class="nc">Stückpreis €</th><th class="nc">MOQ</th><th class="nc">Lieferzeit (Tage)</th><th class="nc">Musterkosten €</th><th class="nc">Score</th><th>Zertifikate</th><th>Notiz</th><th>Aktion</th></tr></thead><tbody id="srcBody"></tbody></table>
+    </div>
+    <div class="empty" id="srcEmpty"><div class="eico">🏭</div><h3>Lieferanten vergleichen</h3><p>Wähle ein Produkt und füge Lieferanten hinzu</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: LAGERBESTAND                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-lager">
+  <div class="page-header"><h1><span class="hico">📦</span>Lagerbestand & Nachbestellung<span class="wika-help" data-tooltip="Verwalte Lagerbestände pro Produkt, plane Nachbestellungen rechtzeitig.&#10;&#10;Faustregel: Produktionszeit + Versand + Sicherheitspuffer = mindestens 60-90 Tage.&#10;&#10;Achtung: Out-of-Stock killt deine Amazon-Ranking-Position. Plane konservativ.">ⓘ</span></h1></div>
+  <div class="page-body" style="max-width:880px">
+
+    <!-- Help-Box -->
+    <div class="help-box">
+      <div class="help-icon">📦</div>
+      <div class="help-body">
+        <div class="help-title">Lagerbestand: nicht zu viel, nicht zu wenig</div>
+        <div class="help-text">
+          Berechnet, <b>wann du nachbestellen musst</b> und wie groß die Nachbestellung sein sollte. Berücksichtigt deine Verkaufsgeschwindigkeit, die Lieferzeit (typisch 30-45 Tage aus China) und einen Sicherheitspuffer.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Out-of-Stock kostet dich nicht nur Umsatz, sondern auch dein <b>Ranking</b> – einmal aus den Top 100 gerutscht, dauert das Wochen, wieder hochzukommen.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card"><h3>📦 Bestandsdaten</h3>
+      <div class="fg">
+        <div class="fi"><label>Aktueller Bestand (Stk)</label><input type="number" id="lBest" oninput="lCalc()"></div>
+        <div class="fi"><label>Verkäufe / Tag</label><input type="number" step=".1" id="lVPT" oninput="lCalc()"></div>
+        <div class="fi"><label>Lieferzeit (Tage)</label><input type="number" id="lLZ" value="35" oninput="lCalc()"></div>
+        <div class="fi"><label>Sicherheitspuffer (Tage)</label><input type="number" id="lPuff" value="14" oninput="lCalc()"></div>
+        <div class="fi"><label>Nachbestellmenge</label><input type="number" id="lNBM" value="500" oninput="lCalc()"></div>
+        <div class="fi"><label>Stückpreis (EK) €</label><input type="number" step=".01" id="lEK" oninput="lCalc()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📊 Ergebnis</h3>
+      <div class="fg4">
+        <div class="ci"><span class="cl">Reichweite (Tage)</span><span class="cv" style="color:var(--bl)" id="lReich">—</span></div>
+        <div class="ci"><span class="cl">Nachbestellen am</span><span class="cv" style="color:var(--ac)" id="lDate">—</span></div>
+        <div class="ci"><span class="cl">Reorder-Point (Stk)</span><span class="cv" style="color:var(--or)" id="lROP">—</span></div>
+        <div class="ci"><span class="cl">Investment</span><span class="cv" style="color:var(--pu)" id="lInv">—</span></div>
+      </div>
+      <div class="meter" style="margin-top:16px"><div class="meter-fill" id="lMeter" style="width:0"></div></div>
+      <div class="meter-labels"><span>⚠️ Kritisch</span><span>OK</span><span>✅ Voll</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: LAUNCH-PLANER                                            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-launch">
+  <div class="page-header"><h1><span class="hico">🚀</span>Launch-Planer<span class="wika-help" data-tooltip="Plane den Launch eines neuen Produkts: Phasen (Pre-Launch, Soft-Launch, Push), Aufgaben, Termine.&#10;&#10;Typische Launch-Dauer: 30-90 Tage. Beinhaltet: Listing optimieren, PPC starten, erste Reviews sammeln, Ranking aufbauen.&#10;&#10;Methodik: Schritt 20 im Produktrecherche-Workflow.">ⓘ</span></h1></div>
+  <div class="page-body">
+
+    <!-- Help-Box -->
+    <div class="help-box green">
+      <div class="help-icon">🚀</div>
+      <div class="help-body">
+        <div class="help-title">Launch-Planer: die kritischen ersten 30-90 Tage</div>
+        <div class="help-text">
+          Hier verwaltest du <b>alle Launch-Aufgaben</b> pro Produkt: Listing optimieren, PPC-Kampagnen anlegen, Coupons setzen, Bewertungs-Strategie. Nutze die Vorlage „📑 Vorlage laden" für einen kompletten 30-Tage-Plan.<br>
+          <b>So fängst du an:</b> Wähle ein Produkt → klick „📑 Vorlage laden" für eine Standard-Checkliste → passe sie an deine Situation an.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Die ersten 30 Tage entscheiden über die Honeymoon-Phase – verliere keinen Tag mit halbfertigen Listings.</span>
+        </div>
+        <a class="help-link" onclick="researchOpenLesson('rp_6');return false" style="cursor:pointer">📖 Lektion: Launch-Plan (Schritt 20) →</a>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <select class="fsel" id="laProd" onchange="renderLaunch()"><option value="">— Produkt wählen —</option></select>
+      <button class="btn btn-p btn-sm" onclick="addLaunchItem()">＋ Aufgabe</button>
+      <button class="btn btn-sm" onclick="loadLaunchTemplate()">📑 Vorlage laden</button>
+    </div>
+    <div id="launchProgress"></div>
+    <div id="launchList"></div>
+    <div class="empty" id="launchEmpty"><div class="eico">🚀</div><h3>Launch planen</h3><p>Wähle ein Produkt und erstelle deine Launch-Checkliste</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: COACHING - LERNZENTRUM mit 3-Ebenen-Navigation            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-coaching">
+  <div class="page-header"><h1><span class="hico">🎓</span>Lernzentrum <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="coachingBreadcrumb">Coaching für Amazon FBA-Seller</span></h1></div>
+  <div class="page-body">
+
+    <!-- ═════ 2-SPALTEN-LAYOUT: Themen-Sidebar links + Inhalt rechts ═════ -->
+    <div style="display:flex;gap:18px;align-items:flex-start">
+
+      <!-- THEMEN-SIDEBAR -->
+      <div id="coachSidebar" style="width:260px;flex-shrink:0;background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:10px;position:sticky;top:16px;max-height:calc(100vh - 40px);overflow-y:auto">
+        <!-- populated by coachBuildSidebar() -->
+      </div>
+
+      <!-- INHALT RECHTS -->
+      <div id="coachMain" style="flex:1;min-width:0">
+
+    <!-- ═════ SEKUNDÄRE NAVIGATION: Lektionen im Modul (nur sichtbar wenn Modul/Lektion offen) ═════ -->
+    <div id="coachingLessonNav" style="display:none;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:18px;align-items:center;gap:8px;flex-wrap:wrap"></div>
+
+    <!-- Spacer when no lesson nav active -->
+    <div id="coachingNavSpacer" style="height:18px"></div>
+
+    <!-- ═════ VIEW: LERNZENTRUM (HOME) ═════ -->
+    <div id="coachView_dashboard">
+
+      <!-- Hero mit Stats -->
+      <div style="background:linear-gradient(135deg,#1a2233 0%,#0f1729 100%);border-radius:16px;padding:26px 30px;margin-bottom:18px;color:#fff;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(217,119,6,.25),transparent 70%);pointer-events:none"></div>
+        <div style="position:relative;z-index:1">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:6px">Willkommen im Lernzentrum</div>
+          <div style="font-size:28px;font-weight:800;font-family:'Playfair Display',serif;margin-bottom:8px;line-height:1.2" id="coachWelcomeText">Werde zum Amazon-FBA-Profi 🚀</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.75);margin-bottom:18px;max-width:520px" id="coachWelcomeSubtext">Strukturierte Module von Helium 10 bis PPC-Optimierung. Schritt für Schritt – mit Videos, Beispielen und praktischen Übungen.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-p" id="coachContinueBtn" onclick="coachContinueLearning()" style="background:linear-gradient(135deg,#d97706,#b45309)">▶️ Lernen fortsetzen</button>
+            <button class="btn" onclick="coachJumpToFirstModule()" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff">📚 Erstes Modul starten</button>
+          </div>
+        </div>
+        <div style="position:relative;z-index:1;text-align:center">
+          <div style="font-size:48px;font-weight:800;color:#d97706;font-family:'Playfair Display',serif;line-height:1" id="coachOverallPct">0%</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-top:4px">Gesamt-Fortschritt</div>
+          <div style="margin-top:10px;font-size:13px;color:rgba(255,255,255,.85);font-weight:600" id="coachOverallText">0 / 0 Lektionen</div>
+        </div>
+      </div>
+
+      <!-- Quick-Stats Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:22px" id="coachStatsGrid"></div>
+
+      <!-- "Continue where you left off" Card -->
+      <div id="coachContinueCard"></div>
+
+      <!-- Themen-Übersicht -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;margin-top:30px">
+        <h2 style="font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--tx);font-weight:800;margin:0;font-family:'Playfair Display',serif">📚 Alle Themen</h2>
+        <span style="font-size:13px;color:var(--tx3)">Klick auf ein Thema, um die Lektionen zu sehen</span>
+      </div>
+      <div id="coachDashboardModules"></div>
+    </div>
+
+    <!-- ═════ VIEW: SINGLE MODULE (jedes Modul auf eigener Seite) ═════ -->
+    <div id="coachView_module" style="display:none">
+      <div id="coachModuleContent"></div>
+    </div>
+
+    <!-- ═════ VIEW: CATEGORY (Lernbereich-Übersicht) ═════ -->
+    <div id="coachView_category" style="display:none">
+      <div id="coachCategoryContent"></div>
+    </div>
+
+    <!-- ═════ VIEW: BOOKMARKS ═════ -->
+    <div id="coachView_bookmarks" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <div style="font-size:36px">⭐</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif">Lesezeichen</div>
+          <div style="font-size:13px;color:var(--tx2)" id="bookmarkSubtitle">Lektionen, die du dir gemerkt hast</div>
+        </div>
+      </div>
+      <div id="coachBookmarksList"></div>
+    </div>
+
+    <!-- ═════ VIEW: COMPLETED ═════ -->
+    <div id="coachView_completed" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <div style="font-size:36px">🏆</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif">Abgeschlossene Lektionen</div>
+          <div style="font-size:13px;color:var(--tx2)" id="completedSubtitle">Was du bereits gemeistert hast</div>
+        </div>
+      </div>
+      <div id="coachCompletedList"></div>
+    </div>
+
+    <!-- ═════ VIEW: SEARCH RESULTS ═════ -->
+    <div id="coachView_search" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <div style="font-size:36px">🔍</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif">Suchergebnisse</div>
+          <div style="font-size:13px;color:var(--tx2)" id="searchSubtitle">Suche nach Lektionen, Themen, Keywords</div>
+        </div>
+      </div>
+      <div id="coachSearchResults"></div>
+    </div>
+
+    <!-- ═════ VIEW: LESSON (Einzellektion) ═════ -->
+    <div id="coachView_lesson" style="display:none">
+      <div id="coachingLessonContent"></div>
+    </div>
+
+      </div><!-- /coachMain -->
+    </div><!-- /2-Spalten-Flex -->
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: HELIUM 10 IMPORT                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-helium">
+  <div class="page-header"><h1><span class="hico">📥</span>Helium 10 Import <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Black Box / Cerebro / Magnet / Xray Exporte importieren</span></h1></div>
+  <div class="page-body">
+
+    <!-- Xray-Schnell-Analyse (Phase 2: Paste → Ampel in 10 Sek.) -->
+    <div style="background:linear-gradient(135deg,var(--pud),var(--acd));border:1.5px solid var(--pu);border-radius:12px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div style="font-weight:800;color:var(--pu);font-size:15px;margin-bottom:4px">⚡ Xray-Schnell-Analyse – ohne Datei-Export</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">Xray-Tabelle auf der Amazon-Suchergebnisseite <b>kopieren</b> (inkl. Kopfzeile) und <b>einfügen</b> → SellerHub aggregiert die Top-10 zu einem Nischen-Kandidaten und zeigt <b>sofort Score + Ampel</b>.</div>
+      </div>
+      <button class="btn" onclick="xrayPasteOpen()" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700;padding:12px 22px;font-size:14px">⚡ Einfügen &amp; analysieren</button>
+    </div>
+
+    <!-- Anleitung-Banner -->
+    <div style="background:linear-gradient(135deg,var(--pud),var(--s2));border:1px solid var(--pu);border-radius:10px;padding:14px 18px;margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:18px">💡</span>
+        <b style="color:var(--pu);font-size:14px">So exportierst du Daten aus Helium 10</b>
+      </div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">
+        <b style="color:var(--tx)">Black Box (Produktrecherche):</b> Filter setzen → "Export" oben rechts → CSV<br>
+        <b style="color:var(--tx)">Cerebro/Magnet (Keywords):</b> Tabelle filtern → "Export to CSV" Button<br>
+        <b style="color:var(--tx)">Xray (Chrome-Extension):</b> Auf Amazon-Suchergebnisseite → Xray öffnen → "Export"<br>
+        <b style="color:var(--ac)">Ziel-Wahl beim Import:</b> Du entscheidest pro Datei ob die Treffer in den Ideen-Pool oder direkt in die Produktliste sollen.
+      </div>
+    </div>
+
+    <!-- Drop-Zone -->
+    <div id="heliumDropZone" style="border:2px dashed var(--bd2);border-radius:14px;padding:48px 24px;text-align:center;background:var(--s1);cursor:pointer;transition:all .2s" onclick="document.getElementById('heliumFileInput').click()">
+      <div style="font-size:48px;margin-bottom:12px;opacity:.7">📥</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--ac)">Helium 10 CSV hier ablegen oder klicken</div>
+      <div style="font-size:12px;color:var(--tx2)">Auto-Erkennung von <b>Black Box</b>, <b>Cerebro</b>, <b>Magnet</b> und <b>Xray</b> Exporten<br>Formate: <b>.csv</b>, <b>.tsv</b>, <b>.txt</b></div>
+      <input type="file" id="heliumFileInput" accept=".csv,.tsv,.txt" style="display:none" onchange="handleHeliumFile(event)">
+    </div>
+
+    <!-- Format-Info Cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:24px">
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--pud);color:var(--pu);display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>
+          <b style="color:var(--pu)">Black Box</b>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);line-height:1.6">ASINs mit BSR, Sales, Revenue, Reviews, Rating → Empfehlung: Ideen-Pool</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--cyd);color:var(--cy);display:flex;align-items:center;justify-content:center;font-size:18px">🔍</div>
+          <b style="color:var(--cy)">Xray</b>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);line-height:1.6">Live-Marktdaten von einer Amazon-Suchergebnis-Seite → Empfehlung: Ideen-Pool</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--bld);color:var(--bl);display:flex;align-items:center;justify-content:center;font-size:18px">🔑</div>
+          <b style="color:var(--bl)">Cerebro/Magnet</b>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);line-height:1.6">Keywords mit Suchvolumen, CPR, Magnet IQ → wandert in Keyword-Tracker</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══ HELIUM IMPORT PREVIEW MODAL ═══ -->
+<div class="mo" id="heliumImportModal" onclick="if(event.target===this)closeHeliumModal()">
+  <div class="modal" style="width:1000px;max-height:85vh">
+    <div class="mh"><h2>📥 Helium 10 Daten importieren</h2><button class="mc" onclick="closeHeliumModal()">✕</button></div>
+    <div class="mb">
+
+      <div id="heliumImportSummary" style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;margin-bottom:14px">
+        <!-- populated -->
+      </div>
+
+      <div id="heliumDestWrap" style="margin-bottom:14px">
+        <!-- destination selector -->
+      </div>
+
+      <div id="heliumPreviewContainer" style="max-height:380px;overflow:auto;border:1px solid var(--bd);border-radius:8px">
+        <!-- preview table -->
+      </div>
+
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeHeliumModal()">Abbrechen</button>
+      <button class="btn btn-p" id="heliumImportBtn" onclick="confirmHeliumImport()" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700">📥 Importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GLOBAL SEARCH MODAL ═══ -->
+<div class="mo" id="globalSearchModal" onclick="if(event.target===this)closeGlobalSearch()" style="align-items:flex-start;padding-top:80px">
+  <div class="modal" style="width:680px;max-width:90vw;animation:su .2s">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;background:var(--s1);border-radius:14px 14px 0 0">
+      <span style="font-size:22px">🔍</span>
+      <input id="globalSearchInput" type="text" placeholder="Suche Produkte, Ideen, Keywords, Lektionen, Funktionen…" style="flex:1;border:none;background:transparent;font-size:18px;font-family:'DM Sans',sans-serif;outline:none;color:var(--tx);padding:6px 0" oninput="runGlobalSearch(this.value)" onkeydown="handleSearchKey(event)">
+      <kbd style="font-family:'DM Sans',sans-serif;font-size:10px;background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:3px 7px;color:var(--tx3);font-weight:600">ESC</kbd>
+    </div>
+    <div id="globalSearchResults" style="max-height:60vh;overflow-y:auto;padding:8px 0">
+      <div style="padding:30px;text-align:center;color:var(--tx3);font-size:13px">
+        <div style="font-size:32px;margin-bottom:10px">⌨️</div>
+        Tippe um zu suchen — Ergebnisse aus allen Bereichen<br>
+        <span style="font-size:11px;color:var(--tx3);margin-top:8px;display:block">↑↓ navigieren · ⏎ öffnen · ESC schließen</span>
+      </div>
+    </div>
+    <div style="padding:10px 18px;border-top:1px solid var(--bd);background:var(--s2);border-radius:0 0 14px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--tx3)">
+      <span><kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">↑</kbd> <kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">↓</kbd> navigieren</span>
+      <span><kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">⏎</kbd> öffnen</span>
+      <span>Ergebnisse: <span id="globalSearchCount" style="color:var(--ac);font-weight:700">0</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: PROFIT DASHBOARD                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page active" id="p-dashboard">
+  <div class="page-header" style="background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px solid var(--ac);padding-bottom:16px">
+    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Willkommen zurück bei SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/index.html">v29.6</span></h1>
+  </div>
+  <div class="page-body">
+
+    <!-- ─── LICENSE COUNTDOWN PANEL ─── -->
+    <div id="dashLicensePanel" style="display:none;margin-bottom:22px"></div>
+
+    <!-- ─── FOKUS: PRODUKTRECHERCHE-FAHRPLAN (geführt) ─── -->
+    <div id="dashRoadmap" style="margin-bottom:18px"></div>
+    <div id="dashBackupHint"></div>
+
+    <!-- ─── DEINE PRODUKTSUCHEN (mehrere parallel, je 5 Schritte) ─── -->
+    <div id="dashSearches" style="margin-bottom:24px"></div>
+
+    <!-- ─── HERO STATS (Recherche-Funnel) ─── -->
+    <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px">
+      <!-- populated by renderDash() -->
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ─── RECHERCHE-PAYOFF: Top-Kandidaten + Aktivität ─── -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:18px" id="dashBottomGrid">
+
+      <!-- Top-Kandidaten nach Score -->
+      <div class="card" style="background:var(--s1);border:1px solid var(--bd2)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <h3 style="margin:0">🏆 Top-Kandidaten nach Score</h3>
+          <button class="btn btn-sm" onclick="go('research');researchShowTab('score')" style="font-size:11px">Scorecard →</button>
+        </div>
+        <div id="dashTopCands"></div>
+      </div>
+
+      <!-- Aktivitäts-Feed -->
+      <div class="card" style="background:var(--s1);border:1px solid var(--bd2)">
+        <h3>🕐 Letzte Aktivität</h3>
+        <div id="dashActivity" style="display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto">
+          <!-- populated by renderDash() -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ─── WERKZEUGE & BETRIEB (kompakte Schnelllinks) ─── -->
+    <div class="card" style="background:var(--s1);border:1px solid var(--bd2);margin-bottom:18px">
+      <h3 style="margin:0 0 12px 0;font-size:14px">🛠️ Werkzeuge & Betrieb <span style="font-size:11px;color:var(--tx3);font-weight:400">— nach der GO-Entscheidung</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+        <button class="btn btn-sm" onclick="go('produkte')" style="justify-content:flex-start;font-size:12px">📋 Produktliste</button>
+        <button class="btn btn-sm" onclick="go('gebuehren')" style="justify-content:flex-start;font-size:12px">💶 Marge rechnen</button>
+        <button class="btn btn-sm" onclick="go('keywords')" style="justify-content:flex-start;font-size:12px">🔑 Keyword-Center</button>
+        <button class="btn btn-sm" onclick="go('listing')" style="justify-content:flex-start;font-size:12px">📝 Listing-Editor</button>
+        <button class="btn btn-sm" onclick="go('inhalt')" style="justify-content:flex-start;font-size:12px">✨ KI-Bildstudio</button>
+        <button class="btn btn-sm" onclick="go('launch')" style="justify-content:flex-start;font-size:12px">🚀 Launch-Planer</button>
+        <button class="btn btn-sm" onclick="go('lager')" style="justify-content:flex-start;font-size:12px">📦 Lagerbestand</button>
+        <button class="btn btn-sm" onclick="go('coaching')" style="justify-content:flex-start;font-size:12px">🎓 Lernzentrum</button>
+      </div>
+    </div>
+
+    <!-- ─── COLLAPSIBLE: WEITERE STATISTIKEN ─── -->
+    <details id="dashMoreStats" style="background:var(--s1);border:1px solid var(--bd2);border-radius:10px;padding:0;margin-bottom:18px">
+      <summary style="cursor:pointer;padding:14px 18px;font-weight:700;color:var(--tx2);font-size:13px;list-style:none;display:flex;align-items:center;gap:8px;user-select:none">
+        <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px">📈 Weitere Statistiken</span>
+        <span style="font-size:10px;color:var(--tx3);font-weight:500">Produkt-Status, Ideen-Funnel</span>
+        <span style="margin-left:auto;color:var(--tx3);font-size:14px" id="dashStatsArrow">▾</span>
+      </summary>
+      <div style="padding:0 18px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div style="border-top:1px solid var(--bd);padding-top:14px">
+          <h3 style="margin:0 0 12px 0;font-size:14px">📊 Produkt-Status-Verteilung</h3>
+          <div id="dashStatusBars" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+        <div style="border-top:1px solid var(--bd);padding-top:14px">
+          <h3 style="margin:0 0 12px 0;font-size:14px">💡 Ideen-Funnel</h3>
+          <div id="dashIdeenFunnel" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: AUFGABEN-BOARD (Kanban / Projektmanagement)              -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-tasks">
+  <div class="page-header"><h1><span class="hico">🗂️</span>Aufgaben-Board<span class="wika-help" data-tooltip="Dein eigenes Kanban-Board für alle Aufgaben außerhalb der FBA-Workflows.&#10;&#10;Boards → Listen → Karten. Ziehe Karten per Drag & Drop zwischen den Listen.&#10;&#10;Mit Prioritäten, Fälligkeiten, Checklisten, Kommentaren und Aktivitätsverlauf.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="tasksBreadcrumb">Projekte & To-dos im Kanban-Stil</span></h1></div>
+  <div class="page-body" id="tasksBody">
+    <!-- wird via JS gerendert -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: ADMIN - BENUTZERVERWALTUNG                                -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-admin">
+  <div class="page-header"><h1><span class="hico">🛡️</span>Benutzerverwaltung</h1><span class="meta" id="adminUserCount"></span></div>
+  <div class="page-body">
+
+    <!-- Info-Banner -->
+    <div style="background:linear-gradient(135deg,rgba(217,119,6,.10),rgba(217,119,6,.04));border:1px solid rgba(217,119,6,.3);border-left:4px solid var(--ac);border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:14px">
+      <div style="font-size:24px">🔐</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--tx);margin-bottom:2px">Sicherheits-Hinweis</div>
+        <div style="font-size:12px;color:var(--tx2)">Passwörter werden lokal gespeichert (gehasht) und sind <b id="adminPwLifetimeText">14 Tage</b> gültig. Danach muss der Benutzer beim nächsten Login ein neues Passwort setzen.</div>
+      </div>
+    </div>
+
+    <!-- Aktuelle Sitzung -->
+    <div class="card" style="margin-bottom:18px">
+      <h3>👤 Angemeldet als</h3>
+      <div id="adminCurrentSession" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn btn-p" onclick="adminOpenNewUserModal()">＋ Neuer Benutzer</button>
+      <button class="btn" onclick="adminRenderUsers()">🔄 Aktualisieren</button>
+      <div style="margin-left:auto;font-size:12px;color:var(--tx2)" id="adminStatsLine"></div>
+    </div>
+
+    <!-- Benutzer-Liste -->
+    <div class="card">
+      <h3>📋 Benutzerliste</h3>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px" id="adminUsersTable">
+          <thead>
+            <tr style="border-bottom:2px solid var(--bd);text-align:left">
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Benutzer</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Rolle</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Lizenzkey</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Lizenz gültig</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">PW</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Status</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px;text-align:right">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ADMIN: NEW/EDIT USER MODAL ═══ -->
+<div class="mo" id="adminUserModal" onclick="if(event.target===this)adminCloseUserModal()">
+  <div class="modal" style="width:480px">
+    <div class="mh"><h2 id="adminUserModalTitle">Neuer Benutzer</h2><button class="mc" onclick="adminCloseUserModal()">✕</button></div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr">
+        <div class="fi">
+          <label>Benutzername *</label>
+          <input id="adminUserName" autocomplete="off" placeholder="z.B. mitarbeiter1">
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px">Nur Buchstaben, Zahlen, Unter-/Bindestrich. Mindestens 3 Zeichen.</div>
+        </div>
+        <div class="fi">
+          <label>E-Mail-Adresse</label>
+          <input id="adminUserEmail" type="email" autocomplete="off" placeholder="benutzer@example.com">
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px">Optional, aber empfohlen — wird für Lizenz-Mails benötigt.</div>
+        </div>
+        <div class="fi">
+          <label>Rolle *</label>
+          <select id="adminUserRole" onchange="adminToggleLicenseField()">
+            <option value="user">Standard-Benutzer</option>
+            <option value="admin">Administrator</option>
+          </select>
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px">Admins können Benutzer verwalten. Standard-Benutzer sehen den Admin-Bereich nicht.</div>
+        </div>
+        <div class="fi" id="adminUserLicenseField">
+          <label>Lizenz-Gültigkeit</label>
+          <select id="adminUserLicenseDuration">
+            <option value="14">14 Tage (Standard)</option>
+            <option value="30">30 Tage</option>
+            <option value="90">90 Tage</option>
+            <option value="365">1 Jahr</option>
+            <option value="permanent">Permanent (kein Ablauf)</option>
+          </select>
+        </div>
+        <div class="fi" id="adminUserPwField">
+          <label>Passwort *</label>
+          <div style="position:relative">
+            <input type="password" id="adminUserPw" autocomplete="new-password" placeholder="min. 6 Zeichen">
+            <button type="button" onclick="wikaTogglePw('adminUserPw','adminUserPwToggle')" id="adminUserPwToggle" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;padding:4px;color:var(--tx2)">👁️</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+            <button type="button" class="btn btn-sm" onclick="adminGenPw()" style="font-size:11px">🎲 Sicher generieren</button>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer">
+              <input type="checkbox" id="adminUserMustChange" checked style="cursor:pointer"> Beim ersten Login ändern
+            </label>
+          </div>
+        </div>
+      </div>
+      <div id="adminUserError" style="display:none;background:var(--rdd);border:1px solid var(--rd);color:var(--rd);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;font-weight:600"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="adminCloseUserModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="adminSaveUser()" id="adminUserSaveBtn">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN: CHANGE PASSWORD MODAL ═══ -->
+<div class="mo" id="adminPwModal" onclick="if(event.target===this)adminClosePwModal()">
+  <div class="modal" style="width:440px">
+    <div class="mh"><h2 id="adminPwModalTitle">Passwort ändern</h2><button class="mc" onclick="adminClosePwModal()">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--tx2)">
+        Benutzer: <b id="adminPwTargetName" style="color:var(--ac)"></b>
+      </div>
+      <div class="fg" style="grid-template-columns:1fr">
+        <div class="fi">
+          <label>Neues Passwort *</label>
+          <div style="position:relative">
+            <input type="password" id="adminPwNew" autocomplete="new-password" placeholder="min. 6 Zeichen">
+            <button type="button" onclick="wikaTogglePw('adminPwNew','adminPwNewToggle')" id="adminPwNewToggle" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;padding:4px;color:var(--tx2)">👁️</button>
+          </div>
+          <button type="button" class="btn btn-sm" onclick="adminGenPwForChange()" style="font-size:11px;margin-top:8px">🎲 Sicher generieren</button>
+        </div>
+        <div class="fi">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="adminPwForceChange" checked> Benutzer muss Passwort beim nächsten Login erneut ändern
+          </label>
+        </div>
+      </div>
+      <div id="adminPwError" style="display:none;background:var(--rdd);border:1px solid var(--rd);color:var(--rd);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;font-weight:600"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="adminClosePwModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="adminSavePw()">Passwort setzen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN: LICENSE MANAGEMENT MODAL ═══ -->
+<div class="mo" id="adminLicenseModal" onclick="if(event.target===this)adminCloseLicenseModal()">
+  <div class="modal" style="width:520px">
+    <div class="mh"><h2>📅 Lizenz verwalten</h2><button class="mc" onclick="adminCloseLicenseModal()">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">Benutzer</div>
+        <div style="font-size:18px;font-weight:700;color:var(--ac)" id="adminLicTargetName"></div>
+        <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Aktueller Lizenzkey</div>
+            <div style="font-family:monospace;font-size:13px;font-weight:700;color:var(--tx)" id="adminLicCurrentKey">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Gültig bis</div>
+            <div style="font-size:13px;font-weight:700" id="adminLicCurrentExpiry">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px">⚡ Schnell-Verlängerung</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">
+          <button class="btn" onclick="adminExtendLicense('add',14)">+14 Tage</button>
+          <button class="btn" onclick="adminExtendLicense('add',30)">+30 Tage</button>
+          <button class="btn" onclick="adminExtendLicense('add',90)">+90 Tage</button>
+          <button class="btn" onclick="adminExtendLicense('add',365)">+1 Jahr</button>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:6px">Verlängert ab dem aktuellen Ablaufdatum (oder ab heute, falls bereits abgelaufen).</div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px">🆕 Neu setzen ab heute</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">
+          <button class="btn btn-p" onclick="adminExtendLicense('reset',14)">14 Tage</button>
+          <button class="btn btn-p" onclick="adminExtendLicense('reset',30)">30 Tage</button>
+          <button class="btn btn-p" onclick="adminExtendLicense('reset',90)">90 Tage</button>
+          <button class="btn btn-p" onclick="adminExtendLicense('reset','permanent')">Permanent ∞</button>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--bd);padding-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:10px">🔑 Lizenzkey neu generieren</div>
+        <button class="btn" onclick="adminRegenerateLicenseKey()" style="width:100%">🔄 Neuen Lizenzkey erstellen (alter wird ungültig)</button>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="adminCloseLicenseModal()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script src="js/admin.js"></script>
+
+<!-- ═══ IDEEN MODAL (einzelne Idee hinzufügen/bearbeiten) ═══ -->
+<div class="mo" id="ideeModal" onclick="if(event.target===this)closeIdeeModal()">
+  <div class="modal" style="width:700px">
+    <div class="mh"><h2 id="iTitle">Neue Idee</h2><button class="mc" onclick="closeIdeeModal()">✕</button></div>
+    <div class="mb">
+      <div class="fsec">Basis</div>
+      <div class="fg">
+        <div class="fi s2"><label>Produktname *</label><input id="iName" placeholder="z.B. Faltbare Reise-Wasserflasche"></div>
+        <div class="fi"><label>Kategorie</label><input id="iKat" placeholder="z.B. Outdoor"></div>
+        <div class="fi"><label>Potenzial</label><select id="iPot"><option>Hoch</option><option>Mittel</option><option>Niedrig</option></select></div>
+        <div class="fi"><label>Status</label><select id="iStatus"><option>Neu</option><option>Zu prüfen</option><option>Hohes Potenzial</option><option>Recherchiert</option><option>Verworfen</option></select></div>
+        <div class="fi"><label>Quelle</label><select id="iQuelle"><option>Claude</option><option>Perplexity</option><option>Gemini</option><option>ChatGPT</option><option>Manuell</option><option>Sonstige</option></select></div>
+      </div>
+      <div class="fsec">Markt & Preis</div>
+      <div class="fg">
+        <div class="fi"><label>Geschätzter VK € </label><input type="number" step=".01" id="iVK"></div>
+        <div class="fi s2"><label>Marktgröße</label><input id="iMarkt" placeholder="z.B. 5.000 Suchanfragen/Monat, stark wachsend"></div>
+        <div class="fi full"><label>Zielgruppe</label><input id="iZielg" placeholder="z.B. Outdoor-Enthusiasten 25-45, Minimalisten, Reisende"></div>
+      </div>
+      <div class="fsec">Strategie</div>
+      <div class="fi full" style="margin-bottom:10px"><label>Differenzierungsideen</label><textarea id="iDiff" placeholder="Wie können wir uns von der Konkurrenz abheben?"></textarea></div>
+      <div class="fi full" style="margin-bottom:10px"><label>Warum interessant?</label><textarea id="iWarum" placeholder="Was macht diese Idee besonders vielversprechend?"></textarea></div>
+      <div class="fi full" style="margin-bottom:10px"><label>Risiken</label><textarea id="iRisiken" placeholder="Was könnte problematisch werden? (Konkurrenz, Regulierung, Patente…)"></textarea></div>
+
+      <div class="fsec">🖼️ Visualisierung</div>
+      <div class="fg2">
+        <div class="fi"><label>Bild-URL (z.B. von Amazon)</label><input id="iBild" placeholder="https://m.media-amazon.com/images/..."></div>
+        <div class="fi"><label>Amazon-Link</label><input id="iAmazon" placeholder="https://www.amazon.de/..."></div>
+      </div>
+      <div class="fi full" style="margin-top:10px"><label>📚 Quellen (z.B. von Perplexity)</label><textarea id="iQuellen" placeholder="Eine URL pro Zeile – wird automatisch beim Perplexity-Import gespeichert"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeIdeeModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="saveIdee()" id="iSaveBtn">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ KI IMPORT MODAL ═══ -->
+<div class="mo" id="importModal" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal" style="width:780px">
+    <div class="mh"><h2>🤖 KI-Import</h2><button class="mc" onclick="closeImportModal()">✕</button></div>
+    <div class="mb">
+      <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--bd)">
+        <button class="btn btn-sm" id="tabJSON" onclick="switchImpTab('json')" style="border-radius:8px 8px 0 0;border-bottom:2px solid var(--ac);color:var(--ac)">📦 JSON (strukturiert)</button>
+        <button class="btn btn-sm" id="tabText" onclick="switchImpTab('text')" style="border-radius:8px 8px 0 0;border-bottom:2px solid transparent">📝 Freitext (flexibel)</button>
+      </div>
+
+      <div id="impJSONTab">
+        <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
+          <b style="color:var(--ac)">So geht's:</b> Klick auf <b>📋 Prompt-Vorlage</b>, kopiere den Prompt in Claude/Gemini, und füge die JSON-Antwort hier ein. SellerHub liest alle Ideen automatisch.
+        </div>
+        <div class="fi full"><label>JSON von KI einfügen</label>
+          <textarea id="impJSON" style="min-height:260px;font-family:monospace;font-size:11px" placeholder='[&#10;  {&#10;    "name": "Faltbare Wasserflasche",&#10;    "kategorie": "Outdoor",&#10;    "potenzial": "Hoch",&#10;    "vkPreis": 19.90,&#10;    "marktgroesse": "5.000 Suchanfragen/Monat",&#10;    "zielgruppe": "Outdoor-Fans 25-45",&#10;    "differenzierung": "Silikon mit Karabiner",&#10;    "warum": "Wachsendes Reisesegment",&#10;    "risiken": "Viel Konkurrenz"&#10;  }&#10;]'></textarea>
+        </div>
+      </div>
+
+      <div id="impTextTab" style="display:none">
+        <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
+          <b style="color:var(--ac)">So geht's:</b> Kopiere einfach die Antwort von Claude/Gemini rein – egal ob Listen, Tabellen oder Fließtext. SellerHub versucht die Produktideen automatisch zu erkennen.
+        </div>
+        <div class="fi full"><label>KI-Antwort einfügen</label>
+          <textarea id="impText" style="min-height:260px;font-size:12px" placeholder="1. Faltbare Wasserflasche – Outdoor-Segment, ca. 20€, Zielgruppe Reisende...&#10;2. Magnetische Messerhalter – Küchenbereich, hohe Marge..."></textarea>
+        </div>
+      </div>
+
+      <div class="fg" style="margin-top:14px">
+        <div class="fi"><label>Quelle</label>
+          <select id="impQuelle"><option>Claude</option><option>Perplexity</option><option>Gemini</option><option>ChatGPT</option><option>Sonstige</option></select>
+        </div>
+        <div class="fi s2"><label>Standard-Status für importierte Ideen</label>
+          <select id="impStatus"><option>Neu</option><option>Zu prüfen</option><option>Hohes Potenzial</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeImportModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="runImport()">📥 Importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROMPT MODAL ═══ -->
+<div class="mo" id="promptModal" onclick="if(event.target===this)closePromptModal()">
+  <div class="modal" style="width:780px">
+    <div class="mh"><h2>📋 KI-Prompt Generator</h2><button class="mc" onclick="closePromptModal()">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6">
+        Stelle die Parameter unten ein und klicke auf <b>🔄 Prompt generieren</b>. Der Prompt weist Claude/Gemini an, Produktideen im Format zu liefern, das SellerHub direkt einlesen kann.
+      </div>
+
+      <div class="fsec">🎯 Basis-Parameter</div>
+      <div class="fg">
+        <div class="fi s2"><label>Nische / Bereich *</label><input id="pNische" placeholder="z.B. Outdoor Camping, Küchen-Gadgets, Büro-Zubehör" value="Haushalt" oninput="generatePrompt()"></div>
+        <div class="fi"><label>Anzahl Ideen</label><input type="number" id="pAnzahl" value="10" min="3" max="30" oninput="generatePrompt()"></div>
+        <div class="fi"><label>Preisbereich €</label><input id="pPreis" value="15-50" placeholder="z.B. 15-50" oninput="generatePrompt()"></div>
+        <div class="fi"><label>Marktplatz</label><select id="pMarkt" onchange="generatePrompt()"><option>Amazon.de</option><option>Amazon.com</option><option>Amazon.co.uk</option><option>Amazon.fr</option><option>Amazon.it</option><option>Amazon.es</option></select></div>
+        <div class="fi"><label>Sprache</label><select id="pSprache" onchange="generatePrompt()"><option value="de">Deutsch</option><option value="en">Englisch</option></select></div>
+      </div>
+
+      <div class="fsec">🎨 Produkt-Charakter</div>
+      <div class="fg">
+        <div class="fi"><label>Produkttyp</label><select id="pTyp" onchange="generatePrompt()">
+          <option value="any">Beliebig</option>
+          <option value="physisch-klein">Klein & leicht (&lt; 500g)</option>
+          <option value="physisch-mittel">Mittelgroß (0,5–2 kg)</option>
+          <option value="set">Set / Bundle</option>
+          <option value="verbrauchsgut">Verbrauchsgut / Refill</option>
+          <option value="zubehoer">Zubehör zu bestehendem Produkt</option>
+        </select></div>
+        <div class="fi"><label>Zielgruppe</label><select id="pZG" onchange="generatePrompt()">
+          <option value="any">Beliebig</option>
+          <option value="young">Jung (18–30)</option>
+          <option value="professional">Berufstätige (25–45)</option>
+          <option value="family">Familien mit Kindern</option>
+          <option value="senior">Senioren (60+)</option>
+          <option value="enthusiast">Hobby-Enthusiasten</option>
+          <option value="b2b">B2B / Gewerblich</option>
+        </select></div>
+        <div class="fi"><label>Marktstrategie</label><select id="pStrategie" onchange="generatePrompt()">
+          <option value="niche">Nischenprodukt (wenig Wettbewerb)</option>
+          <option value="trending">Trending / Wachsend</option>
+          <option value="evergreen">Evergreen (zeitlos)</option>
+          <option value="problem-solver">Problemlöser</option>
+          <option value="improvement">Verbesserung existierender Produkte</option>
+        </select></div>
+      </div>
+
+      <div class="fsec">🛡️ Qualitätskriterien</div>
+      <div class="fg">
+        <div class="fi"><label>Min. Marge</label><select id="pMarge" onchange="generatePrompt()"><option value="30">≥ 30%</option><option value="40">≥ 40%</option><option value="50">≥ 50%</option><option value="20">≥ 20%</option></select></div>
+        <div class="fi"><label>Saisonalität</label><select id="pSaison" onchange="generatePrompt()">
+          <option value="ganzjaehrig">Ganzjährig (kein Saisonprodukt)</option>
+          <option value="any">Egal</option>
+          <option value="saison-ok">Saisonprodukte OK</option>
+        </select></div>
+        <div class="fi"><label>Markenrecht</label><select id="pMarke" onchange="generatePrompt()">
+          <option value="safe">Keine Markenkonflikte</option>
+          <option value="any">Egal</option>
+        </select></div>
+      </div>
+
+      <div class="fi full" style="margin-top:10px"><label>Zusätzliche Kriterien (optional, freier Text)</label>
+        <input id="pKrit" placeholder="z.B. umweltfreundlich, in Deutschland produzierbar, Patent-frei, für Linkshänder..." oninput="generatePrompt()">
+      </div>
+
+      <div style="margin:16px 0 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-p" onclick="generatePrompt()">🔄 Jetzt neu generieren</button>
+        <button class="btn btn-sm" onclick="resetPrompt()">↺ Zurücksetzen</button>
+        <span style="font-size:11px;color:var(--tx2);margin-left:auto">✨ Prompt aktualisiert sich automatisch</span>
+      </div>
+
+      <div class="fi full"><label>Generierter Prompt <span id="pCharCount" style="float:right;color:var(--tx2);font-size:10px"></span></label>
+        <textarea id="pOut" style="min-height:240px;font-size:11px;font-family:'SF Mono',Monaco,Consolas,monospace;line-height:1.5" readonly placeholder="Klicke auf „🔄 Prompt generieren" um den Prompt zu erstellen..."></textarea>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="closePromptModal()">Schließen</button>
+        <button class="btn" onclick="copyPrompt()" id="copyBtn">📋 Nur kopieren</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="openPerplexityWithPrompt()" style="background:linear-gradient(135deg,#20808d,#176874);border:none;color:#fff">🔍 Mit Perplexity öffnen</button>
+        <button class="btn btn-p" onclick="openClaudeWithPrompt()" style="background:linear-gradient(135deg,#d97706,#b45309);border:none">🚀 Mit Claude öffnen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CLAUDE RESPONSE MODAL (after user returns from Claude) ═══ -->
+<div class="mo" id="claudeModal" onclick="if(event.target===this)closeClaudeModal()">
+  <div class="modal" style="width:720px">
+    <div class="mh"><h2>✨ Antwort von Claude einfügen</h2><button class="mc" onclick="closeClaudeModal()">✕</button></div>
+    <div class="mb">
+      <div style="background:linear-gradient(135deg,var(--s3),var(--s2));border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12px;line-height:1.65;border:1px solid var(--bd)">
+        <div style="color:var(--ac);font-weight:700;margin-bottom:6px">📝 So geht's:</div>
+        <div>1. In Claude die komplette Antwort markieren (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘A</kbd> + <kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘C</kbd>)</div>
+        <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – SellerHub findet das JSON automatisch</div>
+        <div>3. Auf <b>📥 Ideen importieren</b> klicken</div>
+      </div>
+
+      <div class="fi full"><label>Claude-Antwort hier einfügen</label>
+        <textarea id="claudeResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Claude ein – egal ob mit Einleitungstext, Markdown-Codeblock oder nur JSON. SellerHub extrahiert den JSON-Teil automatisch..." oninput="previewParse()"></textarea>
+      </div>
+
+      <div id="parsePreview" style="margin-top:12px;padding:12px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);font-size:12px;display:none">
+        <div id="parseResult"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeClaudeModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="importClaudeResponse()" id="claudeImportBtn" disabled style="opacity:.5">📥 Ideen importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PERPLEXITY RESPONSE MODAL ═══ -->
+<div class="mo" id="perplexityModal" onclick="if(event.target===this)closePerplexityModal()">
+  <div class="modal" style="width:760px">
+    <div class="mh"><h2>🔍 Antwort von Perplexity einfügen</h2><button class="mc" onclick="closePerplexityModal()">✕</button></div>
+    <div class="mb">
+      <div style="background:linear-gradient(135deg,rgba(32,128,141,.15),var(--s2));border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12px;line-height:1.65;border:1px solid #20808d">
+        <div style="color:#40c9d8;font-weight:700;margin-bottom:6px">📝 So geht's:</div>
+        <div>1. In Perplexity die Antwort komplett markieren (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘A</kbd> + <kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘C</kbd>)</div>
+        <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – inklusive der Quellen-Zitate</div>
+        <div>3. SellerHub extrahiert die Produktideen automatisch und speichert die Quellen mit</div>
+      </div>
+
+      <div class="fi full"><label>Perplexity-Antwort hier einfügen</label>
+        <textarea id="perplexityResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Perplexity ein – inklusive der Quellenangaben am Ende. SellerHub erkennt das JSON automatisch und speichert die Quellen-URLs als Referenz." oninput="previewParsePerplexity()"></textarea>
+      </div>
+
+      <div id="parsePreviewPerp" style="margin-top:12px;padding:12px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);font-size:12px;display:none">
+        <div id="parseResultPerp"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closePerplexityModal()">Abbrechen</button>
+      <button class="btn btn-p" onclick="importPerplexityResponse()" id="perplexityImportBtn" disabled style="opacity:.5;background:linear-gradient(135deg,#20808d,#176874);border:none">📥 Ideen importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRODUCT MODAL ═══ -->
+<div class="mo" id="prodModal" onclick="if(event.target===this)closePM()">
+  <div class="modal">
+    <div class="mh"><h2 id="pmTitle">Neues Produkt</h2><button class="mc" onclick="closePM()">✕</button></div>
+    <div class="mb">
+      <div class="fsec">Produkt-Info</div>
+      <div class="fg">
+        <div class="fi"><label>Produktname *</label><input id="fNa"></div>
+        <div class="fi"><label>Kategorie</label><input id="fKa" list="kl"><datalist id="kl"></datalist></div>
+        <div class="fi"><label>Status</label><select id="fSt"><option>Idee</option><option>Recherche</option><option>Analyse</option><option>Bestellt</option><option>Abgelehnt</option></select></div>
+        <div class="fi"><label>ASIN</label><input id="fAs"></div>
+        <div class="fi"><label>Bild-URL (Hauptbild)</label><input id="fImg" placeholder="https://m.media-amazon.com/…"></div>
+        <div class="fi"><label>Quelle</label><input id="fQu"></div>
+        <div class="fi"><label>Bewertung</label><select id="fBw"><option value="0">—</option><option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5">⭐⭐⭐⭐⭐</option></select></div>
+      </div>
+      <div class="fsec">💰 Kalkulation</div>
+      <div class="fg">
+        <div class="fi"><label>EK €</label><input type="number" step=".01" id="fEK" oninput="fCalc()"></div>
+        <div class="fi"><label>VK €</label><input type="number" step=".01" id="fVK" oninput="fCalc()"></div>
+        <div class="fi"><label>FBA €</label><input type="number" step=".01" id="fFBA" oninput="fCalc()"></div>
+        <div class="fi"><label>Versand €</label><input type="number" step=".01" id="fVs" oninput="fCalc()"></div>
+        <div class="fi"><label>Zoll €</label><input type="number" step=".01" id="fZl" oninput="fCalc()"></div>
+        <div class="fi"><label>Sonstige €</label><input type="number" step=".01" id="fSo" oninput="fCalc()"></div>
+      </div>
+      <div class="cpanel"><h3>📊 Live</h3><div class="cg"><div class="ci"><span class="cl">Kosten</span><span class="cv" style="color:var(--bl)" id="fLC">—</span></div><div class="ci"><span class="cl">Gewinn</span><span class="cv" id="fLG">—</span></div><div class="ci"><span class="cl">Marge</span><span class="cv" id="fLM">—</span></div><div class="ci"><span class="cl">ROI</span><span class="cv" id="fLR">—</span></div></div></div>
+      <div class="fsec">📈 Marktdaten</div>
+      <div class="fg">
+        <div class="fi"><label>Gewicht (g)</label><input type="number" id="fGw"></div>
+        <div class="fi"><label>Maße (cm)</label><input id="fMa"></div>
+        <div class="fi"><label>BSR</label><input type="number" id="fBS"></div>
+        <div class="fi"><label>Ø Bewertungen</label><input type="number" id="fBe"></div>
+        <div class="fi"><label>Wettbewerber</label><input type="number" id="fWb"></div>
+        <div class="fi"><label>Suchvolumen</label><input type="number" id="fSV"></div>
+        <div class="fi full"><label>Notizen</label><textarea id="fNo"></textarea></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn" onclick="closePM()">Abbrechen</button><button class="btn btn-p" onclick="saveProd()" id="pmBtn">Speichern</button></div>
+  </div>
+</div>
+
+<!-- ═══ BILD-LIGHTBOX (Klick zum Vergrößern) ═══ -->
+<div id="coachLightbox" onclick="coachCloseZoom()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(8,12,20,.92);align-items:center;justify-content:center;padding:24px;cursor:zoom-out;flex-direction:column;gap:14px">
+  <div id="coachLightboxInner" style="max-width:96vw;max-height:86vh;display:flex;align-items:center;justify-content:center"></div>
+  <div style="color:rgba(255,255,255,.6);font-size:13px">Klicken oder ESC zum Schließen</div>
+</div>
+
+<!-- ═══ GENERIC PROMPT MODAL ═══ -->
+<div class="mo" id="genModal" onclick="if(event.target===this)closeGM()">
+  <div class="modal" style="width:560px">
+    <div class="mh"><h2 id="gmTitle">Eintrag</h2><button class="mc" onclick="closeGM()">✕</button></div>
+    <div class="mb" id="gmBody"></div>
+    <div class="mf"><button class="btn" onclick="closeGM()">Abbrechen</button><button class="btn btn-p" id="gmSave">Speichern</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="impFile" accept=".json" style="display:none" onchange="handleImp(event)">
+
+<script src="js/app.js"></script>
+</body>
+</html>

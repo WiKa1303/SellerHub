@@ -1,21 +1,28 @@
 # SellerHub
 
-Single-File-Web-App (HTML/JS/CSS, kein Server, kein Build) — eine E-Commerce-/Amazon-Seller-Suite.
-Zum Benutzen einfach `SellerHub.html` im Browser öffnen (Doppelklick).
+Statische Web-App (HTML/JS/CSS, kein Server, kein Build-Schritt) — eine E-Commerce-/Amazon-Seller-Suite.
+Zum Benutzen `index.html` im Browser öffnen (Doppelklick) — oder den ganzen Ordner hosten.
 
-## Wichtigste Datei
-- **`SellerHub.html`** ← das ist die maßgebliche, aktive Datei. Alle Änderungen hier hinein.
-- Helles Theme, Schriften DM Sans + Playfair Display. Login-Standard-Admin: `wika01` / `wika1303`.
-- Code-Bezeichner heißen intern teils `wika`/`Wika` (z. B. `WikaAuth`) — NICHT umbenennen, nur die sichtbare Marke ist „SellerHub".
-
-## Ordnerstruktur
+## Struktur (seit 4.7.2026 gesplittet, vorher Single-File `SellerHub.html`)
 ```
 SellerHub/
-├── SellerHub.html      ← die komplette App (self-contained: HTML+CSS+JS in EINER Datei)
+├── index.html          ← HTML-Gerüst (alle Seiten/Modals), bindet css/ + js/ ein
+├── css/
+│   ├── base.css        ← Haupt-Styles (Theme, Layout, Komponenten)
+│   └── bildstudio.css  ← Styles des KI-Bildstudios (#p-inhalt)
+├── js/                 ← Reihenfolge der <script>-Tags in index.html ist WICHTIG:
+│   ├── auth.js         ← WikaAuth (Login/User-Store/Session/Lizenz)
+│   ├── bildstudio.js   ← KI-Bildstudio (ig…-Modul, IIFE)
+│   ├── admin.js        ← Admin-Bereich (User-Verwaltung)
+│   └── app.js          ← die eigentliche App (Data-Layer D, alle Seiten & Module, ~900 KB)
 ├── CLAUDE.md           ← diese Notiz
-└── backups/            ← alte Stände, nicht bearbeiten
+├── KONZEPT-Produktrecherche.md
+└── backups/            ← alte Stände (inkl. SellerHub.BACKUP-vor-split.html), nicht bearbeiten
 ```
-Es gibt KEINE separaten .css/.js/Bild-Dateien — alles ist in `SellerHub.html` eingebettet (Single-File-App).
+- Die Blöcke wurden 1:1 an den ursprünglichen `<script>`/`<style>`-Grenzen extrahiert — Lade-Reihenfolge und Positionen im Dokument sind unverändert. Neue Features weiterhin in `js/app.js` (bzw. Seiten-HTML in `index.html`).
+- Helles Theme, Schriften DM Sans + Playfair Display (Google-Fonts-Link). Login-Standard-Admin: `wika01` / `wika1303`.
+- Code-Bezeichner heißen intern teils `wika`/`Wika` (z. B. `WikaAuth`) — NICHT umbenennen, nur die sichtbare Marke ist „SellerHub".
+- ⚠️ App-DATEN hängen am Browser-Speicherpfad: Der Wechsel von `SellerHub.html` auf `index.html` ist ein neuer Pfad → einmalig Daten migrieren via Export (in `backups/SellerHub.BACKUP-vor-split.html` öffnen → ⬇ Export) und Import in `index.html`.
 
 ## Backups (im Ordner `backups/`, nicht bearbeiten)
 - `SellerHub.BACKUP-keybanner.html` — Stand 28.6.2026 (Key-Banner / Überlast-Fix)
@@ -23,11 +30,11 @@ Es gibt KEINE separaten .css/.js/Bild-Dateien — alles ist in `SellerHub.html` 
 - ältere: `-bildstudio`, `-nav`, `.BACKUP`
 - **Konvention:** Vor größeren Umbauten neue Kopie `backups/SellerHub.BACKUP-<thema>.html` anlegen.
 
-## Hosting (später, eigene Domain)
-Da alles in einer Datei steckt, ist Hosting denkbar einfach:
-1. `SellerHub.html` zu `index.html` umbenennen (dann lädt die Domain-Startseite automatisch).
-2. Diese eine Datei per FTP / Hosting-Panel ins Web-Root des Hosters hochladen — fertig.
-- Auf einer echten Domain ist `localStorage` an die **Domain** gebunden (stabil), nicht mehr an den Dateipfad wie bei `file://`.
+## Hosting (vorbereitet)
+Die App ist rein statisch — es reicht, den Ordnerinhalt ins Web-Root des Hosters zu laden:
+1. Hochladen per FTP/Panel: `index.html` + `css/` + `js/` (NICHT nötig: `backups/`, `CLAUDE.md`, `KONZEPT-*.md`, `.claude/`).
+2. Domain aufrufen — `index.html` lädt automatisch. Alternativ gratis via GitHub Pages (Repo ist schon auf GitHub) oder Netlify/Vercel.
+- Auf einer echten Domain ist `localStorage` an die **Domain** gebunden (stabil), nicht mehr an den Dateipfad wie bei `file://`. Daten von lokal mitnehmen: Export/Import (`sellerhub-data.json`).
 - ⚠️ Der eingebaute Login (`WikaAuth`) ist nur clientseitig — kein echter Schutz, da jeder den Quelltext lesen kann. Für einen öffentlichen, geschützten Live-Betrieb später ein Backend nötig.
 
 ## Aufbau (Kurz)
