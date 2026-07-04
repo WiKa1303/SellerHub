@@ -8,6 +8,7 @@ import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
 import { log } from '../core/logger.js';
+import { renderInternal } from './internal.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -36,6 +37,9 @@ export function buildApi() {
   app.use((req, res, next) => { req.tenantId = req.get('X-Tenant-Id') || 'public'; next(); });
   // Lese-Antworten 5 min cachebar → CDN/Proxy entkoppelt die Last
   app.use((req, res, next) => { if (req.method === 'GET') res.set('Cache-Control', 'public, max-age=300'); next(); });
+
+  // GET /internal – interne Debug-Oberfläche (read-only, s. api/internal.js)
+  app.get('/internal', renderInternal);
 
   // GET /api/news – neueste News; mit Profil-Parametern (seller_type, revenue, markets, interests) personalisiert.
   // Personalisierte Antworten sind privat → kein Shared-Cache (Cache-Control wird überschrieben).

@@ -53,6 +53,16 @@ await fetch(base + '/api/feedback', { method: 'POST',
   body: JSON.stringify({ id: 'art-1', vote: 1 }) });
 const t42 = (await db().query(`SELECT vote FROM feedback WHERE tenant_id = 'kunde-42'`)).rows;
 t('X-Tenant-Id → tenant_id in der feedback-Tabelle', t42.length === 1 && t42[0].vote === 1);
+// ── /internal: Debug-Oberfläche rendert (auch mit Minimal-Daten) ──
+const internal = await fetch(base + '/internal');
+const ihtml = await internal.text();
+t('/internal antwortet 200 mit allen Sektionen', internal.status === 200
+  && ihtml.includes('System') && ihtml.includes('Intelligence') && ihtml.includes('Trends')
+  && ihtml.includes('Alerts') && ihtml.includes('Personalisierter Feed'));
+t('/internal ist read-only (kein POST-Formular)', !ihtml.includes('method="post"'));
+const internalProf = await fetch(base + '/internal?profil=arb&tenant=kunde-42');
+t('/internal mit Profil+Tenant rendert', internalProf.status === 200 && (await internalProf.text()).includes('kunde-42'));
+
 srv.close();
 
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen`);
