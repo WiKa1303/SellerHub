@@ -1343,6 +1343,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     <!-- Start-Leiste: Recherche direkt hier starten -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
       <span style="font-size:12px;color:var(--tx2);font-weight:700;margin-right:2px">Neue Recherche starten:</span>
+      <button class="btn btn-sm" onclick="xrayPasteOpen()" title="Xray-Tabelle einfügen → Nischen-Kandidat mit Ampel in 10 Sekunden" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700">⚡ Xray-Paste</button>
       <button class="btn btn-p btn-sm" onclick="go('helium')">📥 Helium-Import</button>
       <button class="btn btn-sm" onclick="go('research');setTimeout(function(){var e=document.getElementById('researchAsinInput');if(e){e.focus();e.scrollIntoView({block:'center'})}},160)">🔗 ASIN analysieren</button>
       <button class="btn btn-sm" onclick="openIdeeModal()">➕ Idee</button>
@@ -3851,6 +3852,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="page" id="p-helium">
   <div class="page-header"><h1><span class="hico">📥</span>Helium 10 Import <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Black Box / Cerebro / Magnet / Xray Exporte importieren</span></h1></div>
   <div class="page-body">
+
+    <!-- Xray-Schnell-Analyse (Phase 2: Paste → Ampel in 10 Sek.) -->
+    <div style="background:linear-gradient(135deg,var(--pud),var(--acd));border:1.5px solid var(--pu);border-radius:12px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div style="font-weight:800;color:var(--pu);font-size:15px;margin-bottom:4px">⚡ Xray-Schnell-Analyse – ohne Datei-Export</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">Xray-Tabelle auf der Amazon-Suchergebnisseite <b>kopieren</b> (inkl. Kopfzeile) und <b>einfügen</b> → SellerHub aggregiert die Top-10 zu einem Nischen-Kandidaten und zeigt <b>sofort Score + Ampel</b>.</div>
+      </div>
+      <button class="btn" onclick="xrayPasteOpen()" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700;padding:12px 22px;font-size:14px">⚡ Einfügen &amp; analysieren</button>
+    </div>
 
     <!-- Anleitung-Banner -->
     <div style="background:linear-gradient(135deg,var(--pud),var(--s2));border:1px solid var(--pu);border-radius:10px;padding:14px 18px;margin-bottom:18px">
@@ -16117,6 +16127,171 @@ function closeHeliumModal(){
   },200);
 })();
 
+// ═══════════════ XRAY-PASTE: Nische einfügen → Ampel in 10 Sekunden (Phase 2) ═══════════════
+// Xray-Tabelle (Chrome-Extension) kopieren & einfügen → EIN aggregierter Nischen-Kandidat,
+// sofort gescort (Nachfrage + Wettbewerb aus echten Daten). Kein Datei-Export nötig.
+var xrayPasteState={rows:[],agg:null,raw:'',type:''};
+
+function xrayPasteOpen(){
+  var old=document.getElementById('xrayPasteModal');if(old)old.remove();
+  xrayPasteState={rows:[],agg:null,raw:'',type:''};
+  var ov=document.createElement('div');
+  ov.id='xrayPasteModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">⚡ Xray-Schnell-Analyse</h2><button onclick="document.getElementById(\'xrayPasteModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
+    '<div style="padding:18px 20px">'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">Amazon-Suchergebnis öffnen → <b>Xray</b> starten → Tabelle <b>inklusive Kopfzeile</b> markieren &amp; kopieren → hier einfügen. SellerHub aggregiert die Top-10 zu <b>einem Nischen-Kandidaten</b> und zeigt sofort die Ampel. Auch CSV-Export-Inhalte funktionieren.</div>'+
+      '<div class="fi" style="margin-bottom:8px"><label>Nischen-Name (Haupt-Keyword)</label><input id="xpName" type="text" placeholder="z.B. Bambus Schneidebrett" style="width:100%;box-sizing:border-box"></div>'+
+      '<textarea id="xpInput" rows="6" placeholder="Xray-Tabelle hier einfügen (Cmd/Strg+V) …" onpaste="setTimeout(xrayPasteAnalyze,60)" style="width:100%;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);resize:vertical;box-sizing:border-box"></textarea>'+
+      '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-p" onclick="xrayPasteAnalyze()">⚡ Analysieren</button></div>'+
+      '<div id="xpResult" style="margin-top:14px"></div>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var t=document.getElementById('xpInput');if(t)t.focus();},80);
+}
+
+function xrayPasteAnalyze(){
+  var inp=document.getElementById('xpInput');var res=document.getElementById('xpResult');
+  if(!inp||!res)return;
+  var raw=inp.value||'';
+  if(!raw.trim()){toast('Bitte erst die Xray-Tabelle einfügen');return;}
+  function fail(msg){res.innerHTML='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--rd)">'+msg+'</div>';}
+  var parsed=parseCSV(raw);
+  if(!parsed.headers.length||!parsed.rows.length){fail('⚠️ Keine Tabelle erkannt. Bitte die Xray-Tabelle <b>inklusive Kopfzeile</b> markieren und kopieren – oder den CSV-Export einfügen.');return;}
+  var type=detectHeliumType(parsed.headers);
+  if(type==='keywords'){fail('⚠️ Das ist ein <b>Keyword-Export</b> (Cerebro/Magnet). Für die Nischen-Analyse brauchst du die <b>Xray-Produkttabelle</b>. Keywords importierst du über 📥 Helium-Import.');return;}
+  if(type==='unknown'){fail('⚠️ Keine ASIN-Spalte gefunden. Bitte die Kopfzeile mitkopieren (Spalten wie ASIN, Price, Revenue …).');return;}
+  var rows=parsed.rows.map(function(r){return mapHeliumRow(r,type);}).filter(function(r){return (r.asin||r.name)&&(r.revenue!=null||r.sales!=null||r.reviews!=null||r.price!=null);});
+  if(!rows.length){fail('⚠️ Keine verwertbaren Zeilen (keine Zahlen zu Umsatz/Sales/Reviews/Preis gefunden).');return;}
+  xrayPasteState.rows=rows;xrayPasteState.raw=raw;xrayPasteState.type=type;
+  xrayPasteState.agg=xrayAggregate(rows);
+  // Nischen-Name vorschlagen, falls leer
+  var nameInp=document.getElementById('xpName');
+  if(nameInp&&!nameInp.value.trim()&&rows[0].name)nameInp.value=rows[0].name.split(/[,|–-]/)[0].trim().substring(0,60);
+  res.innerHTML=xrayPasteResultHtml(xrayPasteState.agg);
+}
+
+// Top-10 (nach Umsatz) aggregieren → Nischen-Kennzahlen
+function xrayAggregate(rows){
+  function nums(arr,f){return arr.map(f).filter(function(x){return typeof x==='number'&&!isNaN(x);});}
+  function avg(arr,f){var v=nums(arr,f);return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:null;}
+  function med(arr,f){var v=nums(arr,f).sort(function(a,b){return a-b;});if(!v.length)return null;var m=Math.floor(v.length/2);return v.length%2?v[m]:(v[m-1]+v[m])/2;}
+  var withRev=rows.filter(function(r){return r.revenue!=null;}).sort(function(a,b){return b.revenue-a.revenue;});
+  var top=(withRev.length?withRev:rows).slice(0,10);
+  var revAll=nums(rows,function(r){return r.revenue;});
+  var reviews=nums(top,function(r){return r.reviews;});
+  var prices=nums(top,function(r){return r.price;});
+  // Marken-Dominanz in den Top-10
+  var brandCount={},domBrand=null,domCount=0;
+  top.forEach(function(r){var b=(r.brand||'').trim();if(!b)return;brandCount[b]=(brandCount[b]||0)+1;if(brandCount[b]>domCount){domCount=brandCount[b];domBrand=b;}});
+  return {
+    n:rows.length,topN:top.length,
+    avgRevenue:avg(top,function(r){return r.revenue;}),
+    totalRevenue:revAll.length?revAll.reduce(function(a,b){return a+b;},0):null,
+    avgSales:avg(top,function(r){return r.sales;}),
+    avgReviews:avg(top,function(r){return r.reviews;}),
+    minReviews:reviews.length?Math.min.apply(null,reviews):null,
+    maxReviews:reviews.length?Math.max.apply(null,reviews):null,
+    beatable:top.filter(function(r){return r.reviews!=null&&r.reviews<300;}).length,
+    medPrice:med(top,function(r){return r.price;}),
+    minPrice:prices.length?Math.min.apply(null,prices):null,
+    maxPrice:prices.length?Math.max.apply(null,prices):null,
+    avgRating:avg(top,function(r){return r.rating;}),
+    domBrand:domCount>=4?domBrand:null,domCount:domCount,
+    asins:top.map(function(r){return r.asin;}).filter(Boolean),
+    at:new Date().toISOString()
+  };
+}
+
+// Kandidaten-Entwurf aus Aggregat (auch für Score-Vorschau vor dem Speichern)
+function xrayDraftCandidate(agg,name){
+  return {
+    name:name||'Xray-Nische',
+    vk:agg.medPrice!=null?Math.round(agg.medPrice*100)/100:null,
+    top10Umsatz:agg.avgRevenue!=null?Math.round(agg.avgRevenue):null,
+    avgReviews:agg.avgReviews!=null?Math.round(agg.avgReviews):null,
+    score2:{}
+  };
+}
+
+function xrayPasteResultHtml(agg){
+  var name=(document.getElementById('xpName')||{}).value||'';
+  var draft=xrayDraftCandidate(agg,name);
+  var vd=decisionVerdict(draft);
+  var cf=decisionConfidence(draft);
+  var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
+  function stat(label,val,col){return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:9px 12px"><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">'+label+'</div><div style="font-size:16px;font-weight:800;color:var(--'+(col||'tx')+')">'+val+'</div></div>';}
+  var h='<div style="background:linear-gradient(135deg,var(--'+vd.color+'d),var(--s2));border:1.5px solid var(--'+vd.color+');border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
+    '<div style="text-align:center"><div style="font-size:32px;font-weight:800;color:var(--'+vd.color+');line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score /100</div></div>'+
+    '<div style="background:var(--'+vd.color+');color:#fff;font-weight:800;font-size:14px;padding:6px 14px;border-radius:9px">'+emoji+' '+vd.label+'</div>'+
+    '<div style="flex:1;min-width:160px;font-size:11px;color:var(--tx2);line-height:1.5">Vorläufig – basiert auf <b>'+cf.data+'/'+cf.total+'</b> echten Datenpunkten ('+agg.topN+' Top-Produkte aggregiert). Für volle Konfidenz danach: 💶 Marge rechnen · 🔬 Review-Mining.</div>'+
+  '</div>';
+  var flags=decisionRedFlags(draft);
+  if(flags.length&&typeof pipeFlagChips==='function')h+=pipeFlagChips(flags);
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px">';
+  h+=stat('⌀ Umsatz Top-'+agg.topN,agg.avgRevenue!=null?Math.round(agg.avgRevenue).toLocaleString('de-DE')+' €/M':'—',agg.avgRevenue>=8000?'gn':'tx');
+  h+=stat('Nische gesamt',agg.totalRevenue!=null?Math.round(agg.totalRevenue).toLocaleString('de-DE')+' €/M':'—');
+  h+=stat('⌀ Reviews',agg.avgReviews!=null?Math.round(agg.avgReviews).toLocaleString('de-DE'):'—',agg.avgReviews!=null?(agg.avgReviews<300?'gn':agg.avgReviews<1000?'ac':'rd'):'tx');
+  h+=stat('Schwache Listings','&lt;300 Rev.: '+agg.beatable,agg.beatable>0?'gn':'tx');
+  h+=stat('⌀ Preis (Median)',agg.medPrice!=null?fmt(agg.medPrice)+'€':'—');
+  h+=stat('Preis-Spanne',(agg.minPrice!=null?fmt(agg.minPrice):'—')+'–'+(agg.maxPrice!=null?fmt(agg.maxPrice):'—')+'€');
+  h+=stat('⌀ Rating',agg.avgRating!=null?'⭐'+agg.avgRating.toFixed(1):'—');
+  h+=stat('Zeilen erkannt',agg.n);
+  h+='</div>';
+  if(agg.domBrand)h+='<div style="background:var(--acd);border:1px solid var(--ac);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--ac);margin-bottom:10px">⚠️ <b>Marken-Dominanz:</b> „'+esc(agg.domBrand)+'" hält '+agg.domCount+' der Top-'+agg.topN+' Plätze – schwerer angreifbar.</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn btn-p" onclick="xrayPasteConfirm()" style="font-weight:700">✓ Als Nischen-Kandidat übernehmen</button>'+
+    '<button class="btn btn-sm" onclick="xrayPasteAsRows()" title="Klassischer Import: jede Zeile einzeln (Ziel wählbar)" style="align-self:center">▸ Zeilen einzeln importieren …</button>'+
+  '</div>';
+  return h;
+}
+
+function xrayPasteConfirm(){
+  var s=xrayPasteState;
+  if(!s.agg){toast('Bitte erst analysieren');return;}
+  researchInit();
+  var name=((document.getElementById('xpName')||{}).value||'').trim()||('Xray-Nische '+new Date().toLocaleDateString('de-DE'));
+  var draft=xrayDraftCandidate(s.agg,name);
+  var c={
+    id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    name:name.substring(0,120), kategorie:'', hauptkeyword:name.substring(0,80),
+    vk:draft.vk, top10Umsatz:draft.top10Umsatz, avgReviews:draft.avgReviews,
+    konkurrenz:'', schwaechen:'', differenzierung:'',
+    ek:null, fbaGebuehren:null, ppcRisiko:'', nettoMarge:null, risiko:'',
+    status:'recherche', currentStep:1,
+    notes:'⚡ Xray-Paste ('+s.agg.n+' Zeilen, Top-'+s.agg.topN+' aggregiert). ⌀ Rating '+(s.agg.avgRating!=null?s.agg.avgRating.toFixed(1):'—')+', Nische gesamt '+(s.agg.totalRevenue!=null?Math.round(s.agg.totalRevenue).toLocaleString('de-DE')+' €/M':'—'),
+    scoreMatrix:{}, score2:{}, computedScore:0,
+    compTitle:'', compDesc:'', compUsps:[], compImages:[], compAsin:(s.agg.asins[0]||''), beat:null, compFetchedAt:null,
+    // kompatibel zum Nischen-Scan (grüne ✓-Anzeige, Ergebnis im Scan-Modal sichtbar)
+    nischenScan:{count:s.agg.topN,okCount:s.agg.topN,failCount:0,avgPrice:s.agg.medPrice,avgReviews:s.agg.avgReviews,
+      minReviews:s.agg.minReviews,maxReviews:s.agg.maxReviews,beatable:s.agg.beatable,asins:s.agg.asins,at:s.agg.at,
+      avgRevenue:s.agg.avgRevenue,totalRevenue:s.agg.totalRevenue,avgRating:s.agg.avgRating,source:'xray-paste'},
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+  };
+  c.computedScore=researchCalcScore(c);
+  D.research.candidates.unshift(c);
+  save();
+  var vd=decisionVerdict(c);
+  var old=document.getElementById('xrayPasteModal');if(old)old.remove();
+  if(typeof researchRenderTable==='function')researchRenderTable();
+  if(typeof researchUpdateBadge==='function')researchUpdateBadge();
+  toast((vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':'🟡')+' „'+c.name.substring(0,40)+'" angelegt – Score '+vd.score+' ('+vd.label+')');
+  go('pipeline');
+}
+
+// Fallback: klassischer Zeilen-Import über das bestehende Vorschau-Modal
+function xrayPasteAsRows(){
+  var s=xrayPasteState;
+  if(!s.raw){toast('Bitte erst analysieren');return;}
+  var old=document.getElementById('xrayPasteModal');if(old)old.remove();
+  heliumImportState.fileName='📋 Zwischenablage (Xray-Paste)';
+  heliumImportState.rawText=s.raw;
+  parseHeliumFile();
+}
+
 // ═══════════════ SELLER-CENTER CSV IMPORT ═══════════════
 
 // Robust CSV parser: handles commas vs semicolons vs tabs, quoted fields, line breaks in fields
@@ -16219,6 +16394,10 @@ function parseNum(v){
   // Handle German format "1.234,56" → "1234.56"
   if(s.match(/,\d{1,2}$/)&&s.indexOf('.')>=0)s=s.replace(/\./g,'').replace(',','.');
   else if(s.match(/,\d{1,2}$/))s=s.replace(',','.');
+  // US-Tausender "1,234" / "1,234.56" (Helium-Exporte sind oft US-formatiert)
+  else if(s.match(/^\d{1,3}(,\d{3})+(\.\d+)?$/))s=s.replace(/,/g,'');
+  // Deutsche Tausenderpunkte ohne Komma "1.234" / "1.234.567" (nicht bei führender 0, z.B. "0.750")
+  else if(s.match(/^[1-9]\d{0,2}(\.\d{3})+$/))s=s.replace(/\./g,'');
   var n=parseFloat(s);
   return isNaN(n)?null:n;
 }
