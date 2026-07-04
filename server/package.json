@@ -7,8 +7,9 @@
   "scripts": {
     "start": "node src/index.js",
     "crawl": "node src/crawl-once.js",
-    "test": "node test/smoke.test.js && node test/ai.test.js",
-    "test:ai": "node test/ai.test.js"
+    "test": "node test/smoke.test.js && node test/ai.test.js && node test/trends.test.js",
+    "test:ai": "node test/ai.test.js",
+    "test:trends": "node test/trends.test.js"
   },
   "engines": {
     "node": ">=18"

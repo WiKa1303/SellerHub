@@ -42,10 +42,49 @@ export async function initDb(poolOverride) {
     `ai_tokens_in INTEGER`, `ai_tokens_out INTEGER`,
     `ai_analyzed_at TIMESTAMPTZ`, `ai_attempts INTEGER DEFAULT 0`, `ai_error TEXT`,
     `ai_feedback INTEGER`,
+    // Phase 4: Trend-/Opportunity-Felder aus der Analyse
+    `ai_topic TEXT`, `ai_opportunity TEXT`, `ai_affected TEXT`,
   ]) {
     await pool.query(`ALTER TABLE news_events ADD COLUMN IF NOT EXISTS ${col}`);
   }
-  log.info('DB bereit (news_events inkl. KI-Spalten)');
+
+  // ═══ Phase 4: Trend-Engine + Alerts ═══
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS trend_topics (
+      id                  TEXT PRIMARY KEY,          -- kanonischer Themen-Slug
+      topic_name          TEXT NOT NULL,
+      trend_score         INTEGER NOT NULL DEFAULT 0,
+      growth_rate         REAL NOT NULL DEFAULT 0,   -- % (7-Tage vs. erwartet aus 30-Tage-Basis)
+      mentions_7d         INTEGER NOT NULL DEFAULT 0,
+      mentions_30d        INTEGER NOT NULL DEFAULT 0,
+      source_count        INTEGER NOT NULL DEFAULT 0,
+      spike               INTEGER NOT NULL DEFAULT 0,
+      risk_or_opportunity TEXT NOT NULL DEFAULT 'neutral',
+      summary             TEXT,
+      recommended_action  TEXT,
+      item_ids            TEXT,                      -- JSON-Array der Beleg-Artikel
+      created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  // Tages-Zeitreihe je Topic = Grundlage für Sparklines HEUTE und Forecasting in Phase 5
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS topic_daily (
+      topic_id TEXT NOT NULL,
+      day      TEXT NOT NULL,                        -- YYYY-MM-DD
+      mentions INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (topic_id, day)
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS alerts (
+      id           TEXT PRIMARY KEY,                 -- = article_id (max. 1 Alert je Artikel)
+      article_id   TEXT NOT NULL,
+      alert_level  TEXT NOT NULL,                    -- info | important | critical
+      risk_type    TEXT NOT NULL,                    -- recht/steuern/… oder 'chance'
+      title        TEXT NOT NULL,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      delivered_at TIMESTAMPTZ                       -- NULL = noch nicht gepusht (Phase 5)
+    )`);
+  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts)');
   return pool;
 }
 
@@ -74,7 +113,8 @@ export async function recentTitleNorms(days = 7) {
 }
 
 const ITEM_COLS = `id, title, summary, url, source, publish_date, country, type, relevance_score,
-  ai_score, ai_category, ai_urgency, ai_impact, ai_reasoning, ai_summary, ai_analyzed_at, ai_feedback`;
+  ai_score, ai_category, ai_urgency, ai_impact, ai_reasoning, ai_summary, ai_analyzed_at, ai_feedback,
+  ai_topic, ai_opportunity, ai_affected`;
 
 export async function queryNews({ limit = 20, country = null, minScore = 0, maxAgeDays = 30 }) {
   const since = new Date(Date.now() - maxAgeDays * 864e5).toISOString();
@@ -111,10 +151,106 @@ export async function saveAiResult(id, a, model, usage) {
   await db().query(
     `UPDATE news_events SET ai_score=$2, ai_category=$3, ai_urgency=$4, ai_impact=$5,
        ai_reasoning=$6, ai_summary=$7, ai_model=$8, ai_tokens_in=$9, ai_tokens_out=$10,
-       ai_analyzed_at=$11, ai_error=NULL
+       ai_analyzed_at=$11, ai_topic=$12, ai_opportunity=$13, ai_affected=$14, ai_error=NULL
      WHERE id=$1`,
     [id, a.relevance_score, a.category, a.urgency, a.impact, a.reasoning,
-     JSON.stringify(a.summary), model, usage.input, usage.output, new Date().toISOString()]);
+     JSON.stringify(a.summary), model, usage.input, usage.output, new Date().toISOString(),
+     a.topic || null, a.opportunity || null, a.affected || null]);
+}
+
+// ═══ Phase 4: Trend-Engine + Alerts ═══
+
+/** Analysierte Items der letzten N Tage (Input der Trend-Engine). */
+export async function analyzedItemsSince(days = 30) {
+  const since = new Date(Date.now() - days * 864e5).toISOString();
+  const r = await db().query(
+    `SELECT id, title, url, source, publish_date, country, ai_score, ai_category, ai_urgency,
+            ai_impact, ai_topic, ai_opportunity, ai_summary
+     FROM news_events
+     WHERE ai_analyzed_at IS NOT NULL AND ai_topic IS NOT NULL AND publish_date >= $1`, [since]);
+  return r.rows.map(parseAiSummary);
+}
+
+export async function upsertTrendTopic(t) {
+  const now = new Date().toISOString();
+  await db().query(
+    `INSERT INTO trend_topics (id, topic_name, trend_score, growth_rate, mentions_7d, mentions_30d,
+       source_count, spike, risk_or_opportunity, summary, recommended_action, item_ids, created_at, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$13)
+     ON CONFLICT (id) DO UPDATE SET topic_name=$2, trend_score=$3, growth_rate=$4, mentions_7d=$5,
+       mentions_30d=$6, source_count=$7, spike=$8, risk_or_opportunity=$9,
+       summary=COALESCE($10, trend_topics.summary),
+       recommended_action=COALESCE($11, trend_topics.recommended_action),
+       item_ids=$12, updated_at=$13`,
+    [t.id, t.topicName, t.trendScore, t.growthRate, t.mentions7, t.mentions30,
+     t.sourceCount, t.spike ? 1 : 0, t.riskOrOpportunity, t.summary || null,
+     t.recommendedAction || null, JSON.stringify(t.itemIds), now]);
+}
+
+export async function upsertTopicDaily(topicId, day, mentions) {
+  await db().query(
+    `INSERT INTO topic_daily (topic_id, day, mentions) VALUES ($1,$2,$3)
+     ON CONFLICT (topic_id, day) DO UPDATE SET mentions=$3`, [topicId, day, mentions]);
+}
+
+export async function queryTrends({ limit = 10, minScore = 0, riskOrOpportunity = null, maxAgeDays = 7 }) {
+  const since = new Date(Date.now() - maxAgeDays * 864e5).toISOString();
+  const params = [minScore, since];
+  let where = `trend_score >= $1 AND updated_at >= $2`;
+  if (riskOrOpportunity) { params.push(riskOrOpportunity); where += ` AND risk_or_opportunity = $${params.length}`; }
+  params.push(limit);
+  const r = await db().query(
+    `SELECT * FROM trend_topics WHERE ${where} ORDER BY trend_score DESC, growth_rate DESC LIMIT $${params.length}`, params);
+  return r.rows.map(row => { try { row.item_ids = JSON.parse(row.item_ids || '[]'); } catch { row.item_ids = []; } return row; });
+}
+
+export async function topicHistory(topicId, days = 30) {
+  const r = await db().query(`SELECT day, mentions FROM topic_daily WHERE topic_id = $1 ORDER BY day ASC`, [topicId]);
+  const map = Object.fromEntries(r.rows.map(x => [x.day, x.mentions]));
+  const out = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10);
+    out.push({ day: d, mentions: map[d] || 0 });
+  }
+  return out;
+}
+
+/** Alert anlegen (idempotent: 1 Alert je Artikel). true = neu erzeugt. */
+export async function insertAlert(articleId, level, riskType, title) {
+  const r = await db().query(
+    `INSERT INTO alerts (id, article_id, alert_level, risk_type, title)
+     VALUES ($1,$1,$2,$3,$4) ON CONFLICT (id) DO NOTHING`,
+    [articleId, level, riskType, String(title).slice(0, 300)]);
+  return r.rowCount === 1;
+}
+
+export async function queryAlerts({ level = null, days = 7, limit = 20, undeliveredOnly = false }) {
+  const since = new Date(Date.now() - days * 864e5).toISOString();
+  const params = [since];
+  let where = `a.created_at >= $1`;
+  if (level) { params.push(level); where += ` AND a.alert_level = $${params.length}`; }
+  if (undeliveredOnly) where += ` AND a.delivered_at IS NULL`;
+  params.push(limit);
+  const r = await db().query(
+    `SELECT a.id, a.alert_level, a.risk_type, a.title, a.created_at, a.delivered_at,
+            n.url, n.source, n.ai_urgency, n.ai_impact, n.ai_affected, n.ai_summary, n.publish_date
+     FROM alerts a JOIN news_events n ON n.id = a.article_id
+     WHERE ${where}
+     ORDER BY CASE a.alert_level WHEN 'critical' THEN 0 WHEN 'important' THEN 1 ELSE 2 END, a.created_at DESC
+     LIMIT $${params.length}`, params);
+  return r.rows.map(parseAiSummary);
+}
+
+/** Items mit KI-Analyse ohne Alert (Generator-Queue). Zeitfenster 7 Tage begrenzt
+ *  den Scan — nicht qualifizierende Items werden so nicht ewig neu angefasst. */
+export async function itemsWithoutAlertCheck(limit = 200) {
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  const r = await db().query(
+    `SELECT n.id, n.title, n.ai_score, n.ai_category, n.ai_urgency, n.ai_impact, n.ai_opportunity
+     FROM news_events n LEFT JOIN alerts a ON a.id = n.id
+     WHERE n.ai_analyzed_at IS NOT NULL AND a.id IS NULL AND n.ai_analyzed_at >= $1
+     ORDER BY n.ai_analyzed_at DESC LIMIT $2`, [since, limit]);
+  return r.rows;
 }
 
 export async function saveAiFailure(id, message) {

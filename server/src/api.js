@@ -1,9 +1,11 @@
 // ═══ REST-API (readonly + Admin-Trigger) ═══
 import express from 'express';
-import { queryNews, queryEvents, saveFeedback } from './db.js';
+import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory } from './db.js';
 import { runCrawl, crawlState } from './crawler/run.js';
 import { drainQueue, aiState } from './ai/queue.js';
 import { aiEnabled } from './ai/analyze.js';
+import { runTrendEngine, trendState } from './trends/engine.js';
+import { generateAlerts, alertState } from './alerts.js';
 import { parseProfile, rankForProfile } from './profile.js';
 import { SOURCES } from './sources.js';
 import { config } from './config.js';
@@ -71,13 +73,77 @@ export function buildApi() {
         if (news.length >= 5) break;
       }
       const events = (await queryEvents({ limit: 3, days: 180 })).slice(0, 3);
+      // Automatische Dashboard-Priorisierung (Phase 4): Critical-Alerts werden gepinnt
+      const criticalAlerts = await queryAlerts({ level: 'critical', days: 7, limit: 2 });
       res.json({
         news, events,
+        critical_alerts: criticalAlerts,
         meta: {
           lastCrawl: crawlState.lastRun,
           personalized: !profile.isEmpty,
           ai: aiEnabled() ? { lastRun: aiState.lastRun, analyzed: aiState.analyzed } : null,
           sources: SOURCES.map(s => ({ id: s.id, name: s.name, region: s.region })),
+        },
+      });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ═══ Phase 4: Market Intelligence ═══
+
+  // GET /api/trends – Trend-Themen (Filter: minScore, risk_or_opportunity, limit)
+  app.get('/api/trends', async (req, res) => {
+    try {
+      const rows = await queryTrends({
+        limit: Math.min(50, parseInt(req.query.limit || '10', 10)),
+        minScore: parseInt(req.query.minScore || '0', 10),
+        riskOrOpportunity: ['risiko', 'chance', 'neutral'].includes(req.query.type) ? req.query.type : null,
+      });
+      res.json({ items: rows, count: rows.length });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
+  // GET /api/trends/:id/history – Tages-Zeitreihe (Sparkline / Forecasting-Datensatz)
+  app.get('/api/trends/:id/history', async (req, res) => {
+    try {
+      res.json({ topic: req.params.id, days: await topicHistory(req.params.id, 30) });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
+  // GET /api/alerts – Risiko-/Chancen-Alerts (level=critical|important|info)
+  app.get('/api/alerts', async (req, res) => {
+    try {
+      const rows = await queryAlerts({
+        level: ['critical', 'important', 'info'].includes(req.query.level) ? req.query.level : null,
+        days: parseInt(req.query.days || '7', 10),
+        limit: Math.min(100, parseInt(req.query.limit || '20', 10)),
+      });
+      res.json({ items: rows, count: rows.length });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
+  // GET /api/market-intelligence – das komplette Dashboard-Modul in EINEM Call
+  app.get('/api/market-intelligence', async (req, res) => {
+    try {
+      const [all, risks, chances, critical, important] = await Promise.all([
+        queryTrends({ limit: 5, minScore: 20 }),
+        queryTrends({ limit: 3, riskOrOpportunity: 'risiko' }),
+        queryTrends({ limit: 3, riskOrOpportunity: 'chance' }),
+        queryAlerts({ level: 'critical', days: 7, limit: 5 }),
+        queryAlerts({ level: 'important', days: 7, limit: 5 }),
+      ]);
+      // Sparkline (30 Tages-Werte) je Top-Trend anhängen
+      const rising = await Promise.all(all.map(async t => ({
+        ...t, sparkline: (await topicHistory(t.id, 30)).map(d => d.mentions),
+      })));
+      res.json({
+        rising_trends: rising,
+        top_risks: risks,
+        opportunities: chances,
+        alerts: { critical, important },
+        meta: {
+          computed_at: trendState.lastRun,
+          window: { short_days: 7, long_days: 30 },
+          topics_total: trendState.topics, spikes: trendState.spikes,
         },
       });
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -100,14 +166,16 @@ export function buildApi() {
       ok: true,
       crawler: { lastRun: crawlState.lastRun, running: crawlState.running, stats: crawlState.lastStats },
       ai: { enabled: aiEnabled(), model: config.aiModel, ...aiState },
+      trends: trendState,
+      alerts: alertState,
     });
   });
 
-  // POST /api/admin/crawl – manueller Trigger (mit ADMIN_KEY geschützt); stößt danach die KI-Queue an
+  // POST /api/admin/crawl – manueller Trigger (ADMIN_KEY); danach KI-Queue → Trends → Alerts (async)
   app.post('/api/admin/crawl', async (req, res) => {
     if (!config.adminKey || req.get('X-Api-Key') !== config.adminKey) return res.status(401).json({ error: 'unauthorized' });
     const stats = await runCrawl();
-    drainQueue().catch(() => {}); // async, blockiert die Antwort nicht
+    drainQueue().then(() => Promise.all([runTrendEngine(), generateAlerts()])).catch(() => {});
     res.json({ ok: true, stats });
   });
 

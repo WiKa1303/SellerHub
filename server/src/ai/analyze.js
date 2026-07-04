@@ -32,6 +32,15 @@ Bewerte den Artikel:
    - RICHTIG: "Prüfe bis 1.9., ob deine Größenklassen-Einstufung noch stimmt — sonst zahlst du drauf."
    - Bei irrelevanten Artikeln (score < 25): 1 kurzer Punkt genügt, warum es nicht relevant ist.
 
+7. topic: normalisierter Themen-Slug für die Trend-Erkennung.
+   - kleingeschrieben, bindestrich-getrennt, max. 4 Wörter, DAS Kernthema (nicht der Einzelfall)
+   - Artikel zum selben Thema MÜSSEN denselben Slug bekommen: "gpsr-produktsicherheit", "amazon-fba-gebuehren", "ppc-gebotsstrategien", "temu-konkurrenz"
+   - kein Datum, keine Quellennamen im Slug
+
+8. opportunity: chance (Seller kann Geld verdienen/Vorteil sichern) | risiko (kostet Geld/bedroht Konto) | neutral
+
+9. affected: WER ist betroffen, kurz. z.B. "alle FBA-Seller", "Private-Label-Seller in Spielzeug", "Seller mit AT-Kunden"
+
 Sei streng: Ein Generalisten-Tech-Artikel ohne Seller-Bezug bekommt einen niedrigen Score, egal wie interessant er klingt.`;
 
 // JSON-Schema für strukturierte Outputs (additionalProperties:false ist Pflicht)
@@ -44,8 +53,11 @@ const ANALYSIS_SCHEMA = {
     impact: { type: 'string', enum: ['low', 'medium', 'high'] },
     reasoning: { type: 'string', description: 'Kurze Begründung, 1-2 Sätze' },
     summary: { type: 'array', items: { type: 'string' }, description: '3-5 handlungsorientierte Bulletpoints' },
+    topic: { type: 'string', description: 'Normalisierter Themen-Slug, z.B. gpsr-produktsicherheit' },
+    opportunity: { type: 'string', enum: ['chance', 'risiko', 'neutral'] },
+    affected: { type: 'string', description: 'Wer ist betroffen, kurz' },
   },
-  required: ['relevance_score', 'category', 'urgency', 'impact', 'reasoning', 'summary'],
+  required: ['relevance_score', 'category', 'urgency', 'impact', 'reasoning', 'summary', 'topic', 'opportunity', 'affected'],
   additionalProperties: false,
 };
 
@@ -89,9 +101,13 @@ export async function analyzeItem(item) {
   if (!text) throw new Error('Leere KI-Antwort (stop_reason: ' + response.stop_reason + ')');
   const analysis = JSON.parse(text); // durch output_config.format garantiert valide
 
-  // Nachschärfen: Score clampen, Summary auf 5 Punkte begrenzen
+  // Nachschärfen: Score clampen, Summary begrenzen, Topic-Slug normalisieren
   analysis.relevance_score = Math.max(0, Math.min(100, Math.round(analysis.relevance_score)));
   analysis.summary = (analysis.summary || []).slice(0, 5).map(s => String(s).slice(0, 300));
+  analysis.topic = String(analysis.topic || 'sonstiges')
+    .toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').split('-').slice(0, 4).join('-') || 'sonstiges';
+  analysis.affected = String(analysis.affected || '').slice(0, 120);
 
   return {
     analysis,

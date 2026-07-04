@@ -6,13 +6,20 @@ import { buildApi } from './api.js';
 import { runCrawl } from './crawler/run.js';
 import { drainQueue } from './ai/queue.js';
 import { aiEnabled } from './ai/analyze.js';
+import { runTrendEngine } from './trends/engine.js';
+import { generateAlerts } from './alerts.js';
 import { log } from './logger.js';
 
-// Crawl + anschließende KI-Analyse. Die KI läuft NACH dem Crawl (nie blockierend):
-// Items sind sofort mit Keyword-Score sichtbar, der KI-Score ersetzt ihn asynchron.
+// Pipeline je Lauf: Crawl → KI-Analyse → Trend-Engine + Alerts.
+// Alles NACH dem Crawl ist Hintergrundverarbeitung (blockiert nie den Feed):
+// Items sind sofort mit Keyword-Score sichtbar, KI/Trends/Alerts kommen asynchron dazu.
 async function crawlAndAnalyze() {
   await runCrawl();
   await drainQueue();
+  await Promise.all([
+    runTrendEngine().catch(e => log.error('Trend-Engine:', e.message)),
+    generateAlerts().catch(e => log.error('Alert-Generator:', e.message)),
+  ]);
 }
 
 async function main() {

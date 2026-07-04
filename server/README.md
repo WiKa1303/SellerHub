@@ -160,3 +160,92 @@ Annahmen: ~850 Input-Tokens/Artikel (Systemprompt ~550 + Titel/Anriss ~300), ~23
 
 Ehrliche Fußnoten: (1) Prompt-Caching lohnt hier noch nicht — der stabile Prompt-Präfix liegt unter dem cache-baren Minimum (4.096 Tokens auf Opus/Haiku); wird der Prompt um Few-Shot-Beispiele erweitert, wird Caching zum Hebel. (2) Der größte Kostenhebel bei Skalierung ist die **Batch API** (Analyse ist nicht latenzkritisch — der Crawl läuft 2×/Tag): 50 % Rabatt, Umbau ~1 Tag.
 
+---
+
+# Phase 4: Trend-Engine, Opportunity Detection & Risk Monitoring
+
+## Architektur
+
+```
+             (je Crawl-Lauf, alles Hintergrund — blockiert nie den Feed)
+Crawl ──▶ KI-Analyse (Phase 3, liefert jetzt auch ai_topic/ai_opportunity/ai_affected)
+              │
+              ├──▶ TREND-ENGINE  src/trends/
+              │      topics.js   Clustering: GROUP BY ai_topic + Trigram-Merge ähnlicher Slugs
+              │      engine.js   Zeitreihe 7d/30d · Wachstum · Spike · Trend-Score 0–100
+              │      interpret.js  Business Impact Interpretation Layer (1 LLM-Call für Top-8)
+              │        └▶ trend_topics + topic_daily (Tages-Zeitreihe)
+              │
+              └──▶ ALERT-GENERATOR  src/alerts.js  (deterministisches Regelwerk)
+                     └▶ alerts (delivered_at NULL = Push-Queue für Phase 5)
+
+API: /api/trends · /api/trends/:id/history · /api/alerts · /api/market-intelligence
+     /api/dashboard-feed enthält critical_alerts (automatische Priorisierung)
+```
+
+## Clustering-Strategie (und warum keine Embeddings in v1)
+
+Die Phase-3-Analyse vergibt pro Artikel bereits einen **normalisierten Themen-Slug** (`ai_topic`, z. B. `gpsr-produktsicherheit`) — für ~20 Extra-Output-Tokens im ohnehin bezahlten Call. Damit ist Clustering im Kern ein `GROUP BY` (O(n), skaliert trivial auf 50k+). Was bleibt, ist das **Merging** fast identischer Slugs („fba-gebuehren" ⊂ „amazon-fba-gebuehren"): Trigram-Cosine auf den wenigen hundert *Slugs* statt Embeddings auf zehntausenden *Artikeln*.
+
+**Upgrade-Pfad** (wenn Themen unschärfer werden oder Slug-Qualität nicht reicht): Embedding je Artikel (z. B. Voyage) → `pgvector`-Spalte → agglomeratives Clustering per Cosine ≥ 0,8 gegen Cluster-Zentroiden. Die Schnittstelle `buildClusters(items)` bleibt identisch — nur die Implementierung wechselt.
+
+## Trend-Score (deterministisch, jede Komponente erklärbar)
+
+```
+growth_rate = (m7 − erwartet7) / erwartet7,  erwartet7 = m23Tage-Basis × 7/23
+              neues Thema ohne Basis mit ≥2 Erwähnungen = +300 % („neu aufgetaucht")
+Spike       = m7 ≥ 3 UND m7 ≥ 2 × Erwartung   (1→2 Erwähnungen ist KEIN Spike)
+
+trend_score = Wachstum (0–35, voll bei +300 %)
+            + Volumen (0–15, 3 P je 7-Tage-Erwähnung)
+            + Ø-Relevanz aus Phase 3 (0–25)
+            + Impact-Anteil high/medium (0–15)
+            + Quellenvielfalt (0–10, 5 P je Zusatzquelle)   → 0–100
+```
+
+Risiko/Chance: Mehrheitsvotum der Artikel-Analysen (`ai_opportunity`), Kategorie als Tie-Breaker; der Interpretations-Layer darf mit Gesamtsicht übersteuern.
+
+## Alert-Regeln (Risk Monitoring, bewusst OHNE KI-Entscheidung — reproduzierbar)
+
+| Level | Regel |
+|---|---|
+| **critical** | (recht ∨ steuern) ∧ urgency=hoch ∧ impact=high — oder score ≥ 85 ∧ hoch ∧ high (konto-/geldkritisch) |
+| **important** | urgency=hoch ∧ impact ≥ medium · oder impact=high ∧ score ≥ 70 |
+| **info** | Chance ∧ impact=high ∧ score ≥ 60 (Opportunity-Hinweis) |
+
+Idempotent (1 Alert je Artikel), `delivered_at IS NULL` = Zustell-Queue für Push (Phase 5).
+
+## Dashboard-Datenstruktur — `GET /api/market-intelligence`
+
+```json
+{
+  "rising_trends": [{
+    "id": "gpsr-produktsicherheit", "topic_name": "Gpsr Produktsicherheit",
+    "trend_score": 84, "growth_rate": 886, "mentions_7d": 3, "mentions_30d": 4,
+    "source_count": 2, "spike": 1, "risk_or_opportunity": "risiko",
+    "summary": "…Marktbewegung + wer betroffen ist + was monetär auf dem Spiel steht…",
+    "recommended_action": "Prüfe deine Top-10-ASINs auf GPSR-Konformität und dokumentiere die Nachweise.",
+    "item_ids": ["…"], "sparkline": [0,0,1,0,…30 Tageswerte…]
+  }],
+  "top_risks": [ … ], "opportunities": [ … ],
+  "alerts": { "critical": [{ "title", "risk_type", "url", "ai_affected", "delivered_at": null }], "important": [ … ] },
+  "meta": { "computed_at": "…", "window": { "short_days": 7, "long_days": 30 }, "topics_total": 12, "spikes": 2 }
+}
+```
+
+## Skalierung auf > 50.000 Artikel
+
+| Baustein | heute | ab ~50k |
+|---|---|---|
+| Cluster-Input | alle analysierten Items 30 Tage (Index auf publish_date) — nur das Fenster zählt, Gesamtbestand egal | unverändert |
+| Tages-Buckets | JS-Aggregation über Fenster-Items | SQL `date_trunc` + materialisierte Tagesrollups |
+| Slug-Merge | Trigram über ~100e Slugs (O(k²), k klein) | Embeddings + pgvector (s. o.) |
+| Interpretation | 1 Call für Top-8-Themen je Lauf | unverändert (Kosten skalieren mit Themen, nicht Artikeln) |
+| Alerts | Regelwerk über 7-Tage-Fenster, idempotent per PK | unverändert |
+
+## Vorbereitung Predictive Forecasting (Phase 5)
+
+- **`topic_daily`** sammelt ab sofort die Tages-Zeitreihe je Thema — der Trainings-/Eingabedatensatz für Forecasts (z. B. exponentielle Glättung/Holt-Winters als Startpunkt, LLM-gestützte Interpretation der Prognose obendrauf).
+- **`alerts.delivered_at`** ist die fertige Push-Queue (Worker: `WHERE delivered_at IS NULL` → zustellen → Zeitstempel setzen).
+- **`ai_feedback`** (Phase 3) liefert die Labels, um Trend-Schwellen und Alert-Regeln datengetrieben nachzuschärfen.
+

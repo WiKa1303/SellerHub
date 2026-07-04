@@ -297,7 +297,11 @@ function renderRadarWidget(){
   if(!api){el.innerHTML='';return;}
   var cached=null;try{cached=JSON.parse(localStorage.getItem('wika_radar_cache')||'null');}catch(e){}
   if(cached)el.innerHTML=radarWidgetHtml(cached); // sofort malen (Login-Moment), dann frisch laden
-  fetch(api+'/api/dashboard-feed'+radarProfileParams()).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
+  Promise.all([
+    fetch(api+'/api/dashboard-feed'+radarProfileParams()).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+    fetch(api+'/api/market-intelligence').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var d=res[0];d.mi=res[1];
     try{localStorage.setItem('wika_radar_cache',JSON.stringify(d));}catch(e){}
     el.innerHTML=radarWidgetHtml(d);
   }).catch(function(){
@@ -309,6 +313,29 @@ var RADAR_CAT={recht:['rd','⚖️ Recht'],steuern:['rd','💶 Steuern'],ppc:['b
 function radarWidgetHtml(d){
   var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:16px 20px;margin-bottom:18px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px"><h3 style="margin:0;font-size:15px">📡 Seller-Radar <span style="font-size:11px;color:var(--tx3);font-weight:400">News &amp; Events für FBA-Seller (DACH)</span></h3>'+(d.meta&&d.meta.lastCrawl?'<span style="font-size:10.5px;color:var(--tx3)">Stand: '+radarRelTime(d.meta.lastCrawl)+'</span>':'')+'</div>';
+  // ── Critical-Alerts (Phase 4): gepinnt, genau wie im Konzept-Mockup der Pflicht-Slot ──
+  if(d.critical_alerts&&d.critical_alerts.length){
+    d.critical_alerts.slice(0,2).forEach(function(a){
+      h+='<a href="'+esc(a.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;background:var(--rdd);border:1.5px solid var(--rd);border-radius:10px;padding:9px 13px;margin-bottom:8px">'+
+        '<div style="font-size:12.5px;font-weight:700;color:var(--rd)">🚨 CRITICAL · '+esc((a.risk_type||'').toUpperCase())+' <span style="font-weight:400;color:var(--tx3);font-size:10.5px">· '+radarRelTime(a.publish_date||a.created_at)+'</span></div>'+
+        '<div style="font-size:12.5px;color:var(--tx);margin-top:2px">'+esc(a.title)+(a.ai_affected?' <span style="color:var(--tx3);font-size:11px">— betrifft: '+esc(a.ai_affected)+'</span>':'')+'</div></a>';
+    });
+  }
+  // ── Market Intelligence (Phase 4): Top-Trends mit Handlungsempfehlung ──
+  if(d.mi&&d.mi.rising_trends&&d.mi.rising_trends.length){
+    h+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:12px">';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📊 Markt-Radar · steigende Themen</div>';
+    d.mi.rising_trends.slice(0,3).forEach(function(tr){
+      var rooCol=tr.risk_or_opportunity==='risiko'?'rd':tr.risk_or_opportunity==='chance'?'gn':'tx3';
+      h+='<div style="padding:5px 0;border-top:1px solid var(--bd)">'+
+        '<div style="font-size:12px;font-weight:700;color:var(--tx)">'+(tr.spike?'🔥 ':'')+esc(tr.topic_name)+
+          ' <span style="color:var(--'+rooCol+');font-size:10.5px">'+(tr.risk_or_opportunity==='risiko'?'⚠ Risiko':tr.risk_or_opportunity==='chance'?'✦ Chance':'')+'</span>'+
+          ' <span style="color:var(--tx3);font-size:10.5px;font-weight:400">· Score '+tr.trend_score+' · '+(tr.growth_rate>=0?'+':'')+tr.growth_rate+' % · '+tr.mentions_7d+'× in 7 T.</span></div>'+
+        (tr.recommended_action?'<div style="font-size:11px;color:var(--tx2);margin-top:1px">→ '+esc(tr.recommended_action)+'</div>':'')+
+      '</div>';
+    });
+    h+='</div>';
+  }
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">';
   // News-Spalte
   h+='<div><div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📰 Top-News</div>';
