@@ -46,3 +46,26 @@ export const IMPACT_PATTERN = /(frist|stichtag|ab dem \d|müssen bis|verpflichte
 
 // Event-Erkennung (kind = 'event')
 export const EVENT_PATTERN = /(konferenz|kongress|messe|event|stammtisch|meetup|networking|seminar|webinar|workshop|summit|barcamp|treffen|ticket)/i;
+
+/**
+ * Environment-Validation: fail-fast beim Boot mit ALLEN Problemen auf einmal
+ * (statt eines kryptischen Fehlers irgendwo zur Laufzeit). Wird von den
+ * apps/-Einstiegspunkten aufgerufen — Tests umgehen sie bewusst (pg-mem).
+ * @returns {string[]} Warnungen (kein Abbruch)
+ */
+export function validateConfig() {
+  const problems = [];
+  if (!config.databaseUrl) problems.push('DATABASE_URL fehlt');
+  else if (!/^postgres(ql)?:\/\//.test(config.databaseUrl)) problems.push('DATABASE_URL muss mit postgres:// beginnen');
+  for (const [k, v] of Object.entries({ PORT: config.port, SCORE_THRESHOLD: config.scoreThreshold,
+    MAX_AGE_DAYS: config.maxAgeDays, AI_MAX_PER_RUN: config.aiMaxPerRun,
+    AI_MAX_ATTEMPTS: config.aiMaxAttempts, AI_CONCURRENCY: config.aiConcurrency })) {
+    if (!Number.isFinite(v) || v <= 0) problems.push(`${k} muss eine positive Zahl sein (ist: ${v})`);
+  }
+  if (config.crawlCron.trim().split(/\s+/).length !== 5) problems.push(`CRAWL_CRON sieht nicht nach Cron-Syntax aus: "${config.crawlCron}"`);
+  if (problems.length) throw new Error('Ungültige Konfiguration:\n  - ' + problems.join('\n  - '));
+  const warnings = [];
+  if (!config.adminKey) warnings.push('ADMIN_KEY leer — POST /api/admin/crawl ist deaktiviert');
+  if (!config.anthropicApiKey) warnings.push('ANTHROPIC_API_KEY fehlt — Intelligence-Module laufen im Degradations-Modus (Keyword-Scoring)');
+  return warnings;
+}

@@ -86,8 +86,15 @@ export async function saveAiFailure(id, message) {
     [id, String(message).slice(0, 500)]);
 }
 
-/** 👍/👎 vom Nutzer — Grundlage für spätere Eval-/Fine-Tuning-Datensätze. */
-export async function saveFeedback(id, vote) {
-  const r = await db().query(`UPDATE news_events SET ai_feedback = $2 WHERE id = $1`, [id, vote]);
-  return r.rowCount === 1;
+/** 👍/👎 je Mandant (Eval-/Fine-Tuning-Datensatz). ai_feedback-Spalte = Legacy-Spiegel
+ *  (Aggregat), wird bei Accounts durch Aggregation über die feedback-Tabelle ersetzt. */
+export async function saveFeedback(id, vote, tenantId = 'public') {
+  const exists = await db().query(`SELECT 1 FROM news_events WHERE id = $1`, [id]);
+  if (exists.rowCount === 0) return false;
+  await db().query(
+    `INSERT INTO feedback (tenant_id, item_id, vote) VALUES ($1,$2,$3)
+     ON CONFLICT (tenant_id, item_id) DO UPDATE SET vote = $3`,
+    [tenantId, id, vote]);
+  await db().query(`UPDATE news_events SET ai_feedback = $2 WHERE id = $1`, [id, vote]);
+  return true;
 }

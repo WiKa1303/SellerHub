@@ -7,6 +7,17 @@ import { AI_MODULES, moduleState, runIntelligencePipeline } from '../services/in
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
+import { log } from '../core/logger.js';
+
+// ═══ Error-Handling-Standard ═══
+// Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
+// Erwartbare Fehler (400/404) antworten explizit in den Routen; alles andere → fail().
+let reqSeq = 0;
+function fail(res, e) {
+  const ref = 'e' + Date.now().toString(36) + '-' + (++reqSeq);
+  log.error(`API-Fehler [${ref}]:`, e.stack || e.message);
+  res.status(500).json({ error: 'Interner Fehler', ref });
+}
 
 export function buildApi() {
   const app = express();
@@ -42,7 +53,7 @@ export function buildApi() {
       res.set('Cache-Control', 'private, max-age=60');
       const ranked = rankForProfile(rows, profile).slice(0, limit);
       res.json({ items: ranked, count: ranked.length, personalized: true });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/events – kommende Events (Kalender-Sortierung)
@@ -53,7 +64,7 @@ export function buildApi() {
         days: parseInt(req.query.days || '180', 10),
       });
       res.json({ items: rows, count: rows.length });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/dashboard-feed – kombiniert & priorisiert fürs Login-Widget.
@@ -87,7 +98,7 @@ export function buildApi() {
           sources: SOURCES.map(s => ({ id: s.id, name: s.name, region: s.region })),
         },
       });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // ═══ Phase 4: Market Intelligence ═══
@@ -101,14 +112,14 @@ export function buildApi() {
         riskOrOpportunity: ['risiko', 'chance', 'neutral'].includes(req.query.type) ? req.query.type : null,
       });
       res.json({ items: rows, count: rows.length });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/trends/:id/history – Tages-Zeitreihe (Sparkline / Forecasting-Datensatz)
   app.get('/api/trends/:id/history', async (req, res) => {
     try {
       res.json({ topic: req.params.id, days: await topicHistory(req.params.id, 30) });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/alerts – Risiko-/Chancen-Alerts (level=critical|important|info)
@@ -120,7 +131,7 @@ export function buildApi() {
         limit: Math.min(100, parseInt(req.query.limit || '20', 10)),
       });
       res.json({ items: rows, count: rows.length });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/market-intelligence – das komplette Dashboard-Modul in EINEM Call
@@ -150,7 +161,7 @@ export function buildApi() {
           topics_total: moduleState('trends').topics, spikes: moduleState('trends').spikes,
         },
       });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // POST /api/feedback – 👍/👎 zu einem Item ({id, vote: 1|-1}); Basis für Eval-/Fine-Tuning-Daten
@@ -158,9 +169,9 @@ export function buildApi() {
     try {
       const { id, vote } = req.body || {};
       if (!id || ![1, -1].includes(vote)) return res.status(400).json({ error: 'id und vote (1|-1) erforderlich' });
-      const ok = await saveFeedback(String(id), vote);
+      const ok = await saveFeedback(String(id), vote, req.tenantId);
       res.status(ok ? 200 : 404).json({ ok });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/strategy/brief – Strategy Engine: das aktuelle Tages-Briefing
@@ -169,7 +180,7 @@ export function buildApi() {
       const b = await latestStrategyBrief();
       if (!b) return res.status(404).json({ error: 'noch kein Briefing erstellt' });
       res.json({ day: b.day, model: b.model, created_at: b.created_at, ...b.brief });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/health – Monitoring: alle Intelligence-Module aus der Registry

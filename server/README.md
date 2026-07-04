@@ -10,8 +10,9 @@ server/
 ├── ARCHITEKTUR.md            ← Schichten, Service-Grenzen, Kernmodule, Multi-Tenancy, Skalierung
 ├── CLAUDE.md                 ← Konventionen + Checklisten für die Weiterentwicklung mit Claude Code
 ├── src/
-│   ├── index.js              ← Boot: DB + API + Cron + Intelligence-Pipeline
-│   ├── crawl-once.js         ← Einmal-Lauf für externe Scheduler
+│   ├── index.js              ← Kombi-Einstieg (MVP): startet apps/api + apps/worker in einem Prozess
+│   ├── apps/                 ← api.js (nur HTTP) · worker.js (Cron+Crawl+AI — AI läuft NUR hier)
+│   ├── crawl-once.js         ← Einmal-Lauf (Crawl+Pipeline) für externe Scheduler
 │   ├── core/                 ← config.js · logger.js · dedupe.js · ai-client.js (LLM-Infrastruktur)
 │   ├── data/                 ← schema.js (DDL) · repos/{items,trends,alerts,strategy}.js · db.js (Fassade) · sources.js
 │   ├── api/routes.js         ← REST: news/events/dashboard-feed/trends/alerts/market-intelligence/strategy/health
@@ -32,7 +33,9 @@ server/
 cd server
 npm install
 cp .env.example .env        # DATABASE_URL eintragen (lokales Postgres oder z.B. Neon Free-Tier)
-npm start                   # API auf :8787, crawlt sofort + per Cron
+npm start                   # Kombi-Modus: API auf :8787 + Worker (crawlt sofort + per Cron)
+npm run start:api           # nur API (Skalierungs-Stufe 2)
+npm run start:worker        # nur Worker (genau 1 Instanz)
 npm test                    # Smoke-Test OHNE Postgres (pg-mem) – braucht nur Internet
 npm run crawl               # einmaliger Crawl-Lauf, dann Exit
 ```

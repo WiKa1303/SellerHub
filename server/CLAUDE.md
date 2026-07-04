@@ -8,7 +8,7 @@ Architektur & Service-Grenzen: **`ARCHITEKTUR.md`** (zuerst lesen bei Strukturfr
 ```bash
 npm test              # ALLE Suiten (smoke, ai, trends, strategy) — pg-mem statt Postgres, KI gemockt; braucht nur Internet für die RSS-Feeds
 npm run test:ai       # einzelne Suite (analog test:trends, test:strategy)
-npm start             # API + Cron (braucht DATABASE_URL)
+npm start             # Kombi: API + Worker (braucht DATABASE_URL) · start:api / start:worker = getrennt
 npm run crawl         # einmaliger Crawl für externe Scheduler
 ```
 
@@ -18,7 +18,7 @@ npm run crawl         # einmaliger Crawl für externe Scheduler
 
 - `src/core/` ENV/Logger/Text-Utils/LLM-Client (`ai-client.js`) · `src/data/` `schema.js` (DDL) + `repos/` je Domäne (EINZIGE SQL-Stellen), `db.js` = Fassade + Quellen-Katalog
 - `src/services/` crawler · intelligence (AI-Layer) · alerts · feed — Services reden nur über data/ miteinander
-- `src/api/routes.js` REST (keine Geschäftslogik!) · `src/index.js` Boot + Cron + Pipeline
+- `src/api/routes.js` REST (keine Geschäftslogik!; 500er über fail(), nie e.message an Clients) · `src/apps/` api/worker-Einstiege · `src/index.js` Kombi-Boot
 
 ## Konventionen (einhalten!)
 

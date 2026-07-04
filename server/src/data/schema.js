@@ -97,7 +97,19 @@ export async function initDb(poolOverride) {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs)');
+  // ── Feedback (Owner: application) — ERSTE mandantenfähige Tabelle ──
+  // Nutzerdaten gehören getrennt von den global geteilten Marktdaten.
+  // tenant_id='public' bis Accounts kommen; PK verhindert Vote-Überschreiben zwischen Nutzern.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feedback (
+      tenant_id  TEXT NOT NULL DEFAULT 'public',
+      item_id    TEXT NOT NULL,
+      vote       INTEGER NOT NULL,                  -- +1 / -1
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (tenant_id, item_id)
+    )`);
+
+  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs, feedback)');
   return pool;
 }
 

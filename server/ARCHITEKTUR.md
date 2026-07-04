@@ -35,10 +35,30 @@ AI-native Kontrollzentrum für Amazon-Seller im DACH-Raum: Risiken erkennen (**R
 │ Ähnlichkeit) — kein Domänenwissen, von allen Schichten nutzbar         │
 └────────────────────────────────────────────────────────────────────────┘
 
-HINTERGRUNDVERARBEITUNG (src/index.js):
+HINTERGRUNDVERARBEITUNG:
 Cron → Crawl → runIntelligencePipeline()  — asynchron, blockiert NIE die API.
 Die DB ist die Queue (crash-sicher): ai_analyzed_at IS NULL = offene Arbeit.
 ```
+
+## Apps & Betriebsmodi (src/apps/)
+
+| App | Einstieg | Enthält | Deploy |
+|---|---|---|---|
+| **api** | `npm run start:api` | nur HTTP (schlank; einzige Ausnahme: manueller Admin-Trigger) | horizontal skalierbar hinter CDN |
+| **worker** | `npm run start:worker` | Cron + Crawl + KOMPLETTE AI-Verarbeitung — AI läuft NUR hier | genau 1 Instanz (bis BullMQ-Auslöser) |
+| **dashboard** | statische SellerHub-App im Repo-Root | Frontend (Widget, Profil lokal) | beliebiges Static Hosting/CDN |
+| *Kombi (MVP)* | `npm start` | api + worker in einem Prozess | 1 Container, heutiger Modus |
+
+Der Wechsel Kombi → getrennt ist reine Deploy-Entscheidung (gleicher Code, andere Einstiegspunkte + `CRAWL_ON_BOOT=false` auf der API).
+
+## Härtungs-Bausteine (Platform Hardening, 4.7.2026)
+
+- **Environment-Validation** (`core/config.js → validateConfig()`): fail-fast beim Boot mit allen Problemen auf einmal; Warnungen (fehlender ADMIN_KEY/KI-Key) brechen nicht ab.
+- **Logging-Strategie** (`core/logger.js`): Dev = menschenlesbar, `LOG_FORMAT=json` = JSON-Zeilen für Log-Aggregatoren. API unverändert (`log.info/warn/error`).
+- **Error-Handling-Standard** (`api/routes.js → fail()`): erwartbare Fehler (400/404) antworten explizit; alles andere wird mit Referenz-ID geloggt, der Client sieht nur `{error:'Interner Fehler', ref}` — keine Interna-Leaks.
+- **Retry-Mechanismen**: LLM-Calls über SDK-Backoff (`maxRetries:3`) + `ai_attempts`-Obergrenze; Crawler-Quellen heilen sich selbst (nächster Lauf), Ausfälle je Quelle in `/api/health` sichtbar.
+- **Mandanten-Feedback**: `feedback (tenant_id, item_id, vote)` — erste tenant-fähige Tabelle; `X-Tenant-Id → req.tenantId → Repository`-Faden existiert durchgängig. `ai_feedback`-Spalte bleibt als Legacy-Spiegel (kein destruktiver Umbau).
+
 
 ## Layer-Taxonomie (Plattform-Sicht → Code)
 
