@@ -267,6 +267,56 @@ function renderBackupHint(){
   '</div>';
 }
 
+// ─── Seller-Radar-Widget (MVP): Top-News + Events aus dem Radar-Backend ───
+// Aktiviert sich nur, wenn eine API-URL gesetzt ist:
+//   localStorage.setItem('wika_radar_api','https://<radar-api>')  (s. server/README.md)
+function radarApi(){try{return (localStorage.getItem('wika_radar_api')||'').replace(/\/+$/,'');}catch(e){return '';}}
+function radarRelTime(iso){
+  var ms=Date.now()-new Date(iso).getTime();
+  var h=Math.round(ms/36e5);
+  if(h<1)return 'gerade eben';if(h<24)return 'vor '+h+' Std.';
+  var d=Math.round(h/24);return d===1?'gestern':'vor '+d+' Tagen';
+}
+function renderRadarWidget(){
+  var el=document.getElementById('dashRadar');if(!el)return;
+  var api=radarApi();
+  if(!api){el.innerHTML='';return;}
+  var cached=null;try{cached=JSON.parse(localStorage.getItem('wika_radar_cache')||'null');}catch(e){}
+  if(cached)el.innerHTML=radarWidgetHtml(cached); // sofort malen (Login-Moment), dann frisch laden
+  fetch(api+'/api/dashboard-feed').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
+    try{localStorage.setItem('wika_radar_cache',JSON.stringify(d));}catch(e){}
+    el.innerHTML=radarWidgetHtml(d);
+  }).catch(function(){
+    if(!cached)el.innerHTML='<div style="background:var(--s1);border:1px dashed var(--bd2);border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--tx3)">📡 Seller-Radar: API nicht erreichbar ('+esc(api)+')</div>';
+  });
+}
+function radarWidgetHtml(d){
+  var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:16px 20px;margin-bottom:18px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px"><h3 style="margin:0;font-size:15px">📡 Seller-Radar <span style="font-size:11px;color:var(--tx3);font-weight:400">News &amp; Events für FBA-Seller (DACH)</span></h3>'+(d.meta&&d.meta.lastCrawl?'<span style="font-size:10.5px;color:var(--tx3)">Stand: '+radarRelTime(d.meta.lastCrawl)+'</span>':'')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">';
+  // News-Spalte
+  h+='<div><div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📰 Top-News</div>';
+  if(d.news&&d.news.length){
+    d.news.forEach(function(n){
+      h+='<a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:7px 0;border-bottom:1px solid var(--bd)">'+
+        '<div style="font-size:12.5px;font-weight:600;color:var(--tx);line-height:1.4">'+esc(n.title)+'</div>'+
+        '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+esc(n.source)+' · '+radarRelTime(n.publish_date)+' · <span title="Relevanz-Score 0–100">🔥 '+n.relevance_score+'</span></div></a>';
+    });
+  }else h+='<div style="font-size:12px;color:var(--tx3)">Noch keine News – der Crawler läuft 2× täglich.</div>';
+  h+='</div>';
+  // Events-Spalte
+  h+='<div><div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📅 Events</div>';
+  if(d.events&&d.events.length){
+    d.events.forEach(function(ev){
+      h+='<a href="'+esc(ev.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:7px 0;border-bottom:1px solid var(--bd)">'+
+        '<div style="font-size:12.5px;font-weight:600;color:var(--tx);line-height:1.4">'+esc(ev.title)+'</div>'+
+        '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+(ev.event_start?new Date(ev.event_start).toLocaleDateString('de-DE')+' · ':'')+esc(ev.source)+'</div></a>';
+    });
+  }else h+='<div style="font-size:12px;color:var(--tx3)">Keine kommenden Events erkannt.</div>';
+  h+='</div></div></div>';
+  return h;
+}
+
 // ═══════════════ NAVIGATION ═══════════════
 function go(name){
   // If leaving detail view with unsaved changes, save them silently
@@ -11839,6 +11889,7 @@ function renderDash(){
   // ─── Produktrecherche-Fahrplan (geführt) ───
   if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
   if(typeof renderBackupHint==='function')renderBackupHint();
+  if(typeof renderRadarWidget==='function')renderRadarWidget();
   if(typeof renderDashSearches==='function')renderDashSearches();
 
   // ─── License Countdown Panel ───
