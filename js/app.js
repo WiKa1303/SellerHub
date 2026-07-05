@@ -6,7 +6,7 @@ var WIKA_NAME='SellerHub';
 var WIKA_TAGLINE='Smarte Werkzeuge für E-Commerce-Profis';
 
 // ═══════════════ DATA LAYER ═══════════════
-var D={products:[],competitors:[],keywords:[],reviews:[],suppliers:[],launches:[],ideen:[],sellerImports:[],salesData:{},coachingProgress:{},researchCandidates:[],researchWorkflows:{}};
+var D={products:[],competitors:[],keywords:[],reviews:[],suppliers:[],launches:[],ideen:[],sellerImports:[],aiListings:[],salesData:{},coachingProgress:{},researchCandidates:[],researchWorkflows:{}};
 var SK='wika_v2';
 var editIdx=-1;
 var editIdeeIdx=-1;
@@ -21,7 +21,7 @@ function load(){try{
   if(o&&!localStorage.getItem(SK)){var p=JSON.parse(o);D.products=p;localStorage.setItem(SK,JSON.stringify(D));}
   var r=localStorage.getItem(SK);if(r)D=JSON.parse(r);
   // ensure arrays
-  ['products','competitors','keywords','reviews','suppliers','launches','ideen','sellerImports'].forEach(function(k){if(!D[k])D[k]=[];});
+  ['products','competitors','keywords','reviews','suppliers','launches','ideen','sellerImports','aiListings'].forEach(function(k){if(!D[k])D[k]=[];});
   if(!D.salesData||typeof D.salesData!=='object')D.salesData={};
   if(!D.coachingProgress||typeof D.coachingProgress!=='object')D.coachingProgress={};
   // Unified pipeline status migration (idempotent)
@@ -10109,6 +10109,9 @@ function renderListing(){
     '<b style="color:var(--or)">⚠️ Wichtig zu Amazon &amp; HTML:</b> Amazon zeigt HTML in der Produktbeschreibung bei vielen (neueren) Seller-Accounts <b>nicht mehr</b> an – dort zählt nur Klartext. HTML funktioniert noch bei Accounts mit Bestandsschutz sowie auf eBay, Shopify, Kaufland &amp; eigener Website. '+
     '<b>Nutze den „Klartext"-Export</b> für aktuelle Amazon-Felder (Bullet Points &amp; Beschreibung), den HTML-Export für die übrigen Kanäle.</div>';
 
+  // ── KI-Generator (zusammenklappbar, oben) ──
+  html+=lgHtml();
+
   // ── Listing-Auswahl / Verwaltung ──
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">';
   if(D.listings.items.length){
@@ -10134,6 +10137,7 @@ function renderListing(){
     html+='<div onclick="listingCreate(\'Neues Listing\',\'\');save();renderListing()" style="background:var(--s1);border:2px dashed var(--bd2);border-radius:11px;padding:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd2)\'"><span style="font-size:28px">➕</span><span style="font-size:13px;font-weight:700;color:var(--tx2)">Leer starten</span></div>';
     html+='</div>';
     body.innerHTML=html;
+    lgCount();
     return;
   }
 
@@ -10192,6 +10196,7 @@ function renderListing(){
 
   body.innerHTML=html;
   listingRefreshOutputs();
+  lgCount();
 }
 
 // ─── Toolbar-Buttons ───
@@ -10320,6 +10325,209 @@ function listingPromptGen(){
       '<button onclick="var o=document.getElementById(\'lpPromptOut\');o.select();try{navigator.clipboard.writeText(o.value)}catch(e){document.execCommand(\'copy\')}toast(\'✓ Prompt kopiert\')" style="margin-top:10px;background:var(--ac);color:#fff;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;width:100%">📋 Prompt kopieren</button>';
     var sb=document.getElementById('gmSave');if(sb)sb.style.display='none';
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KI-LISTING-GENERATOR — kompletter Amazon-DE-Listing-Text per KI
+// ───────────────────────────────────────────────────────────────
+// Eingaben + Ergebnis leben in LG (überleben das Re-Rendern der Seite).
+// Gespeicherte Listings: D.aiListings (Array, synct via save() → Cloud).
+// Hinweis: D.listings ist bereits vom Editor belegt ({items,activeId}),
+// daher eigenes Array D.aiListings für die KI-Ergebnisse.
+// ═══════════════════════════════════════════════════════════════
+var LG={open:false,name:'',infos:'',keywords:'',ton:'sachlich',res:null,busy:false};
+var LG_LIMITS={titel:200,bullet:200,such:249}; // Suchbegriffe = BYTES (UTF-8), Rest = Zeichen
+
+function lgSyToken(){try{return localStorage.getItem('sy_token')||'';}catch(e){return '';}}
+function lgBytes(s){try{return new TextEncoder().encode(s||'').length;}catch(e){return (s||'').length;}}
+
+// ─── UI des Generator-Abschnitts (wird von renderListing() eingebettet) ───
+function lgHtml(){
+  var IN='width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-family:inherit;font-size:13px;box-sizing:border-box';
+  var LB='display:block;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin:0 0 4px';
+  var h='<details ontoggle="LG.open=this.open"'+(LG.open?' open':'')+' style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;margin-bottom:16px">';
+  h+='<summary style="padding:13px 16px;cursor:pointer;font-size:14px;font-weight:700;color:var(--tx)">🤖 KI-Generator <span style="font-size:11px;font-weight:600;color:var(--tx3);margin-left:6px">Titel · 5 Bullets · Beschreibung · Suchbegriffe (Amazon DE)</span></summary>';
+  h+='<div style="padding:2px 16px 16px">';
+  // Eingaben
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
+    '<div><label style="'+LB+'">Produktname</label><input id="lgName" oninput="LG.name=this.value" value="'+escapeHtml(LG.name)+'" placeholder="z. B. Edelstahl-Trinkflasche 1 l" style="'+IN+'"></div>'+
+    '<div><label style="'+LB+'">Ziel-Keywords (optional)</label><input id="lgKeywords" oninput="LG.keywords=this.value" value="'+escapeHtml(LG.keywords)+'" placeholder="kommagetrennt, z. B. trinkflasche edelstahl, auslaufsicher" style="'+IN+'"></div></div>';
+  h+='<div style="margin-bottom:10px"><label style="'+LB+'">Produktinfos / USPs</label><textarea id="lgInfos" oninput="LG.infos=this.value" placeholder="Material, Maße, Besonderheiten, Zielgruppe — Stichpunkte reichen" style="'+IN+';height:88px;resize:vertical">'+esc(LG.infos)+'</textarea></div>';
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px">'+
+    '<select id="lgTon" onchange="LG.ton=this.value" style="'+IN+';width:auto"><option value="sachlich"'+(LG.ton==='sachlich'?' selected':'')+'>Tonalität: sachlich</option><option value="verkaufsstark"'+(LG.ton==='verkaufsstark'?' selected':'')+'>Tonalität: verkaufsstark</option></select>'+
+    '<button id="lgImportBtn" onclick="lgImportAmazon()" style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:9px 14px;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--tx)">⬇ Von Amazon importieren</button>'+
+    '<button id="lgGenBtn" onclick="lgGenerate()" style="background:linear-gradient(135deg,var(--pu),var(--ac));color:#fff;border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700">✨ Listing generieren</button></div>';
+  // Ergebnis (editierbar, mit Zählern + Kopieren)
+  if(LG.res){
+    var cnt=function(id){return '<span id="'+id+'" style="font-size:11px;color:var(--tx3)"></span>';};
+    var cpy=function(t){return '<button onclick="lgCopy(\''+t+'\')" title="In Zwischenablage kopieren" style="background:var(--s3);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px">📋</button>';};
+    var row=function(label,cid,tid){return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><label style="'+LB+';margin:0">'+label+'</label><span style="display:flex;gap:8px;align-items:center">'+cnt(cid)+cpy(tid)+'</span></div>';};
+    h+='<div style="border-top:1px dashed var(--bd2);padding-top:14px;margin-top:10px">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Ergebnis — prüfen &amp; anpassen</div>';
+    h+='<div style="margin-bottom:10px">'+row('Titel','lgCntTitel','lgResTitel')+'<input id="lgResTitel" oninput="LG.res.titel=this.value;lgCount()" value="'+escapeHtml(LG.res.titel)+'" style="'+IN+'"></div>';
+    for(var i=0;i<5;i++){
+      h+='<div style="margin-bottom:8px">'+row('Bullet '+(i+1),'lgCntB'+i,'lgResB'+i)+'<input id="lgResB'+i+'" oninput="LG.res.bullets['+i+']=this.value;lgCount()" value="'+escapeHtml(LG.res.bullets[i]||'')+'" style="'+IN+'"></div>';
+    }
+    h+='<div style="margin-bottom:10px">'+row('Beschreibung','lgCntBeschr','lgResBeschr')+'<textarea id="lgResBeschr" oninput="LG.res.beschreibung=this.value;lgCount()" style="'+IN+';height:120px;resize:vertical">'+esc(LG.res.beschreibung)+'</textarea></div>';
+    h+='<div style="margin-bottom:12px">'+row('Suchbegriffe (Backend)','lgCntSuch','lgResSuch')+'<textarea id="lgResSuch" oninput="LG.res.suchbegriffe=this.value;lgCount()" style="'+IN+';height:52px;resize:vertical">'+esc(LG.res.suchbegriffe)+'</textarea></div>';
+    h+='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button onclick="lgApply()" style="background:var(--ac);color:#fff;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700">📥 In Editor übernehmen</button>'+
+      '<button onclick="lgSave()" style="background:var(--gn);color:#fff;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700">💾 Speichern</button></div>';
+    h+='</div>';
+  }
+  // Gespeicherte KI-Listings
+  var saved=D.aiListings||[];
+  if(saved.length){
+    h+='<div style="border-top:1px dashed var(--bd2);margin-top:14px;padding-top:10px"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">💾 Gespeicherte KI-Listings ('+saved.length+')</div>';
+    saved.forEach(function(l){
+      h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12.5px">'+
+        '<a href="#" onclick="lgLoad(\''+l.id+'\');return false" title="In die Felder laden" style="color:var(--ac);font-weight:600;text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.name)+'</a>'+
+        '<span style="color:var(--tx3);font-size:11px">'+new Date(l.ts).toLocaleDateString('de-DE')+'</span>'+
+        '<button onclick="lgDelete(\''+l.id+'\')" title="Löschen" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button></div>';
+    });
+    h+='</div>';
+  }
+  h+='</div></details>';
+  return h;
+}
+
+// ─── Live-Zähler (Zeichen; Suchbegriffe in BYTES via TextEncoder) ───
+function lgCount(){
+  if(!LG.res)return;
+  function set(id,n,max,unit){
+    var el=document.getElementById(id);if(!el)return;
+    el.textContent=n.toLocaleString('de-DE')+' / '+max.toLocaleString('de-DE')+(unit?' '+unit:'');
+    el.style.color=n>max?'var(--rd)':'var(--tx3)';
+    el.style.fontWeight=n>max?'700':'400';
+  }
+  set('lgCntTitel',(LG.res.titel||'').length,LG_LIMITS.titel,'Zeichen');
+  for(var i=0;i<5;i++)set('lgCntB'+i,(LG.res.bullets[i]||'').length,LG_LIMITS.bullet,'Zeichen');
+  set('lgCntBeschr',(LG.res.beschreibung||'').length,LISTING_LIMITS.description,'Zeichen');
+  set('lgCntSuch',lgBytes(LG.res.suchbegriffe),LG_LIMITS.such,'Bytes');
+}
+
+// ─── Amazon-Import in die Eingabefelder (Backend-Endpoint, Bearer) ───
+async function lgImportAmazon(){
+  if(!lgSyToken()){toast('☁️ Cloud-Konto nötig — bitte zuerst unter „Konto & Sync" anmelden');return;}
+  var raw=prompt('Amazon-URL oder ASIN:');
+  if(!raw||!raw.trim())return;
+  var btn=document.getElementById('lgImportBtn');var old=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ Importiert …';}
+  try{
+    var r=await fetch(radarApi()+'/api/import/amazon',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+lgSyToken()},body:JSON.stringify({urlOrAsin:raw.trim()})});
+    var j=null;try{j=await r.json();}catch(e){}
+    if(!r.ok)throw new Error((j&&j.error)||('Import fehlgeschlagen ('+r.status+')'));
+    if(!j||!j.title)throw new Error('Kein Produkt gefunden — bitte Link/ASIN prüfen');
+    LG.name=j.title;
+    var infos=[];
+    if(j.brand)infos.push('Marke: '+j.brand);
+    if(j.bullets&&j.bullets.length)infos=infos.concat(j.bullets);
+    if(j.description)infos.push(j.description);
+    if(infos.length)LG.infos=infos.join('\n');
+    LG.open=true;
+    renderListing();
+    toast('✓ Amazon-Daten übernommen'+(j.asin?' ('+j.asin+')':''));
+  }catch(err){
+    toast('⚠️ '+(err&&err.message||'Import fehlgeschlagen'));
+  }finally{if(btn){btn.disabled=false;btn.textContent=old;}}
+}
+
+// ─── Prompt (EIN Aufruf, striktes JSON, Amazon-DE-Regeln aus dem Konzept) ───
+function lgBuildPrompt(strict){
+  var p='Du bist ein erfahrener Amazon-Listing-Texter für den deutschen Marktplatz (amazon.de). '+
+    'Erstelle ein vollständiges, konversionsstarkes Listing auf Deutsch für folgendes Produkt.\n\n'+
+    'Produkt: '+(LG.name.trim()||'—')+'\n'+
+    'Produktinfos/USPs:\n'+(LG.infos.trim()||'—')+'\n'+
+    (LG.keywords.trim()?'Ziel-Keywords (einarbeiten, wo sinnvoll): '+LG.keywords.trim()+'\n':'')+
+    'Tonalität: '+(LG.ton==='verkaufsstark'?'verkaufsstark, aber seriös (ohne marktschreierische Übertreibungen)':'sachlich, präzise, vertrauensbildend')+'\n\n'+
+    'Halte dich STRIKT an diese Amazon-DE-Regeln:\n'+
+    '- "titel": max. 200 Zeichen, wichtigste Keywords und Hauptnutzen vorne, KEINE Werbephrasen (kein "Bestseller", "Top", "Nr. 1", "Angebot", "Aktion"), KEINE Emojis, Ziffern statt ausgeschriebener Zahlwörter.\n'+
+    '- "bullets": GENAU 5 Bullet Points, je max. 200 Zeichen, jeder beginnt mit einem GROSS geschriebenen Schlagwort und Doppelpunkt, konkreter Kundennutzen statt Floskeln, keine Emojis.\n'+
+    '- "beschreibung": 2 bis 4 Absätze Fließtext (Absätze durch Leerzeilen getrennt), KEIN HTML, keine Aufzählungszeichen, erfinde keine Fakten.\n'+
+    '- "suchbegriffe": Backend-Suchbegriffe: alles kleingeschrieben, einzelne Wörter durch Leerzeichen getrennt, max. 249 Bytes, KEINE Wörter, die schon im Titel oder in den Bullets vorkommen, keine Dubletten, keine Wettbewerber-Markennamen.\n\n'+
+    'Antworte AUSSCHLIESSLICH mit einem JSON-Objekt in exakt dieser Form (ohne Markdown, ohne Erklärung):\n'+
+    '{"titel":"…","bullets":["…","…","…","…","…"],"beschreibung":"…","suchbegriffe":"…"}';
+  if(strict)p+='\n\nWICHTIG: Gib NUR das JSON zurück — kein Text davor oder danach, keine Code-Zäune.';
+  return p;
+}
+
+// ─── Antwort robust parsen: ```json-Zäune tolerieren, {…}-Block extrahieren ───
+function lgParse(raw){
+  raw=String(raw||'').replace(/```(?:json)?/gi,'').trim();
+  var a=raw.indexOf('{'),b=raw.lastIndexOf('}');
+  if(a<0||b<=a)return null;
+  var j=null;try{j=JSON.parse(raw.slice(a,b+1));}catch(e){return null;}
+  if(!j||typeof j.titel!=='string'||!j.titel.trim())return null;
+  var bl=Array.isArray(j.bullets)?j.bullets.map(function(x){return String(x||'').trim();}).filter(Boolean):[];
+  while(bl.length<5)bl.push('');
+  return {titel:j.titel.trim(),bullets:bl.slice(0,5),beschreibung:String(j.beschreibung||'').trim(),suchbegriffe:String(j.suchbegriffe||'').trim().toLowerCase()};
+}
+
+async function lgGenerate(){
+  if(LG.busy)return;
+  if(!LG.name.trim()&&!LG.infos.trim()){toast('Bitte mindestens Produktname oder Produktinfos angeben');return;}
+  if(typeof window.igGenText!=='function'){toast('⚠️ KI-Modul nicht geladen — bitte Seite neu laden');return;}
+  LG.busy=true;
+  var btn=document.getElementById('lgGenBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ KI schreibt …';}
+  try{
+    var res=lgParse(await window.igGenText(lgBuildPrompt(false)));
+    if(!res)res=lgParse(await window.igGenText(lgBuildPrompt(true))); // 1 Retry mit „NUR das JSON"
+    if(!res)throw new Error('Die KI hat kein gültiges JSON geliefert — bitte erneut versuchen.');
+    LG.res=res;LG.open=true;
+    renderListing();
+    toast('✓ Listing generiert — bitte prüfen & anpassen');
+  }catch(err){
+    toast('⚠️ '+(err&&err.message||'Generierung fehlgeschlagen'));
+    if(btn){btn.disabled=false;btn.textContent='✨ Listing generieren';}
+  }finally{LG.busy=false;}
+}
+
+// ─── Aktionen: Kopieren / In Editor übernehmen / Speichern / Laden / Löschen ───
+function lgCopy(id){
+  var el=document.getElementById(id);if(!el)return;
+  try{navigator.clipboard.writeText(el.value);}catch(e){el.select();document.execCommand('copy');}
+  toast('✓ Kopiert');
+}
+function lgApply(){
+  if(!LG.res){toast('Bitte zuerst generieren');return;}
+  listingInit();
+  var html='';
+  if(LG.res.titel)html+='<h3>'+esc(LG.res.titel)+'</h3>';
+  var bl=(LG.res.bullets||[]).filter(function(b){return b&&b.trim();});
+  if(bl.length)html+='<ul>'+bl.map(function(b){return '<li>'+esc(b.trim())+'</li>';}).join('')+'</ul>';
+  (LG.res.beschreibung||'').split(/\n\s*\n/).forEach(function(p){p=p.trim();if(p)html+='<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';});
+  var active=listingActive();
+  if(active){
+    if(active.html && active.html.replace(/<[^>]*>/g,'').trim() && !confirm('Aktuelles Listing „'+active.name+'" mit dem KI-Ergebnis überschreiben?'))return;
+    active.html=html;active.updatedAt=new Date().toISOString();
+  }else{
+    listingCreate((LG.name.trim()||LG.res.titel||'KI-Listing').slice(0,60),html);
+  }
+  save();renderListing();toast('✓ In den Editor übernommen (Suchbegriffe separat kopieren)');
+}
+function lgSave(){
+  if(!LG.res){toast('Bitte zuerst generieren');return;}
+  D.aiListings=D.aiListings||[]; // defensiv (alte Datenstände)
+  D.aiListings.unshift({
+    id:'ai_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    ts:new Date().toISOString(),
+    name:(LG.name.trim()||LG.res.titel||'KI-Listing').slice(0,80),
+    titel:LG.res.titel,bullets:LG.res.bullets.slice(0,5),beschreibung:LG.res.beschreibung,suchbegriffe:LG.res.suchbegriffe
+  });
+  save();renderListing();toast('✓ KI-Listing gespeichert');
+}
+function lgLoad(id){
+  var l=(D.aiListings||[]).find(function(x){return x.id===id;});if(!l)return;
+  LG.name=l.name||'';
+  LG.res={titel:l.titel||'',bullets:(l.bullets||[]).concat(['','','','','']).slice(0,5),beschreibung:l.beschreibung||'',suchbegriffe:l.suchbegriffe||''};
+  LG.open=true;renderListing();toast('✓ „'+l.name+'" in die Felder geladen');
+}
+function lgDelete(id){
+  var l=(D.aiListings||[]).find(function(x){return x.id===id;});if(!l)return;
+  if(!confirm('Gespeichertes KI-Listing „'+l.name+'" löschen?'))return;
+  D.aiListings=D.aiListings.filter(function(x){return x.id!==id;});
+  save();renderListing();toast('Gelöscht');
 }
 
 

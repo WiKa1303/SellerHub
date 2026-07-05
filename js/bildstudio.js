@@ -180,7 +180,21 @@
   { const b=$("igKeyBannerBtn");if(b)b.onclick=igRevealKeyBox;
     const x=$("igKeyBannerX");if(x)x.onclick=()=>{try{sessionStorage.setItem("ig_keyban_x","1");}catch(e){}igUpdateKeyUI();}; }
 
-  // ── Amazon-Import (clientseitig über offene CORS-Proxys, best effort) ──
+  // ── Amazon-Import ──
+  // Stufe 0: eigenes Backend (Bearer, gecacht, zuverlässig) — nur mit Cloud-Session (sy_token).
+  // Ohne Token oder bei Fehler (401/429/502/Netz): unveränderte clientseitige Proxy-Kette darunter.
+  function igRadarApi(){try{return (localStorage.getItem("wika_radar_api")||"https://radar-production-388a.up.railway.app").replace(/\/+$/,"");}catch(e){return "https://radar-production-388a.up.railway.app";}}
+  async function igBackendImport(urlOrAsin){
+    const tok=igSyToken();if(!tok)return null;
+    try{
+      const r=await fetch(igRadarApi()+"/api/import/amazon",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({urlOrAsin:urlOrAsin})});
+      if(!r.ok){let msg="";try{msg=((await r.json())||{}).error||"";}catch(e){}console.warn("Backend-Import "+r.status+(msg?" — "+msg:"")+" → Fallback auf Proxy-Kette");return null;}
+      const j=await r.json();
+      if(!j||!j.title)return null;
+      return j;
+    }catch(e){console.warn("Backend-Import nicht erreichbar → Fallback auf Proxy-Kette",e);return null;}
+  }
+  // (Stufe 1+: clientseitig über offene CORS-Proxys, best effort)
   const IG_PROXIES=[
     u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u),
     u=>"https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(u),
@@ -212,9 +226,18 @@
   }
   function igTld(s){var m=s.match(/amazon\.([a-z.]{2,6})(?:\/|$)/i);return m?m[1].toLowerCase():"de";}
   async function igFetchImageB64(url){
-    // Amazon-CDN sendet CORS (*), daher direkt abrufbar; Proxy nur als Fallback
     let blob=null;
-    try{const r=await fetch(url);if(r.ok)blob=await r.blob();}catch(e){}
+    // Stufe 0: eigener Bild-Proxy (canvas-taint-freie Bytes, Bearer) — nur mit Cloud-Session + Amazon-CDN-Host
+    const tok=igSyToken();
+    if(tok && /^https?:\/\/(?:m\.media-amazon\.com|images-(?:eu|na)\.ssl-images-amazon\.com)\//i.test(url)){
+      try{
+        const rp=await fetch(igRadarApi()+"/api/import/amazon-image?url="+encodeURIComponent(url),{headers:{"Authorization":"Bearer "+tok}});
+        if(rp.ok){const b=await rp.blob();if(/^image\//.test(b.type))blob=b;}
+        else console.warn("Bild-Proxy "+rp.status+" → direkter Abruf");
+      }catch(e){console.warn("Bild-Proxy nicht erreichbar → direkter Abruf");}
+    }
+    // Amazon-CDN sendet CORS (*), daher direkt abrufbar; Proxy nur als Fallback
+    if(!blob){try{const r=await fetch(url);if(r.ok)blob=await r.blob();}catch(e){}}
     if(!blob){const r2=await fetch("https://api.allorigins.win/raw?url="+encodeURIComponent(url));if(!r2.ok)throw new Error("img "+r2.status);blob=await r2.blob();}
     if(!/^image\//.test(blob.type))throw new Error("kein Bild");
     return await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:"amazon.jpg",mime:blob.type,dataUrl:fr.result,base64:String(fr.result).split(",")[1]});fr.onerror=rej;fr.readAsDataURL(blob);});
@@ -623,6 +646,12 @@
       const asin=igAsin(raw);
       if(!/amazon\./i.test(raw) && !asin) throw new Error("Bitte einen Amazon-Link oder eine 10-stellige ASIN angeben.");
       const target=asin?("https://www.amazon."+(/amazon\./i.test(raw)?igTld(raw):"de")+"/dp/"+asin):raw;
+      // Stufe 0: eigenes Backend (nur mit Cloud-Session) — liefert dieselbe Ergebnis-Form wie die Proxy-Kette
+      const be=await igBackendImport(asin||raw);
+      if(be){
+        const bUsps=[...new Set((be.bullets||[]).map(b=>String(b||"").replace(/\s+/g," ").trim()).filter(Boolean))];
+        return {title:(be.title||"").replace(/\s+/g," ").trim(), desc:be.description||bUsps.join(" "), usps:bUsps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:(be.images||[]).slice(0,9), asin:be.asin||asin||"", price:(be.price!=null?be.price:null), category:"", reviews:null, blocked:false};
+      }
       const html=await igFetchVia(target);
       const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);
       let r=igParseListing(html);

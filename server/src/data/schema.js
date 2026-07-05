@@ -182,6 +182,22 @@ export async function initDb(poolOverride) {
       PRIMARY KEY (user_id, day)
     )`);
 
+  // import_calls: Tageszähler des Amazon-Imports (Modul 3) — additive Migration
+  // (gleiches ALTER/IF-NOT-EXISTS-Muster wie die ai_*-Spalten oben).
+  await pool.query(`ALTER TABLE ai_usage ADD COLUMN IF NOT EXISTS import_calls INTEGER DEFAULT 0`);
+
+  // ── Amazon-Import-Cache (Owner: import — KONZEPT-Import-Listing.md, Modul 3) ──
+  // 1 Zeile je ASIN+Marktplatz (PK = Idempotenz: erneuter Import überschreibt).
+  // Frische-Grenze (24 h) wird als JS-Datum an das Repo übergeben (pg-mem-Konvention).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS import_cache (
+      asin        TEXT NOT NULL,
+      marketplace TEXT NOT NULL,
+      data        JSONB NOT NULL,                    -- geparstes Produkt (title, bullets, images, …)
+      fetched_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (asin, marketplace)
+    )`);
+
   // ── AI-Call-Telemetrie (Owner: intelligence) — Prompt-Versionierung & Kosten je Call ──
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ai_calls (
@@ -195,7 +211,7 @@ export async function initDb(poolOverride) {
       created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, ai_calls)');
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, import_cache, ai_calls)');
   return pool;
 }
 

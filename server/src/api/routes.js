@@ -12,6 +12,7 @@ import { renderInternal } from './internal.js';
 import { registerUser, loginUser, logoutSession, changePassword, authMiddleware } from '../services/auth/index.js';
 import { listSyncData, applySyncBatch } from '../services/sync/index.js';
 import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
+import { importProduct, proxyImage as proxyImportImage } from '../services/import/index.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -308,6 +309,37 @@ export function buildApi() {
       const { parts, generationConfig } = req.body || {};
       const r = await proxyImage({ parts, generationConfig, userId: req.user.id });
       sendAiResult(res, r, x => ({ mimeType: x.mimeType, dataBase64: x.dataBase64 }));
+    } catch (e) { fail(res, e); }
+  });
+
+  // ═══ Amazon-Import (KONZEPT-Import-Listing.md, Modul 3) ═══
+  // Nur Delegation an services/import; erwartbare Fehler kommen als {status, error}
+  // aus dem Service (400/403/429/502), alles Unerwartete über fail().
+
+  // POST /api/import/amazon (Bearer) – {urlOrAsin, marketplace?='de'} → geparstes Produkt
+  app.post('/api/import/amazon', authMiddleware, express.json(), async (req, res) => {
+    try {
+      const { urlOrAsin, marketplace } = req.body || {};
+      const r = await importProduct({ urlOrAsin, ...(marketplace !== undefined ? { marketplace } : {}), userId: req.user.id });
+      res.set('Cache-Control', 'no-store');
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      const { status, ...payload } = r;
+      res.json(payload);
+    } catch (e) { fail(res, e); }
+  });
+
+  // GET /api/import/amazon-image?url=… (Bearer) – Bild-Durchreiche (Whitelist, max. 8 MB).
+  // Erfolg streamt die Bytes mit Original-Content-Type; 1 h privat cachebar (Bildstudio
+  // lädt dasselbe Bild mehrfach — Browser-Cache statt erneuter Durchreiche).
+  app.get('/api/import/amazon-image', authMiddleware, async (req, res) => {
+    try {
+      const r = await proxyImportImage(req.query.url);
+      if (r.error) {
+        res.set('Cache-Control', 'no-store');
+        return res.status(r.status).json({ error: r.error });
+      }
+      res.set('Cache-Control', 'private, max-age=3600');
+      res.type(r.contentType).send(r.buffer);
     } catch (e) { fail(res, e); }
   });
 

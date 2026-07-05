@@ -13,3 +13,4 @@ export * from './repos/users.js';
 export * from './repos/sessions.js';
 export * from './repos/userData.js';
 export * from './repos/aiUsage.js';
+export * from './repos/importCache.js';

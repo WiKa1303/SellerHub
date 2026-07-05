@@ -369,3 +369,44 @@ Limits, heutige Nutzung je Nutzer) + Log je Call (Dauer, gekürzte Nutzer-ID, Ty
 ok/Fehler — fail-soft). Kein Intelligence-Modul (kein Registry-Eintrag), Code in
 `services/ai-proxy/` + `data/repos/aiUsage.js`. Tests: `test/ai-proxy.test.js`
 (Upstream gemockt) — Teil von `npm test`.
+
+
+# Amazon-Import (Modul 3)
+
+Zuverlässiger Amazon-Produktimport über das eigene Backend — ersetzt die wacklige
+clientseitige CORS-Proxy-Kette als ERSTE Stufe (Spezifikation:
+[`../KONZEPT-Import-Listing.md`](../KONZEPT-Import-Listing.md), Teil A). Nutzt die
+Bearer-Auth aus Modul 1. Der Server holt `amazon.de/dp/<ASIN>` mit realistischen
+Browser-Headern (Desktop-Chrome-UA, `Accept-Language: de-DE,de`), Timeout 20 s, und
+parst tolerant per Regex (dependency-frei, Muster von `services/crawler/html.js`;
+Entity-Dekodierung zentral in `core/html-text.js`): Titel, Bullets, Bilder
+(hiRes bevorzugt, max. 10, `landingImage`-Fallback), Marke, Beschreibung, Preis —
+fehlende Felder bleiben leer, KEIN Abbruch, solange der Titel gefunden wird.
+
+| Endpunkt | Auth | Zweck |
+|---|---|---|
+| `POST /api/import/amazon` | Bearer | `{urlOrAsin, marketplace?='de'}` → `{asin, marketplace, title, bullets[], description, brand, images[], price, fetchedAt, cached}`; ASIN aus `/dp/…`, `/gp/product/…` oder roher 10-stelliger ASIN |
+| `GET /api/import/amazon-image?url=…` | Bearer | Bild-Durchreiche für canvas-taint-freie Bytes im Bildstudio; NUR Whitelist-Hosts (`m.media-amazon.com`, `images-eu.ssl-images-amazon.com`, `images-na.ssl-images-amazon.com`), max. 8 MB, Content-Type durchgereicht, `Cache-Control: private, max-age=3600`; zählt nicht gegen Limits |
+
+Statuscodes: **401** ohne/mit ungültigem Token · **400** kaputte Eingabe/ASIN oder
+fremder Marktplatz · **403** Bild-Host außerhalb der Whitelist · **429** Tageslimit
+Frisch-Importe erreicht („morgen wieder") · **502** Bot-Block (Captcha-Marker oder
+HTTP ≠ 200 — ehrliche Meldung „Amazon blockiert gerade automatisierte Abrufe";
+der Client fällt auf seine alte Proxy-Kette zurück) bzw. Seite ohne Titel
+(„Seite nicht lesbar").
+
+Kostenbremsen (Radar-Konvention): **Cache** `import_cache` (PK `asin+marketplace`,
+Treffer < 24 h → `cached:true`, zählt NICHT gegen das Limit; Frische-Grenze als
+JS-Datum, pg-mem-Konvention) · **Tageslimit** je Nutzer über die additive Spalte
+`ai_usage.import_calls` (gleiches Repo/Muster wie Modul 2); der Zähler steigt VOR
+dem Fetch — ein fehlgeschlagener Abruf zählt bewusst (Schutz vor Retry-Stürmen).
+
+| ENV | Default | Zweck |
+|---|---|---|
+| `IMPORT_PER_DAY` | 20 | max. Frisch-Importe je Nutzer/Tag (Cache-Treffer zählen nicht) |
+
+Sichtbarkeit: Import-Zeile in der Sektion „KI-Proxy (Modul 2) & Amazon-Import (Modul 3)"
+in `/internal` (Import-Limit, Cache-Größe, `import_calls` heute je Nutzer) + Log je
+Import (Dauer, gekürzte Nutzer-ID, Bildanzahl, ok/Fehler). Kein Intelligence-Modul
+(kein Registry-Eintrag), Code in `services/import/` + `data/repos/importCache.js`.
+Tests: `test/import.test.js` (Amazon-Fetch gemockt) — Teil von `npm test`.

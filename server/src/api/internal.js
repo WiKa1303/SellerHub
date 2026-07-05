@@ -2,7 +2,7 @@
 // Read-only, server-gerendertes HTML, kein Auth (interner Prototyp — NICHT öffentlich deployen
 // ohne Schutz; Hinweis im Seitenkopf). Keine neue Business-Logik: nur Lese-Queries
 // + Wiederverwendung bestehender Repository-/Service-Funktionen.
-import { db, queryTrends, queryAlerts, queryNews, queryForecasts, usageToday } from '../data/db.js';
+import { db, queryTrends, queryAlerts, queryNews, queryForecasts, usageToday, importCacheCount } from '../data/db.js';
 import { config } from '../core/config.js';
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { crawlState } from '../services/crawler/run.js';
@@ -43,8 +43,8 @@ export async function renderInternal(req, res) {
       db().query(`SELECT count(*) AS n FROM user_data`),
     ]);
 
-    // ── KI-PROXY (Modul 2, read-only): Key konfiguriert, Limits, heutige Nutzung je Nutzer ──
-    const aiUsage = await usageToday();
+    // ── KI-PROXY (Modul 2) + AMAZON-IMPORT (Modul 3, read-only): Limits, heutige Nutzung, Cache-Größe ──
+    const [aiUsage, importCache] = await Promise.all([usageToday(), importCacheCount()]);
 
     // ── INTELLIGENCE: letzte 20 analysierte Artikel ──
     const analyzed = (await db().query(
@@ -107,15 +107,19 @@ export async function renderInternal(req, res) {
 <div class="kpi"><b>${num(cSyncKeys.rows[0].n)}</b>Sync-Keys (user_data)</div>
 <p class="muted">Read-only-Zähler. Auth ist bewusst KEIN Intelligence-Modul (kein Registry-Eintrag) — Endpunkte unter /api/auth/* und /api/sync.</p>
 
-<h2>KI-Proxy (Modul 2)</h2>
+<h2>KI-Proxy (Modul 2) &amp; Amazon-Import (Modul 3)</h2>
 <div class="kpi"><b>${config.geminiApiKey ? 'ja' : 'nein → 503'}</b>GEMINI_API_KEY konfiguriert</div>
 <div class="kpi"><b>${num(config.aiProxyTextPerDay)}</b>Text-Limit/Tag</div>
 <div class="kpi"><b>${num(config.aiProxyImagePerDay)}</b>Bild-Limit/Tag</div>
-<table><tr><th>Nutzer</th><th>Text-Calls heute</th><th>Bild-Calls heute</th></tr>
+<div class="kpi"><b>${num(config.importPerDay)}</b>Import-Limit/Tag</div>
+<div class="kpi"><b>${num(importCache)}</b>Import-Cache (Produkte)</div>
+<table><tr><th>Nutzer</th><th>Text-Calls heute</th><th>Bild-Calls heute</th><th>Import-Calls heute</th></tr>
 ${aiUsage.map(u => `<tr><td class="mono">${esc(u.email)}</td><td>${num(u.text_calls)} / ${num(config.aiProxyTextPerDay)}</td>
-  <td>${num(u.image_calls)} / ${num(config.aiProxyImagePerDay)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">heute noch keine Nutzung</td></tr>'}
+  <td>${num(u.image_calls)} / ${num(config.aiProxyImagePerDay)}</td>
+  <td>${num(u.import_calls)} / ${num(config.importPerDay)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">heute noch keine Nutzung</td></tr>'}
 </table>
-<p class="muted">Endpunkte: POST /api/ai/text und /api/ai/image (Bearer, Modul 1). Ohne Server-Key antwortet der Proxy 503 — Clients fallen auf eigenen Key/Pollinations zurück (KONZEPT-KI-Proxy.md).</p>
+<p class="muted">Endpunkte: POST /api/ai/text und /api/ai/image (Modul 2) · POST /api/import/amazon und GET /api/import/amazon-image (Modul 3) — alle Bearer (Modul 1).
+Ohne Server-Key antwortet der KI-Proxy 503; Import-Cache-Treffer (&lt; 24 h) zählen nicht gegen das Import-Limit (KONZEPT-Import-Listing.md).</p>
 
 <h2>Prompts — Registry & Versionen</h2>
 <table><tr><th>prompt_key</th><th>Version</th><th>Modell</th><th>effort</th><th>temperature</th><th>max_tokens</th><th>Beschreibung</th></tr>

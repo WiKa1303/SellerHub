@@ -32,6 +32,10 @@ export const config = {
   aiProxyTextPerDay: parseInt(process.env.AI_PROXY_TEXT_PER_DAY || '200', 10),
   aiProxyImagePerDay: parseInt(process.env.AI_PROXY_IMAGE_PER_DAY || '60', 10),
 
+  // ═══ Amazon-Import (Modul 3, KONZEPT-Import-Listing.md) ═══
+  // Kostenbremse: max. FRISCH-Importe je Nutzer/Tag (Cache-Treffer zählen nicht)
+  importPerDay: parseInt(process.env.IMPORT_PER_DAY || '20', 10),
+
   // ═══ Push-Zustellung (Phase 5) ═══
   // Beide Kanäle optional & fail-soft: ohne Konfiguration überspringt der Dispatcher
   // sauber (Alerts bleiben in der Queue sichtbar). Beide gleichzeitig sind erlaubt.
@@ -87,7 +91,8 @@ export function validateConfig() {
   for (const [k, v] of Object.entries({ PORT: config.port, SCORE_THRESHOLD: config.scoreThreshold,
     MAX_AGE_DAYS: config.maxAgeDays, AI_MAX_PER_RUN: config.aiMaxPerRun,
     AI_MAX_ATTEMPTS: config.aiMaxAttempts, AI_CONCURRENCY: config.aiConcurrency,
-    AI_PROXY_TEXT_PER_DAY: config.aiProxyTextPerDay, AI_PROXY_IMAGE_PER_DAY: config.aiProxyImagePerDay })) {
+    AI_PROXY_TEXT_PER_DAY: config.aiProxyTextPerDay, AI_PROXY_IMAGE_PER_DAY: config.aiProxyImagePerDay,
+    IMPORT_PER_DAY: config.importPerDay })) {
     if (!Number.isFinite(v) || v <= 0) problems.push(`${k} muss eine positive Zahl sein (ist: ${v})`);
   }
   if (config.crawlCron.trim().split(/\s+/).length !== 5) problems.push(`CRAWL_CRON sieht nicht nach Cron-Syntax aus: "${config.crawlCron}"`);
