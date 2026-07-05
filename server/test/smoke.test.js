@@ -31,6 +31,13 @@ t('Score: heiße Meldung ≥ 80', hot.score >= 80, hot.score);
 const cold = scoreItem({ title: 'Neues Rezept für Apfelkuchen', summary: 'Backen im Herbst', publishDate: new Date(Date.now() - 20 * 864e5).toISOString(), sourceWeight: 1 });
 t('Score: irrelevante Meldung < 25', cold.score < 25, cold.score);
 t('Score: nie > 100', scoreItem({ title: Object.values({ a: 'gebühr gpsr oss zoll frist pflicht gesetz fba prime amazon marktplatz' }).join(' '), summary: 'abmahnung verordnung haftung sperrung', publishDate: new Date().toISOString(), sourceWeight: 3 }).score <= 100);
+// Regressionen 5.7.2026: Substring-Treffer & Off-Topic-Rauschen (echte t3n-Fälle aus Produktion)
+const befr = scoreItem({ title: 'Krankmeldung und Befristung: Reformpaket baut mehr Druck auf, statt ab', summary: 'Arbeitsrecht-Reform', publishDate: new Date().toISOString(), sourceWeight: 1 });
+t('Score: „Befristung" triggert weder frist-Keyword noch Impact-Boost (Gate: kw=0)', befr.kw === 0, JSON.stringify(befr));
+const midl = scoreItem({ title: 'Midlife-Crisis: Warum viele in der Mitte ihrer Karriere besonders unglücklich sind', summary: 'Psychologie im E-Commerce-Zeitalter', publishDate: new Date().toISOString(), sourceWeight: 1 });
+t('Score: Karriere/Psychologie-Artikel fällt trotz ctx-Wort unters Gate', midl.kw === 0, JSON.stringify(midl));
+const echt = scoreItem({ title: 'Neue Frist: Verpackungsgesetz-Registrierung wird Pflicht für Händler', summary: 'Amazon informiert Seller', publishDate: new Date().toISOString(), sourceWeight: 2 });
+t('Score: echte Fristen-Meldung bleibt heiß (kw>0, Impact-Boost)', echt.kw > 0 && echt.score >= 70, JSON.stringify(echt));
 
 // ── Unit: Dedupe ──
 t('urlHash stabil', urlHash('https://a.de/x') === urlHash('https://a.de/x') && urlHash('https://a.de/x').length === 64);

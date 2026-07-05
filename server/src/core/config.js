@@ -47,8 +47,18 @@ export const KEYWORDS = {
   ],
 };
 
+// Off-Topic-Begriffe: klar seller-fremde Themen (Karriere-/Lifestyle-Rauschen aus
+// Generalisten-Quellen wie t3n). Jeder Treffer zieht Keyword-Punkte ab — Artikel ohne
+// starke Seller-Keywords fallen damit unters Gate. Bewusst eng gehalten, damit keine
+// echten Händler-Themen verloren gehen.
+export const KEYWORDS_NEGATIVE = [
+  'karriere', 'gehalt', 'bewerbung', 'burnout', 'midlife', 'psycholog',
+  'achtsamkeit', 'dating', 'horoskop', 'krankmeldung', 'work-life',
+];
+
 // Fristen-/Handlungs-Muster → Impact-Boost (+10)
-export const IMPACT_PATTERN = /(frist|stichtag|ab dem \d|müssen bis|verpflichtend|inkrafttreten|tritt in kraft|verboten|abmahn|deadline)/i;
+// \bfrist statt frist: „Befristung" (Arbeitsrecht) darf den Boost nicht auslösen.
+export const IMPACT_PATTERN = /(\bfrist|stichtag|ab dem \d|müssen bis|verpflichtend|inkrafttreten|tritt in kraft|verboten|abmahn|deadline)/i;
 
 // Event-Erkennung (kind = 'event')
 export const EVENT_PATTERN = /(konferenz|kongress|messe|event|stammtisch|meetup|networking|seminar|webinar|workshop|summit|barcamp|treffen|ticket)/i;
