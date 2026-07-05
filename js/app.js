@@ -268,9 +268,10 @@ function renderBackupHint(){
 }
 
 // ─── Seller-Radar-Widget (MVP): Top-News + Events aus dem Radar-Backend ───
-// Aktiviert sich nur, wenn eine API-URL gesetzt ist:
+// Standard-API = Live-Backend auf Railway; überschreibbar (z. B. lokales Backend) via:
 //   localStorage.setItem('wika_radar_api','https://<radar-api>')  (s. server/README.md)
-function radarApi(){try{return (localStorage.getItem('wika_radar_api')||'').replace(/\/+$/,'');}catch(e){return '';}}
+var RADAR_API_DEFAULT='https://radar-production-388a.up.railway.app';
+function radarApi(){try{return (localStorage.getItem('wika_radar_api')||RADAR_API_DEFAULT).replace(/\/+$/,'');}catch(e){return RADAR_API_DEFAULT;}}
 function radarRelTime(iso){
   var ms=Date.now()-new Date(iso).getTime();
   var h=Math.round(ms/36e5);
