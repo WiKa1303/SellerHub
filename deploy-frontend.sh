@@ -4,17 +4,17 @@
 # (nicht: backups/, server/, *.md, .claude/, node_modules/, .git/)
 #
 # Nutzung:
-#   WEBSPACE_HOST=hostingXXXXXX.netcup.net WEBSPACE_USER=hostingXXXXXX ./deploy-frontend.sh
+#   ./deploy-frontend.sh          (Defaults: a2fa9.netcup.net, hosting120520, amzsellerhub.de/httpdocs)
 # Optional:
-#   WEBSPACE_DIR=httpdocs   Zielverzeichnis auf dem Server (Standard: httpdocs)
+#   WEBSPACE_DIR=…   Zielverzeichnis überschreiben (Standard: amzsellerhub.de/httpdocs)
 #
 # Die Zugangsdaten stehen im netcup CCP unter Webhosting → Zugangsdaten (SSH/SFTP).
 # Passwort wird interaktiv abgefragt (SSH-Key geht natürlich auch).
 set -euo pipefail
 
-HOST="${WEBSPACE_HOST:?WEBSPACE_HOST fehlt (z. B. hostingXXXXXX.netcup.net)}"
-USER="${WEBSPACE_USER:?WEBSPACE_USER fehlt (z. B. hostingXXXXXX)}"
-DIR="${WEBSPACE_DIR:-httpdocs}"
+HOST="${WEBSPACE_HOST:-a2fa9.netcup.net}"
+USER="${WEBSPACE_USER:-hosting120520}"
+DIR="${WEBSPACE_DIR:-amzsellerhub.de/httpdocs}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
 echo "→ Lade Frontend nach $USER@$HOST:$DIR …"
