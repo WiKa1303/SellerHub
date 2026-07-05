@@ -300,9 +300,10 @@ function renderRadarWidget(){
   if(cached)el.innerHTML=radarWidgetHtml(cached); // sofort malen (Login-Moment), dann frisch laden
   Promise.all([
     fetch(api+'/api/dashboard-feed'+radarProfileParams()).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
-    fetch(api+'/api/market-intelligence').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    fetch(api+'/api/market-intelligence').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch(api+'/api/forecast?limit=3').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function(res){
-    var d=res[0];d.mi=res[1];
+    var d=res[0];d.mi=res[1];d.fc=res[2];
     try{localStorage.setItem('wika_radar_cache',JSON.stringify(d));}catch(e){}
     el.innerHTML=radarWidgetHtml(d);
   }).catch(function(){
@@ -344,6 +345,22 @@ function radarWidgetHtml(d){
         (tr.recommended_action?'<div style="font-size:11px;color:var(--tx2);margin-top:1px">→ '+esc(tr.recommended_action)+'</div>':'')+
       '</div>';
     });
+    h+='</div>';
+  }
+  // ── Trend-Prognose (Phase 5): Holt-Forecast über die Themen-Zeitreihen; erscheint erst, wenn genug Tage gesammelt sind ──
+  if(d.fc&&d.fc.items&&d.fc.items.length){
+    var FC_DIR={steigend:['gn','↗ steigend'],fallend:['rd','↘ fallend'],stabil:['tx3','→ stabil']};
+    h+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:12px">';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📈 Trend-Prognose · nächste 7 Tage</div>';
+    d.fc.items.slice(0,3).forEach(function(f){
+      var dir=FC_DIR[f.direction]||FC_DIR.stabil;
+      h+='<div style="padding:5px 0;border-top:1px solid var(--bd)" title="'+esc(f.reasoning||'')+'">'+
+        '<span style="font-size:12px;font-weight:700;color:var(--tx)">'+esc(f.topic_name)+'</span> '+
+        '<span style="color:var(--'+dir[0]+');font-size:11px;font-weight:700">'+dir[1]+'</span>'+
+        '<span style="color:var(--tx3);font-size:10.5px"> · Konfidenz '+(f.confidence!=null?f.confidence:'–')+' %</span>'+
+      '</div>';
+    });
+    if(d.fc.meta&&d.fc.meta.hint)h+='<div style="font-size:11px;color:var(--tx2);margin-top:5px">🤖 '+esc(d.fc.meta.hint)+'</div>';
     h+='</div>';
   }
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">';
