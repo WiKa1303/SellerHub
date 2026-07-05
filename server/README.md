@@ -44,7 +44,7 @@ Schnelltest der API: `curl localhost:8787/api/dashboard-feed`
 
 ## Scheduling-Logik
 
-- **Ein Prozess:** `node-cron` läuft im API-Prozess (`CRAWL_CRON`, Standard `0 6,15 * * *` = 6:00 + 15:00). News sind kein Echtzeit-Problem — 2×/Tag ist für Seller genau richtig und maximal quellen-schonend.
+- **Ein Prozess:** `node-cron` läuft im API-Prozess (`CRAWL_CRON`, Standard `0 6,15 * * *` = 6:00 + 15:00 in der **Server-Zeitzone** — Container sind meist UTC, deshalb `TZ=Europe/Berlin` setzen, sonst verschiebt sich alles um 2 h). News sind kein Echtzeit-Problem — 2×/Tag ist für Seller genau richtig und maximal quellen-schonend.
 - **Boot-Crawl:** Nach jedem Deploy einmal sofort (`CRAWL_ON_BOOT=true`), damit die DB nie leer ist.
 - **Überlapp-Schutz:** `crawlState.running` verhindert parallele Läufe.
 - **Alternative für Sleep-Hosting** (Render Free schläft ein): Cron extern triggern — `npm run crawl` als Railway-Cron/GitHub-Action, oder `POST /api/admin/crawl` (Header `X-Api-Key`) von einem Uptime-Pinger.
@@ -72,7 +72,7 @@ Neue Quelle vorher IMMER per `curl -sL <url> | head` real verifizieren (RSS: `<r
 
 1. Repo verbinden, Root-Verzeichnis `server/` wählen.
 2. PostgreSQL-Addon anlegen → `DATABASE_URL` wird gesetzt (Schema legt sich beim Start selbst an).
-3. ENV setzen: `ADMIN_KEY`, optional `CRAWL_CRON`, `SCORE_THRESHOLD`.
+3. ENV setzen: `ADMIN_KEY`, `TZ=Europe/Berlin`, optional `CRAWL_CRON`, `SCORE_THRESHOLD`.
 4. Start-Command: `npm start`. Fertig — `GET /api/health` zum Verifizieren.
 
 DSGVO-Hinweis: Es werden ausschließlich öffentliche Artikel-Metadaten gespeichert (Titel, ≤300-Zeichen-Anriss, Link, Datum) — keine Personendaten. EU-Region beim Hoster wählen.
