@@ -45,7 +45,7 @@ npm run crawl         # einmaliger Crawl für externe Scheduler
 
 1. RSS-URL real verifizieren (`curl -sL <url> | head -c 300` → `<rss`/`<feed`).
 2. Eintrag in `data/sources.js` mit `weight` (0.5–3.0 = FBA-Nähe/Vertrauen) und `region`.
-3. HTML-Quellen: `type:'html'` + Selektor-Parser in `services/crawler/` ergänzen (noch nicht gebaut — erster Umsetzer definiert das Muster, `selector_json` ist im Konzept vorgesehen).
+3. HTML-Quellen: `type:'html'` + `selector_json` (Schema im Dateikopf von `services/crawler/html.js`; nur statische Seiten MIT Datum je Artikel — vorher per `curl` verifizieren).
 4. `npm test` — der Smoke-Test crawlt live und zeigt die Quelle in der Statistik.
 
 ## Häufige Fallen

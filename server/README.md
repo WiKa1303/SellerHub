@@ -17,12 +17,12 @@ server/
 │   ├── data/                 ← schema.js (DDL) · repos/{items,trends,alerts,strategy}.js · db.js (Fassade) · sources.js
 │   ├── api/routes.js         ← REST: news/events/dashboard-feed/trends/alerts/market-intelligence/strategy/health
 │   └── services/
-│       ├── crawler/          ← rss.js · normalize.js · scoring.js · run.js
+│       ├── crawler/          ← rss.js · html.js · normalize.js · scoring.js · run.js
 │       ├── intelligence/     ← AI-LAYER: registry.js (Erweiterungspunkt!) · analyze.js · queue.js
 │       │                        topics.js · engine.js · interpret.js · strategy.js
 │       ├── alerts/rules.js   ← Risk Shield (deterministisches Regelwerk)
 │       └── feed/profile.js   ← Personal Intelligence Feed (Profil-Ranking)
-├── test/                     ← smoke · ai · trends · strategy (pg-mem, KI gemockt)
+├── test/                     ← smoke · html · ai · trends · strategy (pg-mem, KI gemockt)
 ├── .env.example
 └── package.json
 ```
@@ -49,6 +49,25 @@ Schnelltest der API: `curl localhost:8787/api/dashboard-feed`
 - **Überlapp-Schutz:** `crawlState.running` verhindert parallele Läufe.
 - **Alternative für Sleep-Hosting** (Render Free schläft ein): Cron extern triggern — `npm run crawl` als Railway-Cron/GitHub-Action, oder `POST /api/admin/crawl` (Header `X-Api-Key`) von einem Uptime-Pinger.
 
+## Quellen (`data/sources.js`)
+
+Zwei Quellen-Typen, beide liefern denselben Roh-Item-Kontrakt an `crawler/run.js` (Fehler je Quelle fail-soft in der Crawl-Statistik):
+
+- **`type:'rss'`** — RSS 2.0/Atom via `crawler/rss.js` (Standardfall).
+- **`type:'html'`** — statische HTML-Listenseiten via `crawler/html.js`, dependency-frei (Regex/String-basiert, kein cheerio/jsdom). Konfiguration je Quelle über `selector_json`; vollständiges Schema im Dateikopf von `html.js`. Beispiel (aktive Quelle IT-Recht Kanzlei):
+
+```js
+{ id: 'itrecht', name: 'IT-Recht Kanzlei', type: 'html',
+  url: 'https://www.it-recht-kanzlei.de/Newsarchiv.php', region: 'DE', weight: 3.0, kindHint: 'news',
+  selector_json: {
+    item: '<div class="newsitem">',  // Pflicht: Start-Marker für den Item-Split (String, kein Regex)
+    // Defaults: erstes <a href> mit Text = Link+Titel · Datum 'auto' (<time datetime> →
+    // dt. Datum 03.07.2026 → ISO-Datum) · optional title:{tag:'h2'}, summary:{tag:'p'}, maxItems
+  } }
+```
+
+Neue Quelle vorher IMMER per `curl -sL <url> | head` real verifizieren (RSS: `<rss`/`<feed`; HTML: statische Artikel-Liste MIT Datum je Artikel) — JS-gerenderte Seiten funktionieren nicht (Playwright erst, wenn eine Kernquelle es zwingend braucht).
+
 ## Deployment (Railway / Render)
 
 1. Repo verbinden, Root-Verzeichnis `server/` wählen.
@@ -73,7 +92,7 @@ Danach zeigt der Login Top-5-News + Top-3-Events aus `GET /api/dashboard-feed`. 
 | Auslöser | Maßnahme |
 |---|---|
 | Mehr Leser | Nichts tun — `Cache-Control: max-age=300` steht schon; CDN davor (Cloudflare) macht Reads gratis |
-| Mehr Quellen | Nur `sources.js` erweitern; HTML-Quellen: `type:'html'` + Selektor-Parser in `crawler/` ergänzen (Playwright erst, wenn eine Kernquelle JS-gerendert ist) |
+| Mehr Quellen | Nur `sources.js` erweitern — RSS und statisches HTML (`type:'html'` + `selector_json`) werden unterstützt, siehe Abschnitt „Quellen" |
 | Crawl blockiert API spürbar | Worker abtrennen: gleicher Code, zweiter Prozess mit `npm run crawl` + externem Cron |
 | Nutzer-Accounts/gespeicherte Filter | Jetzt erst lohnt sich mehr DB: Tabelle `user_prefs`, ggf. managed Postgres skalieren |
 | Feed-Qualität | `SCORE_THRESHOLD` justieren; Keyword-Lexikon in `config.js` pflegen; später LLM-Klassifikation als Batch-Schritt NACH dem Crawl (Ausfall unkritisch) |

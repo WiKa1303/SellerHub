@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "crawl": "node src/crawl-once.js",
-    "test": "node test/smoke.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js",
+    "test": "node test/smoke.test.js && node test/html.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js",
+    "test:html": "node test/html.test.js",
     "test:ai": "node test/ai.test.js",
     "test:trends": "node test/trends.test.js",
     "test:strategy": "node test/strategy.test.js",

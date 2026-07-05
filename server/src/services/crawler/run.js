@@ -2,6 +2,7 @@
 import { SOURCES } from '../../data/sources.js';
 import { config } from '../../core/config.js';
 import { fetchFeed } from './rss.js';
+import { fetchHtmlList } from './html.js';
 import { canonicalUrl, cleanSummary, normalizeTitle, parseDate, detectKind, extractEventDate } from './normalize.js';
 import { scoreItem } from './scoring.js';
 import { urlHash, isDuplicateTitle } from '../../core/dedupe.js';
@@ -26,8 +27,11 @@ export async function runCrawl() {
       const s = { fetched: 0, kept: 0, dupes: 0, old: 0, lowScore: 0, error: null };
       stats[src.id] = s;
       try {
-        if (src.type !== 'rss') { s.error = 'Typ noch nicht implementiert'; continue; }
-        const raw = await fetchFeed(src.url);
+        // Verzweigung nach Quellen-Typ — beide liefern denselben Roh-Item-Kontrakt
+        let raw;
+        if (src.type === 'rss') raw = await fetchFeed(src.url);
+        else if (src.type === 'html') raw = await fetchHtmlList(src.url, src.selector_json);
+        else { s.error = `Quellen-Typ "${src.type}" nicht implementiert`; continue; }
         s.fetched = raw.length;
 
         for (const r of raw) {
