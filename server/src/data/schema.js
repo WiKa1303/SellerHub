@@ -170,6 +170,18 @@ export async function initDb(poolOverride) {
       PRIMARY KEY (user_id, key)
     )`);
 
+  // ── KI-Proxy-Kontingente (Owner: ai-proxy — KONZEPT-KI-Proxy.md, Modul 2) ──
+  // 1 Zeile je Nutzer und Tag; idempotentes Increment per ON CONFLICT UPDATE.
+  // day wird als YYYY-MM-DD aus JS übergeben (pg-mem-Konvention: keine SQL-Datums-Arithmetik).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ai_usage (
+      user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      day         DATE NOT NULL,
+      text_calls  INTEGER NOT NULL DEFAULT 0,
+      image_calls INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, day)
+    )`);
+
   // ── AI-Call-Telemetrie (Owner: intelligence) — Prompt-Versionierung & Kosten je Call ──
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ai_calls (
@@ -183,7 +195,7 @@ export async function initDb(poolOverride) {
       created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_calls)');
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, ai_calls)');
   return pool;
 }
 

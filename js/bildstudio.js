@@ -5,6 +5,20 @@
   const igToast=(m,err)=>{ if(window.toast){window.toast((err?"⚠️ ":"")+m);} };
   const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-");
 
+  // ── Cloud-KI-Proxy (läuft über dieselbe API wie der Seller-Radar) ──
+  // bildstudio.js lädt VOR app.js → eigene lokale Kopie der radarApi()-Logik, keine Abhängigkeit.
+  const IG_API_DEFAULT="https://radar-production-388a.up.railway.app";
+  function igApi(){try{return (localStorage.getItem("wika_radar_api")||IG_API_DEFAULT).replace(/\/+$/,"");}catch(e){return IG_API_DEFAULT;}}
+  function igSyToken(){try{return localStorage.getItem("sy_token")||"";}catch(e){return "";}}
+  let igQuotaToastShown=false; // 429-Hinweis nur einmal pro Sitzung
+  function igProxyWarn(kind,status){
+    console.warn("KI-Proxy ("+kind+"): HTTP "+status+" – nutze Fallback-Kette.");
+    if(status===429 && !igQuotaToastShown){
+      igQuotaToastShown=true;
+      igToast("KI-Tageskontingent erreicht — nutze eigenen Key oder Gratis-Modus",true);
+    }
+  }
+
   let mainImgs=[], packImg=null, useImg=null, usps=["","",""], igLastResults=[], igCtx=null, igCards=[], igLbRef=null, igCompetitor=null;
 
   const VISUALS=[
@@ -124,10 +138,14 @@
   // ── Gemini-Key: Status, Banner & Auto-Öffnen bei Überlast ──
   function igHasKey(){return !!(($("igApikey").value||localStorage.getItem("gemini_key")||"").trim());}
   function igUpdateKeyUI(){
-    const has=igHasKey();
-    const ok=$("igKeyOk");if(ok)ok.style.display=has?"block":"none";
+    const has=igHasKey(), cloud=!!igSyToken(); // cloud beeinflusst NUR den Hinweistext, nie igHasKey()
+    const ok=$("igKeyOk");
+    if(ok){
+      ok.style.display=(has||cloud)?"block":"none";
+      ok.textContent=has?"✓ Key gespeichert":"☁️ KI läuft über dein SellerHub-Konto — eigener Key optional";
+    }
     const ban=$("igKeyBanner");
-    if(ban)ban.style.display=(!has && sessionStorage.getItem("ig_keyban_x")!=="1")?"flex":"none";
+    if(ban)ban.style.display=(!has && !cloud && sessionStorage.getItem("ig_keyban_x")!=="1")?"flex":"none";
   }
   function igRevealKeyBox(){
     const box=$("igKeyBox");if(!box)return;
@@ -532,6 +550,18 @@
 
   // ── KI-Titel-Verbesserung (Schritt 1) ──
   async function igGenText(promptText){
+    // Stufe 0: Cloud-Proxy (SellerHub-Konto) – der Gemini-Key bleibt auf dem Server
+    const tok=igSyToken();
+    if(tok){
+      try{
+        const res=await fetch(igApi()+"/api/ai/text",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({prompt:promptText})});
+        if(res.ok){
+          const d=await res.json();
+          if(d && d.text)return d.text;
+          console.warn("KI-Proxy (Text): leere Antwort – nutze Fallback-Kette.");
+        }else igProxyWarn("Text",res.status);
+      }catch(e){console.warn("KI-Proxy (Text) nicht erreichbar – nutze Fallback-Kette.",e);}
+    }
     const key=($("igApikey").value||localStorage.getItem("gemini_key")||"").trim();
     if(key){
       const ep="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+encodeURIComponent(key);
@@ -544,6 +574,7 @@
     }
     return await igPollinations(promptText);
   }
+  window.igGenText=igGenText;
   // Kostenloser Fallback ohne Key: zuerst zuverlässiger POST-Chat-Endpoint, dann GET als Fallback
   async function igPollinations(promptText){
     const seed=Math.floor(Math.random()*1e6);
@@ -787,7 +818,18 @@
     ph.innerHTML='<div class="ig-spin"></div>';st.textContent="…";if(act)act.style.visibility="hidden";
     try{
       const o={title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang,imgCount:igCtx.imgs.length,hasPack:igCtx.hasPack,hasUse:igCtx.hasUse};
-      let url = igCtx.provider==="gemini" ? await generateOne(buildPrompt(v,o),igCtx.imgs,igCtx.key) : await generatePollinations(v,{title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang},i);
+      let url;
+      if(igCtx.provider==="gemini"){
+        try{url=await generateOne(buildPrompt(v,o),igCtx.imgs,igCtx.key);}
+        catch(err){
+          if(igCtx.key)throw err; // eigener Key → Fehler wie bisher anzeigen
+          // Ohne eigenen Key (Cloud-Proxy fehlgeschlagen) → Pollinations-Fallback
+          console.warn("Cloud-KI (Bild) fehlgeschlagen – Fallback auf Pollinations:",err&&err.message);
+          url=await generatePollinations(v,{title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang},i);
+        }
+      }else{
+        url=await generatePollinations(v,{title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang},i);
+      }
       if(v.key==="main")url=await igCropSquare(url); // NUR Hauptbild: garantiert exakt 1:1
       ph.innerHTML='<img src="'+url+'">';st.textContent="✓";el._url=url;if(act)act.style.visibility="visible";
       igSetResult(v.nm,url);return true;
@@ -816,7 +858,7 @@
   $("igGenBtn").onclick=async()=>{
     const provider=$("igProvider").value;
     const key=$("igApikey").value.trim();
-    if(provider==="gemini" && !key){igToast("Bitte Gemini API-Key eingeben (⚙️ unten im Panel).",true);$("igKeyBox").open=true;return;}
+    if(provider==="gemini" && !key && !igSyToken()){igToast("Bitte Gemini API-Key eingeben (⚙️ unten im Panel).",true);$("igKeyBox").open=true;return;}
     if(provider==="pollinations" && mainImgs.length>0){
       if(!confirm("Achtung: Im Pollinations-Vorschaumodus werden deine hochgeladenen Produktfotos NICHT verwendet – die Bilder werden nur aus dem Text erfunden.\n\nFür echte, produktgenaue Listing-Bilder wechsle zu „Gemini Nano Banana\".\n\nTrotzdem als Stil-Vorschau fortfahren?"))return;
     }
@@ -914,6 +956,19 @@
   async function generateOne(promptText,imgs,key){
     const parts=[{text:promptText}];
     imgs.forEach(img=>parts.push({inline_data:{mime_type:img.mime,data:img.base64}}));
+    // Stufe 0: Cloud-Proxy (SellerHub-Konto) – identisches parts-Array wie der direkte Call
+    const tok=igSyToken();
+    if(tok){
+      try{
+        const res=await fetch(igApi()+"/api/ai/image",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({parts:parts,generationConfig:{responseModalities:["IMAGE"]}})});
+        if(res.ok){
+          const d=await res.json();
+          if(d && d.dataBase64)return "data:"+(d.mimeType||"image/png")+";base64,"+d.dataBase64;
+          console.warn("KI-Proxy (Bild): leere Antwort – nutze Fallback-Kette.");
+        }else igProxyWarn("Bild",res.status);
+      }catch(e){console.warn("KI-Proxy (Bild) nicht erreichbar – nutze Fallback-Kette.",e);}
+    }
+    if(!key)throw new Error("Cloud-KI gerade nicht verfügbar und kein eigener Gemini-Key hinterlegt");
     const res=await fetch(ENDPOINT+"?key="+encodeURIComponent(key),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts}],generationConfig:{responseModalities:["IMAGE"]}})});
     if(!res.ok){let m="HTTP "+res.status;try{m=(await res.json()).error?.message||m;}catch(e){}throw new Error(m);}
     const data=await res.json();

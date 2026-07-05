@@ -11,6 +11,7 @@ import { log } from '../core/logger.js';
 import { renderInternal } from './internal.js';
 import { registerUser, loginUser, logoutSession, changePassword, authMiddleware } from '../services/auth/index.js';
 import { listSyncData, applySyncBatch } from '../services/sync/index.js';
+import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -32,6 +33,8 @@ export function buildApi() {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key, X-Tenant-Id, Authorization');
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+    // Kontingent-Header des KI-Proxys muss im Browser lesbar sein (CORS versteckt ihn sonst)
+    res.set('Access-Control-Expose-Headers', 'X-Quota-Remaining');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     next();
   });
@@ -273,6 +276,38 @@ export function buildApi() {
       if (r.error && r.status !== 409) return res.status(r.status).json({ error: r.error });
       if (r.status === 409) return res.status(409).json({ error: r.error, conflicts: r.conflicts, applied: r.applied });
       res.json({ ok: true, items: r.items });
+    } catch (e) { fail(res, e); }
+  });
+
+  // ═══ KI-Proxy (KONZEPT-KI-Proxy.md, Modul 2) ═══
+  // Nur Delegation an services/ai-proxy; erwartbare Fehler kommen als {status, error}
+  // aus dem Service (400/413/429/502/503), alles Unerwartete über fail().
+  // X-Quota-Remaining bei jedem gezählten Call (auch 429/502 — Konzept: „bei jedem Call").
+
+  function sendAiResult(res, r, payload) {
+    res.set('Cache-Control', 'no-store');
+    if (r.remaining !== undefined) res.set('X-Quota-Remaining', String(r.remaining));
+    if (r.error) return res.status(r.status).json({ error: r.error });
+    res.json(payload(r));
+  }
+
+  // POST /api/ai/text (Bearer) – {prompt} → {text}
+  app.post('/api/ai/text', authMiddleware, express.json(), async (req, res) => {
+    try {
+      const r = await proxyText({ prompt: (req.body || {}).prompt, userId: req.user.id });
+      sendAiResult(res, r, x => ({ text: x.text }));
+    } catch (e) { fail(res, e); }
+  });
+
+  // POST /api/ai/image (Bearer) – {parts, generationConfig?} → {mimeType, dataBase64}
+  // Body-Limit 25 MB NUR hier (Produktfotos inline als Base64) — nicht global.
+  // Parser-Limit knapp über dem 25-MB-parts-Limit des Services, damit der 413 aus
+  // UNSERER Prüfung kommt (ehrliche deutsche Meldung statt Parser-Abbruch — Muster /api/sync).
+  app.post('/api/ai/image', authMiddleware, express.json({ limit: '26mb' }), async (req, res) => {
+    try {
+      const { parts, generationConfig } = req.body || {};
+      const r = await proxyImage({ parts, generationConfig, userId: req.user.id });
+      sendAiResult(res, r, x => ({ mimeType: x.mimeType, dataBase64: x.dataBase64 }));
     } catch (e) { fail(res, e); }
   });
 

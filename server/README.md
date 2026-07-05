@@ -335,3 +335,37 @@ Intelligence-Modul (kein Registry-Eintrag); Zähler read-only in `/internal`.
 Auth via Header `Authorization: Bearer <token>` (CORS erlaubt Authorization + PUT).
 Tabellen: `users`, `sessions`, `user_data` (Optimistic Locking über `version`,
 `size_bytes` für die Limit-Prüfung). Tests: `test/auth.test.js` — Teil von `npm test`.
+
+
+# KI-Proxy (Modul 2)
+
+Gemini-Aufrufe des Bildstudios laufen über den Server — der `GEMINI_API_KEY` verlässt nie
+den Server (Spezifikation: [`../KONZEPT-KI-Proxy.md`](../KONZEPT-KI-Proxy.md)). Nutzt die
+Bearer-Auth aus Modul 1. Ohne Server-Key antwortet der Proxy **503** (bewusster
+Degradations-Pfad): das Frontend fällt still auf eigenen Browser-Key bzw. Pollinations
+zurück — kein Bruch. Kostenbremsen: Tageslimits je Nutzer (`ai_usage`, PK `user_id+day`,
+idempotentes Increment per `ON CONFLICT UPDATE`), Limit wird **vor** dem Upstream-Call
+geprüft; der Zähler steigt ebenfalls vor dem Call (fehlgeschlagener Upstream zählt
+bewusst — Schutz vor Retry-Stürmen).
+
+| Endpunkt | Auth | Zweck |
+|---|---|---|
+| `POST /api/ai/text` | Bearer | `{prompt}` → Gemini `gemini-2.5-flash` → `{text}` (Text-Parts gejoint wie im Frontend); Upstream-Timeout 30 s |
+| `POST /api/ai/image` | Bearer | `{parts, generationConfig?}` → Gemini `gemini-2.5-flash-image` (responseModalities IMAGE erzwungen) → `{mimeType, dataBase64}`; Body-Limit 25 MB (nur diese Route), Upstream-Timeout 90 s; `parts` validiert (Array, nur `{text}` oder `{inlineData:{mimeType,data}}`, Gesamtgröße ≤ 25 MB) |
+
+Statuscodes: **401** ohne/mit ungültigem Token · **400** kaputter Prompt/parts ·
+**413** parts > 25 MB · **429** Tageslimit erreicht („morgen wieder") · **502**
+Upstream-Fehler (Meldung durchgereicht, Key IMMER maskiert) · **503** `GEMINI_API_KEY`
+leer. Jeder gezählte Call trägt den Header **`X-Quota-Remaining`** (per CORS exposed).
+
+| ENV | Default | Zweck |
+|---|---|---|
+| `GEMINI_API_KEY` | leer | leer = Proxy inaktiv (503), Boot-Warnung aus `validateConfig()` |
+| `AI_PROXY_TEXT_PER_DAY` | 200 | Text-Tageslimit je Nutzer |
+| `AI_PROXY_IMAGE_PER_DAY` | 60 | Bild-Tageslimit je Nutzer |
+
+Sichtbarkeit: Sektion „KI-Proxy (Modul 2)" in `/internal` (Key konfiguriert ja/nein,
+Limits, heutige Nutzung je Nutzer) + Log je Call (Dauer, gekürzte Nutzer-ID, Typ,
+ok/Fehler — fail-soft). Kein Intelligence-Modul (kein Registry-Eintrag), Code in
+`services/ai-proxy/` + `data/repos/aiUsage.js`. Tests: `test/ai-proxy.test.js`
+(Upstream gemockt) — Teil von `npm test`.

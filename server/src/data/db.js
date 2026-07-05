@@ -12,3 +12,4 @@ export * from './repos/forecast.js';
 export * from './repos/users.js';
 export * from './repos/sessions.js';
 export * from './repos/userData.js';
+export * from './repos/aiUsage.js';

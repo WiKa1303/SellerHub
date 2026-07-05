@@ -2,7 +2,8 @@
 // Read-only, server-gerendertes HTML, kein Auth (interner Prototyp — NICHT öffentlich deployen
 // ohne Schutz; Hinweis im Seitenkopf). Keine neue Business-Logik: nur Lese-Queries
 // + Wiederverwendung bestehender Repository-/Service-Funktionen.
-import { db, queryTrends, queryAlerts, queryNews, queryForecasts } from '../data/db.js';
+import { db, queryTrends, queryAlerts, queryNews, queryForecasts, usageToday } from '../data/db.js';
+import { config } from '../core/config.js';
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { crawlState } from '../services/crawler/run.js';
 import { AI_MODULES, moduleState } from '../services/intelligence/registry.js';
@@ -41,6 +42,9 @@ export async function renderInternal(req, res) {
       db().query(`SELECT count(*) AS n FROM sessions WHERE expires_at > $1`, [new Date().toISOString()]),
       db().query(`SELECT count(*) AS n FROM user_data`),
     ]);
+
+    // ── KI-PROXY (Modul 2, read-only): Key konfiguriert, Limits, heutige Nutzung je Nutzer ──
+    const aiUsage = await usageToday();
 
     // ── INTELLIGENCE: letzte 20 analysierte Artikel ──
     const analyzed = (await db().query(
@@ -102,6 +106,16 @@ export async function renderInternal(req, res) {
 <div class="kpi"><b>${num(cSessions.rows[0].n)}</b>aktive Sessions</div>
 <div class="kpi"><b>${num(cSyncKeys.rows[0].n)}</b>Sync-Keys (user_data)</div>
 <p class="muted">Read-only-Zähler. Auth ist bewusst KEIN Intelligence-Modul (kein Registry-Eintrag) — Endpunkte unter /api/auth/* und /api/sync.</p>
+
+<h2>KI-Proxy (Modul 2)</h2>
+<div class="kpi"><b>${config.geminiApiKey ? 'ja' : 'nein → 503'}</b>GEMINI_API_KEY konfiguriert</div>
+<div class="kpi"><b>${num(config.aiProxyTextPerDay)}</b>Text-Limit/Tag</div>
+<div class="kpi"><b>${num(config.aiProxyImagePerDay)}</b>Bild-Limit/Tag</div>
+<table><tr><th>Nutzer</th><th>Text-Calls heute</th><th>Bild-Calls heute</th></tr>
+${aiUsage.map(u => `<tr><td class="mono">${esc(u.email)}</td><td>${num(u.text_calls)} / ${num(config.aiProxyTextPerDay)}</td>
+  <td>${num(u.image_calls)} / ${num(config.aiProxyImagePerDay)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">heute noch keine Nutzung</td></tr>'}
+</table>
+<p class="muted">Endpunkte: POST /api/ai/text und /api/ai/image (Bearer, Modul 1). Ohne Server-Key antwortet der Proxy 503 — Clients fallen auf eigenen Key/Pollinations zurück (KONZEPT-KI-Proxy.md).</p>
 
 <h2>Prompts — Registry & Versionen</h2>
 <table><tr><th>prompt_key</th><th>Version</th><th>Modell</th><th>effort</th><th>temperature</th><th>max_tokens</th><th>Beschreibung</th></tr>
