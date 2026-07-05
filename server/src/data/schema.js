@@ -88,6 +88,27 @@ export async function initDb(poolOverride) {
       delivered_at TIMESTAMPTZ                       -- NULL = noch nicht gepusht (Phase 5)
     )`);
 
+  // Push-Zustellung (Phase 5): attempts = Fehlversuchs-Zähler des Dispatchers,
+  // delivery_note = Vermerk (z. B. „aufgegeben nach N Fehlversuchen") — additive Migration.
+  for (const col of [`attempts INTEGER DEFAULT 0`, `delivery_note TEXT`]) {
+    await pool.query(`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS ${col}`);
+  }
+
+  // ── Predictive Forecasting (Owner: intelligence, Phase 5) ──
+  // 7-Tage-Prognose je Topic aus der topic_daily-Zeitreihe (Holt-Glättung, deterministisch).
+  // PK topic_slug+forecast_date = Idempotenz: wiederholter Lauf überschreibt statt dupliziert.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS topic_forecast (
+      topic_slug    TEXT NOT NULL,
+      forecast_date TEXT NOT NULL,                   -- YYYY-MM-DD (prognostizierter Tag)
+      predicted     REAL NOT NULL,                   -- erwartete Erwähnungen an diesem Tag
+      direction     TEXT NOT NULL,                   -- steigend | fallend | stabil
+      confidence    INTEGER NOT NULL,                -- 0–100 (Datenpunkte + Fit-Fehler, ehrlich)
+      reasoning     TEXT,                            -- deutsche Begründung (Erklärbarkeit)
+      computed_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (topic_slug, forecast_date)
+    )`);
+
   // ── Strategy Engine (Owner: intelligence) — 1 Briefing/Tag, PK=day = Kostenbremse ──
   await pool.query(`
     CREATE TABLE IF NOT EXISTS strategy_briefs (
@@ -122,7 +143,7 @@ export async function initDb(poolOverride) {
       created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, alerts, strategy_briefs, feedback, ai_calls)');
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, ai_calls)');
   return pool;
 }
 

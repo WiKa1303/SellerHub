@@ -19,13 +19,40 @@ export async function queryAlerts({ level = null, days = 7, limit = 20, undelive
   if (undeliveredOnly) where += ` AND a.delivered_at IS NULL`;
   params.push(limit);
   const r = await db().query(
-    `SELECT a.id, a.alert_level, a.risk_type, a.title, a.created_at, a.delivered_at,
+    `SELECT a.id, a.alert_level, a.risk_type, a.title, a.created_at, a.delivered_at, a.attempts, a.delivery_note,
             n.url, n.source, n.ai_urgency, n.ai_impact, n.ai_affected, n.ai_summary, n.publish_date
      FROM alerts a JOIN news_events n ON n.id = a.article_id
      WHERE ${where}
      ORDER BY CASE a.alert_level WHEN 'critical' THEN 0 WHEN 'important' THEN 1 ELSE 2 END, a.created_at DESC
      LIMIT $${params.length}`, params);
   return r.rows.map(parseAiSummary);
+}
+
+// ── Zustell-Queue (Phase 5): delivered_at IS NULL = noch nicht gepusht ──
+
+/** Offene Alerts für den Dispatcher (Cap per LIMIT; kritische zuerst, dann älteste zuerst). */
+export async function pendingAlerts(limit = 20) {
+  const r = await db().query(
+    `SELECT a.id, a.alert_level, a.risk_type, a.title, a.attempts, a.created_at,
+            n.url, n.source, n.publish_date
+     FROM alerts a JOIN news_events n ON n.id = a.article_id
+     WHERE a.delivered_at IS NULL
+     ORDER BY CASE a.alert_level WHEN 'critical' THEN 0 WHEN 'important' THEN 1 ELSE 2 END, a.created_at ASC
+     LIMIT $1`, [limit]);
+  return r.rows;
+}
+
+/** Alert als zugestellt markieren (nur bei Erfolg — oder mit Vermerk beim Aufgeben). */
+export async function markAlertDelivered(id, note = null) {
+  await db().query(
+    `UPDATE alerts SET delivered_at = $2, delivery_note = $3 WHERE id = $1`,
+    [id, new Date().toISOString(), note ? String(note).slice(0, 300) : null]);
+}
+
+/** Fehlversuch zählen — Alert bleibt in der Queue (automatischer Retry im nächsten Lauf). */
+export async function bumpAlertAttempts(id) {
+  await db().query(
+    `UPDATE alerts SET attempts = COALESCE(attempts, 0) + 1 WHERE id = $1`, [id]);
 }
 
 /** Items mit KI-Analyse ohne Alert (Generator-Queue). Zeitfenster 7 Tage begrenzt

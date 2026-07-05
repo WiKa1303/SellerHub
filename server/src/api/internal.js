@@ -2,10 +2,10 @@
 // Read-only, server-gerendertes HTML, kein Auth (interner Prototyp — NICHT öffentlich deployen
 // ohne Schutz; Hinweis im Seitenkopf). Keine neue Business-Logik: nur Lese-Queries
 // + Wiederverwendung bestehender Repository-/Service-Funktionen.
-import { db, queryTrends, queryAlerts, queryNews } from '../data/db.js';
+import { db, queryTrends, queryAlerts, queryNews, queryForecasts } from '../data/db.js';
 import { parseProfile, rankForProfile } from '../services/feed/profile.js';
 import { crawlState } from '../services/crawler/run.js';
-import { AI_MODULES } from '../services/intelligence/registry.js';
+import { AI_MODULES, moduleState } from '../services/intelligence/registry.js';
 import { PROMPTS } from '../core/prompt-registry.js';
 import { recentAiCalls, aiCallStats } from '../data/db.js';
 
@@ -43,8 +43,9 @@ export async function renderInternal(req, res) {
     // ── PROMPTS: Registry + Call-Telemetrie ──
     const [aiCalls, callStats] = await Promise.all([recentAiCalls(20), aiCallStats()]);
 
-    // ── TRENDS / ALERTS über bestehende Repos ──
+    // ── TRENDS / FORECASTS / ALERTS über bestehende Repos ──
     const trends = await queryTrends({ limit: 10, maxAgeDays: 30 });
+    const forecasts = await queryForecasts({ limit: 10 });
     const alerts = await queryAlerts({ days: 30, limit: 20 });
 
     // ── FEED: bestehendes Ranking wiederverwenden; Tenant-Votes nur markieren ──
@@ -124,11 +125,22 @@ ${trends.map(t => `<tr><td><b>${esc(t.topic_name)}</b></td><td><b>${t.trend_scor
   <td class="muted">${esc(t.recommended_action || '—')}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">keine Trends (braucht ≥2 analysierte Artikel je Thema)</td></tr>'}
 </table>
 
+<h2>Forecast — 7-Tage-Prognose je Topic (Holt-Glättung, deterministisch)</h2>
+<table><tr><th>Thema</th><th>Richtung</th><th>Konfidenz</th><th>Prognose (nächste 7 Tage)</th><th>Begründung</th></tr>
+${forecasts.map(f => `<tr><td><b>${esc(f.topic_name)}</b></td>
+  <td>${f.direction === 'steigend' ? '📈' : f.direction === 'fallend' ? '📉' : '➡️'} ${esc(f.direction)}</td>
+  <td><b>${f.confidence}</b> %</td><td class="mono">${f.days.map(d => d.predicted).join(' · ')}</td>
+  <td class="muted">${esc(f.reasoning)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">noch keine Prognosen (Forecast-Modul läuft nach der Trend-Engine)</td></tr>'}
+</table>
+${moduleState('forecast').note ? `<p class="muted">KI-Seller-Hinweis: ${esc(moduleState('forecast').note)}</p>` : ''}
+
 <h2>Alerts</h2>
 <table><tr><th>Level</th><th>risk_type</th><th>Titel</th><th>created_at</th><th>zugestellt</th></tr>
 ${alerts.map(a => `<tr><td><span class="pill" style="background:${lvlColor[a.alert_level] || '#7b8395'}">${esc(a.alert_level)}</span></td>
   <td>${esc(a.risk_type)}</td><td>${esc(a.title)}</td><td class="mono">${dt(a.created_at)}</td>
-  <td class="muted">${a.delivered_at ? dt(a.delivered_at) : 'offen (Push-Queue)'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">keine Alerts</td></tr>'}
+  <td class="muted">${a.delivered_at
+    ? dt(a.delivered_at) + (a.delivery_note ? ' — ' + esc(a.delivery_note) : '')
+    : 'offen (Push-Queue' + (a.attempts ? ', ' + a.attempts + ' Fehlversuche' : '') + ')'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">keine Alerts</td></tr>'}
 </table>
 
 <h2>Personalisierter Feed</h2>

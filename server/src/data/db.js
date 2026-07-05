@@ -8,3 +8,4 @@ export * from './repos/trends.js';
 export * from './repos/alerts.js';
 export * from './repos/strategy.js';
 export * from './repos/ai-calls.js';
+export * from './repos/forecast.js';

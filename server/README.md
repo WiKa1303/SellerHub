@@ -272,3 +272,42 @@ Idempotent (1 Alert je Artikel), `delivered_at IS NULL` = Zustell-Queue für Pus
 - **`alerts.delivered_at`** ist die fertige Push-Queue (Worker: `WHERE delivered_at IS NULL` → zustellen → Zeitstempel setzen).
 - **`ai_feedback`** (Phase 3) liefert die Labels, um Trend-Schwellen und Alert-Regeln datengetrieben nachzuschärfen.
 
+---
+
+# Phase 5: Predictive Forecasting & Alert-Zustellung (Push)
+
+## Forecasting-Modul (`services/intelligence/forecast.js`, Registry-Position nach `trends`)
+
+DETERMINISTISCH, kein LLM nötig: **Holt-Glättung** (doppelt exponentiell, α=0.5 Niveau / β=0.3 Trend)
+über die `topic_daily`-Zeitreihe (30 Tage, führende Null-Tage abgeschnitten) je aktivem Topic.
+Output je Topic: **7 Prognosewerte**, **Richtung** (steigend/fallend/stabil aus dem geglätteten Trend),
+**Konfidenz** (Datenpunkte-Anzahl × Fit-Fehler; unter 7 Datenpunkten ehrlich auf max. 35 gedeckelt)
+und ein deutscher `reasoning`-Text (Erklärbarkeit). Persistenz in `topic_forecast`
+(idempotent per PK `topic_slug+forecast_date`, ON CONFLICT UPDATE).
+
+**Optional obendrauf** (nur mit `ANTHROPIC_API_KEY`, sonst Skip): 1 gebatchter LLM-Call je Lauf
+interpretiert die Top-5-Prognosen als Seller-Hinweis (Prompt `forecast_interpretation` v1 in der
+Registry, `logAiCall()`-Telemetrie). Der Hinweis landet in `meta.hint` von `/api/forecast` und in `/internal`.
+
+```
+GET /api/forecast            → { items: [{ topic, topic_name, direction, confidence,
+                                 reasoning, days: [{day, predicted} ×7] }], meta: { hint } }
+```
+
+## Alert-Dispatcher (`services/alerts/dispatch.js`, Registry-Position nach `alerts`)
+
+Arbeitet die Zustell-Queue ab (`alerts.delivered_at IS NULL`), **max. 20 Alerts pro Lauf**
+(Cap = Spam-Schutz, Rest im nächsten Lauf). Kanäle per ENV, beide fail-soft und kombinierbar:
+
+| ENV | Kanal |
+|---|---|
+| `PUSH_WEBHOOK_URL` | generischer JSON-POST `{title, severity, url, published_at, source}` |
+| `PUSH_NTFY_TOPIC` | POST an `https://ntfy.sh/<topic>` — kontofrei: Topic einfach in der ntfy-App abonnieren |
+
+- **Kein Kanal konfiguriert** → sauberer Skip mit Log, Queue bleibt stehen (Degradations-Pfad; Boot-Warnung aus `validateConfig()`).
+- **`delivered_at` wird NUR bei Erfolg gesetzt** (mind. 1 Kanal erfolgreich) → automatischer Retry im nächsten Lauf.
+- Nach **5 Fehlversuchen** (`alerts.attempts`) wird der Alert mit Vermerk (`delivery_note`) aufgegeben, damit die Queue nicht ewig wächst.
+- Sichtbarkeit: `modules.dispatch` in `/api/health`, Fehlversuche/Vermerke in `/internal`.
+
+Tests: `test/forecast.test.js` + `test/dispatch.test.js` (pg-mem, fetch/KI gemockt) — Teil von `npm test`.
+

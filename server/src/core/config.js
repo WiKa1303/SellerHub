@@ -20,6 +20,12 @@ export const config = {
   // Kostenbremse 2: max. Analyse-Versuche pro Item, danach dauerhaft Keyword-Score
   aiMaxAttempts: parseInt(process.env.AI_MAX_ATTEMPTS || '3', 10),
   aiConcurrency: parseInt(process.env.AI_CONCURRENCY || '2', 10),
+
+  // ═══ Push-Zustellung (Phase 5) ═══
+  // Beide Kanäle optional & fail-soft: ohne Konfiguration überspringt der Dispatcher
+  // sauber (Alerts bleiben in der Queue sichtbar). Beide gleichzeitig sind erlaubt.
+  pushWebhookUrl: process.env.PUSH_WEBHOOK_URL || '',   // generischer JSON-POST
+  pushNtfyTopic: process.env.PUSH_NTFY_TOPIC || '',     // https://ntfy.sh/<topic> (kontofrei)
 };
 
 // ═══ FBA-Keyword-Lexikon (3 Gewichtsstufen) ═══
@@ -63,9 +69,11 @@ export function validateConfig() {
     if (!Number.isFinite(v) || v <= 0) problems.push(`${k} muss eine positive Zahl sein (ist: ${v})`);
   }
   if (config.crawlCron.trim().split(/\s+/).length !== 5) problems.push(`CRAWL_CRON sieht nicht nach Cron-Syntax aus: "${config.crawlCron}"`);
+  if (config.pushWebhookUrl && !/^https?:\/\//.test(config.pushWebhookUrl)) problems.push(`PUSH_WEBHOOK_URL muss mit http(s):// beginnen (ist: "${config.pushWebhookUrl}")`);
   if (problems.length) throw new Error('Ungültige Konfiguration:\n  - ' + problems.join('\n  - '));
   const warnings = [];
   if (!config.adminKey) warnings.push('ADMIN_KEY leer — POST /api/admin/crawl ist deaktiviert');
   if (!config.anthropicApiKey) warnings.push('ANTHROPIC_API_KEY fehlt — Intelligence-Module laufen im Degradations-Modus (Keyword-Scoring)');
+  if (!config.pushWebhookUrl && !config.pushNtfyTopic) warnings.push('PUSH_WEBHOOK_URL/PUSH_NTFY_TOPIC leer — Push-Zustellung inaktiv (Alerts bleiben in der Queue sichtbar)');
   return warnings;
 }

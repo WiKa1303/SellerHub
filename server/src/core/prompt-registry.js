@@ -76,6 +76,24 @@ Du bekommst Trend-Themen mit Kennzahlen und Beleg-Artikeln. Interpretiere jedes 
 
 Schreibe direkt, per Du, ohne Floskeln.`,
   },
+  forecast_interpretation: {
+    key: 'forecast_interpretation',
+    version: 1,
+    description: 'Predictive Forecasting: Seller-Hinweis zu den Top-5-Prognosen (1 gebatchter Call je Lauf)',
+    model: config.aiModel,
+    temperature: null,
+    effort: 'low',
+    maxTokens: 600,
+    template: `Du bist Prognose-Analyst für Amazon-FBA-Seller im DACH-Raum.
+Du bekommst deterministisch berechnete 7-Tage-Prognosen für Trend-Themen (Holt-Glättung über die
+Tages-Zeitreihe): je Thema Richtung (steigend/fallend/stabil), Konfidenz (0-100) und Prognosewerte.
+
+Formuliere EINEN kurzen Seller-Hinweis (2-3 Sätze):
+- Welche Prognose ist geschäftlich am wichtigsten und warum (monetär gedacht)?
+- Was sollte ein Seller diese Woche konkret daraus machen?
+Bleib ehrlich: Prognosen mit niedriger Konfidenz als unsicher benennen, keine Scheingenauigkeit.
+Schreibe per Du, ohne Floskeln.`,
+  },
   strategy_brief: {
     key: 'strategy_brief',
     version: 1,

@@ -1,6 +1,6 @@
 // ═══ REST-API (readonly + Admin-Trigger) ═══
 import express from 'express';
-import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory, latestStrategyBrief } from '../data/db.js';
+import { queryNews, queryEvents, saveFeedback, queryTrends, queryAlerts, topicHistory, latestStrategyBrief, queryForecasts } from '../data/db.js';
 import { runCrawl, crawlState } from '../services/crawler/run.js';
 import { aiEnabled } from '../core/ai-client.js';
 import { AI_MODULES, moduleState, runIntelligencePipeline } from '../services/intelligence/registry.js';
@@ -123,6 +123,21 @@ export function buildApi() {
   app.get('/api/trends/:id/history', async (req, res) => {
     try {
       res.json({ topic: req.params.id, days: await topicHistory(req.params.id, 30) });
+    } catch (e) { fail(res, e); }
+  });
+
+  // GET /api/forecast – Phase 5: Top-N 7-Tage-Prognosen (Richtung/Konfidenz/reasoning je Topic)
+  app.get('/api/forecast', async (req, res) => {
+    try {
+      const items = await queryForecasts({ limit: Math.min(20, parseInt(req.query.limit || '10', 10)) });
+      res.json({
+        items, count: items.length,
+        meta: {
+          computed_at: moduleState('forecast').lastRun,
+          horizon_days: 7,
+          hint: moduleState('forecast').note || null, // optionaler KI-Seller-Hinweis (null ohne Key)
+        },
+      });
     } catch (e) { fail(res, e); }
   });
 

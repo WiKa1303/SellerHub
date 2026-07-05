@@ -31,6 +31,10 @@ aiClient({
           watchlist: ['Kaufland Expansion'],
         }) }], usage: { input_tokens: 900, output_tokens: 300 }, model: 'claude-opus-4-8' };
       }
+      if (sys.includes('Prognose-Analyst')) {
+        return { content: [{ type: 'text', text: JSON.stringify({ hint: 'Wichtigste Prognose: GPSR steigt weiter — Konformität diese Woche prüfen.' }) }],
+          usage: { input_tokens: 150, output_tokens: 60 }, model: 'claude-opus-4-8' };
+      }
       if (sys.includes('Marktanalyst')) {
         const payload = JSON.parse(req.messages[0].content);
         return { content: [{ type: 'text', text: JSON.stringify({ topics: payload.map(p => ({
@@ -44,8 +48,8 @@ aiClient({
 });
 
 // ── Registry-Vertrag ──
-t('Registry: 4 Kernmodule in korrekter Reihenfolge',
-  AI_MODULES.map(m => m.id).join(',') === 'relevance,trends,alerts,strategy');
+t('Registry: 6 Kernmodule in korrekter Reihenfolge (forecast nach trends, dispatch nach alerts)',
+  AI_MODULES.map(m => m.id).join(',') === 'relevance,trends,forecast,alerts,strategy,dispatch');
 t('Registry: jedes Modul hat run() + state', AI_MODULES.every(m => typeof m.run === 'function' && m.state && m.description));
 
 // ── Setup: pg-mem + vor-analysierte Items (relevance-Modul findet nichts Offenes) ──
@@ -68,7 +72,7 @@ await seed('kaufland-expansion', { age: 5, cat: 'trends', urg: 'niedrig', opp: '
 
 // ── Pipeline: alle Module laufen, Fehler isoliert ──
 const results = await runIntelligencePipeline();
-t('Pipeline führt alle 4 Module aus', Object.keys(results).join(',') === 'relevance,trends,alerts,strategy', JSON.stringify(results));
+t('Pipeline führt alle 6 Module aus', Object.keys(results).join(',') === 'relevance,trends,forecast,alerts,strategy,dispatch', JSON.stringify(results));
 t('Strategy: Briefing erzeugt (KI-Pfad)', results.strategy.generated === true && strategyCalls === 1);
 const today = new Date().toISOString().slice(0, 10);
 const saved = await getStrategyBrief(today);
@@ -106,7 +110,7 @@ t('GET /api/strategy/brief liefert Briefing-Struktur', !!brief.headline && Array
 const mi = await (await fetch(base + '/api/market-intelligence')).json();
 t('Market Intelligence enthält Strategy-Briefing', mi.strategy && !!mi.strategy.headline);
 const health = await (await fetch(base + '/api/health')).json();
-t('Health listet alle Registry-Module', Object.keys(health.modules).join(',') === 'relevance,trends,alerts,strategy');
+t('Health listet alle Registry-Module', Object.keys(health.modules).join(',') === 'relevance,trends,forecast,alerts,strategy,dispatch');
 srv.close();
 
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen`);

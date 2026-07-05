@@ -20,8 +20,9 @@ const v = (env) => runNode(`import('./src/core/config.js').then(m => { try { con
 t('validateConfig: fehlende DATABASE_URL → Abbruch', v({ DATABASE_URL: '' }).startsWith('ERR:Ungültige Konfiguration'));
 t('validateConfig: kaputte Zahl → Abbruch', v({ DATABASE_URL: 'postgres://x/y', AI_MAX_PER_RUN: 'quatsch' }).startsWith('ERR:'));
 t('validateConfig: kaputtes Cron-Muster → Abbruch', v({ DATABASE_URL: 'postgres://x/y', CRAWL_CRON: 'jeden morgen' }).startsWith('ERR:'));
-const okOut = v({ DATABASE_URL: 'postgres://x/y', ADMIN_KEY: '' });
-t('validateConfig: valide Config → Warnungen statt Abbruch (ADMIN_KEY, KI-Key)', okOut === 'OK:2', okOut);
+const okOut = v({ DATABASE_URL: 'postgres://x/y', ADMIN_KEY: '', ANTHROPIC_API_KEY: '', PUSH_WEBHOOK_URL: '', PUSH_NTFY_TOPIC: '' });
+t('validateConfig: valide Config → Warnungen statt Abbruch (ADMIN_KEY, KI-Key, Push)', okOut === 'OK:3', okOut);
+t('validateConfig: kaputte PUSH_WEBHOOK_URL → Abbruch', v({ DATABASE_URL: 'postgres://x/y', PUSH_WEBHOOK_URL: 'ftp://falsch' }).startsWith('ERR:'));
 
 // ── Logging-Strategie: JSON-Modus für Aggregatoren ──
 const line = runNode(`import('./src/core/logger.js').then(m => m.log.info('Hallo', { a: 1 }));`, { LOG_FORMAT: 'json' });

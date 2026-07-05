@@ -11,15 +11,19 @@
 // 5. State in api/routes.js /api/health einhängen · Tests mit aiClient(mock) + pg-mem
 import { drainQueue, aiState } from './queue.js';
 import { runTrendEngine, trendState } from './engine.js';
+import { runForecast, forecastState } from './forecast.js';
 import { generateAlerts, alertState } from '../alerts/rules.js';
 import { updateStrategyBrief, strategyState } from './strategy.js';
+import { dispatchAlerts, dispatchState } from '../alerts/dispatch.js';
 import { log } from '../../core/logger.js';
 
 export const AI_MODULES = [
   { id: 'relevance', description: 'Relevanz, Impact, Kategorie, Topic je Artikel (Claude, structured output)', run: drainQueue, state: aiState },
   { id: 'trends',    description: 'Opportunity Radar: Topic-Cluster, Zeitreihen, Spikes, Trend-Scores',        run: runTrendEngine, state: trendState },
+  { id: 'forecast',  description: 'Predictive Forecasting: 7-Tage-Prognose je Topic (Holt-Glättung, deterministisch)', run: runForecast, state: forecastState }, // NACH trends (braucht topic_daily)
   { id: 'alerts',    description: 'Risk Shield: deterministisches Alert-Regelwerk (critical/important/info)',  run: generateAlerts, state: alertState },
   { id: 'strategy',  description: 'Strategy Engine: tägliches Strategie-Briefing aus der Gesamtlage',          run: updateStrategyBrief, state: strategyState },
+  { id: 'dispatch',  description: 'Alert-Dispatcher: Push-Zustellung offener Alerts (Webhook/ntfy, fail-soft)', run: dispatchAlerts, state: dispatchState }, // NACH alerts (arbeitet deren Queue ab)
 ];
 
 /** Laufzeit-Zustand eines Moduls (für /api/health & Meta-Felder) — einziger Weg für die API-Schicht. */
