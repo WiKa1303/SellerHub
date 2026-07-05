@@ -9,9 +9,12 @@
 
   const VISUALS=[
     {nm:"Hauptbild (Amazon-konform)", key:"main", p:"Amazon-Hauptbild nach Vorgaben: Produkt freigestellt auf REINWEISSEM Hintergrund, füllt ca. 85 % der Fläche, KEIN Text, KEINE Logos/Grafik, keine Requisiten."},
-    {nm:"USP-Infografik 1", key:"usp1", p:"Infografik-Visual, das den 1. USP hervorhebt: Produkt seitlich, daneben großer Vorteilstext mit Icon und kurzer Erklärung. Klare, moderne Amazon-A+-Optik."},
-    {nm:"USP-Infografik 2", key:"usp2", p:"Infografik-Visual, das den 2. USP hervorhebt: Produkt mit Callout-Linien zu wichtigen Merkmalen, Vorteilstext groß und gut lesbar."},
-    {nm:"USP-Infografik 3", key:"usp3", p:"Infografik-Visual, das den 3. USP hervorhebt: Vergleich/Benefit-Darstellung mit Häkchen, Produkt gut sichtbar, vertrauensbildend."},
+    {nm:"USP-Infografik 1", key:"usp1", p:"Infografik-Visual, das den 1. USP hervorhebt: Produkt seitlich, daneben großer Vorteilstext mit Icon und kurzer Erklärung. Klare, moderne Amazon-A+-Optik.",
+      pNo:"Infografik-Visual OHNE Text, das den 1. USP rein visuell hervorhebt: Produkt seitlich, daneben ein großes, passendes Icon/Symbol für den Vorteil. Klare, moderne Amazon-A+-Optik."},
+    {nm:"USP-Infografik 2", key:"usp2", p:"Infografik-Visual, das den 2. USP hervorhebt: Produkt mit Callout-Linien zu wichtigen Merkmalen, Vorteilstext groß und gut lesbar.",
+      pNo:"Infografik-Visual OHNE Text, das den 2. USP rein visuell zeigt: Produkt mit Callout-Linien zu wichtigen Merkmalen – an den Linien nur Icons oder vergrößerte Detail-Ausschnitte statt Text."},
+    {nm:"USP-Infografik 3", key:"usp3", p:"Infografik-Visual, das den 3. USP hervorhebt: Vergleich/Benefit-Darstellung mit Häkchen, Produkt gut sichtbar, vertrauensbildend.",
+      pNo:"Infografik-Visual OHNE Text, das den 3. USP rein visuell zeigt: Benefit-Darstellung mit Häkchen-Symbolen und Icons, Produkt gut sichtbar, vertrauensbildend."},
     {nm:"Lifestyle / Anwendung", key:"life", p:"Lifestyle-Bild: das Produkt in realer Anwendung/Umgebung der Zielgruppe, natürliches Licht, emotional und ansprechend, dezenter Nutzentext."},
     {nm:"Vertrauen / Qualität", key:"trust", p:"Vertrauens-Visual: Produkt mit Qualitäts-/Gütesiegel-Anmutung (z. B. laborgeprüft, Made-in-Optik), Verpackung sichtbar wenn vorhanden, seriös und premium."}
   ];
@@ -101,6 +104,13 @@
     });
   }
   function igSelectedVisuals(){return [...$("igVisuals").querySelectorAll("input:checked")].map(c=>VISUALS[+c.dataset.i]);}
+  // ── Umschalter: USP-Bilder ohne Text-Overlay (Zustand in localStorage) ──
+  function igUspNoTextOn(){const cb=$("igUspNoText");return !!(cb&&cb.checked);}
+  { const cb=$("igUspNoText");
+    if(cb){
+      cb.checked=localStorage.getItem("ig_usp_notext")==="1";
+      cb.addEventListener("change",()=>localStorage.setItem("ig_usp_notext",cb.checked?"1":"0"));
+    } }
   function tog(id,on,n){const e=$(id);e.classList.toggle("done",on);e.querySelector(".ig-box").textContent=on?"✓":n;}
 
   $("igProvider").addEventListener("change",updateProvider);
@@ -646,7 +656,7 @@
     btn.disabled=true;
     const prompt="Du bist ein erfahrener Amazon-SEO-Texter. Optimiere den folgenden Produkttitel für ein Amazon-Listing in der Sprache "+lang+".\n\nGib GENAU 3 verbesserte, verkaufsstarke Titel zurück – jeweils in einer eigenen Zeile, OHNE Nummerierung, OHNE Anführungszeichen, OHNE weitere Erklärung. Jeder Titel max. ca. 180 Zeichen, mit den wichtigsten Keywords, dem Hauptnutzen und relevanten Eigenschaften weit vorne. Erfinde keine Fakten.\n\nAktueller Titel: "+title+(desc?"\n\nBeschreibung: "+desc:"")+(uspTxt?"\n\nUSPs:\n"+uspTxt:"");
     try{
-      const raw=await igGenText(prompt);
+      const raw=await igGenTextSafe(prompt,3); // Retry + Backoff bei Überlast
       const titles=igParseTitles(raw);
       if(!titles.length)throw new Error("Keine Vorschläge erhalten – bitte erneut versuchen.");
       box.innerHTML='<div class="ig-sug-head">✨ KI-Vorschläge – zum Übernehmen anklicken</div>';
@@ -673,7 +683,7 @@
     btn.disabled=true;
     const prompt="Du bist ein erfahrener Amazon-SEO-Texter. "+(cur?"Verbessere":"Erstelle")+" eine überzeugende, gut lesbare Produktbeschreibung in der Sprache "+lang+".\n\nSchreibe verkaufsstarken FLIESSTEXT (ca. 60–120 Wörter), der den Hauptnutzen und die Alleinstellungsmerkmale hervorhebt und zum Kauf motiviert. KEINE Aufzählungszeichen, KEINE Überschrift, KEINE Vorrede – gib NUR den reinen Beschreibungstext zurück. Erfinde keine Fakten.\n\nProdukttitel: "+title+(cur?"\n\nAktuelle Beschreibung: "+cur:"")+(uspTxt?"\n\nUSPs:\n"+uspTxt:"");
     try{
-      let raw=await igGenText(prompt);
+      let raw=await igGenTextSafe(prompt,3); // Retry + Backoff bei Überlast
       raw=(raw||"").trim().replace(/^["'»„“]+|["'«”]+$/g,"").trim();
       if(!raw)throw new Error("Keine Beschreibung erhalten – bitte erneut versuchen.");
       box.innerHTML='<div class="ig-sug-head">✨ KI-Vorschlag</div>';
@@ -723,7 +733,7 @@
     btn.disabled=true;
     const prompt="Du bist ein erfahrener Amazon-SEO-Texter. Leite aus dem folgenden Produkt 5 prägnante, verkaufsstarke USPs / Alleinstellungsmerkmale in der Sprache "+lang+" ab.\n\nJeder USP KURZ (max. ca. 8 Wörter), je ein USP pro Zeile, OHNE Nummerierung, OHNE Anführungszeichen, OHNE Erklärung. Erfinde keine Fakten.\n\nProdukttitel: "+title+(desc?"\n\nBeschreibung: "+desc:"")+(have.length?"\n\nBereits vorhanden (nicht wiederholen):\n"+have.map(u=>"- "+u).join("\n"):"");
     try{
-      const raw=await igGenText(prompt);
+      const raw=await igGenTextSafe(prompt,3); // Retry + Backoff bei Überlast
       const list=(raw||"").split(/\r?\n/).map(l=>l.replace(/^\s*(\d+[\).:\-]|[-*•])\s*/,"").replace(/^["'»„“]+|["'«”]+$/g,"").trim()).filter(l=>l.length>1).slice(0,6);
       if(!list.length)throw new Error("Keine USPs erhalten – bitte erneut versuchen.");
       igRenderUspSuggest(list);
@@ -752,12 +762,33 @@
   }
   let igGenProgCtl=null;
 
+  // ── Hauptbild hart auf 1:1 bringen (Amazon-Anforderung): zentrierter Canvas-Crop,
+  //    kürzere Seite = Maß. Quadratische Bilder bleiben unverändert (Original-URL). ──
+  function igCropSquare(url){
+    return new Promise(resolve=>{
+      const img=new Image();img.crossOrigin="anonymous";
+      img.onload=()=>{
+        const w=img.naturalWidth,h=img.naturalHeight;
+        if(!w||!h||w===h){resolve(url);return;} // schon quadratisch → nichts tun
+        const s=Math.min(w,h),c=document.createElement("canvas");c.width=s;c.height=s;
+        try{
+          c.getContext("2d").drawImage(img,(w-s)/2,(h-s)/2,s,s,0,0,s,s);
+          resolve(c.toDataURL("image/png"));
+        }catch(e){resolve(url);} // z. B. CORS-tainted Canvas → Original behalten
+      };
+      img.onerror=()=>resolve(url);
+      img.src=url;
+    });
+  }
+  window.igCropSquare=igCropSquare; // extern aufrufbar (auch für Tests)
+
   async function igGenerateOneInto(el,v,i){
     const ph=el.querySelector(".ig-ph"), st=el.querySelector(".st"), act=el.querySelector(".ig-res-actions");
     ph.innerHTML='<div class="ig-spin"></div>';st.textContent="…";if(act)act.style.visibility="hidden";
     try{
       const o={title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang,imgCount:igCtx.imgs.length,hasPack:igCtx.hasPack,hasUse:igCtx.hasUse};
-      const url = igCtx.provider==="gemini" ? await generateOne(buildPrompt(v,o),igCtx.imgs,igCtx.key) : await generatePollinations(v,{title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang},i);
+      let url = igCtx.provider==="gemini" ? await generateOne(buildPrompt(v,o),igCtx.imgs,igCtx.key) : await generatePollinations(v,{title:igCtx.title,desc:igCtx.desc,uspTxt:igCtx.uspTxt,usps:igCtx.uspsArr||[],lang:igCtx.lang},i);
+      if(v.key==="main")url=await igCropSquare(url); // NUR Hauptbild: garantiert exakt 1:1
       ph.innerHTML='<img src="'+url+'">';st.textContent="✓";el._url=url;if(act)act.style.visibility="visible";
       igSetResult(v.nm,url);return true;
     }catch(err){
@@ -836,7 +867,7 @@
         "- NUR das Produkt selbst – kein zusätzliches Objekt, kein nicht mitgeliefertes Zubehör; Verpackung nur zeigen, wenn das Produkt selbst die Verpackung ist.\n"+
         "- ABSOLUT KEIN Text, KEINE Schrift, KEINE Logos, Wasserzeichen, Icons, Badges, Siegel, Pfeile, Rahmen oder Sticker im Bild.\n"+
         "- Produkt freigestellt, mittig, vollständig sichtbar, füllt ca. 85 % der Bildfläche, gestochen scharf, professionelle Studio-Ausleuchtung mit realistischem, weichem Schatten.\n"+
-        "- Quadratisches Format (1:1), keine Personen, keine Collage.\n\n"+
+        "- Format EXAKT QUADRATISCH: Seitenverhältnis 1:1, Breite = Höhe (z. B. 1024×1024). Keine Personen, keine Collage.\n\n"+
         "Produkt nur zur Wiedererkennung (NICHT als Text einblenden): "+o.title;
     }
     // ── ZUSATZBILDER (A+/Infografik/Lifestyle): mit Beschriftung aus USP + Beschreibung ──
@@ -844,13 +875,21 @@
       ? "Dir sind "+o.imgCount+" reale Produktfotos angehängt (Bild 1 = Haupt-Produktfoto"+(o.hasPack?", ein Bild zeigt die Verpackung":"")+(o.hasUse?", ein Bild zeigt das Produkt in Benutzung":"")+"). PFLICHT: Verwende GENAU dieses reale Produkt aus den angehängten Fotos als Basis und integriere es in das Visual – übernimm Form, Farbe, Material, Logo, Etikett, Beschriftung und Proportionen exakt 1:1. Erfinde KEIN neues Produkt, ersetze es nicht und verändere es nicht."
       : "Es sind KEINE Produktfotos angehängt – erstelle ein generisches Visual nur anhand des Textes.";
     var focus = v.key==="usp1"?usps[0] : v.key==="usp2"?usps[1] : v.key==="usp3"?usps[2] : "";
-    var labelInstr = focus
-      ? "BESCHRIFTUNG (PFLICHT): Setze als große, gut lesbare Headline GENAU diesen Vorteil ins Bild: \""+focus+"\". Ergänze einen kurzen erklärenden Untertext (max. ca. 8 Wörter), der zu diesem Vorteil und zur Produktbeschreibung passt."
-      : "BESCHRIFTUNG (PFLICHT): Hebe den wichtigsten konkreten Vorteil aus Beschreibung und USPs als große, gut lesbare Headline im Bild hervor, plus kurzer erklärender Untertext (max. ca. 8 Wörter).";
-    return "Erstelle ein professionelles, fotorealistisches Amazon-A+/Listing-ZUSATZBILD in höchster Qualität (NICHT das Hauptbild – hier ist Text/Grafik ausdrücklich erwünscht).\n\n"+imgNote+
-      "\n\nAUFGABE/ZWECK DIESES VISUALS: "+v.p+
+    // USP-Infografiken optional OHNE Text-Overlay (Umschalter im Panel)
+    var isUsp = v.key==="usp1"||v.key==="usp2"||v.key==="usp3";
+    var noText = isUsp && igUspNoTextOn();
+    var labelInstr;
+    if(noText){
+      labelInstr="OHNE TEXT (PFLICHT): Rendere ABSOLUT KEINEN Text ins Bild – KEINE Schrift, KEINE Buchstaben, KEINE Zahlen, KEINE Wörter, KEINE Beschriftung. Stelle den Vorteil"+(focus?" \""+focus+"\"":"")+" rein VISUELL dar: nur Produkt, Icons/Symbole und Bildsprache.";
+    }else{
+      labelInstr = focus
+        ? "BESCHRIFTUNG (PFLICHT): Setze als große, gut lesbare Headline GENAU diesen Vorteil ins Bild: \""+focus+"\". Ergänze einen kurzen erklärenden Untertext (max. ca. 8 Wörter), der zu diesem Vorteil und zur Produktbeschreibung passt."
+        : "BESCHRIFTUNG (PFLICHT): Hebe den wichtigsten konkreten Vorteil aus Beschreibung und USPs als große, gut lesbare Headline im Bild hervor, plus kurzer erklärender Untertext (max. ca. 8 Wörter).";
+    }
+    return "Erstelle ein professionelles, fotorealistisches Amazon-A+/Listing-ZUSATZBILD in höchster Qualität (NICHT das Hauptbild"+(noText?"":" – hier ist Text/Grafik ausdrücklich erwünscht")+").\n\n"+imgNote+
+      "\n\nAUFGABE/ZWECK DIESES VISUALS: "+((noText&&v.pNo)?v.pNo:v.p)+
       "\n\n"+labelInstr+
-      "\n\nALLE TEXTE IM BILD MÜSSEN AUF "+lang+" SEIN – korrekte Rechtschreibung, gut lesbar, professionell gesetzt, mit klarem Kontrast zum Hintergrund.\n\n"+
+      (noText?"":"\n\nALLE TEXTE IM BILD MÜSSEN AUF "+lang+" SEIN – korrekte Rechtschreibung, gut lesbar, professionell gesetzt, mit klarem Kontrast zum Hintergrund.")+"\n\n"+
       "Produkttitel: "+o.title+"\nBeschreibung: "+o.desc+"\n"+o.uspTxt+
       "\n\nStil: sauberes, verkaufsstarkes E-Commerce-/A+-Design, professionelle Studio-Beleuchtung, hohe Auflösung, quadratisches Format (1:1). Keine Wasserzeichen.";
   }
@@ -858,9 +897,13 @@
     var usps=o.usps||[];
     var focus = v.key==="usp1"?usps[0] : v.key==="usp2"?usps[1] : v.key==="usp3"?usps[2] : "";
     var p;
+    var isUsp = v.key==="usp1"||v.key==="usp2"||v.key==="usp3";
     if(v.key==="main"){
       // Amazon-Hauptbild-Regeln: reinweiß, kein Text/Logo, Produkt füllt 85%
-      p="Amazon main product image, single product centered on a pure white background (RGB 255,255,255), product fills about 85% of frame, photorealistic studio lighting, soft realistic shadow, NO text, NO logo, NO graphics, NO props, 1:1 square. Product: "+o.title+". "+o.desc;
+      p="Amazon main product image, single product centered on a pure white background (RGB 255,255,255), product fills about 85% of frame, photorealistic studio lighting, soft realistic shadow, NO text, NO logo, NO graphics, NO props, exactly square 1:1 aspect ratio. Product: "+o.title+". "+o.desc;
+    }else if(isUsp && igUspNoTextOn()){
+      // USP-Infografik OHNE Text-Overlay: rein visuelle Darstellung
+      p="Professional Amazon A+ e-commerce infographic visual, absolutely NO text, NO letters, NO words, NO numbers, NO captions – purely visual presentation with product and icons/symbols only, high quality, studio lighting, 1:1. "+(v.pNo||v.p)+" "+(focus?"Benefit to convey visually (do NOT render as text): \""+focus+"\". ":"")+"Product: "+o.title+". "+o.desc+". Clean, commercial, sharp.";
     }else{
       p="Professional Amazon A+ e-commerce marketing visual with bold readable caption text, high quality, studio lighting, 1:1. "+v.p+(focus?" Headline caption in image: \""+focus+"\".":"")+" Product: "+o.title+". "+o.desc+". "+o.uspTxt+". All text in language: "+o.lang+". Clean, commercial, sharp, correct spelling.";
     }
@@ -916,24 +959,27 @@
     if(!$("igTitle").value.trim()){igToast("Bitte zuerst einen kurzen Produkttitel eingeben.",true);$("igTitle").focus();return;}
     const old=btn.textContent;btn.disabled=true;btn.textContent="… KI arbeitet";
     const lang=$("igLang").value;
+    let fails=0; // Teilausfälle zählen (jeder Schritt hat eigenes Retry + Backoff)
     try{
       try{
-        const raw=await igGenText("Du bist Amazon-SEO-Texter. Gib EINEN einzigen optimierten, verkaufsstarken Amazon-Produkttitel in "+lang+" zurück (max ca. 180 Zeichen), nur den Titel, ohne Anführungszeichen, ohne Erklärung.\n\nAktueller Titel: "+$("igTitle").value.trim()+($("igDesc").value.trim()?"\nBeschreibung: "+$("igDesc").value.trim():""));
+        const raw=await igGenTextSafe("Du bist Amazon-SEO-Texter. Gib EINEN einzigen optimierten, verkaufsstarken Amazon-Produkttitel in "+lang+" zurück (max ca. 180 Zeichen), nur den Titel, ohne Anführungszeichen, ohne Erklärung.\n\nAktueller Titel: "+$("igTitle").value.trim()+($("igDesc").value.trim()?"\nBeschreibung: "+$("igDesc").value.trim():""),3);
         const t=(raw||"").split(/\r?\n/).map(s=>s.replace(/^["'»„“]+|["'«”]+$/g,"").trim()).filter(Boolean)[0];
         if(t)$("igTitle").value=t;
-      }catch(e){}
+      }catch(e){fails++;}
       try{
-        const raw=await igGenText("Du bist Amazon-SEO-Texter. Schreibe EINE verkaufsstarke Produktbeschreibung in "+lang+" als Fließtext (ca. 60–120 Wörter), ohne Aufzählungszeichen, ohne Überschrift, ohne Vorrede – nur den Text. Erfinde keine Fakten.\n\nProdukttitel: "+$("igTitle").value.trim()+($("igDesc").value.trim()?"\nAktuelle Beschreibung: "+$("igDesc").value.trim():""));
+        const raw=await igGenTextSafe("Du bist Amazon-SEO-Texter. Schreibe EINE verkaufsstarke Produktbeschreibung in "+lang+" als Fließtext (ca. 60–120 Wörter), ohne Aufzählungszeichen, ohne Überschrift, ohne Vorrede – nur den Text. Erfinde keine Fakten.\n\nProdukttitel: "+$("igTitle").value.trim()+($("igDesc").value.trim()?"\nAktuelle Beschreibung: "+$("igDesc").value.trim():""),3);
         const d=(raw||"").trim().replace(/^["'»„“]+|["'«”]+$/g,"").trim();
         if(d)$("igDesc").value=d;
-      }catch(e){}
+      }catch(e){fails++;}
       try{
-        const raw=await igGenText("Du bist Amazon-SEO-Texter. Leite aus dem Produkt 5 kurze, prägnante USPs in "+lang+" ab (max ca. 8 Wörter), je einer pro Zeile, ohne Nummerierung/Anführungszeichen.\n\nTitel: "+$("igTitle").value.trim()+"\nBeschreibung: "+$("igDesc").value.trim());
+        const raw=await igGenTextSafe("Du bist Amazon-SEO-Texter. Leite aus dem Produkt 5 kurze, prägnante USPs in "+lang+" ab (max ca. 8 Wörter), je einer pro Zeile, ohne Nummerierung/Anführungszeichen.\n\nTitel: "+$("igTitle").value.trim()+"\nBeschreibung: "+$("igDesc").value.trim(),3);
         const list=(raw||"").split(/\r?\n/).map(l=>l.replace(/^\s*(\d+[\).:\-]|[-*•])\s*/,"").replace(/^["'»„“]+|["'«”]+$/g,"").trim()).filter(l=>l.length>1).slice(0,5);
         if(list.length){usps=list.slice();while(usps.length<3)usps.push("");renderUsps();}
-      }catch(e){}
+      }catch(e){fails++;}
       igUpdateCounts();updateChecklist();
-      igToast("✨ Auto-Ausfüllen fertig – bitte prüfen");
+      if(fails>=3){igToast("Auto-Ausfüllen fehlgeschlagen – die KI ist gerade überlastet, bitte gleich erneut versuchen.",true);igPromptKeyOnOverload();}
+      else if(fails>0)igToast("✨ Auto-Ausfüllen teilweise fertig ("+fails+" Schritt(e) fehlgeschlagen) – bitte prüfen",true);
+      else igToast("✨ Auto-Ausfüllen fertig – bitte prüfen");
     }finally{ btn.disabled=false;btn.textContent=old; }
   }
   $("igAutoAll").onclick=igAutoFill;
