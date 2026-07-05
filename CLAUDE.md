@@ -32,10 +32,9 @@ SellerHub/
 - ältere: `-bildstudio`, `-nav`, `.BACKUP`
 - **Konvention:** Vor größeren Umbauten neue Kopie `backups/SellerHub.BACKUP-<thema>.html` anlegen.
 
-## Hosting (vorbereitet)
-Die App ist rein statisch — es reicht, den Ordnerinhalt ins Web-Root des Hosters zu laden:
-1. Hochladen per FTP/Panel: `index.html` + `css/` + `js/` (NICHT nötig: `backups/`, `CLAUDE.md`, `KONZEPT-*.md`, `.claude/`).
-2. Domain aufrufen — `index.html` lädt automatisch. Alternativ gratis via GitHub Pages (Repo ist schon auf GitHub) oder Netlify/Vercel.
+## Hosting (vorbereitet — Ziel: amzsellerhub.de auf netcup-Webspace)
+Die App ist rein statisch. Upload-Skript: **`./deploy-frontend.sh`** (rsync, lädt nur index.html + css/ + js/; Zugangsdaten aus netcup CCP → Webhosting als `WEBSPACE_HOST`/`WEBSPACE_USER`).
+Das Backend (Seller-Radar) läuft separat auf Railway: https://radar-production-388a.up.railway.app (Custom Domain api.amzsellerhub.de eingerichtet, wartet auf DENIC-Delegation). CORS ist offen, Standard-API-URL steht in js/app.js (`RADAR_API_DEFAULT`).
 - Auf einer echten Domain ist `localStorage` an die **Domain** gebunden (stabil), nicht mehr an den Dateipfad wie bei `file://`. Daten von lokal mitnehmen: Export/Import (`sellerhub-data.json`).
 - ⚠️ Der eingebaute Login (`WikaAuth`) ist nur clientseitig — kein echter Schutz, da jeder den Quelltext lesen kann. Für einen öffentlichen, geschützten Live-Betrieb später ein Backend nötig.
 
