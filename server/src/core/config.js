@@ -8,6 +8,9 @@ export const config = {
   scoreThreshold: parseInt(process.env.SCORE_THRESHOLD || '25', 10),
   maxAgeDays: parseInt(process.env.MAX_AGE_DAYS || '30', 10),
   adminKey: process.env.ADMIN_KEY || '',
+  // Einladungscode für POST /api/auth/register (Konten & Sync, Modul 1).
+  // Leer/ungesetzt = Registrierung geschlossen (bewusster Default — kein offenes SaaS in v1).
+  registrationCode: process.env.REGISTRATION_CODE || '',
   userAgent: 'SellerHub-Radar/0.1 (+https://github.com/WiKa1303/SellerHub)',
   fetchTimeoutMs: 15000,
 
@@ -83,6 +86,7 @@ export function validateConfig() {
   if (problems.length) throw new Error('Ungültige Konfiguration:\n  - ' + problems.join('\n  - '));
   const warnings = [];
   if (!config.adminKey) warnings.push('ADMIN_KEY leer — POST /api/admin/crawl ist deaktiviert');
+  if (!config.registrationCode) warnings.push('REGISTRATION_CODE leer — Registrierung geschlossen (Login bestehender Konten funktioniert weiter)');
   if (!config.anthropicApiKey) warnings.push('ANTHROPIC_API_KEY fehlt — Intelligence-Module laufen im Degradations-Modus (Keyword-Scoring)');
   if (!config.pushWebhookUrl && !config.pushNtfyTopic) warnings.push('PUSH_WEBHOOK_URL/PUSH_NTFY_TOPIC leer — Push-Zustellung inaktiv (Alerts bleiben in der Queue sichtbar)');
   return warnings;

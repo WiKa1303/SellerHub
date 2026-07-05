@@ -9,6 +9,8 @@ import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
 import { log } from '../core/logger.js';
 import { renderInternal } from './internal.js';
+import { registerUser, loginUser, logoutSession, changePassword, authMiddleware } from '../services/auth/index.js';
+import { listSyncData, applySyncBatch } from '../services/sync/index.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -25,9 +27,11 @@ export function buildApi() {
   app.disable('x-powered-by');
 
   // CORS: Inhalte sind öffentlich, das SellerHub-Frontend (file:// oder eigene Domain) darf lesen.
+  // Authorization für Konten/Sync (Bearer-Token), PUT für den Batch-Upsert des Syncs.
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key, X-Tenant-Id');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key, X-Tenant-Id, Authorization');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     next();
   });
@@ -199,6 +203,76 @@ export function buildApi() {
       const b = await latestStrategyBrief();
       if (!b) return res.status(404).json({ error: 'noch kein Briefing erstellt' });
       res.json({ day: b.day, model: b.model, created_at: b.created_at, ...b.brief });
+    } catch (e) { fail(res, e); }
+  });
+
+  // ═══ Konten & Daten-Sync (KONZEPT-Konten-Sync.md, Modul 1) ═══
+  // Nur Delegation an services/auth + services/sync; erwartbare Fehler kommen als
+  // {status, error} aus dem Service, alles Unerwartete über fail() (keine Interna-Leaks).
+  // Antworten mit Kontodaten sind privat → Cache-Control no-store (überschreibt den GET-Default).
+
+  // POST /api/auth/register – {email, password, displayName, inviteCode}
+  app.post('/api/auth/register', express.json(), async (req, res) => {
+    try {
+      const r = await registerUser(req.body || {});
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      res.status(201).json({ user: r.user });
+    } catch (e) { fail(res, e); }
+  });
+
+  // POST /api/auth/login – {email, password} → {token, user}
+  app.post('/api/auth/login', express.json(), async (req, res) => {
+    try {
+      const r = await loginUser(req.body || {});
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      res.json({ token: r.token, user: r.user });
+    } catch (e) { fail(res, e); }
+  });
+
+  // POST /api/auth/logout (Bearer) – Session serverseitig widerrufen
+  app.post('/api/auth/logout', authMiddleware, async (req, res) => {
+    try {
+      await logoutSession(req.sessionTokenHash);
+      res.json({ ok: true });
+    } catch (e) { fail(res, e); }
+  });
+
+  // GET /api/auth/me (Bearer) – eigenes Konto
+  app.get('/api/auth/me', authMiddleware, (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.json({ user: req.user });
+  });
+
+  // POST /api/auth/change-password (Bearer) – {currentPassword, newPassword}
+  app.post('/api/auth/change-password', authMiddleware, express.json(), async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body || {};
+      const r = await changePassword(req.user, currentPassword, newPassword);
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      res.json({ ok: true });
+    } catch (e) { fail(res, e); }
+  });
+
+  // GET /api/sync (Bearer) – alle {key, value, updated_at, version} des Users
+  app.get('/api/sync', authMiddleware, async (req, res) => {
+    try {
+      res.set('Cache-Control', 'no-store');
+      const items = await listSyncData(req.user.id);
+      res.json({ items, count: items.length });
+    } catch (e) { fail(res, e); }
+  });
+
+  // PUT /api/sync (Bearer) – Batch-Upsert {items:[{key, value, baseVersion}]}
+  // 409 = Versions-Konflikt (Server-Stand der Konflikt-Keys beiliegend) · 413 = Größenlimit.
+  // Body-Limit 12 MB: über dem 10-MB-Kontolimit, damit der 413 aus UNSERER Prüfung kommt
+  // (ehrliche deutsche Fehlermeldung statt generischem Parser-Abbruch).
+  app.put('/api/sync', authMiddleware, express.json({ limit: '12mb' }), async (req, res) => {
+    try {
+      res.set('Cache-Control', 'no-store');
+      const r = await applySyncBatch(req.user.id, (req.body || {}).items);
+      if (r.error && r.status !== 409) return res.status(r.status).json({ error: r.error });
+      if (r.status === 409) return res.status(409).json({ error: r.error, conflicts: r.conflicts, applied: r.applied });
+      res.json({ ok: true, items: r.items });
     } catch (e) { fail(res, e); }
   });
 

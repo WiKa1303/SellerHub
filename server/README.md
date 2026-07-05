@@ -311,3 +311,27 @@ Arbeitet die Zustell-Queue ab (`alerts.delivered_at IS NULL`), **max. 20 Alerts 
 
 Tests: `test/forecast.test.js` + `test/dispatch.test.js` (pg-mem, fetch/KI gemockt) — Teil von `npm test`.
 
+
+# Konten & Sync (Modul 1)
+
+Echte Benutzerkonten + Key-Value-Daten-Sync zwischen Geräten (Spezifikation:
+[`../KONZEPT-Konten-Sync.md`](../KONZEPT-Konten-Sync.md)). Ohne neue Dependencies:
+Passwort-Hashing mit `crypto.scrypt` (Format `salt$hash`), Sessions als opake Zufalls-Tokens
+(DB speichert NUR `sha256(token)` — widerrufbar, 30 Tage gleitend). Registrierung nur mit
+Einladungscode (`REGISTRATION_CODE`; leer = geschlossen). Login-Rate-Limit: max. 10
+Fehlversuche/15 min je E-Mail (in-memory, fail-soft). Auth ist bewusst **kein**
+Intelligence-Modul (kein Registry-Eintrag); Zähler read-only in `/internal`.
+
+| Endpunkt | Auth | Zweck |
+|---|---|---|
+| `POST /api/auth/register` | inviteCode | Konto anlegen `{email, password, displayName, inviteCode}` → 201; 403 wenn Registrierung geschlossen/Code falsch; 409 bei doppelter E-Mail |
+| `POST /api/auth/login` | – | `{email, password}` → `{token, user}`; 401 generisch, 429 bei Rate-Limit |
+| `POST /api/auth/logout` | Bearer | Session serverseitig widerrufen |
+| `GET /api/auth/me` | Bearer | eigenes Konto (`no-store`) |
+| `POST /api/auth/change-password` | Bearer | `{currentPassword, newPassword}`; 401 bei falschem aktuellem Passwort |
+| `GET /api/sync` | Bearer | alle `{key, value, updated_at, version}` des Users |
+| `PUT /api/sync` | Bearer | Batch-Upsert `{items:[{key, value, baseVersion}]}` → `{items:[{key, version}]}`; **409** bei Versions-Konflikt (inkl. Server-Stand der Konflikt-Keys, konfliktfreie Keys werden angewendet); **413** bei Wert > 512 KB oder Summe > 10 MB |
+
+Auth via Header `Authorization: Bearer <token>` (CORS erlaubt Authorization + PUT).
+Tabellen: `users`, `sessions`, `user_data` (Optimistic Locking über `version`,
+`size_bytes` für die Limit-Prüfung). Tests: `test/auth.test.js` — Teil von `npm test`.

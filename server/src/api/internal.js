@@ -34,6 +34,14 @@ export async function renderInternal(req, res) {
       db().query(`SELECT DISTINCT tenant_id FROM feedback ORDER BY tenant_id`),
     ]);
 
+    // ── KONTEN & SYNC (Modul 1, read-only): Konten, aktive Sessions, Sync-Keys ──
+    // Ablauf-Grenze als JS-Datum (pg-mem-Konvention: keine SQL-Datums-Arithmetik).
+    const [cUsers, cSessions, cSyncKeys] = await Promise.all([
+      db().query(`SELECT count(*) AS n FROM users`),
+      db().query(`SELECT count(*) AS n FROM sessions WHERE expires_at > $1`, [new Date().toISOString()]),
+      db().query(`SELECT count(*) AS n FROM user_data`),
+    ]);
+
     // ── INTELLIGENCE: letzte 20 analysierte Artikel ──
     const analyzed = (await db().query(
       `SELECT title, source, ai_score, ai_impact, ai_urgency, ai_reasoning, ai_category, ai_analyzed_at
@@ -88,6 +96,12 @@ export async function renderInternal(req, res) {
 <div class="kpi"><b>${num(cAnalyzed.rows[0].n)}</b>davon KI-analysiert</div>
 <div class="kpi"><b>${num(cAlerts.rows[0].n)}</b>Alerts</div>
 <table><tr><th>Intelligence-Modul</th><th>Beschreibung</th><th>Laufzeit-State</th></tr>${modRows}</table>
+
+<h2>Konten &amp; Sync (Modul 1)</h2>
+<div class="kpi"><b>${num(cUsers.rows[0].n)}</b>Konten</div>
+<div class="kpi"><b>${num(cSessions.rows[0].n)}</b>aktive Sessions</div>
+<div class="kpi"><b>${num(cSyncKeys.rows[0].n)}</b>Sync-Keys (user_data)</div>
+<p class="muted">Read-only-Zähler. Auth ist bewusst KEIN Intelligence-Modul (kein Registry-Eintrag) — Endpunkte unter /api/auth/* und /api/sync.</p>
 
 <h2>Prompts — Registry & Versionen</h2>
 <table><tr><th>prompt_key</th><th>Version</th><th>Modell</th><th>effort</th><th>temperature</th><th>max_tokens</th><th>Beschreibung</th></tr>

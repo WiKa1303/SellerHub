@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "crawl": "node src/crawl-once.js",
-    "test": "node test/smoke.test.js && node test/html.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js && node test/forecast.test.js && node test/dispatch.test.js",
+    "test": "node test/smoke.test.js && node test/html.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js && node test/forecast.test.js && node test/dispatch.test.js && node test/auth.test.js",
     "test:html": "node test/html.test.js",
     "test:ai": "node test/ai.test.js",
     "test:trends": "node test/trends.test.js",
@@ -16,7 +16,8 @@
     "start:worker": "node src/apps/worker.js",
     "test:platform": "node test/platform.test.js",
     "test:forecast": "node test/forecast.test.js",
-    "test:dispatch": "node test/dispatch.test.js"
+    "test:dispatch": "node test/dispatch.test.js",
+    "test:auth": "node test/auth.test.js"
   },
   "engines": {
     "node": ">=18"

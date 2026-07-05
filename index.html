@@ -228,6 +228,15 @@
   <button onclick="notifToggle()" id="notifBell" title="Benachrichtigungen" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.color='#a8b1cc'">
     🔔<span id="notifBellBadge" style="position:absolute;top:5px;right:5px;background:var(--rd);color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px">0</span>
   </button>
+  <button onclick="syBtnClick()" id="syBtn" title="Cloud-Konto: nicht angemeldet" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px;opacity:.55" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)'">
+    ☁️<span id="syBtnDot" style="position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#8a93ad"></span>
+  </button>
+  </div>
+  <!-- Cloud-Sync Mini-Menü (angemeldet) -->
+  <div id="syMenu" style="display:none;position:fixed;top:64px;left:18px;width:260px;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column;padding:8px">
+    <div id="syMenuUser" style="padding:8px 10px;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--bd);margin-bottom:6px;word-break:break-all"></div>
+    <button class="btn btn-sm" onclick="syNow()" style="width:100%;justify-content:flex-start;margin-bottom:4px;font-size:12px">🔄 Jetzt syncen</button>
+    <button class="btn btn-sm" onclick="syLogout()" style="width:100%;justify-content:flex-start;font-size:12px">🚪 Abmelden</button>
   </div>
   <!-- Notification Panel -->
   <div id="notifPanel" style="display:none;position:fixed;top:64px;left:18px;width:340px;max-height:70vh;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column"></div>
@@ -2339,9 +2348,49 @@
   </div>
 </div>
 
+<!-- ═══ CLOUD-KONTO MODAL (Sync, js/sync.js) ═══ -->
+<div class="mo" id="syModal" onclick="if(event.target===this)syClose()">
+  <div class="modal" style="width:440px">
+    <div class="mh"><h2 id="syModalTitle">☁️ Cloud-Konto</h2><button class="mc" onclick="syClose()">✕</button></div>
+    <div class="mb">
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <button type="button" class="btn btn-sm" id="syTabLogin" onclick="syMode('login')" style="flex:1">Anmelden</button>
+        <button type="button" class="btn btn-sm" id="syTabReg" onclick="syMode('register')" style="flex:1">Registrieren</button>
+      </div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--tx2)">
+        Synchronisiert deine Daten automatisch zwischen Geräten. Optional — ohne Konto bleibt alles wie bisher lokal.
+      </div>
+      <div class="fg" style="grid-template-columns:1fr">
+        <div class="fi">
+          <label>E-Mail-Adresse *</label>
+          <input id="syEmail" type="email" autocomplete="email" placeholder="du@example.com" onkeydown="if(event.key==='Enter')sySubmit()">
+        </div>
+        <div class="fi">
+          <label>Passwort *</label>
+          <input id="syPw" type="password" autocomplete="current-password" placeholder="min. 8 Zeichen" onkeydown="if(event.key==='Enter')sySubmit()">
+        </div>
+        <div class="fi sy-reg-only" style="display:none">
+          <label>Anzeigename</label>
+          <input id="syName" autocomplete="name" placeholder="z.B. Wissam" onkeydown="if(event.key==='Enter')sySubmit()">
+        </div>
+        <div class="fi sy-reg-only" style="display:none">
+          <label>Einladungscode *</label>
+          <input id="syCode" autocomplete="off" placeholder="Code vom Betreiber" onkeydown="if(event.key==='Enter')sySubmit()">
+        </div>
+      </div>
+      <div id="syError" style="display:none;background:var(--rdd);border:1px solid var(--rd);color:var(--rd);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;font-weight:600"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="syClose()">Abbrechen</button>
+      <button class="btn btn-p" onclick="sySubmit()" id="sySubmitBtn">Anmelden</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="impFile" accept=".json" style="display:none" onchange="handleImp(event)">
 
 <script src="js/app.js"></script>
+<script src="js/sync.js"></script>
 </body>
 </html>

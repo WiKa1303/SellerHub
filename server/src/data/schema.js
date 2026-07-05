@@ -130,6 +130,46 @@ export async function initDb(poolOverride) {
       PRIMARY KEY (tenant_id, item_id)
     )`);
 
+  // ── Konten & Daten-Sync (Owner: auth/sync — KONZEPT-Konten-Sync.md, Modul 1) ──
+  // users: Konten. id wird in JS erzeugt (crypto.randomUUID) — kein gen_random_uuid()
+  // nötig (pg-mem-kompatibel). email liegt IMMER lowercase in der DB.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id            UUID PRIMARY KEY,
+      email         TEXT NOT NULL UNIQUE,             -- lowercase (Service normalisiert)
+      password_hash TEXT NOT NULL,                    -- scrypt: salt$hash (hex)
+      display_name  TEXT,
+      role          TEXT NOT NULL DEFAULT 'user',     -- 'user' | 'admin'
+      created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+      last_login_at TIMESTAMPTZ
+    )`);
+
+  // sessions: opake, widerrufbare Tokens (30 Tage, gleitend). In der DB liegt NUR
+  // der sha256-Hash — der Klartext-Token existiert ausschließlich beim Client.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token_hash   TEXT PRIMARY KEY,                  -- sha256(token) hex
+      user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      expires_at   TIMESTAMPTZ NOT NULL,
+      last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions (user_id)`);
+
+  // user_data: Key-Value-Sync-Speicher (Spiegel der localStorage-Keys der App).
+  // size_bytes wird in JS berechnet und mitgeschrieben — Größenlimits per einfacher
+  // SUM-Query prüfbar, ohne SQL-Funktionen auf jsonb (pg-mem-kompatibel).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_data (
+      user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      key        TEXT NOT NULL,
+      value      JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      version    INTEGER NOT NULL DEFAULT 1,          -- Optimistic Locking (baseVersion-Check)
+      size_bytes INTEGER NOT NULL DEFAULT 0,          -- Bytes von JSON.stringify(value)
+      PRIMARY KEY (user_id, key)
+    )`);
+
   // ── AI-Call-Telemetrie (Owner: intelligence) — Prompt-Versionierung & Kosten je Call ──
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ai_calls (
@@ -143,7 +183,7 @@ export async function initDb(poolOverride) {
       created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, ai_calls)');
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_calls)');
   return pool;
 }
 
