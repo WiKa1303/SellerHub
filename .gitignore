@@ -13,3 +13,8 @@
 
 # Exportierte App-Daten (gehören nicht in die Versionierung)
 sellerhub-data.json
+
+# Node-Abhängigkeiten im Root (z. B. Playwright für Screenshots) — server/ hat eigene, echte package.json!
+/node_modules/
+/package.json
+/package-lock.json
