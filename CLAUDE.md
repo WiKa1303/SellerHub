@@ -33,6 +33,9 @@ SellerHub/
 - ältere: `-bildstudio`, `-nav`, `.BACKUP`
 - **Konvention:** Vor größeren Umbauten neue Kopie `backups/SellerHub.BACKUP-<thema>.html` anlegen.
 
+## Lokale Vorschau (solange die Domain hängt)
+`./start-lokal.sh` (oder `node lokaler-server.mjs`) → http://localhost:5173/ = Marketing-Website (`website/`), http://localhost:5173/app/ = die App. Bildet das Ziel-Layout der Domain ab; Cloud-Login/Sync laufen ganz normal gegen Railway.
+
 ## Hosting (vorbereitet — Ziel: amzsellerhub.de auf netcup-Webspace)
 Die App ist rein statisch. Upload-Skript: **`./deploy-frontend.sh`** (rsync, lädt nur index.html + css/ + js/; Zugangsdaten aus netcup CCP → Webhosting als `WEBSPACE_HOST`/`WEBSPACE_USER`).
 Das Backend (Seller-Radar) läuft separat auf Railway: https://radar-production-388a.up.railway.app (Custom Domain api.amzsellerhub.de eingerichtet, wartet auf DENIC-Delegation). CORS ist offen, Standard-API-URL steht in js/app.js (`RADAR_API_DEFAULT`).
