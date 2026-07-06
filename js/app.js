@@ -1489,14 +1489,13 @@ function renderPipeline(){
     var cf=decisionConfidence(c);
     // Harte Red Flags blockieren GO → Karte rot umranden (10-Sekunden-Urteil auf einen Blick)
     var cardBorder=vd.hard>0?'border:1.5px solid var(--rd);box-shadow:0 0 0 3px var(--rdd)':'border:1px solid var(--bd)';
-    // Produktname klickbar → Amazon-Listing (compAsin aus Import/ASIN-Analyse)
-    var azUrl=c.compAsin?('https://www.amazon.de/dp/'+esc(c.compAsin)):'';
-    var nameHtml=azUrl
-      ?'<a href="'+azUrl+'" target="_blank" rel="noopener" title="Auf Amazon öffnen: '+esc(c.compAsin)+'" style="color:var(--tx);text-decoration:none;border-bottom:1px dashed var(--bd2)" onmouseover="this.style.color=\'var(--ac)\'" onmouseout="this.style.color=\'var(--tx)\'">'+esc(c.name)+' <span style="font-size:10px;color:var(--tx3)">↗</span></a>'
-      :esc(c.name);
+    // Hauptbild + Produktname klickbar → Amazon-Listing (pipeThumb/pipeLinkedName sind gehoistet)
     c2+='<div style="background:var(--s1);'+cardBorder+';border-radius:9px;padding:10px 11px"'+(vd.hard>0?' title="'+vd.hard+' harte'+(vd.hard===1?'r':'')+' Red Flag — GO ist blockiert"':'')+'>'+
-      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+nameHtml+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
-      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span>'+(c.compAsin?' · <a href="'+azUrl+'" target="_blank" rel="noopener" style="font-family:monospace;color:var(--tx3);font-size:9.5px" title="Auf Amazon öffnen">'+esc(c.compAsin)+'</a>':'')+'</div>'+
+      '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:4px">'+pipeThumb(c,38)+
+        '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+pipeLinkedName(c)+'</div>'+
+        '<div style="font-size:10.5px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span></div></div>'+
+        '<div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div>'+
+      '</div>'+
       pipeFlagChips(vd.flags)+
       '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:11px;font-weight:700" title="Scorecard: bewerten & Urteil sehen">⚖️ Bewerten</button>'+
@@ -1510,13 +1509,29 @@ function renderPipeline(){
     '</div>';
   });
 
+  // Hauptbild-Thumbnail + Amazon-Link (gemeinsames Muster für Shortlist/Entscheidung)
+  function pipeThumb(it,size){
+    var img=(it.compImages&&it.compImages[0])||'';
+    var t=img
+      ?'<img src="'+esc(img)+'" loading="lazy" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:'+size+'px;height:'+size+'px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0&quot;>📦</div>\'">'
+      :'<div style="width:'+size+'px;height:'+size+'px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0" title="Kein Bild vorhanden">📦</div>';
+    return it.compAsin?'<a href="https://www.amazon.de/dp/'+esc(it.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(it.compAsin)+')" style="flex-shrink:0;line-height:0">'+t+'</a>':t;
+  }
+  function pipeLinkedName(it){
+    if(!it.compAsin)return esc(it.name);
+    return '<a href="https://www.amazon.de/dp/'+esc(it.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen" style="color:var(--tx);text-decoration:none;border-bottom:1px dashed var(--bd2)" onmouseover="this.style.color=\'var(--ac)\'" onmouseout="this.style.color=\'var(--tx)\'">'+esc(it.name)+' <span style="font-size:10px;color:var(--tx3)">↗</span></a>';
+  }
+
   // ── Stufe 3: Shortlist (in Prüfung) ──
   var sl=(D.research.shortlist||[]).filter(function(s){return s.decision==='pruefen'&&!s.movedToProducts;});
   var c3='';
   sl.forEach(function(s){
     c3+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
-      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(s.name)+'</div>'+(s.score?'<div style="font-weight:800;color:var(--ac);font-size:15px;line-height:1">'+s.score+'</div>':'')+'</div>'+
-      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(s.kategorie?esc(s.kategorie)+' · ':'')+(s.compUsps&&s.compUsps.length?s.compUsps.length+' USPs':'')+'</div>'+
+      '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:4px">'+pipeThumb(s,38)+
+        '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+pipeLinkedName(s)+'</div>'+
+        '<div style="font-size:10.5px;color:var(--tx2);margin-top:2px">'+(s.kategorie?esc(s.kategorie)+' · ':'')+(s.compUsps&&s.compUsps.length?s.compUsps.length+' USPs':'')+'</div></div>'+
+        (s.score?'<div style="font-weight:800;color:var(--ac);font-size:15px;line-height:1">'+s.score+'</div>':'')+
+      '</div>'+
       '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
         '<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'muster\')" style="font-size:10.5px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">✅ GO →</button>'+
         '<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'abgelehnt\')" style="font-size:10.5px;background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌ NO-GO</button>'+
@@ -1534,8 +1549,10 @@ function renderPipeline(){
     var col=go1?'gn':'rd';
     var label=s.movedToProducts?'🟢 In Produktliste':go1?'🟢 GO':'🔴 NO-GO';
     c4+='<div style="background:var(--s1);border:1px solid var(--'+col+');border-radius:9px;padding:10px 11px;'+(go1?'':'opacity:.7')+'">'+
-      '<div style="font-weight:600;color:var(--tx);font-size:12.5px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(s.name)+'</div>'+
-      '<div style="font-size:11px;color:var(--'+col+');font-weight:700;margin-bottom:8px">'+label+'</div>'+
+      '<div style="display:flex;gap:9px;align-items:center;margin-bottom:8px">'+pipeThumb(s,34)+
+        '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+pipeLinkedName(s)+'</div>'+
+        '<div style="font-size:11px;color:var(--'+col+');font-weight:700;margin-top:2px">'+label+'</div></div>'+
+      '</div>'+
       '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
         (go1&&!s.movedToProducts?'<button class="btn btn-sm" onclick="auswahlOrderSample(\''+s.id+'\')" style="font-size:10.5px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">→ Produktliste</button>':'')+
         (!go1?'<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'pruefen\')" style="font-size:10.5px" title="Zurück in Prüfung">↩</button>':'')+
