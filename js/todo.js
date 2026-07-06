@@ -27,14 +27,18 @@ const PRIOS=[{id:'keine',label:'Keine',icon:'⚪'},{id:'niedrig',label:'Niedrig'
 const STATI=[{id:'offen',label:'Offen'},{id:'in_arbeit',label:'In Arbeit'},{id:'wartet',label:'Wartet'},{id:'erledigt',label:'Erledigt'}];
 const ROLLEN=[{id:'viewer',label:'Nur lesen'},{id:'commenter',label:'Kommentieren'},{id:'editor',label:'Bearbeiten'},{id:'admin',label:'Verwalten'}];
 const SMARTS=[
- {id:'inbox',icon:'📥',label:'Eingang'},
- {id:'today',icon:'📅',label:'Heute'},
- {id:'week',icon:'🗓️',label:'Nächste 7 Tage'},
- {id:'assigned',icon:'👤',label:'Mir zugewiesen'},
- {id:'starred',icon:'⭐',label:'Markiert'},
- {id:'all',icon:'🗃️',label:'Alle Aufgaben'},
- {id:'done',icon:'✅',label:'Erledigt'},
+ {id:'inbox',icon:'📥',label:'Eingang',c:'#d97706'},
+ {id:'today',icon:'☀️',label:'Heute',c:'#dc2626'},
+ {id:'week',icon:'🗓️',label:'Nächste 7 Tage',c:'#1d4ed8'},
+ {id:'assigned',icon:'👤',label:'Mir zugewiesen',c:'#6d28d9'},
+ {id:'starred',icon:'⭐',label:'Markiert',c:'#b45309'},
+ {id:'all',icon:'🗂️',label:'Alle Aufgaben',c:'#4d5568'},
+ {id:'done',icon:'✅',label:'Erledigt',c:'#059669'},
 ];
+const STATUS_COLORS={offen:'#7b8395',in_arbeit:'#1d4ed8',wartet:'#d97706',erledigt:'#059669'};
+// Farbige Icon-Kachel (Herzstück des warmen Looks — überall wiederverwendet)
+const icoTile=(icon,color,big)=>'<span class="td-ico'+(big?' big':'')+'" style="--ic:'+esc(color||'#d97706')+'">'+esc(icon||'•')+'</span>';
+const listTile=(l,big)=>icoTile(l.icon||l.name[0].toUpperCase(),l.color||'#d97706',big);
 const ACT_LABELS={'task.created':'hat die Aufgabe erstellt','task.updated':'hat die Aufgabe bearbeitet','task.completed':'hat die Aufgabe erledigt','task.reopened':'hat die Aufgabe wieder geöffnet','task.moved':'hat die Aufgabe verschoben','task.deleted':'hat die Aufgabe in den Papierkorb gelegt','task.restored':'hat die Aufgabe wiederhergestellt','task.purged':'hat eine Aufgabe endgültig gelöscht','task.repeated':'Wiederholung: nächste Instanz erstellt','comment.added':'hat kommentiert','attachment.added':'hat eine Datei angehängt','member.added':'hat ein Mitglied eingeladen','member.removed':'hat ein Mitglied entfernt','member.left':'hat die Liste verlassen','member.role':'hat eine Rolle geändert','list.created':'hat die Liste erstellt','list.updated':'hat die Liste bearbeitet'};
 
 // ── Zustand ──
@@ -229,15 +233,15 @@ function currentTasks(){
  });
  return arr;
 }
-function scopeTitle(){
+function scopeMeta(){
  const sc=S.scope;
- if(sc.type==='smart')return SMARTS.find(s=>s.id===sc.id).label;
- if(sc.type==='list'){const l=listById(sc.id);return l?(l.icon?l.icon+' ':'')+l.name:'Liste';}
- if(sc.type==='folder'){const f=S.folders.find(f=>f.id===sc.id);return f?'📁 '+f.name:'Ordner';}
- if(sc.type==='tag'){const t=S.tags.find(t=>t.id===sc.id);return t?'#'+t.name:'Tag';}
- if(sc.type==='filter'){const f=S.savedFilters.find(f=>f.id===sc.id);return f?'💾 '+f.name:'Filter';}
- if(sc.type==='trash')return'🗑 Papierkorb';
- return'';
+ if(sc.type==='smart'){const s=SMARTS.find(s=>s.id===sc.id);return{icon:s.icon,color:s.c,name:s.label};}
+ if(sc.type==='list'){const l=listById(sc.id);return l?{icon:l.icon||l.name[0].toUpperCase(),color:l.color||'#d97706',name:l.name}:{icon:'☰',color:'#7b8395',name:'Liste'};}
+ if(sc.type==='folder'){const f=S.folders.find(f=>f.id===sc.id);return{icon:'📁',color:'#8a7a5f',name:f?f.name:'Ordner'};}
+ if(sc.type==='tag'){const t=S.tags.find(t=>t.id===sc.id);return{icon:'#',color:(t&&t.color)||'#7b8395',name:t?t.name:'Tag'};}
+ if(sc.type==='filter'){const f=S.savedFilters.find(f=>f.id===sc.id);return{icon:'💾',color:'#0e7490',name:f?f.name:'Filter'};}
+ if(sc.type==='trash')return{icon:'🗑',color:'#7b8395',name:'Papierkorb'};
+ return{icon:'☰',color:'#7b8395',name:''};
 }
 
 // ═══ Optimistische Mutationen ═══
@@ -250,8 +254,14 @@ function tdToggleDone(id,ev){
  if(ev)ev.stopPropagation();
  const t=S.tasks[id];if(!t)return;
  const val=!t.completed;
- patchLocal(id,{completed:val,status:val?'erledigt':'offen'});renderAll();
- mutate(async()=>{const r=await PUT('/api/todo/tasks/'+id,{completed:val});S.tasks[id]=r.task;if(r.spawnedTaskId)refresh(true);renderAll();});
+ // Beim Erledigen: kurze Häkchen-Animation zeigen, DANN neu rendern
+ const row=document.querySelector('.td-row[data-id="'+id+'"]');
+ const apply=()=>{
+  patchLocal(id,{completed:val,status:val?'erledigt':'offen'});renderAll();
+  mutate(async()=>{const r=await PUT('/api/todo/tasks/'+id,{completed:val});S.tasks[id]=r.task;if(r.spawnedTaskId)refresh(true);renderAll();});
+ };
+ if(val&&row){row.classList.add('td-completing');setTimeout(apply,340);}
+ else apply();
 }
 function tdToggleStar(id,ev){
  if(ev)ev.stopPropagation();
@@ -295,7 +305,7 @@ function skeleton(){
  +'<aside class="td-side" id="tdSide"></aside>'
  +'<main class="td-main">'
  + '<div class="td-toolbar">'
- +  '<h2 id="tdTitle" style="margin:0;display:flex;align-items:center;gap:8px"></h2>'
+ +  '<div id="tdTitle" class="td-htitle"></div>'
  +  '<span id="tdLiveDot" style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block"></span>'
  +  '<div style="flex:1"></div>'
  +  '<input id="tdSearch" class="td-search" placeholder="🔍 Suchen…  ( / )" oninput="td.searchInput(this.value)">'
@@ -325,22 +335,22 @@ function renderSidebar(){
  h+=SMARTS.map(s=>{
   const on=S.scope.type==='smart'&&S.scope.id===s.id;
   const badge=s.id==='inbox'&&cnt[S.inboxId]?'<span class="td-badge">'+cnt[S.inboxId]+'</span>':'';
-  return'<button class="td-nav'+(on?' on':'')+'" onclick="td.setScope(\'smart\',\''+s.id+'\')">'+s.icon+' '+s.label+badge+'</button>';
+  return'<button class="td-nav'+(on?' on':'')+'" onclick="td.setScope(\'smart\',\''+s.id+'\')">'+icoTile(s.icon,s.c)+'<span class="td-navlbl">'+s.label+'</span>'+badge+'</button>';
  }).join('');
  h+='<div class="td-sec">LISTEN <button class="td-mini" title="Neue Liste" onclick="td.newList()">＋</button><button class="td-mini" title="Neuer Ordner" onclick="td.newFolder()">📁＋</button></div>';
  const rootLists=S.lists.filter(l=>!l.folderId&&!l.isInbox);
  const listBtn=l=>{
   const on=S.scope.type==='list'&&S.scope.id===l.id;
-  const shared=l.role!=='owner'?' <span title="geteilt — Rolle: '+esc(l.role)+'">👥</span>':'';
+  const shared=l.role!=='owner'?' <span class="td-sharemark" title="geteilt — Rolle: '+esc(l.role)+'">👥</span>':'';
   return'<button class="td-nav td-list'+(on?' on':'')+'" ondragover="td.dragOver(event)" ondrop="td.dropOnList(event,\''+l.id+'\')" oncontextmenu="td.listMenu(event,\''+l.id+'\')" onclick="td.setScope(\'list\',\''+l.id+'\')">'
-   +(l.icon?esc(l.icon)+' ':'<span class="td-dot" style="background:'+esc(l.color||'var(--ac)')+'"></span> ')+esc(l.name)+shared
+   +listTile(l)+'<span class="td-navlbl">'+esc(l.name)+shared+'</span>'
    +(cnt[l.id]?'<span class="td-badge">'+cnt[l.id]+'</span>':'')+'</button>';
  };
  h+=rootLists.map(listBtn).join('');
  S.folders.forEach(f=>{
   const inside=S.lists.filter(l=>l.folderId===f.id);
   const on=S.scope.type==='folder'&&S.scope.id===f.id;
-  h+='<button class="td-nav td-folder'+(on?' on':'')+'" oncontextmenu="td.folderMenu(event,\''+f.id+'\')" onclick="td.setScope(\'folder\',\''+f.id+'\')">📁 '+esc(f.name)+'</button>';
+  h+='<button class="td-nav td-folder'+(on?' on':'')+'" oncontextmenu="td.folderMenu(event,\''+f.id+'\')" onclick="td.setScope(\'folder\',\''+f.id+'\')">'+icoTile('📁',f.color||'#8a7a5f')+'<span class="td-navlbl">'+esc(f.name)+'</span></button>';
   h+='<div class="td-indent">'+inside.map(listBtn).join('')+'</div>';
  });
  h+='<div class="td-sec">TAGS <button class="td-mini" title="Tags verwalten" onclick="td.openTagManager()">⚙</button></div>';
@@ -354,7 +364,7 @@ function renderSidebar(){
   h+='<div class="td-sec">GESPEICHERTE FILTER</div>';
   h+=S.savedFilters.map(f=>'<button class="td-nav'+(S.scope.type==='filter'&&S.scope.id===f.id?' on':'')+'" onclick="td.applySavedFilter(\''+f.id+'\')">💾 '+esc(f.name)+' <span class="td-mini" onclick="event.stopPropagation();td.deleteSavedFilter(\''+f.id+'\')" title="Filter löschen">✕</span></button>').join('');
  }
- h+='<div class="td-sec"></div><button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" onclick="td.setScope(\'trash\')">🗑 Papierkorb</button>';
+ h+='<div class="td-sec"></div><button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" onclick="td.setScope(\'trash\')">'+icoTile('🗑','#7b8395')+'<span class="td-navlbl">Papierkorb</span></button>';
  el.innerHTML=h;
 }
 
@@ -383,7 +393,11 @@ function renderFilterbar(){
 function renderAll(){
  if(!isActive())return;
  skeleton();
- $('tdTitle').textContent=scopeTitle();
+ const meta=scopeMeta();
+ const openN=currentTasks().filter(t=>!t.completed).length;
+ $('tdTitle').innerHTML=icoTile(meta.icon,meta.color,true)
+  +'<div class="td-htxt"><div class="td-hname">'+esc(meta.name)+'</div>'
+  +'<div class="td-hsub">'+(S.scope.type==='trash'?currentTasks().length+' im Papierkorb':openN+' offen'+(S.search?' · Suche „'+esc(S.search)+'"':''))+'</div></div>';
  ['tdVList','tdVBoard','tdVCal'].forEach((id,i)=>{const b=$(id);if(b)b.classList.toggle('on',['list','board','calendar'][i]===S.view);});
  paintLiveDot();
  renderSidebar();renderFilterbar();
@@ -429,13 +443,21 @@ function renderListView(body){
  const multi=S.scope.type!=='list'&&!(S.scope.type==='smart'&&S.scope.id==='inbox');
  let h='';
  if(S.scope.type!=='trash')h+='<div class="td-quickrow"><input id="tdQuickAdd" placeholder="＋ Aufgabe hinzufügen und Enter drücken…" onkeydown="if(event.key===\'Enter\')td.quickAdd()"></div>';
- if(!tasks.length){h+='<div class="td-empty">'+(S.scope.type==='trash'?'Der Papierkorb ist leer.':'Keine Aufgaben hier — alles erledigt 🎉')+'</div>';body.innerHTML=h;return;}
+ if(!tasks.length){
+  const em=S.scope.type==='trash'?['🗑','Der Papierkorb ist leer','Gelöschte Aufgaben landen hier und können wiederhergestellt werden.']
+   :S.search?['🔍','Nichts gefunden','Versuch es mit einem anderen Suchbegriff oder setz die Filter zurück.']
+   :S.scope.type==='smart'&&S.scope.id==='today'?['☀️','Nichts für heute fällig','Genieß den Tag — oder plane mit „n" die nächste Aufgabe.']
+   :S.scope.type==='smart'&&S.scope.id==='done'?['✅','Noch nichts erledigt','Abgehakte Aufgaben tauchen hier auf.']
+   :['🌤','Alles erledigt','Leg mit „n" eine neue Aufgabe an — oder lehn dich zurück.'];
+  h+='<div class="td-empty"><div class="td-emoji-big">'+em[0]+'</div><b>'+em[1]+'</b><span>'+em[2]+'</span></div>';
+  body.innerHTML=h;return;
+ }
  if(multi){
   const groups={};tasks.forEach(t=>{(groups[t.listId]=groups[t.listId]||[]).push(t);});
   let idx=0;
   for(const lid of Object.keys(groups)){
    const l=listById(lid);
-   h+='<div class="td-group">'+(l?(l.icon?esc(l.icon)+' ':'')+esc(l.name):'Liste')+'</div>';
+   h+='<div class="td-group">'+(l?listTile(l)+'<span>'+esc(l.name)+'</span>':'<span>Liste</span>')+'<em>'+groups[lid].filter(t=>!t.completed).length+'</em></div>';
    h+=groups[lid].map(t=>taskRow(t,idx++)).join('');
   }
  }else{
@@ -450,8 +472,8 @@ function renderBoardView(body){
  let h='<div class="td-board">';
  STATI.forEach(st=>{
   const col=tasks.filter(t=>st.id==='erledigt'?(t.completed||t.status==='erledigt'):(!t.completed&&t.status===st.id));
-  h+='<div class="td-col" ondragover="td.dragOver(event)" ondrop="td.dropOnCol(event,\''+st.id+'\')">'
-   +'<div class="td-colhead">'+st.label+' <span class="td-badge">'+col.length+'</span></div>'
+  h+='<div class="td-col" style="--cc:'+STATUS_COLORS[st.id]+'" ondragover="td.dragOver(event)" ondrop="td.dropOnCol(event,\''+st.id+'\')">'
+   +'<div class="td-colhead"><span class="td-coldot"></span>'+st.label+' <span class="td-badge">'+col.length+'</span></div>'
    +col.map(t=>'<div class="td-card'+(S.detailId===t.id?' open':'')+'" draggable="true" ondragstart="td.dragStart(event,\''+t.id+'\')" onclick="td.openDetail(\''+t.id+'\')">'
     +'<div class="td-cardtitle">'+(t.completed?'<s>':'')+esc(t.title)+(t.completed?'</s>':'')+'</div>'
     +'<div class="td-cardmeta">'
