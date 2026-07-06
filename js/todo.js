@@ -522,6 +522,14 @@ function renderBulkbar(){
  const el=$('tdBulkbar');if(!el)return;
  if(!S.sel.size){el.style.display='none';return;}
  el.style.display='flex';
+ // Papierkorb hat eigene Aktionen: Wiederherstellen / endgültig löschen
+ if(S.scope.type==='trash'){
+  el.innerHTML='<b>'+S.sel.size+' ausgewählt</b>'
+   +'<button class="btn btn-sm" onclick="td.bulk(\'restore\')">↩︎ Wiederherstellen</button>'
+   +'<button class="btn btn-d btn-sm" onclick="td.bulk(\'purge\')">✕ Endgültig löschen</button>'
+   +'<button class="btn btn-sm" onclick="td.clearSel()">Abbrechen (Esc)</button>';
+  return;
+ }
  el.innerHTML='<b>'+S.sel.size+' ausgewählt</b>'
   +'<button class="btn btn-sm" onclick="td.bulk(\'complete\')">✓ Erledigen</button>'
   +'<button class="btn btn-sm" onclick="td.bulk(\'reopen\')">↩︎ Öffnen</button>'
@@ -739,8 +747,8 @@ document.addEventListener('keydown',function(ev){
   case'd':if(focT){ev.preventDefault();tdToggleDone(focT.id);}break;
   case's':if(focT){ev.preventDefault();tdToggleStar(focT.id);}break;
   case'Delete':case'Backspace':
-   if(S.sel.size){ev.preventDefault();td.bulk('delete');}
-   else if(focT){ev.preventDefault();tdDeleteTask(focT.id);}
+   if(S.sel.size){ev.preventDefault();td.bulk(S.scope.type==='trash'?'purge':'delete');}
+   else if(focT){ev.preventDefault();if(S.scope.type==='trash')td.purge(focT.id);else tdDeleteTask(focT.id);}
    break;
   case'Escape':
    if(S.sel.size)clearSel();
@@ -1033,6 +1041,7 @@ window.td={
   const ids=[...S.sel];if(!ids.length)return;
   const run=()=>{S.sel.clear();mutate(async()=>{const r=await POST('/api/todo/tasks/bulk',{ids,action});if(r.failed&&r.failed.length)toast('⚠️ '+r.failed.length+' fehlgeschlagen (Rechte?)');refresh();});};
   if(action==='delete')tdConfirm('Aufgaben löschen',ids.length+' Aufgabe(n) in den Papierkorb legen?','In Papierkorb',run);
+  else if(action==='purge')tdConfirm('Endgültig löschen',ids.length+' Aufgabe(n) unwiderruflich löschen? Das kann nicht rückgängig gemacht werden.','Endgültig löschen',run);
   else run();
  },
  bulkPatch(patch){

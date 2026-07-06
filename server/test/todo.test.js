@@ -221,6 +221,17 @@ r = await del(`/api/todo/tasks/${t3.id}/purge`, null, anna);
 t('Endgültig löschen → 200', r.status === 200);
 t('Endgültig gelöschte Task → 404', (await get(`/api/todo/tasks/${t3.id}`, anna)).status === 404);
 
+// ── Bulk im Papierkorb: markierte endgültig löschen ──
+const tp1 = (await (await post('/api/todo/tasks', { listId: list.id, title: 'Trash A' }, anna)).json()).task;
+const tp2 = (await (await post('/api/todo/tasks', { listId: list.id, title: 'Trash B' }, anna)).json()).task;
+await post('/api/todo/tasks/bulk', { ids: [tp1.id, tp2.id], action: 'delete' }, anna);
+r = await post('/api/todo/tasks/bulk', { ids: [tp1.id, tp2.id], action: 'purge' }, anna);
+bulk = await r.json();
+t('Bulk purge im Papierkorb: beide ok', bulk.ok.length === 2 && bulk.failed.length === 0, JSON.stringify(bulk));
+t('Bulk purge: Tasks unwiderruflich weg', (await get(`/api/todo/tasks/${tp1.id}`, anna)).status === 404 && (await get(`/api/todo/tasks/${tp2.id}`, anna)).status === 404);
+r = await get(`/api/todo/tasks?listId=${list.id}&trash=true`, anna);
+t('Bulk purge: Papierkorb enthält sie nicht mehr', !(await r.json()).tasks.some(x => x.id === tp1.id || x.id === tp2.id));
+
 // ── Wiederholung: Erledigen erzeugt nächste Instanz ──
 r = await post('/api/todo/tasks', { listId: list.id, title: 'Wöchentlicher Report', dueDate: '2026-07-06', repeatRule: { mode: 'fixed', every: 1, unit: 'week' } }, anna);
 const rep = (await r.json()).task;

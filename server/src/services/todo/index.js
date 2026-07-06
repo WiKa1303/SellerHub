@@ -471,7 +471,7 @@ export async function purgeTask(user, taskId) {
   return { ok: true };
 }
 
-/** Bulk-Aktionen: complete | reopen | delete | restore | move | patch (Teilmenge der Felder). */
+/** Bulk-Aktionen: complete | reopen | delete | purge | restore | patch (Teilmenge der Felder). */
 export async function bulkTasks(user, { ids, action, patch }) {
   if (!Array.isArray(ids) || !ids.length) return { status: 400, error: 'ids erforderlich' };
   if (ids.length > 200) return { status: 400, error: 'Maximal 200 Aufgaben je Bulk-Aktion' };
@@ -479,6 +479,7 @@ export async function bulkTasks(user, { ids, action, patch }) {
   for (const id of ids) {
     let r;
     if (action === 'delete') r = await trashTask(user, id);
+    else if (action === 'purge') r = await purgeTask(user, id);
     else if (action === 'restore') r = await restoreTask(user, id);
     else if (action === 'complete') r = await updateTask(user, id, { completed: true });
     else if (action === 'reopen') r = await updateTask(user, id, { completed: false });
