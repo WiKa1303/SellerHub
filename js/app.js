@@ -1731,10 +1731,18 @@ function researchRenderTable(){
            (c.hauptkeyword||'').toLowerCase().indexOf(searchQ)>-1;
   });
 
+  // Verwaiste Markierungen entfernen (gelöschte Kandidaten dürfen nicht weiterzählen)
+  var existIds={};D.research.candidates.forEach(function(c){existIds[c.id]=1;});
+  Object.keys(researchSel).forEach(function(id){if(!existIds[id])delete researchSel[id];});
+
   if(cands.length===0){
     tbody.innerHTML='';
     if(empty)empty.style.display='block';
     var pgEmpty=document.getElementById('researchTablePager');if(pgEmpty)pgEmpty.innerHTML='';
+    var bulkEmpty=document.getElementById('researchBulkBar');if(bulkEmpty)bulkEmpty.innerHTML='';
+    var cbEmpty=document.getElementById('researchSelAllCb');if(cbEmpty){cbEmpty.checked=false;cbEmpty.indeterminate=false;}
+    researchTableAllIds=[];
+    if(typeof researchRenderStatsBar==='function')researchRenderStatsBar();
     return;
   }
   if(empty)empty.style.display='none';
