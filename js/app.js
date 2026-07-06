@@ -624,6 +624,29 @@ function migratePipelineStatus(){
   console.log('[AMZ SellerHub] Pipeline-Status v2: '+changed+' Items migriert');
 }
 
+// ── Ideen-Pool-Migration: Alt-Format reparieren, echte Leer-Datensätze entfernen ──
+// Alte App-Versionen speicherten {id, titel, ts} — heutige Leser erwarten name/datum.
+// Läuft bei jedem Start (idempotent, billig); rettet Titel statt sie zu löschen.
+function migrateIdeen(){
+  if(!Array.isArray(D.ideen))return;
+  var fixed=0,removed=0;
+  D.ideen=D.ideen.filter(function(i){
+    if(!i||typeof i!=='object'){removed++;return false;}
+    if(!i.name&&(i.titel||i.title)){i.name=String(i.titel||i.title).trim();delete i.titel;fixed++;}
+    if(!i.datum&&i.ts){try{i.datum=new Date(i.ts).toLocaleDateString('de-DE');}catch(e){}fixed++;}
+    // Wirklich leer (kein Name/Titel und keinerlei Inhalt) → raus
+    var hasContent=(i.name&&String(i.name).trim())||(i.kategorie&&i.kategorie.trim())||(i.differenzierung&&i.differenzierung.trim())||(i.amazonLink&&i.amazonLink.trim());
+    if(!hasContent){removed++;return false;}
+    if(!i.name||!String(i.name).trim()){i.name='(Unbenannte Idee)';fixed++;}
+    return true;
+  });
+  if(fixed||removed){
+    save();
+    console.log('[AMZ SellerHub] Ideen-Migration: '+fixed+' repariert, '+removed+' leere entfernt');
+  }
+}
+migrateIdeen();
+
 // Status-Badge-Generator (für alle Bereiche)
 function pipelineBadge(statusKey,size){
   var s=normalizeStatus(statusKey);
