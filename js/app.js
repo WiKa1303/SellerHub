@@ -971,16 +971,12 @@ function auswahlUpdateBadge(){
   var n=D.research.shortlist.filter(function(x){return x.decision!=='abgelehnt';}).length;
   if(n>0){b.style.display='inline-block';b.textContent=n;}else{b.style.display='none';}
 }
-function researchPromoteToProduct(candId,opts){
-  var stay=opts&&opts.stay;
-  researchInit();
-  var c=D.research.candidates.find(function(x){return x.id===candId;});
-  if(!c){toast('Kandidat nicht gefunden');return;}
-  var exists=D.research.shortlist.find(function(s){return s.sourceCandidateId===candId;});
-  if(exists){toast('„'+esc(c.name||'')+'" ist schon in der Engeren Wahl');auswahlUpdateBadge();if(!stay)go('auswahl');return;}
-  var item={
+// Ein Shortlist-Eintrag aus einem Kandidaten — EINE Stelle für die Feld-Übernahme
+// (genutzt von Einzel-Übernahme und Sammel-Übernahme aus der Master-Tabelle).
+function shortlistItemFrom(c){
+  return {
     id:'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-    sourceCandidateId:candId,
+    sourceCandidateId:c.id,
     name:c.name||'Produkt',
     kategorie:c.kategorie||'',
     vk:(c.vk!=null?c.vk:null),
@@ -1000,12 +996,39 @@ function researchPromoteToProduct(candId,opts){
     createdAt:new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
-  D.research.shortlist.unshift(item);
+}
+function researchPromoteToProduct(candId,opts){
+  var stay=opts&&opts.stay;
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});
+  if(!c){toast('Kandidat nicht gefunden');return;}
+  var exists=D.research.shortlist.find(function(s){return s.sourceCandidateId===candId;});
+  if(exists){toast('„'+esc(c.name||'')+'" ist schon in der Engeren Wahl');auswahlUpdateBadge();if(!stay)go('auswahl');return;}
+  D.research.shortlist.unshift(shortlistItemFrom(c));
   if(normalizeStatus(c.status)==='recherche'){c.status='kandidat';c.updatedAt=new Date().toISOString();}
   save();researchRenderTable();researchUpdateBadge();auswahlUpdateBadge();
   toast('★ „'+esc(c.name||'')+'" zu Engerer Wahl übernommen');
   if(!stay)go('auswahl');
 }
+// Sammel-Übernahme: alle markierten Kandidaten der Master-Tabelle → Engere Wahl
+function researchAddSelectedToShortlist(){
+  var ids=Object.keys(researchSel);if(!ids.length)return;
+  researchInit();
+  var added=0,skipped=0;
+  ids.forEach(function(id){
+    var c=D.research.candidates.find(function(x){return x.id===id;});if(!c)return;
+    if(D.research.shortlist.find(function(s){return s.sourceCandidateId===id;})){skipped++;return;}
+    D.research.shortlist.unshift(shortlistItemFrom(c));
+    if(normalizeStatus(c.status)==='recherche'){c.status='kandidat';c.updatedAt=new Date().toISOString();}
+    added++;
+  });
+  researchSel={};
+  save();researchRenderTable();researchUpdateBadge();auswahlUpdateBadge();
+  if(typeof researchRenderStatsBar==='function')researchRenderStatsBar();
+  if(document.getElementById('pipelineBoard')&&typeof renderPipeline==='function')renderPipeline();
+  toast('⭐ '+added+' Kandidat'+(added===1?'':'en')+' in die Engere Wahl übernommen'+(skipped?' · '+skipped+' waren schon drin':''));
+}
+window.researchAddSelectedToShortlist=researchAddSelectedToShortlist;
 function auswahlSetDecision(id,dec){
   researchInit();
   var it=D.research.shortlist.find(function(x){return x.id===id;});if(!it)return;
@@ -1716,7 +1739,7 @@ function renderPipeline(){
   if(candsTotal>10){
     c2+='<div style="background:var(--acd);border:1.5px dashed var(--ac);border-radius:9px;padding:12px;text-align:center">'+
       '<div style="font-size:12.5px;color:var(--tx);font-weight:700;margin-bottom:2px">+ '+(candsTotal-10)+' weitere Kandidaten</div>'+
-      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px;line-height:1.45">Das Board zeigt die <b>Top 10 nach Score</b> — Sichten, Sortieren und Aufräumen geht in der Tabelle schneller.</div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px;line-height:1.45">Das Board zeigt die <b>Top 10 nach Score</b>. In der Tabelle wählst du per <b>Checkbox</b> alle oder einzelne aus — und löschst sie oder übernimmst sie gesammelt in die ⭐ Engere Wahl.</div>'+
       '<button class="btn btn-sm" onclick="go(\'research\')" style="background:var(--ac);color:#fff;border:none;font-weight:700;font-size:11px">📋 Alle '+candsTotal+' in der Tabelle sichten →</button>'+
     '</div>';
   }
@@ -1973,6 +1996,7 @@ function researchRenderTable(){
     bulk.innerHTML=selCount>0
       ?'<div style="display:flex;gap:10px;align-items:center;background:var(--acd);border:1.5px solid var(--ac);border-radius:10px;padding:9px 14px;margin-bottom:10px;flex-wrap:wrap">'+
         '<b style="font-size:13px;color:var(--ac)">'+selCount+' markiert</b>'+
+        '<button class="btn btn-sm" onclick="researchAddSelectedToShortlist()" style="background:var(--ac);color:#fff;border:none;font-weight:700;font-size:12px">⭐ Markierte → Engere Wahl</button>'+
         '<button class="btn btn-sm" onclick="researchDeleteSelected()" style="background:var(--rd);color:#fff;border:none;font-weight:700;font-size:12px">🗑 Markierte löschen</button>'+
         '<button class="btn btn-sm" onclick="researchSelAll(true)" style="font-size:12px">Alle '+researchTableAllIds.length+' markieren</button>'+
         '<button class="btn btn-sm" onclick="researchSelAll(false)" style="font-size:12px">Auswahl aufheben</button>'+
