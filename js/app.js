@@ -431,6 +431,7 @@ function go(name){
   document.querySelector('.sidebar').classList.remove('open');
   // refresh
   if(name==='dashboard')renderDash();
+  if(name==='news'&&typeof renderNewsPage==='function')renderNewsPage();
   if(name==='findung')renderFindungHub();
   if(name==='ideen')renderIdeen();
   if(name==='research')renderResearch();
@@ -12204,6 +12205,130 @@ function renderDashSearches(){
   el.innerHTML=html;
 }
 
+// ═══ TOOL-HUB (Dashboard): alle Module als Kachel-Gruppen — nichts bleibt versteckt ═══
+var DASH_HUB=[
+  {title:'🔎 Produktforschung',tiles:[
+    {icon:'🗂️',t:'Recherche-Pipeline',d:'Idee → Validieren → Shortlist → Entscheidung',act:"go('pipeline')"},
+    {icon:'⚡',t:'Xray-Paste',d:'Helium-Xray einfügen → Nische sofort bewertet',act:"if(typeof xrayPasteOpen==='function')xrayPasteOpen()"},
+    {icon:'📥',t:'Daten holen',d:'Helium-10-Import (Black Box, Xray, Cerebro)',act:"go('helium')"},
+    {icon:'🧭',t:'Nischen vergleichen',d:'Mehrere Nischen objektiv ranken',act:"go('nischen')"},
+    {icon:'💶',t:'Marge rechnen',d:'FBA-Profit, ROI & BSR-Schätzer',act:"go('gebuehren')"},
+    {icon:'⚖️',t:'Scorecard',d:'6 Dimensionen, Ampel-Urteil, Red Flags',act:"go('research');if(typeof researchShowTab==='function')researchShowTab('score')"}
+  ]},
+  {title:'📝 Listings & Content',tiles:[
+    {icon:'✨',t:'KI-Bildstudio',d:'Produktfoto → Hauptbild, USPs, Lifestyle',act:"go('inhalt')"},
+    {icon:'📝',t:'Listing-Editor',d:'Titel, Bullets & Beschreibung mit KI',act:"go('listing')"},
+    {icon:'🔑',t:'Keyword-Center',d:'Tracking, Backend-Reiniger, Abdeckung',act:"go('keywords')"}
+  ]},
+  {title:'🛠️ Betrieb & Gewinne',tiles:[
+    {icon:'📋',t:'Produktliste',d:'Deine aktiven Produkte & Kalkulationen',act:"go('produkte')"},
+    {icon:'🚀',t:'Launch-Planer',d:'Schritt für Schritt zum Livegang',act:"go('launch')"},
+    {icon:'📦',t:'Lagerbestand',d:'Bestände & Reichweiten im Blick',act:"go('lager')"},
+    {icon:'✅',t:'Aufgaben-Board',d:'Was heute zu tun ist',act:"go('tasks')"}
+  ]},
+  {title:'📡 Markt & Wissen',tiles:[
+    {icon:'📰',t:'News & Events',d:'Der komplette Seller-Radar als Bereich',act:"go('news')",neu:true},
+    {icon:'🎓',t:'Lernzentrum',d:'FBA-Coaching in Lektionen',act:"go('coaching')"},
+    {icon:'☁️',t:'Cloud-Konto',d:'Sync, Passwort, Geräte',act:"if(typeof syBtnClick==='function')syBtnClick()"},
+    {icon:'🛡️',t:'Benutzerverwaltung',d:'Cloud-Konten des Servers verwalten',act:"go('admin')",adminOnly:true}
+  ]}
+];
+function renderDashHub(){
+  var el=document.getElementById('dashHub');
+  if(!el)return;
+  var u=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
+  var isAdmin=!!(u&&u.role==='admin');
+  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:22px">';
+  DASH_HUB.forEach(function(g){
+    var tiles=g.tiles.filter(function(t){return !t.adminOnly||isAdmin;});
+    if(!tiles.length)return;
+    h+='<div class="card" style="padding:16px 16px 12px">';
+    h+='<div style="font-weight:800;font-size:14px;color:var(--tx);margin-bottom:10px">'+g.title+'</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    tiles.forEach(function(t){
+      h+='<button onclick="'+t.act.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:10px;text-align:left;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor=\'var(--ac)\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--bd)\';this.style.transform=\'none\'">'+
+        '<span style="flex-shrink:0;width:34px;height:34px;border-radius:9px;background:var(--acd);display:flex;align-items:center;justify-content:center;font-size:17px">'+t.icon+'</span>'+
+        '<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:12px;color:var(--tx)">'+t.t+(t.neu?' <span style="background:var(--ac);color:#fff;border-radius:8px;padding:0 6px;font-size:8.5px;font-weight:800;vertical-align:1px">NEU</span>':'')+'</span>'+
+        '<span style="display:block;font-size:10.5px;color:var(--tx2);line-height:1.35">'+t.d+'</span></span>'+
+        '<span style="color:var(--tx3);font-size:13px">›</span>'+
+      '</button>';
+    });
+    h+='</div></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+// ═══ NEWS & EVENTS — Seller-Radar als kompletter Bereich (p-news) ═══
+function renderNewsPage(force){
+  var el=document.getElementById('newsBody');
+  if(!el)return;
+  var stand=document.getElementById('newsStand');
+  var cached=null;try{cached=JSON.parse(localStorage.getItem('wika_news_cache')||'null');}catch(e){}
+  if(cached&&!force)newsPageHtml(cached);
+  var api=radarApi();
+  var prof=radarProfileParams();// '' oder '?...'
+  Promise.all([
+    fetch(api+'/api/news'+(prof?prof+'&':'?')+'limit=25').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+    fetch(api+'/api/events').then(function(r){return r.ok?r.json():{items:[]};}).catch(function(){return {items:[]};}),
+    fetch(api+'/api/forecast').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var d={news:res[0].items||[],events:res[1].items||[],fc:res[2],at:new Date().toISOString()};
+    try{localStorage.setItem('wika_news_cache',JSON.stringify(d));}catch(e){}
+    newsPageHtml(d);
+  }).catch(function(e){
+    if(!cached)el.innerHTML='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:10px;padding:14px 18px;color:var(--rd);font-size:13px;font-weight:600">📡 Radar-API nicht erreichbar ('+esc(e&&e.message||'Netzwerk')+') — später erneut versuchen.</div>';
+    if(stand)stand.textContent='API nicht erreichbar';
+  });
+  function newsPageHtml(d){
+    if(stand)stand.textContent='Stand: '+(d.at?radarRelTime(d.at):'—')+' · '+d.news.length+' Meldungen · '+d.events.length+' Events';
+    var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px"><div style="grid-column:span 1;min-width:0">';
+    // ── News-Spalte ──
+    h+='<div class="card"><h3 style="margin-bottom:6px">📰 News für FBA-Seller</h3><div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Sortiert nach Relevanz-Score — 🤖 = KI-bewertet, 🔥 = Keyword-Score</div>';
+    if(d.news.length){
+      d.news.forEach(function(n){
+        var cat=n.ai_category&&RADAR_CAT[n.ai_category]?RADAR_CAT[n.ai_category]:null;
+        var score=n.ai_score!=null?n.ai_score:n.relevance_score;
+        var sum=(n.ai_summary&&n.ai_summary.length)?n.ai_summary:[];
+        h+='<a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--bd)">'+
+          '<div style="font-size:13.5px;font-weight:700;color:var(--tx);line-height:1.45">'+(n.ai_urgency==='hoch'?'<span style="color:var(--rd)" title="dringend">⚠️ </span>':'')+esc(n.title)+'</div>'+
+          (sum.length?'<div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5">'+sum.slice(0,2).map(function(s){return '→ '+esc(s);}).join('<br>')+'</div>':'')+
+          '<div style="font-size:10.5px;color:var(--tx3);margin-top:5px">'+
+            (cat?'<span style="background:var(--'+cat[0]+(cat[0]==='tx3'?'':'d')+');color:var(--'+cat[0]+');border-radius:7px;padding:1px 7px;font-weight:700;margin-right:6px">'+cat[1]+'</span>':'')+
+            esc(n.source)+' · '+radarRelTime(n.publish_date)+' · '+(n.ai_score!=null?'🤖':'🔥')+' '+score+'</div></a>';
+      });
+    }else h+='<div style="font-size:12px;color:var(--tx3);padding:10px 0">Noch keine Meldungen — der Crawler läuft 2× täglich (6 &amp; 15 Uhr).</div>';
+    h+='</div></div><div style="min-width:0">';
+    // ── Events-Spalte ──
+    h+='<div class="card" style="margin-bottom:18px"><h3 style="margin-bottom:10px">📅 Kommende Events</h3>';
+    if(d.events.length){
+      d.events.forEach(function(ev){
+        var when=ev.event_start?new Date(ev.event_start).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'long'}):'';
+        h+='<a href="'+esc(ev.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:10px 0;border-bottom:1px solid var(--bd)">'+
+          '<div style="font-size:12.5px;font-weight:700;color:var(--tx);line-height:1.4">'+esc(ev.title)+'</div>'+
+          '<div style="font-size:10.5px;color:var(--tx3);margin-top:3px">'+(when?'🗓 '+when+' · ':'')+esc(ev.source)+'</div></a>';
+      });
+    }else h+='<div style="font-size:12px;color:var(--tx3)">Aktuell keine kommenden Events im Radar.</div>';
+    h+='</div>';
+    // ── Trend-Prognose ──
+    if(d.fc&&d.fc.items&&d.fc.items.length){
+      var FC_DIR={steigend:['gn','↗ steigend'],fallend:['rd','↘ fallend'],stabil:['tx3','→ stabil']};
+      h+='<div class="card"><h3 style="margin-bottom:10px">📈 Trend-Prognose · 7 Tage</h3>';
+      d.fc.items.forEach(function(f){
+        var dir=FC_DIR[f.direction]||FC_DIR.stabil;
+        h+='<div style="padding:7px 0;border-bottom:1px solid var(--bd)" title="'+esc(f.reasoning||'')+'">'+
+          '<span style="font-size:12.5px;font-weight:700;color:var(--tx)">'+esc(f.topic_name)+'</span> '+
+          '<span style="color:var(--'+dir[0]+');font-size:11px;font-weight:700">'+dir[1]+'</span>'+
+          '<span style="color:var(--tx3);font-size:10.5px"> · Konfidenz '+(f.confidence!=null?f.confidence:'–')+' %</span></div>';
+      });
+      h+='<div style="font-size:10.5px;color:var(--tx3);margin-top:8px">Deterministische Holt-Prognose — Konfidenz steigt mit jedem gesammelten Tag.</div></div>';
+    }
+    h+='</div></div>';
+    el.innerHTML=h;
+  }
+}
+window.renderNewsPage=renderNewsPage;
+
 // ═══ „WAS IST NEU?" — Modul-Updates sichtbar machen (ausblendbar, Stand je Version) ═══
 // Dismiss-Key nutzt das wika_info_dismissed_-Präfix → wird über Geräte gesynct.
 var WHATSNEW_KEY='wika_info_dismissed_wn20260706';
@@ -12250,8 +12375,16 @@ function renderDash(){
   var prods=D.products||[];
   var ideen=D.ideen||[];
 
-  // ─── „Was ist neu?" + Produktrecherche-Fahrplan (geführt) ───
+  // ─── Persönliche Begrüßung (Cloud-Konto) ───
+  var greetEl=document.getElementById('dashGreeting');
+  if(greetEl){
+    var gu=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
+    greetEl.textContent=gu?('Herzlich willkommen, '+gu.username+' · Dein Entscheidungs-Cockpit'):'Dein Entscheidungs-Cockpit · AMZ SellerHub';
+  }
+
+  // ─── „Was ist neu?" + Tool-Hub + Produktrecherche-Fahrplan (geführt) ───
   if(typeof renderWhatsNew==='function')renderWhatsNew();
+  if(typeof renderDashHub==='function')renderDashHub();
   if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
   if(typeof renderBackupHint==='function')renderBackupHint();
   if(typeof renderRadarWidget==='function')renderRadarWidget();

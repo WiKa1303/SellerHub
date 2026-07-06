@@ -180,7 +180,8 @@
   <div id="notifPanel" style="display:none;position:fixed;top:64px;left:18px;width:340px;max-height:70vh;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column"></div>
 
   <nav class="sidebar-nav">
-    <button class="nav-btn active" onclick="go('dashboard')" style="margin-bottom:8px"><span class="ico">🏠</span>Dashboard</button>
+    <button class="nav-btn active" onclick="go('dashboard')"><span class="ico">🏠</span>Dashboard</button>
+    <button class="nav-btn" onclick="go('news')" style="margin-bottom:8px" title="Seller-Radar komplett: News, Events, Trends & Prognosen für den DACH-Raum"><span class="ico">📰</span>News &amp; Events <span style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:800;letter-spacing:.5px">NEU</span></button>
 
     <!-- ═══ KERN: PRODUKTRECHERCHE ═══ -->
     <div class="nav-group open has-active" id="navgrp-recherche">
@@ -224,6 +225,11 @@
     </div>
   </nav>
   <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;gap:4px;flex-wrap:wrap;font-size:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <a href="/preise.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">💳 Preise</a>
+      <a href="/ueber-uns.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">Über uns</a>
+      <a href="/kontakt.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">✉️ Kontakt</a>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
       <span id="versionDisplay" style="font-weight:600;color:var(--ac);font-size:11px">v—</span>
       <span id="buildDate" style="font-size:9px;color:var(--tx3)"></span>
@@ -1716,9 +1722,21 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: PROFIT DASHBOARD                                         -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══ NEWS & EVENTS — der Seller-Radar als eigener Bereich ═══ -->
+<div class="page" id="p-news">
+  <div class="page-header"><h1><span class="hico">📰</span>News &amp; Events <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Seller-Radar für den DACH-Raum · täglich aktualisiert</span></h1></div>
+  <div class="page-body">
+    <div class="toolbar">
+      <button class="btn btn-p btn-sm" onclick="renderNewsPage(true)">🔄 Aktualisieren</button>
+      <div style="margin-left:auto;font-size:12px;color:var(--tx2)" id="newsStand"></div>
+    </div>
+    <div id="newsBody"><div style="color:var(--tx3);font-size:13px;padding:20px">⏳ Lade News &amp; Events …</div></div>
+  </div>
+</div>
+
 <div class="page active" id="p-dashboard">
   <div class="page-header" style="background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px solid var(--ac);padding-bottom:16px">
-    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Dein Entscheidungs-Cockpit · AMZ SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/index.html">v29.6</span></h1>
+    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px" id="dashGreeting">Dein Entscheidungs-Cockpit · AMZ SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/index.html">v29.6</span></h1>
   </div>
   <div class="page-body">
 
@@ -1730,6 +1748,9 @@
     <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px">
       <!-- populated by renderDash() -->
     </div>
+
+    <!-- ─── TOOL-HUB: alle Module als Kacheln (gruppiert) ─── -->
+    <div id="dashHub"></div>
 
     <!-- ─── SELLER-RADAR: Briefing · Markt-Radar · Trend-Prognose ─── -->
     <div id="dashRadar"></div>
