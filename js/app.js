@@ -12086,10 +12086,24 @@ function renderResearchRoadmap(){
   var allDone=current===steps.length;
   var pct=Math.round(doneN/steps.length*100);
 
+  // Einklappbar: Fortgeschrittene (≥3 Stufen begonnen) sehen standardmäßig nur die Slim-Leiste
+  var collPref=null;try{collPref=localStorage.getItem('wika_roadmap_collapsed');}catch(e){}
+  var collapsed=collPref===null?(doneN>=3):collPref==='1';
+  if(collapsed){
+    el.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
+      '<span style="font-size:12.5px;font-weight:700;color:var(--tx)">🎯 Recherche-Fahrplan</span>'+
+      '<div style="flex:1;min-width:120px;height:6px;background:var(--s2);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--ac)"></div></div>'+
+      '<span style="font-size:11px;color:var(--tx2);font-weight:600">'+doneN+' / '+steps.length+' Stufen</span>'+
+      '<button class="btn btn-sm" onclick="roadmapToggle(false)" style="font-size:10.5px">Aufklappen ▾</button>'+
+    '</div>';
+    return;
+  }
+
   var html='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:14px;padding:20px 22px">';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:2px">'+
     '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--tx)">🎯 So funktioniert Produktrecherche</div>'+
-    '<div style="font-size:12px;color:var(--tx2);font-weight:700">'+(allDone?'Alle 5 Stufen aktiv 🎉':doneN+' / '+steps.length+' Stufen begonnen')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--tx2);font-weight:700">'+(allDone?'Alle 5 Stufen aktiv 🎉':doneN+' / '+steps.length+' Stufen begonnen')+'</span>'+
+    '<button class="btn btn-sm" onclick="roadmapToggle(true)" style="font-size:10.5px" title="Zur schlanken Leiste einklappen">Einklappen ▴</button></div>'+
   '</div>';
   html+='<div style="font-size:11.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45">Die <b>5-Stufen-Methode</b> – du recherchierst <b>beliebig viele Produkte gleichzeitig</b>. Jedes ist eine eigene gespeicherte Recherche und wandert eigenständig durch die <button onclick="go(\'pipeline\')" style="background:none;border:none;color:var(--ac);font-weight:700;cursor:pointer;padding:0;font-size:11.5px">Pipeline →</button>. Du musst nichts „abschließen", um Neues zu starten.</div>';
   html+='<div style="height:8px;background:var(--s2);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+pct+'%;background:var(--ac);transition:width .3s"></div></div>';
@@ -12498,6 +12512,12 @@ function renderWhatsNew(){
 }
 window.whatsNewDismiss=whatsNewDismiss;
 
+// Fahrplan ein-/ausklappen (Präferenz bleibt lokal gespeichert)
+window.roadmapToggle=function(collapse){
+  try{localStorage.setItem('wika_roadmap_collapsed',collapse?'1':'0');}catch(e){}
+  if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
+};
+
 function renderDash(){
   var prods=D.products||[];
   var ideen=D.ideen||[];
@@ -12533,10 +12553,14 @@ function renderDash(){
   var rshort=(D.research&&D.research.shortlist)?D.research.shortlist:[];
   var activeCands=rcands.filter(function(c){var s=normalizeStatus(c.status);return s!=='abgelehnt'&&s!=='aktiv';});
   var goCands=rcands.filter(function(c){return decisionVerdict(c).verdict==='go';}).length;
+  // Ø Netto-Marge über alle bewertbaren Kandidaten (decisionMarge: manuell ODER auto)
+  var candMargins=activeCands.map(function(c){return decisionMarge(c).val;}).filter(function(v){return v!=null;});
+  var avgCandM=candMargins.length?Math.round(candMargins.reduce(function(a,b){return a+b;},0)/candMargins.length):null;
   var heroStats=[
     {label:'Ideen',val:ideen.length,sub:ideenHohesPotenzial+' mit Hohem Potenzial',color:'pu',icon:'💡',go:"go('ideen')"},
     {label:'Kandidaten',val:activeCands.length,sub:'in Validierung',color:'ac',icon:'🔬',go:"go('pipeline')"},
     {label:'GO-Kandidaten',val:goCands,sub:'bereit für Shortlist',color:'gn',icon:'🟢',go:"go('research');researchShowTab('score')"},
+    {label:'Ø Marge',val:avgCandM!=null?avgCandM+' %':'—',sub:candMargins.length?candMargins.length+' Kandidat'+(candMargins.length===1?'':'en')+' kalkuliert':'VK/EK/FBA eintragen',color:avgCandM==null?'tx3':avgCandM>=25?'gn':avgCandM>=15?'ac':'rd',icon:'🧮',go:"go('pipeline')"},
     {label:'Engere Wahl',val:rshort.length,sub:'Shortlist & Entscheidung',color:'cy',icon:'⭐',go:"go('pipeline')"}
   ];
   var heroHtml='';
@@ -12550,6 +12574,34 @@ function renderDash(){
     '</div>';
   });
   document.getElementById('dashHeroStats').innerHTML=heroHtml;
+
+  // ─── Quick Actions: die 4 häufigsten Handgriffe, groß und eindeutig ───
+  var qa=document.getElementById('dashQuickActions');
+  if(qa){
+    var QA=[
+      {icon:'⚡',t:'Nische analysieren',d:'Xray einfügen → Urteil',act:"if(typeof xrayPasteOpen==='function')xrayPasteOpen()"},
+      {icon:'🔗',t:'ASIN analysieren',d:'Konkurrenz-Listing laden',act:"go('research');setTimeout(function(){var e=document.getElementById('researchAsinInput');if(e){e.focus();e.scrollIntoView({block:'center'})}},160)"},
+      {icon:'🎨',t:'KI-Bild erzeugen',d:'Produktfoto → Visuals',act:"go('inhalt')"},
+      {icon:'📝',t:'Listing optimieren',d:'Titel, Bullets, Backend',act:"go('listing')"}
+    ];
+    var qh='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">';
+    QA.forEach(function(q){
+      qh+='<button onclick="'+q.act.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:12px;text-align:left;background:linear-gradient(135deg,var(--ac),#b45309);border:none;border-radius:13px;padding:14px 16px;cursor:pointer;font-family:inherit;color:#fff;box-shadow:0 4px 14px rgba(217,119,6,.28);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 22px rgba(217,119,6,.4)\'" onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'0 4px 14px rgba(217,119,6,.28)\'">'+
+        '<span style="font-size:24px">'+q.icon+'</span>'+
+        '<span><span style="display:block;font-weight:800;font-size:13.5px">'+q.t+'</span><span style="display:block;font-size:11px;opacity:.85">'+q.d+'</span></span>'+
+      '</button>';
+    });
+    qh+='</div>';
+    qa.innerHTML=qh;
+  }
+
+  // ─── Profil-Chip (Kopfleiste): Initiale des Cloud-Kontos ───
+  var pc=document.getElementById('profileChip');
+  if(pc){
+    var pu=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
+    if(pu){pc.style.display='flex';pc.textContent=(pu.username||'?').charAt(0).toUpperCase();pc.title=pu.username+(pu.email?' · '+pu.email:'')+' — Konto öffnen';}
+    else pc.style.display='none';
+  }
 
   // ─── Quick action card meta ───
   var qProds=document.getElementById('qcProds');if(qProds)qProds.textContent=prods.length+' Produkte';
@@ -12600,9 +12652,16 @@ function renderDash(){
   ideen.forEach(function(it,i){
     if(it.datum)activities.push({type:'idea',name:it.name||'(Ohne Namen)',status:it.status,date:it.datum,idx:i,icon:'💡',color:'pu',extra:it.potenzial});
   });
-  // Sort newest first by date (parse de-DE format DD.MM.YYYY)
+  // Recherche-Kandidaten (updatedAt = ISO) — zuletzt bearbeitete zuerst im Feed
+  rcands.forEach(function(c){
+    if(!c.updatedAt)return;
+    var vd=decisionVerdict(c);
+    activities.push({type:'cand',name:c.name||'(Ohne Namen)',status:(vd.score>0?'Score '+vd.score+' · '+vd.label:'unbewertet'),
+      date:new Date(c.updatedAt).toLocaleDateString('de-DE'),ts:new Date(c.updatedAt).getTime(),icon:'🔬',color:'cy'});
+  });
+  // Sort newest first by date (ISO-Zeitstempel bevorzugt, sonst de-DE-Datum)
   activities.sort(function(a,b){
-    var pa=parseGermanDate(a.date),pb=parseGermanDate(b.date);
+    var pa=a.ts||parseGermanDate(a.date),pb=b.ts||parseGermanDate(b.date);
     return pb-pa;
   });
 
@@ -12613,7 +12672,7 @@ function renderDash(){
     activities.slice(0,12).forEach(function(a){
       var color='var(--'+a.color+')';
       var bgColor='var(--'+a.color+'d)';
-      var clickHandler=a.type==='product'?'openProductDetail('+a.idx+')':'go(\'ideen\')';
+      var clickHandler=a.type==='product'?'openProductDetail('+a.idx+')':a.type==='cand'?'go(\'pipeline\')':'go(\'ideen\')';
       actHtml+='<div class="act-item" onclick="'+clickHandler+'">'+
         '<div class="ai-ico" style="background:'+bgColor+';color:'+color+'">'+a.icon+'</div>'+
         '<div class="ai-body">'+

@@ -168,6 +168,7 @@
   <button onclick="syBtnClick()" id="syBtn" title="Cloud-Konto: nicht angemeldet" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px;opacity:.55" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)'">
     ☁️<span id="syBtnDot" style="position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#8a93ad"></span>
   </button>
+  <button onclick="syBtnClick()" id="profileChip" title="Konto" style="display:none;align-items:center;justify-content:center;width:38px;padding:0;background:linear-gradient(135deg,#d97706,#a85a04);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:14px"></button>
   </div>
   <!-- Cloud-Sync Mini-Menü (angemeldet) -->
   <div id="syMenu" style="display:none;position:fixed;top:64px;left:18px;width:260px;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column;padding:8px">
@@ -1745,9 +1746,12 @@
     <div id="dashBackupHint"></div>
 
     <!-- ─── HERZSTÜCK: RECHERCHE-FUNNEL (Cockpit-Kennzahlen) ─── -->
-    <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px">
+    <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
       <!-- populated by renderDash() -->
     </div>
+
+    <!-- ─── QUICK ACTIONS: die 4 häufigsten Handgriffe ─── -->
+    <div id="dashQuickActions" style="margin-bottom:26px"></div>
 
     <!-- ─── TOOL-HUB: alle Module als Kacheln (gruppiert) ─── -->
     <div id="dashHub"></div>
