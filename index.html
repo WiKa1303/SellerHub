@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SellerHub — Smarte Werkzeuge für E-Commerce-Profis</title>
+<title>AMZ SellerHub — Smarte Werkzeuge für E-Commerce-Profis</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 </head>
@@ -15,7 +15,7 @@
   <div id="wikaLoginBox" style="position:relative;width:100%;max-width:420px;background:#fff;border-radius:18px;padding:42px 38px;box-shadow:0 25px 60px rgba(0,0,0,.4),0 10px 25px rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);margin:auto">
     <div style="text-align:center;margin-bottom:32px">
       <div style="width:72px;height:72px;margin:0 auto 18px;background:linear-gradient(135deg,#d97706,#a85a04);border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,.45)">S</div>
-      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#0f1729;margin-bottom:4px">Seller<span style="color:#d97706">Hub</span></div>
+      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#0f1729;margin-bottom:4px">AMZ Seller<span style="color:#d97706">Hub</span></div>
       <div style="font-size:10px;color:#475066;letter-spacing:1.5px;text-transform:uppercase;font-weight:600">Smarte Werkzeuge für E-Commerce-Profis</div>
     </div>
 
@@ -35,7 +35,7 @@
     <div id="wikaViewLogin">
       <div style="margin-bottom:24px">
         <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">🔒 Anmeldung</div>
-        <div style="font-size:13px;color:#6b7488;text-align:center">Melde dich mit deinem SellerHub-Konto an</div>
+        <div style="font-size:13px;color:#6b7488;text-align:center">Melde dich mit deinem AMZ SellerHub-Konto an</div>
       </div>
 
       <form id="wikaLoginForm" onsubmit="return wikaTryLogin(event)">
@@ -135,7 +135,7 @@
     </div>
 
     <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e8ecf2;text-align:center;font-size:11px;color:#8a96aa">
-      <div style="font-weight:700;color:#475066;font-size:12px;margin-bottom:2px">SellerHub</div>
+      <div style="font-weight:700;color:#475066;font-size:12px;margin-bottom:2px">AMZ SellerHub</div>
       Smarte Werkzeuge für E-Commerce-Profis · Geschützter Bereich
     </div>
   </div>
@@ -150,7 +150,7 @@
   <div class="sidebar-brand">
     <div class="logo">S</div>
     <div style="display:flex;flex-direction:column;gap:2px">
-      <span class="brand">Seller<span>Hub</span></span>
+      <span class="brand">AMZ Seller<span>Hub</span></span>
       <span style="font-size:8px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;font-weight:600">E-Commerce-Werkzeuge</span>
     </div>
   </div>
@@ -931,7 +931,7 @@
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-weight:700;margin:14px 0 8px">Kategorie & Größe</div>
         <div class="fg">
           <div class="fi"><label>Produktkategorie <span class="wika-help" data-tooltip="Bestimmt die Referral Fee (Verkaufsprovision). Die meisten Kategorien liegen bei 7-15%. Ausnahmen: Schmuck bis 20%, Amazon-Geräte-Zubehör 45%.">ⓘ</span></label><select id="fbCat" onchange="fbaCalc()"></select></div>
-          <div class="fi"><label>Größenklasse <span class="wika-help" data-tooltip="Bestimmt die FBA-Versandgebühr. Wird normalerweise automatisch aus Maßen + Gewicht ermittelt — wähle „Auto", damit SellerHub das übernimmt.">ⓘ</span></label><select id="fbSize" onchange="fbaCalc()"><option value="auto">⚙️ Automatisch ermitteln</option></select></div>
+          <div class="fi"><label>Größenklasse <span class="wika-help" data-tooltip="Bestimmt die FBA-Versandgebühr. Wird normalerweise automatisch aus Maßen + Gewicht ermittelt — wähle „Auto", damit AMZ SellerHub das übernimmt.">ⓘ</span></label><select id="fbSize" onchange="fbaCalc()"><option value="auto">⚙️ Automatisch ermitteln</option></select></div>
         </div>
         <div class="fg">
           <div class="fi"><label>Länge cm</label><input type="number" step=".1" id="fbL" placeholder="z.B. 20" oninput="fbaCalc()"></div>
@@ -979,12 +979,12 @@
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Sicherheitspuffer auf FBA-Gebühr <span class="wika-help" data-tooltip="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — Standard ist 0%. Optional kannst du im ⚙️ einen eigenen Prozent-Puffer auf die FBA-Gebühr legen (z.B. für künftige Erhöhungen).">ⓘ</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. AMZ SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbCep" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Ohne Zentraleuropa-Programm (+0,26 €/Einheit) <span class="wika-help" data-tooltip="Wenn dein Lager in DE liegt und du NICHT am Zentraleuropa-Programm (CEP) teilnimmst, berechnet Amazon +0,26 €/Einheit.">ⓘ</span></label>
         </div>
         <div class="fg" style="margin-top:8px">
           <div class="fi"><label>Manuelle Zusatzgebühr €/Stk <span class="wika-help" data-tooltip="Freies Feld für sonstige Gebühren: z.B. Lithium-/Gefahrgut-Zuschlag (0,10 €), Etikettierung, Sonderverpackung.">ⓘ</span></label><input type="number" step=".01" id="fbExtra" placeholder="0.00" oninput="fbaCalc()"></div>
-          <div class="fi" id="fbTargetMarginWrap" style="display:none"><label>Zielmarge % <span class="wika-help" data-tooltip="Im Zielmargen-Modus: Welche Netto-Marge willst du erreichen? SellerHub berechnet den nötigen Verkaufspreis.">ⓘ</span></label><input type="number" step=".1" id="fbTargetMargin" value="25" oninput="fbaCalc()"></div>
+          <div class="fi" id="fbTargetMarginWrap" style="display:none"><label>Zielmarge % <span class="wika-help" data-tooltip="Im Zielmargen-Modus: Welche Netto-Marge willst du erreichen? AMZ SellerHub berechnet den nötigen Verkaufspreis.">ⓘ</span></label><input type="number" step=".1" id="fbTargetMargin" value="25" oninput="fbaCalc()"></div>
         </div>
 
         <!-- Szenario B (nur im Szenario-Modus) -->
@@ -1095,7 +1095,7 @@
             </div>
 
             <div class="fg">
-              <div class="fi"><label>Pers. ESt-Satz % <span class="wika-help" data-tooltip="Dein geschätzter persönlicher Einkommensteuersatz (Grenzsteuersatz). Wenn unbekannt, lass 0 — dann nutzt SellerHub ein konservatives Modell mit 35%. Typisch: 14-42% je nach Gesamteinkommen.">ⓘ</span></label><input type="number" step=".1" id="fbTaxEstRate" placeholder="0 = konservativ (35%)" oninput="fbaCalcTax()"></div>
+              <div class="fi"><label>Pers. ESt-Satz % <span class="wika-help" data-tooltip="Dein geschätzter persönlicher Einkommensteuersatz (Grenzsteuersatz). Wenn unbekannt, lass 0 — dann nutzt AMZ SellerHub ein konservatives Modell mit 35%. Typisch: 14-42% je nach Gesamteinkommen.">ⓘ</span></label><input type="number" step=".1" id="fbTaxEstRate" placeholder="0 = konservativ (35%)" oninput="fbaCalcTax()"></div>
               <div class="fi"><label>USt-pflichtig <span class="wika-help" data-tooltip="Ja = Regelbesteuerung (du führst USt ab). Nein = Kleinunternehmer §19 UStG (keine USt). Die USt ist ein Durchlaufposten und KEIN Gewinn!">ⓘ</span></label><select id="fbTaxVatLiable" onchange="fbaCalcTax()">
                 <option value="yes">Ja (Regelbesteuerung)</option>
                 <option value="no">Nein (Kleinunternehmer)</option>
@@ -1240,7 +1240,7 @@
             <summary>⚙️ Gemini API-Key (für Bildgenerierung)</summary>
             <input type="password" id="igApikey" placeholder="AIza… (nur lokal gespeichert)">
             <div class="ig-keyok" id="igKeyOk">✓ Key gespeichert</div>
-            <div class="ig-hint">Benötigt aktiviertes Billing. Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ac)">aistudio.google.com/apikey</a> · Mit Cloud-Konto (☁️) läuft die KI über SellerHub — ein eigener Key ist optional.</div>
+            <div class="ig-hint">Benötigt aktiviertes Billing. Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ac)">aistudio.google.com/apikey</a> · Mit Cloud-Konto (☁️) läuft die KI über AMZ SellerHub — ein eigener Key ist optional.</div>
           </details>
         </div>
       </div>
@@ -1608,7 +1608,7 @@
     <div style="background:linear-gradient(135deg,var(--pud),var(--acd));border:1.5px solid var(--pu);border-radius:12px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:240px">
         <div style="font-weight:800;color:var(--pu);font-size:15px;margin-bottom:4px">⚡ Xray-Schnell-Analyse – ohne Datei-Export</div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6">Xray-Tabelle auf der Amazon-Suchergebnisseite <b>kopieren</b> (inkl. Kopfzeile) und <b>einfügen</b> → SellerHub aggregiert die Top-10 zu einem Nischen-Kandidaten und zeigt <b>sofort Score + Ampel</b>.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6">Xray-Tabelle auf der Amazon-Suchergebnisseite <b>kopieren</b> (inkl. Kopfzeile) und <b>einfügen</b> → AMZ SellerHub aggregiert die Top-10 zu einem Nischen-Kandidaten und zeigt <b>sofort Score + Ampel</b>.</div>
       </div>
       <button class="btn" onclick="xrayPasteOpen()" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700;padding:12px 22px;font-size:14px">⚡ Einfügen &amp; analysieren</button>
     </div>
@@ -1718,25 +1718,30 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page active" id="p-dashboard">
   <div class="page-header" style="background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px solid var(--ac);padding-bottom:16px">
-    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Willkommen zurück bei SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/index.html">v29.6</span></h1>
+    <h1 style="font-size:24px"><span class="hico">🏠</span>Dashboard <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Dein Entscheidungs-Cockpit · AMZ SellerHub</span> <span style="font-size:10px;color:var(--tx3);font-weight:500;margin-left:8px" title="Pfad: ~/Developer/SellerHub/index.html">v29.6</span></h1>
   </div>
   <div class="page-body">
 
-    <!-- ─── LICENSE COUNTDOWN PANEL ─── -->
-    <div id="dashLicensePanel" style="display:none;margin-bottom:22px"></div>
-
-    <!-- ─── FOKUS: PRODUKTRECHERCHE-FAHRPLAN (geführt) ─── -->
-    <div id="dashRoadmap" style="margin-bottom:18px"></div>
+    <!-- ─── WAS IST NEU? (Modul-Updates, ausblendbar) ─── -->
+    <div id="dashWhatsNew"></div>
     <div id="dashBackupHint"></div>
-    <div id="dashRadar"></div>
 
-    <!-- ─── DEINE PRODUKTSUCHEN (mehrere parallel, je 5 Schritte) ─── -->
-    <div id="dashSearches" style="margin-bottom:24px"></div>
-
-    <!-- ─── HERO STATS (Recherche-Funnel) ─── -->
+    <!-- ─── HERZSTÜCK: RECHERCHE-FUNNEL (Cockpit-Kennzahlen) ─── -->
     <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px">
       <!-- populated by renderDash() -->
     </div>
+
+    <!-- ─── SELLER-RADAR: Briefing · Markt-Radar · Trend-Prognose ─── -->
+    <div id="dashRadar"></div>
+
+    <!-- ─── LICENSE PANEL (nur Admin) ─── -->
+    <div id="dashLicensePanel" style="display:none;margin-bottom:22px"></div>
+
+    <!-- ─── FAHRPLAN (geführter Einstieg) ─── -->
+    <div id="dashRoadmap" style="margin-bottom:18px"></div>
+
+    <!-- ─── DEINE PRODUKTSUCHEN (mehrere parallel, je 5 Schritte) ─── -->
+    <div id="dashSearches" style="margin-bottom:24px"></div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- ─── RECHERCHE-PAYOFF: Top-Kandidaten + Aktivität ─── -->
@@ -1821,7 +1826,7 @@
     <div class="card" style="margin-bottom:22px">
       <h3>☁️ Cloud-Konten (Server)</h3>
       <div style="font-size:12px;color:var(--tx2);margin-bottom:12px">
-        Echte SellerHub-Konten auf dem Server (Login + Sync). Benötigt den <b>ADMIN_KEY</b> aus dem Railway-Dashboard — er bleibt nur auf diesem Gerät gespeichert.
+        Echte AMZ SellerHub-Konten auf dem Server (Login + Sync). Benötigt den <b>ADMIN_KEY</b> aus dem Railway-Dashboard — er bleibt nur auf diesem Gerät gespeichert.
       </div>
       <div class="toolbar" style="margin-bottom:12px">
         <input type="password" id="shAdminKey" placeholder="ADMIN_KEY" autocomplete="off" style="max-width:280px">
@@ -2087,7 +2092,7 @@
 
       <div id="impJSONTab">
         <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
-          <b style="color:var(--ac)">So geht's:</b> Klick auf <b>📋 Prompt-Vorlage</b>, kopiere den Prompt in Claude/Gemini, und füge die JSON-Antwort hier ein. SellerHub liest alle Ideen automatisch.
+          <b style="color:var(--ac)">So geht's:</b> Klick auf <b>📋 Prompt-Vorlage</b>, kopiere den Prompt in Claude/Gemini, und füge die JSON-Antwort hier ein. AMZ SellerHub liest alle Ideen automatisch.
         </div>
         <div class="fi full"><label>JSON von KI einfügen</label>
           <textarea id="impJSON" style="min-height:260px;font-family:monospace;font-size:11px" placeholder='[&#10;  {&#10;    "name": "Faltbare Wasserflasche",&#10;    "kategorie": "Outdoor",&#10;    "potenzial": "Hoch",&#10;    "vkPreis": 19.90,&#10;    "marktgroesse": "5.000 Suchanfragen/Monat",&#10;    "zielgruppe": "Outdoor-Fans 25-45",&#10;    "differenzierung": "Silikon mit Karabiner",&#10;    "warum": "Wachsendes Reisesegment",&#10;    "risiken": "Viel Konkurrenz"&#10;  }&#10;]'></textarea>
@@ -2096,7 +2101,7 @@
 
       <div id="impTextTab" style="display:none">
         <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
-          <b style="color:var(--ac)">So geht's:</b> Kopiere einfach die Antwort von Claude/Gemini rein – egal ob Listen, Tabellen oder Fließtext. SellerHub versucht die Produktideen automatisch zu erkennen.
+          <b style="color:var(--ac)">So geht's:</b> Kopiere einfach die Antwort von Claude/Gemini rein – egal ob Listen, Tabellen oder Fließtext. AMZ SellerHub versucht die Produktideen automatisch zu erkennen.
         </div>
         <div class="fi full"><label>KI-Antwort einfügen</label>
           <textarea id="impText" style="min-height:260px;font-size:12px" placeholder="1. Faltbare Wasserflasche – Outdoor-Segment, ca. 20€, Zielgruppe Reisende...&#10;2. Magnetische Messerhalter – Küchenbereich, hohe Marge..."></textarea>
@@ -2125,7 +2130,7 @@
     <div class="mh"><h2>📋 KI-Prompt Generator</h2><button class="mc" onclick="closePromptModal()">✕</button></div>
     <div class="mb">
       <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6">
-        Stelle die Parameter unten ein und klicke auf <b>🔄 Prompt generieren</b>. Der Prompt weist Claude/Gemini an, Produktideen im Format zu liefern, das SellerHub direkt einlesen kann.
+        Stelle die Parameter unten ein und klicke auf <b>🔄 Prompt generieren</b>. Der Prompt weist Claude/Gemini an, Produktideen im Format zu liefern, das AMZ SellerHub direkt einlesen kann.
       </div>
 
       <div class="fsec">🎯 Basis-Parameter</div>
@@ -2214,12 +2219,12 @@
       <div style="background:linear-gradient(135deg,var(--s3),var(--s2));border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12px;line-height:1.65;border:1px solid var(--bd)">
         <div style="color:var(--ac);font-weight:700;margin-bottom:6px">📝 So geht's:</div>
         <div>1. In Claude die komplette Antwort markieren (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘A</kbd> + <kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘C</kbd>)</div>
-        <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – SellerHub findet das JSON automatisch</div>
+        <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – AMZ SellerHub findet das JSON automatisch</div>
         <div>3. Auf <b>📥 Ideen importieren</b> klicken</div>
       </div>
 
       <div class="fi full"><label>Claude-Antwort hier einfügen</label>
-        <textarea id="claudeResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Claude ein – egal ob mit Einleitungstext, Markdown-Codeblock oder nur JSON. SellerHub extrahiert den JSON-Teil automatisch..." oninput="previewParse()"></textarea>
+        <textarea id="claudeResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Claude ein – egal ob mit Einleitungstext, Markdown-Codeblock oder nur JSON. AMZ SellerHub extrahiert den JSON-Teil automatisch..." oninput="previewParse()"></textarea>
       </div>
 
       <div id="parsePreview" style="margin-top:12px;padding:12px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);font-size:12px;display:none">
@@ -2242,11 +2247,11 @@
         <div style="color:#40c9d8;font-weight:700;margin-bottom:6px">📝 So geht's:</div>
         <div>1. In Perplexity die Antwort komplett markieren (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘A</kbd> + <kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘C</kbd>)</div>
         <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – inklusive der Quellen-Zitate</div>
-        <div>3. SellerHub extrahiert die Produktideen automatisch und speichert die Quellen mit</div>
+        <div>3. AMZ SellerHub extrahiert die Produktideen automatisch und speichert die Quellen mit</div>
       </div>
 
       <div class="fi full"><label>Perplexity-Antwort hier einfügen</label>
-        <textarea id="perplexityResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Perplexity ein – inklusive der Quellenangaben am Ende. SellerHub erkennt das JSON automatisch und speichert die Quellen-URLs als Referenz." oninput="previewParsePerplexity()"></textarea>
+        <textarea id="perplexityResp" style="min-height:280px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace" placeholder="Füge hier die komplette Antwort von Perplexity ein – inklusive der Quellenangaben am Ende. AMZ SellerHub erkennt das JSON automatisch und speichert die Quellen-URLs als Referenz." oninput="previewParsePerplexity()"></textarea>
       </div>
 
       <div id="parsePreviewPerp" style="margin-top:12px;padding:12px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);font-size:12px;display:none">

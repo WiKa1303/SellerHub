@@ -142,7 +142,7 @@
     const ok=$("igKeyOk");
     if(ok){
       ok.style.display=(has||cloud)?"block":"none";
-      ok.textContent=has?"✓ Key gespeichert":"☁️ KI läuft über dein SellerHub-Konto — eigener Key optional";
+      ok.textContent=has?"✓ Key gespeichert":"☁️ KI läuft über dein AMZ SellerHub-Konto — eigener Key optional";
     }
     const ban=$("igKeyBanner");
     if(ban)ban.style.display=(!has && !cloud && sessionStorage.getItem("ig_keyban_x")!=="1")?"flex":"none";
@@ -573,7 +573,7 @@
 
   // ── KI-Titel-Verbesserung (Schritt 1) ──
   async function igGenText(promptText){
-    // Stufe 0: Cloud-Proxy (SellerHub-Konto) – der Gemini-Key bleibt auf dem Server
+    // Stufe 0: Cloud-Proxy (AMZ SellerHub-Konto) – der Gemini-Key bleibt auf dem Server
     const tok=igSyToken();
     if(tok){
       try{
@@ -985,7 +985,7 @@
   async function generateOne(promptText,imgs,key){
     const parts=[{text:promptText}];
     imgs.forEach(img=>parts.push({inline_data:{mime_type:img.mime,data:img.base64}}));
-    // Stufe 0: Cloud-Proxy (SellerHub-Konto) – identisches parts-Array wie der direkte Call
+    // Stufe 0: Cloud-Proxy (AMZ SellerHub-Konto) – identisches parts-Array wie der direkte Call
     const tok=igSyToken();
     if(tok){
       try{

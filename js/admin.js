@@ -430,10 +430,10 @@ function adminSendWelcomeMail(username,email,licenseKey,plainPw,validUntil){
   var dStr=validUntil
     ? new Date(validUntil).toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'})
     : 'unbegrenzt';
-  var subject='Deine Zugangsdaten für SellerHub';
+  var subject='Deine Zugangsdaten für AMZ SellerHub';
   var body=
     'Hallo '+username+',\n\n'+
-    'dein SellerHub-Account wurde angelegt. Hier deine Zugangsdaten:\n\n'+
+    'dein AMZ SellerHub-Account wurde angelegt. Hier deine Zugangsdaten:\n\n'+
     '═══════════════════════════════════════\n'+
     '  ZUGANGSDATEN\n'+
     '═══════════════════════════════════════\n\n'+
@@ -446,7 +446,7 @@ function adminSendWelcomeMail(username,email,licenseKey,plainPw,validUntil){
     '  ändern.\n'+
     '➜ Bewahre den Lizenzkey sicher auf.\n\n'+
     'Viel Erfolg!\n'+
-    '— SellerHub Admin';
+    '— AMZ SellerHub Admin';
   window.location.href='mailto:'+encodeURIComponent(email)+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);
@@ -458,14 +458,14 @@ function adminMailUser(username){
   var dStr=u.licenseExpiresAt
     ? new Date(u.licenseExpiresAt).toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'})
     : 'unbegrenzt';
-  var subject='SellerHub · Info zu deinem Account';
+  var subject='AMZ SellerHub · Info zu deinem Account';
   var body=
     'Hallo '+u.username+',\n\n'+
     'hier dein aktueller Lizenz-Status:\n\n'+
     'Benutzername: '+u.username+'\n'+
     'Lizenzkey:    '+u.licenseKey+'\n'+
     'Gültig bis:   '+dStr+'\n\n'+
-    '— SellerHub Admin';
+    '— AMZ SellerHub Admin';
   window.location.href='mailto:'+encodeURIComponent(u.email)+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);
@@ -672,7 +672,7 @@ function adminSendLicenseUpdateMail(u){
   var dStr=u.licenseExpiresAt
     ? new Date(u.licenseExpiresAt).toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'})
     : 'unbegrenzt';
-  var subject='SellerHub · Deine Lizenz wurde aktualisiert';
+  var subject='AMZ SellerHub · Deine Lizenz wurde aktualisiert';
   var body=
     'Hallo '+u.username+',\n\n'+
     'deine Lizenz wurde vom Administrator aktualisiert.\n\n'+
@@ -684,7 +684,7 @@ function adminSendLicenseUpdateMail(u){
     'Gültig bis:   '+dStr+'\n\n'+
     '═══════════════════════════════════════\n\n'+
     'Bei Fragen melde dich beim Administrator.\n\n'+
-    '— SellerHub Admin';
+    '— AMZ SellerHub Admin';
   window.location.href='mailto:'+encodeURIComponent(u.email)+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);

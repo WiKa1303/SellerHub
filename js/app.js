@@ -2,7 +2,7 @@
 // Increment this on every meaningful change/bugfix/feature
 var WIKA_VERSION='3.6.0';
 var WIKA_BUILD_DATE='2026-05-03';
-var WIKA_NAME='SellerHub';
+var WIKA_NAME='AMZ SellerHub';
 var WIKA_TAGLINE='Smarte Werkzeuge für E-Commerce-Profis';
 
 // ═══════════════ DATA LAYER ═══════════════
@@ -49,7 +49,7 @@ function _doSave(){
       if(typeof toast==='function')toast('⚠️ Speicher voll! Bitte ein Backup exportieren und alte Daten löschen.');
       // Einmalige ausführliche Warnung
       setTimeout(function(){
-        alert('SellerHub konnte nicht speichern: Der lokale Browser-Speicher ist voll.\n\nSo löst du das:\n1. Exportiere ein Backup (Dashboard → Daten exportieren)\n2. Lösche nicht mehr benötigte Daten (alte Produkte, Ideen, erledigte Aufgaben)\n\nDeine zuletzt gemachten Änderungen sind möglicherweise NICHT gespeichert.');
+        alert('AMZ SellerHub konnte nicht speichern: Der lokale Browser-Speicher ist voll.\n\nSo löst du das:\n1. Exportiere ein Backup (Dashboard → Daten exportieren)\n2. Lösche nicht mehr benötigte Daten (alte Produkte, Ideen, erledigte Aufgaben)\n\nDeine zuletzt gemachten Änderungen sind möglicherweise NICHT gespeichert.');
       },300);
     }
   }
@@ -197,7 +197,7 @@ function wikaImportAll(){
     reader.onload=function(ev){
       try{
         var data=JSON.parse(ev.target.result);
-        if(!data.localStorage){alert('Datei ist kein gültiges SellerHub-Format.');return;}
+        if(!data.localStorage){alert('Datei ist kein gültiges AMZ SellerHub-Format.');return;}
         if(!confirm('Alle aktuellen Daten überschreiben mit Inhalt aus "'+file.name+'"?'))return;
         // Clear old wika keys
         var rm=[];
@@ -230,7 +230,7 @@ function backupOpen(){
   ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:620px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">🛟 Backups</h2><button onclick="document.getElementById(\'backupModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
     '<div style="padding:18px 20px">'+
-      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">SellerHub sichert deine Daten <b>automatisch 1× täglich</b> als Snapshot im Browser (letzte 10 Tage). Snapshots schützen vor Fehlbedienung und kaputten Daten – <b>nicht</b> vor dem Löschen der Browser-Daten. Dagegen hilft nur der <b>Datei-Export</b> (letzter: <b>'+lastTxt+'</b>).</div>'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">AMZ SellerHub sichert deine Daten <b>automatisch 1× täglich</b> als Snapshot im Browser (letzte 10 Tage). Snapshots schützen vor Fehlbedienung und kaputten Daten – <b>nicht</b> vor dem Löschen der Browser-Daten. Dagegen hilft nur der <b>Datei-Export</b> (letzter: <b>'+lastTxt+'</b>).</div>'+
       '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="wikaExportAll();document.getElementById(\'backupModal\').remove()">⬇ Jetzt als Datei exportieren</button><button class="btn btn-sm" onclick="wikaImportAll()">⬆ Datei importieren</button></div>'+
       '<div style="font-weight:700;font-size:13px;color:var(--tx);margin-bottom:8px">Automatische Snapshots</div>'+
       '<div id="backupList" style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--tx3)">Lade …</div></div>'+
@@ -520,7 +520,7 @@ var RESEARCH_PROMPTS=[
 var RESEARCH_WORKFLOW_STEPS=[
   {num:1,phase:'Recherche',title:'Produktfelder definieren',tool:'Claude Pro',goal:'3-5 klare Produktbereiche, in denen du suchst',promptId:'p_felder',lessonId:'rp_3'},
   {num:2,phase:'Recherche',title:'Produktideen sammeln',tool:'Perplexity Pro',goal:'50-100 Rohideen aus echten Kundenproblemen',promptId:'p_ideen',lessonId:'rp_3'},
-  {num:3,phase:'Recherche',title:'Master-Tabelle anlegen',tool:'SellerHub',goal:'Zentrale Ablage – schon erledigt durch diesen Bereich',promptId:null,lessonId:'rp_3'},
+  {num:3,phase:'Recherche',title:'Master-Tabelle anlegen',tool:'AMZ SellerHub',goal:'Zentrale Ablage – schon erledigt durch diesen Bereich',promptId:null,lessonId:'rp_3'},
   {num:4,phase:'Recherche',title:'Erste Filterung mit Claude',tool:'Claude Pro',goal:'Reduktion auf 10-20 ernsthafte Kandidaten',promptId:'p_filter',lessonId:'rp_3'},
   {num:5,phase:'Recherche',title:'Amazon-Nische mit Black Box suchen',tool:'Helium 10 Black Box',goal:'10-20 konkrete Amazon-Produkte mit Daten',promptId:null,lessonId:'rp_3'},
   {num:6,phase:'Analyse',title:'Konkurrenz mit Xray analysieren',tool:'Helium 10 Xray',goal:'Einschätzung, ob Nische angreifbar ist',promptId:null,lessonId:'rp_4'},
@@ -533,7 +533,7 @@ var RESEARCH_WORKFLOW_STEPS=[
   {num:13,phase:'Validierung',title:'Marge prüfen',tool:'Helium 10 Profit Calc + Claude',goal:'Wirtschaftliche Machbarkeit bestätigen',promptId:'p_marge',lessonId:'rp_5'},
   {num:14,phase:'Validierung',title:'Lieferanten recherchieren',tool:'Perplexity + Alibaba',goal:'3+ mögliche Lieferanten mit Preisen',promptId:'p_liefer',lessonId:'rp_5'},
   {num:15,phase:'Validierung',title:'Rechtliche Risiken prüfen',tool:'Perplexity + Claude',goal:'Keine Abmahnungen, keine Haftungsfallen',promptId:'p_recht',lessonId:'rp_5'},
-  {num:16,phase:'Entscheidung',title:'Score-Matrix erstellen',tool:'Gemini Pro (oder SellerHub)',goal:'Objektive gewichtete Endbewertung',promptId:'p_score',lessonId:'rp_6'},
+  {num:16,phase:'Entscheidung',title:'Score-Matrix erstellen',tool:'Gemini Pro (oder AMZ SellerHub)',goal:'Objektive gewichtete Endbewertung',promptId:'p_score',lessonId:'rp_6'},
   {num:17,phase:'Entscheidung',title:'Finale kritische Entscheidung',tool:'Claude Pro Max',goal:'Top-1-3-Kandidaten zur Musterbestellung',promptId:'p_final',lessonId:'rp_6'},
   {num:18,phase:'Entscheidung',title:'Muster bestellen und testen',tool:'3+ Lieferanten',goal:'Qualität live prüfen vor Massenbestellung',promptId:'p_test',lessonId:'rp_6'},
   {num:19,phase:'Entscheidung',title:'Produktkonzept finalisieren',tool:'Claude Pro Max',goal:'Briefing für Lieferant, Designer, Listing',promptId:'p_konzept',lessonId:'rp_6'},
@@ -620,7 +620,7 @@ function migratePipelineStatus(){
   // normalizeStatus(...) wird bei Pipeline-Anzeige zur Laufzeit aufgerufen.
   if(changed>0)save();
   localStorage.setItem('wika_pipeline_migrated_v2','1');
-  console.log('[SellerHub] Pipeline-Status v2: '+changed+' Items migriert');
+  console.log('[AMZ SellerHub] Pipeline-Status v2: '+changed+' Items migriert');
 }
 
 // Status-Badge-Generator (für alle Bereiche)
@@ -2360,7 +2360,7 @@ function dossierHtml(c){
   // ── Kopf ──
   h+='<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid '+K.tx+';padding-bottom:10px;margin-bottom:14px">'+
     '<div style="font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase">⚖️ Entscheidungs-Dossier</div>'+
-    '<div style="font-size:11px;color:'+K.mut+'">SellerHub · '+now.toLocaleDateString('de-DE')+'</div>'+
+    '<div style="font-size:11px;color:'+K.mut+'">AMZ SellerHub · '+now.toLocaleDateString('de-DE')+'</div>'+
   '</div>';
   h+='<div style="font-family:\'Playfair Display\',serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:4px">'+esc(c.name)+'</div>';
   var meta=[];
@@ -2477,7 +2477,7 @@ function dossierHtml(c){
 
   // ── Fußzeile ──
   h+='<div style="margin-top:26px;padding-top:10px;border-top:1px solid '+K.bd+';display:flex;justify-content:space-between;font-size:10px;color:'+K.mut+'">'+
-    '<span>Erstellt mit SellerHub – Entscheidungs-Cockpit für Amazon-Produktrecherche</span>'+
+    '<span>Erstellt mit AMZ SellerHub – Entscheidungs-Cockpit für Amazon-Produktrecherche</span>'+
     '<span>'+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr · alle Werte aus eigenen Eingaben &amp; Importen</span>'+
   '</div>';
   return h;
@@ -5690,7 +5690,7 @@ var COACHING_MODULES=[
           {h:'Der Bewertungs-Workflow'},
           {l:[
             'Black Box-Liste exportieren als CSV',
-            'In SellerHub importieren (jetzt im Bereich „📥 Helium 10 Import" möglich!) → landet im Ideen-Pool',
+            'In AMZ SellerHub importieren (jetzt im Bereich „📥 Helium 10 Import" möglich!) → landet im Ideen-Pool',
             'Pro Idee: ASIN in Cerebro reverse-suchen → Top-Keywords notieren',
             'Top 3 Konkurrenten in Xray prüfen: wirklich so viel Umsatz wie Black Box behauptet?',
             'Reviews der Top 3 Konkurrenten lesen: was beschweren sich Kunden?',
@@ -5704,7 +5704,7 @@ var COACHING_MODULES=[
             '🚩 Reviews-Anzahl der Top 5 alle über 1.000 → Markt zu reif',
             '🚩 Top-Listings haben „Amazon\'s Choice" Badge → schwer rauszubrechen'
           ]},
-          {tip:'SellerHub-Workflow: Pro Black-Box-Treffer eine Idee im Ideen-Pool. Nach 2-3 Tagen Recherche pro Idee bewertest du sie als „Hohes Potenzial" oder verwirfst.'}
+          {tip:'AMZ SellerHub-Workflow: Pro Black-Box-Treffer eine Idee im Ideen-Pool. Nach 2-3 Tagen Recherche pro Idee bewertest du sie als „Hohes Potenzial" oder verwirfst.'}
         ]
       }
     ]
@@ -5729,7 +5729,7 @@ var COACHING_MODULES=[
           {l:[
             'Top 3 Konkurrenz-ASINs nehmen, jede einzeln in Cerebro werfen',
             'Filter: <b>Position 1-15</b> + <b>Search Volume min. 500</b>',
-            'Keywords exportieren, in Excel/SellerHub-Keyword-Tracker zusammenführen',
+            'Keywords exportieren, in Excel/AMZ SellerHub-Keyword-Tracker zusammenführen',
             'Keywords die bei <b>allen 3</b> Konkurrenten ranken → das sind deine Pflicht-Keywords',
             'Keywords die nur bei 1 Konkurrenten gut ranken → Nischen-Chance'
           ]},
@@ -5816,10 +5816,10 @@ var COACHING_MODULES=[
           ]},
           {h:'Die "Revenue-Verteilungs"-Regel'},
           {p:'Idealer Markt: Top 5 haben jeweils 5.000-15.000€/Monat Revenue, niemand dominiert. Das bedeutet: kein Marken-Monopol, Platz für Newcomer.'},
-          {h:'Export für SellerHub'},
+          {h:'Export für AMZ SellerHub'},
           {l:[
             'In Xray oben „Export to CSV" klicken',
-            'In SellerHub: Helium 10 Import → Xray-Format auswählen',
+            'In AMZ SellerHub: Helium 10 Import → Xray-Format auswählen',
             'Wahl: Ideen-Pool (zum Bewerten) oder Wettbewerbsanalyse-Tab (für ein bestehendes Produkt)'
           ]},
           {tip:'Xray-Daten sind <i>Schätzungen</i>. Für endgültige Entscheidungen Cerebro für Keyword-Validierung nutzen.'}
@@ -5832,7 +5832,7 @@ var COACHING_MODULES=[
     title:'Der komplette Recherche-Workflow',
     icon:'⚡',
     color:'gn',
-    desc:'Schritt-für-Schritt von Idee bis Bestellung mit Helium 10 + SellerHub',
+    desc:'Schritt-für-Schritt von Idee bis Bestellung mit Helium 10 + AMZ SellerHub',
     lessons:[
       {
         id:'h10_wf_1',
@@ -5848,9 +5848,9 @@ var COACHING_MODULES=[
             '<b>Helium Black Box</b>: mit den Beginner-Filtern → Top 30 ASINs exportieren',
             '<b>Amazon Movers & Shakers</b>: in deinen Wunsch-Kategorien aktuelle Trends',
             '<b>Trend Hunter / Reddit / TikTok</b>: was ist gerade angesagt',
-            '<b>Claude / Perplexity (in SellerHub)</b>: KI-Brainstorming mit dem Prompt-Generator'
+            '<b>Claude / Perplexity (in AMZ SellerHub)</b>: KI-Brainstorming mit dem Prompt-Generator'
           ]},
-          {h:'In SellerHub landen alle in den Ideen-Pool mit Status „Neu"'}
+          {h:'In AMZ SellerHub landen alle in den Ideen-Pool mit Status „Neu"'}
         ]
       },
       {
@@ -5867,7 +5867,7 @@ var COACHING_MODULES=[
             '<b>Helium Trendster</b>: ist der Markt wachsend, stabil oder schrumpfend?',
             '<b>Reviews lesen</b>: Top 5 Konkurrenten – häufige Beschwerden notieren'
           ]},
-          {h:'In SellerHub: Idee bearbeiten → Felder ausfüllen'},
+          {h:'In AMZ SellerHub: Idee bearbeiten → Felder ausfüllen'},
           {l:[
             'Marktgröße (z.B. „Top 10 = 80k€/Monat")',
             'Differenzierung („Konkurrent A hat schwache Bilder, Konkurrent B Reviews unter 4.0")',
@@ -5883,7 +5883,7 @@ var COACHING_MODULES=[
         videoId:'oi5lOs1Uvu4',
         videoTitle:'Helium 10 Tutorial deutsch - Amazon FBA',
         content:[
-          {h:'In SellerHub: Idee → Produktliste übernehmen'},
+          {h:'In AMZ SellerHub: Idee → Produktliste übernehmen'},
           {p:'Im Ideen-Pool den ➡️-Button klicken → Idee wandert zur Produktliste, Detail-Ansicht öffnet sich.'},
           {h:'Im Hersteller-Tab'},
           {l:[
@@ -5891,7 +5891,7 @@ var COACHING_MODULES=[
             'Top 5 Lieferanten kontaktieren – um Sample fragen',
             'Stückpreise notieren (FOB, EXW, CIF)',
             'MOQ, Lieferzeit, Zertifikate erfassen',
-            'SellerHub berechnet automatisch einen Score je Lieferant'
+            'AMZ SellerHub berechnet automatisch einen Score je Lieferant'
           ]},
           {h:'Im Kalkulation-Tab'},
           {l:[
@@ -5924,7 +5924,7 @@ var COACHING_MODULES=[
             '<b>Frankenstein</b>: bereinigt Backend-Keywords-Liste',
             '<b>Scribbles</b>: Echtzeit-Keyword-Tracking während du Listing schreibst'
           ]},
-          {h:'SellerHub: Launch-Planer befüllen'},
+          {h:'AMZ SellerHub: Launch-Planer befüllen'},
           {p:'Im Launch-Planer eine Checkliste machen: Inspection im Werk, FBA-Versand-Buchung, Listing live, PPC-Kampagnen, Review-Anfragen, Brand Registry – alles abhakbar.'},
           {tip:'Erst launchen wenn alle Pre-Launch-Aufgaben erledigt sind. Eile = teuer.'}
         ]
@@ -6012,7 +6012,7 @@ var COACHING_MODULES=[
             '<b>Verpackung</b>: präsentationsfähig auf Amazon?',
             '<b>Geruch</b>: chemisch? → CE-Zertifikat fragwürdig'
           ]},
-          {tip:'Mache eine Sample-Vergleichs-Tabelle in SellerHub: Lieferant A vs B vs C nach Qualität, Preis, MOQ, Antwortzeit. Score-System hilft bei Entscheidung.'}
+          {tip:'Mache eine Sample-Vergleichs-Tabelle in AMZ SellerHub: Lieferant A vs B vs C nach Qualität, Preis, MOQ, Antwortzeit. Score-System hilft bei Entscheidung.'}
         ]
       },
       {
@@ -6830,7 +6830,7 @@ var COACHING_MODULES=[
 
           {p:'<b>Offizielle Quelle:</b> Den vollständigen Amazon-Leitfaden zur SB-Einrichtung findest du unter <a href="https://advertising.amazon.de/help/GF86HBCNDJUAC5WN" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">advertising.amazon.de – Sponsored Brands erstellen</a> sowie den Lernpfad unter <a href="https://advertising.amazon.com/de-de/solutions/products/sponsored-brands" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Sponsored Brands – Markenbewusstsein fördern</a>.'},
 
-          {warning:'Hinweis zu Videos: SellerHub ist eine Offline-App und kann keine YouTube-Videos automatisch aktuell halten. Für aktuelle Video-Anleitungen suche auf YouTube nach „Amazon Sponsored Brands Tutorial deutsch" oder nutze den offiziellen Amazon-Ads-Lernpfad oben – dort sind die Anleitungen immer auf dem neuesten Stand der Benutzeroberfläche.'}
+          {warning:'Hinweis zu Videos: AMZ SellerHub ist eine Offline-App und kann keine YouTube-Videos automatisch aktuell halten. Für aktuelle Video-Anleitungen suche auf YouTube nach „Amazon Sponsored Brands Tutorial deutsch" oder nutze den offiziellen Amazon-Ads-Lernpfad oben – dort sind die Anleitungen immer auf dem neuesten Stand der Benutzeroberfläche.'}
         ]
       },
       // ═══════════════════════════════════════════════════════════
@@ -8585,7 +8585,7 @@ var PM_CONTEXT={
   role:'owner'                // owner | admin | member | viewer
 };
 function pmSyncContext(){
-  // Bindet den SellerHub-Login an den PM-Kontext (Multi-User-Vorbereitung)
+  // Bindet den AMZ SellerHub-Login an den PM-Kontext (Multi-User-Vorbereitung)
   var u=window.WikaAuth?window.WikaAuth.currentUser():null;
   if(u){
     PM_CONTEXT.userId='usr_'+(u.username||'local');
@@ -9498,7 +9498,7 @@ function pmDeleteTaskConfirm(taskId){
 // Daten: D.nischen = { items:[], weights:{}, assumptions:{} }
 // ═══════════════════════════════════════════════════════════════
 
-// ─── SellerHub-Standard-Kriterien (aus Wissams Recherche-Logik) ───
+// ─── AMZ SellerHub-Standard-Kriterien (aus Wissams Recherche-Logik) ───
 var NISCHEN_KRITERIEN={
   preisMin:20, preisMax:50,        // EUR Verkaufspreis
   maxGewicht:2000,                 // g (für günstige FBA-Gebühren)
@@ -9662,7 +9662,7 @@ function nischenQuickWin(n){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// KRITERIEN-CHECK (gegen SellerHub-Standards)
+// KRITERIEN-CHECK (gegen AMZ SellerHub-Standards)
 // ═══════════════════════════════════════════════════════════════
 function nischenKriterienCheck(n){
   var k=NISCHEN_KRITERIEN;
@@ -9822,7 +9822,7 @@ function nischenGoNoGo(ranking){
   if(top.attr>=7)gruende.push('hohe Attraktivität ('+top.attr+'/10)');
   else if(top.attr>=5)gruende.push('solide Attraktivität ('+top.attr+'/10)');
   if(top.barr<=4)gruende.push('niedrige Einstiegsbarriere ('+top.barr+'/10)');
-  if(top.krit.allPass)gruende.push('alle SellerHub-Kriterien erfüllt');
+  if(top.krit.allPass)gruende.push('alle AMZ SellerHub-Kriterien erfüllt');
   else gruende.push(top.krit.passed+'/'+top.krit.total+' Kriterien erfüllt');
   if(top.roi>=100)gruende.push('attraktiver geschätzter ROI ('+top.roi+'%)');
 
@@ -10936,7 +10936,7 @@ function notifRunReminderEngine(silent){
   // Browser-Push für neue (gebündelt, um Spam zu vermeiden)
   if(newPush.length && Notification!==undefined && window.Notification && Notification.permission==='granted'){
     if(newPush.length===1)notifBrowserPush(newPush[0].title,newPush[0].body);
-    else notifBrowserPush('SellerHub: '+newPush.length+' neue Erinnerungen',newPush.map(function(p){return p.body;}).slice(0,3).join('\n'));
+    else notifBrowserPush('AMZ SellerHub: '+newPush.length+' neue Erinnerungen',newPush.map(function(p){return p.body;}).slice(0,3).join('\n'));
   }
 
   notifUpdateBell();
@@ -10988,7 +10988,7 @@ function notifRenderPanel(){
   // Browser-Permission-Banner
   if(permState==='default'){
     html+='<div style="padding:10px 16px;background:var(--acd);border-bottom:1px solid var(--bd);font-size:11.5px;color:var(--tx2);line-height:1.5">'+
-      '🌐 <b>Browser-Benachrichtigungen</b> aktivieren, um auch außerhalb von SellerHub erinnert zu werden?'+
+      '🌐 <b>Browser-Benachrichtigungen</b> aktivieren, um auch außerhalb von AMZ SellerHub erinnert zu werden?'+
       '<button onclick="notifRequestPermission()" style="display:block;margin-top:8px;background:var(--ac);color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700">Aktivieren</button></div>';
   }else if(permState==='granted'){
     html+='<div style="padding:7px 16px;background:var(--gnd);border-bottom:1px solid var(--bd);font-size:11px;color:var(--gn)">✓ Browser-Benachrichtigungen aktiv</div>';
@@ -11463,7 +11463,7 @@ function xrayPasteOpen(){
   ov.innerHTML='<div style="background:var(--s1);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)"><h2 style="margin:0;font-size:17px">⚡ Xray-Schnell-Analyse</h2><button onclick="document.getElementById(\'xrayPasteModal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2)">✕</button></div>'+
     '<div style="padding:18px 20px">'+
-      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">Amazon-Suchergebnis öffnen → <b>Xray</b> starten → Tabelle <b>inklusive Kopfzeile</b> markieren &amp; kopieren → hier einfügen. SellerHub aggregiert die Top-10 zu <b>einem Nischen-Kandidaten</b> und zeigt sofort die Ampel. Auch CSV-Export-Inhalte funktionieren.</div>'+
+      '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:12px">Amazon-Suchergebnis öffnen → <b>Xray</b> starten → Tabelle <b>inklusive Kopfzeile</b> markieren &amp; kopieren → hier einfügen. AMZ SellerHub aggregiert die Top-10 zu <b>einem Nischen-Kandidaten</b> und zeigt sofort die Ampel. Auch CSV-Export-Inhalte funktionieren.</div>'+
       '<div class="fi" style="margin-bottom:8px"><label>Nischen-Name (Haupt-Keyword)</label><input id="xpName" type="text" placeholder="z.B. Bambus Schneidebrett" style="width:100%;box-sizing:border-box"></div>'+
       '<textarea id="xpInput" rows="6" placeholder="Xray-Tabelle hier einfügen (Cmd/Strg+V) …" onpaste="setTimeout(xrayPasteAnalyze,60)" style="width:100%;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);resize:vertical;box-sizing:border-box"></textarea>'+
       '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-p" onclick="xrayPasteAnalyze()">⚡ Analysieren</button></div>'+
@@ -11845,14 +11845,14 @@ function renderSellerPreview(){
     matchInfo.style.background='var(--ord)';
     matchInfo.style.color='var(--or)';
     matchInfo.style.borderColor='var(--or)';
-    matchInfo.innerHTML='⚠️ Keine ASIN/SKU der CSV-Zeilen passt zu deinen SellerHub-Produkten. Stelle sicher dass deine Produkte ASIN/SKU haben.';
+    matchInfo.innerHTML='⚠️ Keine ASIN/SKU der CSV-Zeilen passt zu deinen AMZ SellerHub-Produkten. Stelle sicher dass deine Produkte ASIN/SKU haben.';
   }
 
   // Preview table - show all rows with match status
   var html='<table style="width:100%;font-size:11px"><thead><tr style="position:sticky;top:0;background:var(--s2);z-index:1">';
   html+='<th style="text-align:left;padding:6px 10px">Status</th>';
   html+='<th style="text-align:left;padding:6px 10px">ASIN</th>';
-  html+='<th style="text-align:left;padding:6px 10px">Produkt (in SellerHub)</th>';
+  html+='<th style="text-align:left;padding:6px 10px">Produkt (in AMZ SellerHub)</th>';
   if(s.type==='business'){
     html+='<th class="nc" style="padding:6px 10px">Sessions</th>';
     html+='<th class="nc" style="padding:6px 10px">Verkäufe</th>';
@@ -12204,11 +12204,54 @@ function renderDashSearches(){
   el.innerHTML=html;
 }
 
+// ═══ „WAS IST NEU?" — Modul-Updates sichtbar machen (ausblendbar, Stand je Version) ═══
+// Dismiss-Key nutzt das wika_info_dismissed_-Präfix → wird über Geräte gesynct.
+var WHATSNEW_KEY='wika_info_dismissed_wn20260706';
+var WHATSNEW=[
+  {icon:'☁️',title:'Cloud-Konto & Login',desc:'Anmeldung läuft jetzt über dein Cloud-Konto (E-Mail). Passwort ändern & Sync: Wolke oben links.',cta:'Konto öffnen',act:"if(typeof syBtnClick==='function')syBtnClick()"},
+  {icon:'📈',title:'Trend-Prognose & Briefing',desc:'Der Radar liefert ein Tages-Briefing, Markt-Trends und eine 7-Tage-Prognose — direkt hier im Dashboard.',cta:'Zum Radar',act:"var r=document.getElementById('dashRadar');if(r)r.scrollIntoView({behavior:'smooth'})"},
+  {icon:'🧮',title:'Auto-Marge in der Scorecard',desc:'VK, EK und FBA-Gebühren eintragen — die Netto-Marge (und der Marge-Red-Flag) rechnet sich von selbst.',cta:'Zur Pipeline',act:"go('pipeline')"},
+  {icon:'🚩',title:'Monopol-Flag & rote Rahmen',desc:'Dominiert eine Marke die Top-10, warnt die Scorecard; Kandidaten mit hartem Red Flag sind rot umrandet.',cta:'Zur Pipeline',act:"go('pipeline')"},
+  {icon:'⚡',title:'Xray-Paste',desc:'Helium-10-Xray-Tabelle kopieren, einfügen — fertiger Nischen-Kandidat mit Score & Ampel in Sekunden.',cta:'Ausprobieren',act:"if(typeof xrayPasteOpen==='function')xrayPasteOpen()"},
+  {icon:'🛡️',title:'Cloud-Nutzer-Verwaltung',desc:'Als Admin verwaltest du die echten Server-Konten: Passwort-Reset, Rollen — Admin-Bereich, Sektion „Cloud-Konten".',cta:'Zum Admin',act:"go('admin')",adminOnly:true}
+];
+function whatsNewDismiss(){
+  try{localStorage.setItem(WHATSNEW_KEY,'1');}catch(e){}
+  var el=document.getElementById('dashWhatsNew');if(el)el.innerHTML='';
+  if(typeof syQueue==='function')try{syQueue(WHATSNEW_KEY);}catch(e){}
+  toast('Ausgeblendet — die Funktionen findest du weiter an ihren Plätzen');
+}
+function renderWhatsNew(){
+  var el=document.getElementById('dashWhatsNew');
+  if(!el)return;
+  var dismissed=false;try{dismissed=!!localStorage.getItem(WHATSNEW_KEY);}catch(e){}
+  if(dismissed){el.innerHTML='';return;}
+  var u=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
+  var isAdmin=!!(u&&u.role==='admin');
+  var items=WHATSNEW.filter(function(w){return !w.adminOnly||isAdmin;});
+  var h='<div style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:14px;padding:18px 20px;margin-bottom:18px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
+    '<div style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 06.07.2026</span></div>'+
+    '<button class="btn btn-sm" onclick="whatsNewDismiss()" style="font-size:11px">✕ Ausblenden</button></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">';
+  items.forEach(function(w){
+    h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">'+
+      '<div style="font-weight:700;color:var(--tx);font-size:13px">'+w.icon+' '+w.title+'</div>'+
+      '<div style="font-size:11.5px;color:var(--tx2);line-height:1.5;flex:1">'+w.desc+'</div>'+
+      '<button class="btn btn-sm" onclick="'+w.act.replace(/"/g,'&quot;')+'" style="align-self:flex-start;font-size:10.5px;background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-weight:700">'+w.cta+' →</button>'+
+    '</div>';
+  });
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+window.whatsNewDismiss=whatsNewDismiss;
+
 function renderDash(){
   var prods=D.products||[];
   var ideen=D.ideen||[];
 
-  // ─── Produktrecherche-Fahrplan (geführt) ───
+  // ─── „Was ist neu?" + Produktrecherche-Fahrplan (geführt) ───
+  if(typeof renderWhatsNew==='function')renderWhatsNew();
   if(typeof renderResearchRoadmap==='function')renderResearchRoadmap();
   if(typeof renderBackupHint==='function')renderBackupHint();
   if(typeof renderRadarWidget==='function')renderRadarWidget();
@@ -12416,7 +12459,7 @@ function handleImp(e){
       // Check if this is a versioned backup (has _meta)
       if(d&&d._meta&&d.data){
         var backupVer=d._meta.version||'unknown';
-        var msg='Backup-Datei erkannt: '+(d._meta.app||'SellerHub')+' v'+backupVer;
+        var msg='Backup-Datei erkannt: '+(d._meta.app||'AMZ SellerHub')+' v'+backupVer;
         if(backupVer!==WIKA_VERSION){
           msg+='\n\n⚠️ Andere Version: aktuell v'+WIKA_VERSION+', Backup v'+backupVer;
           msg+='\n\nDaten trotzdem importieren? (Import addiert die Daten zu den vorhandenen)';

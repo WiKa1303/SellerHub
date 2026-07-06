@@ -248,7 +248,7 @@
 
   // ── Passwort vergessen: Reset kann nur der Betreiber (Nutzer-Admin) ──
   window.wikaForgotPw=function(){
-    alert('🔑 Passwort vergessen?\n\nDein Konto liegt in der SellerHub-Cloud — das Passwort kann nur der Betreiber zurücksetzen.\n\nBitte melde dich per E-Mail:\nwissam.kahil@gmail.com');
+    alert('🔑 Passwort vergessen?\n\nDein Konto liegt in der AMZ SellerHub-Cloud — das Passwort kann nur der Betreiber zurücksetzen.\n\nBitte melde dich per E-Mail:\nwissam.kahil@gmail.com');
   };
 
   function wikaUnlock(silent){
