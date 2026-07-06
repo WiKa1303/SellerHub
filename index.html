@@ -430,11 +430,12 @@
       </div>
 
       <!-- Master-Tabelle -->
+      <div id="researchBulkBar"></div>
       <div style="overflow-x:auto;background:var(--s1);border:1px solid var(--bd);border-radius:10px">
         <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:640px">
           <thead>
             <tr>
-              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:240px">Produkt <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Hauptbild + Name des analysierten Konkurrenz-Produkts. Bild-Klick öffnet das Amazon-Listing, Name-Klick den Editor.</span></span></th>
+              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:240px"><span style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" id="researchSelAllCb" onchange="researchSelAll(this.checked)" title="Alle (gefilterten) markieren / Auswahl aufheben" style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer">Produkt</span> <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Checkbox: markieren (Kopf-Checkbox = ALLE gefilterten, auch über Seiten hinweg). Hauptbild-Klick öffnet Amazon, Name-Klick den Editor.</span></span></th>
               <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
               <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis aus dem Konkurrenz-Listing. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
               <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>

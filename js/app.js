@@ -904,6 +904,26 @@ function auswahlAddToProduktliste(id){
   renderAuswahl();auswahlUpdateBadge();
   toast('➕ „'+esc(it.name||'')+'" zur Produktliste hinzugefügt');
 }
+// ── Mehrfachauswahl Engere Wahl: markieren (auch „alle") + Sammel-Entfernen ──
+var auswahlSel={};
+function auswahlToggleSel(id,on){if(on)auswahlSel[id]=1;else delete auswahlSel[id];renderAuswahl();}
+function auswahlSelAll(on){
+  auswahlSel={};
+  if(on)(D.research.shortlist||[]).forEach(function(x){auswahlSel[x.id]=1;});
+  renderAuswahl();
+}
+function auswahlDeleteSelected(){
+  var ids=Object.keys(auswahlSel);if(!ids.length)return;
+  if(!confirm(ids.length+' markierte Produkte aus der Engeren Wahl entfernen?\n\nDie zugehörigen Kandidaten in der Konkurrenz-Tabelle bleiben erhalten.'))return;
+  var sel=auswahlSel;
+  D.research.shortlist=D.research.shortlist.filter(function(x){return !sel[x.id];});
+  auswahlSel={};
+  save();renderAuswahl();auswahlUpdateBadge();
+  if(document.getElementById('pipelineBoard')&&typeof renderPipeline==='function')renderPipeline();
+  toast('🗑 '+ids.length+' Produkte entfernt');
+}
+window.auswahlToggleSel=auswahlToggleSel;window.auswahlSelAll=auswahlSelAll;window.auswahlDeleteSelected=auswahlDeleteSelected;
+
 function auswahlStatCard(label,val,color){
   return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;min-width:120px"><div style="font-size:11px;color:var(--tx2)">'+label+'</div><div style="font-size:22px;font-weight:800;color:var(--'+color+')">'+val+'</div></div>';
 }
@@ -922,14 +942,22 @@ function renderAuswahl(){
     box.innerHTML='<div style="padding:50px 30px;text-align:center;color:var(--tx2);background:var(--s1);border:1px solid var(--bd);border-radius:12px"><div style="font-size:48px;margin-bottom:14px">⭐</div><div style="font-weight:700;color:var(--tx);font-size:16px;margin-bottom:6px">Noch keine Produkte in der engeren Wahl</div><div style="font-size:13px;margin-bottom:18px">Geh in die <b>⚔️ Konkurrenz-Tabelle</b> und übernimm vielversprechende Produkte mit „★ Produkt".</div><button class="btn btn-p" onclick="go(\'research\')">⚔️ Zur Konkurrenz-Tabelle</button></div>';
     return;
   }
-  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">';
+  // Auswahl-Leiste über den Karten
+  var aSelCount=Object.keys(auswahlSel).filter(function(id){return list.some(function(x){return x.id===id;});}).length;
+  var html='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;'+(aSelCount?'background:var(--acd);border:1.5px solid var(--ac);border-radius:10px;padding:9px 14px':'padding:2px')+'">'+
+    '<label style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2);cursor:pointer;font-weight:600"><input type="checkbox" onchange="auswahlSelAll(this.checked)" '+(aSelCount>0&&aSelCount===list.length?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer">Alle markieren</label>'+
+    (aSelCount?'<b style="font-size:13px;color:var(--ac)">'+aSelCount+' markiert</b>'+
+      '<button class="btn btn-sm" onclick="auswahlDeleteSelected()" style="background:var(--rd);color:#fff;border:none;font-weight:700;font-size:12px">🗑 Markierte entfernen</button>'+
+      '<button class="btn btn-sm" onclick="auswahlSelAll(false)" style="font-size:12px">Auswahl aufheben</button>':'')+
+  '</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">';
   list.forEach(function(it){
     var d=AUSWAHL_DECISION[it.decision]||AUSWAHL_DECISION.pruefen;
     var sc=it.score||0; var scc=sc>=70?'gn':sc>=50?'ac':sc>0?'rd':'tx3';
-    var imgs=(it.compImages||[]).slice(0,5).map(function(u){return '<img src="'+esc(u)+'" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
+    var imgs=(it.compImages||[]).slice(0,5).map(function(u){return '<img src="'+esc(u)+'" class="pzoom" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
     var usps=(it.compUsps||[]).slice(0,4).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
-    html+='<div style="background:var(--s1);border:1.5px solid '+(it.decision==='abgelehnt'?'var(--bd)':'var(--'+d.color+')')+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px'+(it.decision==='abgelehnt'?';opacity:.6':'')+'">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+esc(it.name||'')+'</div><span style="flex-shrink:0;display:inline-block;padding:3px 9px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:12px">'+(sc>0?sc:'—')+'</span></div>';
+    html+='<div style="background:var(--s1);border:1.5px solid '+(auswahlSel[it.id]?'var(--ac)':(it.decision==='abgelehnt'?'var(--bd)':'var(--'+d.color+')'))+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px'+(it.decision==='abgelehnt'?';opacity:.6':'')+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0"><input type="checkbox" onchange="auswahlToggleSel(\''+it.id+'\',this.checked)" '+(auswahlSel[it.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer;flex-shrink:0;margin-top:2px" title="Markieren"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+esc(it.name||'')+'</div></div><span style="flex-shrink:0;display:inline-block;padding:3px 9px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:12px">'+(sc>0?sc:'—')+'</span></div>';
     html+='<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--tx2)">'+(it.kategorie?'<span>🏷️ '+esc(it.kategorie)+'</span>':'')+(it.vk!=null?'<span>💶 '+esc(String(it.vk))+' €</span>':'')+(it.avgReviews!=null?'<span>⭐ '+esc(String(it.avgReviews))+' Rev.</span>':'')+(it.hasBeat?'<span style="color:var(--gn);font-weight:700">✨ KI-optimiert</span>':'')+'</div>';
     if(imgs)html+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';
     if(usps)html+='<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--tx2)">'+usps+'</ul>';
@@ -1656,6 +1684,28 @@ function researchRenderStatsBar(){
   bar.innerHTML=html;
 }
 
+// ── Mehrfachauswahl Master-Tabelle: markieren (auch „alle") + Sammel-Löschen ──
+var researchSel={},researchTableAllIds=[];
+function researchToggleSel(id,on){if(on)researchSel[id]=1;else delete researchSel[id];researchRenderTable();}
+function researchSelAll(on){
+  researchSel={};
+  if(on)researchTableAllIds.forEach(function(id){researchSel[id]=1;});
+  researchRenderTable();
+}
+function researchDeleteSelected(){
+  var ids=Object.keys(researchSel);if(!ids.length)return;
+  if(!confirm(ids.length+' markierte Kandidaten endgültig löschen?\n\nWorkflow-Notizen und Bewertungen dieser Kandidaten gehen verloren. Einträge in der Engeren Wahl bleiben erhalten.'))return;
+  var sel=researchSel;
+  D.research.candidates=D.research.candidates.filter(function(c){return !sel[c.id];});
+  ids.forEach(function(id){if(D.research.workflowState&&D.research.workflowState[id])delete D.research.workflowState[id];});
+  researchSel={};
+  save();researchRenderTable();researchUpdateBadge();
+  if(typeof researchRenderStatsBar==='function')researchRenderStatsBar();
+  if(document.getElementById('pipelineBoard')&&typeof renderPipeline==='function')renderPipeline();
+  toast('🗑 '+ids.length+' Kandidaten gelöscht');
+}
+window.researchToggleSel=researchToggleSel;window.researchSelAll=researchSelAll;window.researchDeleteSelected=researchDeleteSelected;
+
 var researchTablePage=1,researchTableSig='';
 function researchTableGoPage(p){
   researchTablePage=p;researchRenderTable();
@@ -1699,6 +1749,9 @@ function researchRenderTable(){
     return researchCalcScore(b)-researchCalcScore(a);
   });
 
+  // Gefilterte IDs für „Alle markieren" (über alle Seiten hinweg) merken
+  researchTableAllIds=cands.map(function(c){return c.id;});
+
   // ── Blätterung: 30 je Seite; bei Filter-/Suchwechsel zurück auf Seite 1 ──
   var sig=filterStatus+'|'+searchQ+'|'+sortMode;
   if(sig!==researchTableSig){researchTablePage=1;researchTableSig=sig;}
@@ -1721,7 +1774,8 @@ function researchRenderTable(){
       :'<div style="width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0" title="Kein Bild — kommt per ASIN-Analyse oder Import mit Bild-Spalte">📦</div>';
     if(c.compAsin)mthumb='<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(c.compAsin)+')" style="flex-shrink:0;line-height:0">'+mthumb+'</a>';
     html+='<tr data-cid="'+c.id+'">'+
-      '<td style="position:sticky;left:0;background:var(--s1)"><div style="display:flex;align-items:center;gap:8px;min-width:220px">'+mthumb+
+      '<td style="position:sticky;left:0;background:var(--s1)"><div style="display:flex;align-items:center;gap:8px;min-width:240px">'+
+        '<input type="checkbox" onclick="event.stopPropagation()" onchange="researchToggleSel(\''+c.id+'\',this.checked)" '+(researchSel[c.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer;flex-shrink:0" title="Markieren">'+mthumb+
         '<button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="flex:1;min-width:0;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button>'+
       '</div></td>'+
       '<td><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.kategorie?esc(c.kategorie):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
@@ -1738,6 +1792,21 @@ function researchRenderTable(){
     '</tr>';
   });
   tbody.innerHTML=html;
+
+  // ── Auswahl-Leiste (erscheint bei markierten Zeilen) + „Alle"-Checkbox im Kopf ──
+  var selCount=Object.keys(researchSel).length;
+  var allCb=document.getElementById('researchSelAllCb');
+  if(allCb){allCb.checked=selCount>0&&selCount>=researchTableAllIds.length;allCb.indeterminate=selCount>0&&selCount<researchTableAllIds.length;}
+  var bulk=document.getElementById('researchBulkBar');
+  if(bulk){
+    bulk.innerHTML=selCount>0
+      ?'<div style="display:flex;gap:10px;align-items:center;background:var(--acd);border:1.5px solid var(--ac);border-radius:10px;padding:9px 14px;margin-bottom:10px;flex-wrap:wrap">'+
+        '<b style="font-size:13px;color:var(--ac)">'+selCount+' markiert</b>'+
+        '<button class="btn btn-sm" onclick="researchDeleteSelected()" style="background:var(--rd);color:#fff;border:none;font-weight:700;font-size:12px">🗑 Markierte löschen</button>'+
+        '<button class="btn btn-sm" onclick="researchSelAll(true)" style="font-size:12px">Alle '+researchTableAllIds.length+' markieren</button>'+
+        '<button class="btn btn-sm" onclick="researchSelAll(false)" style="font-size:12px">Auswahl aufheben</button>'+
+      '</div>':'';
+  }
 
   // ── Blätter-Leiste unter der Tabelle ──
   var pager=document.getElementById('researchTablePager');
