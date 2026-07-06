@@ -669,6 +669,15 @@ var DECISION_DIMS=[
 // Alt-Kompatibilität (falls noch irgendwo referenziert)
 var RESEARCH_SCORE_CRITERIA=DECISION_DIMS;
 
+// Effektive Netto-Marge: manuell eingetragen hat Vorrang, sonst live aus VK − EK − FBA
+// (Kalkulation speist die Wirtschaftlichkeit direkt — kein Abtippen aus dem Gebühren-Center).
+function decisionMarge(c){
+  if(c.nettoMarge!=null)return {val:c.nettoMarge,src:'manuell'};
+  if(c.vk!=null&&c.vk>0&&c.ek!=null&&c.ek>0&&c.fbaGebuehren!=null){
+    return {val:Math.round((c.vk-c.ek-c.fbaGebuehren)/c.vk*1000)/10,src:'auto'};
+  }
+  return {val:null,src:null};
+}
 // Auto-Schätzung einer Dimension aus den Kandidatendaten → {val:0-10|null, reason}
 function decisionAuto(c,key){
   if(key==='nachfrage'){
@@ -680,8 +689,9 @@ function decisionAuto(c,key){
     return {val:null,reason:'Keine ⌀-Review-Zahl erfasst'};
   }
   if(key==='wirtschaft'){
-    if(c.nettoMarge!=null){var m=c.nettoMarge;var v=m>=35?10:m>=30?8:m>=25?6:m>=20?4:m>=15?2:1;return {val:v,reason:'Netto-Marge '+m+' %'};}
-    return {val:null,reason:'Keine Netto-Marge erfasst'};
+    var mm=decisionMarge(c);
+    if(mm.val!=null){var m=mm.val;var v=m>=35?10:m>=30?8:m>=25?6:m>=20?4:m>=15?2:1;return {val:v,reason:'Netto-Marge '+m+' %'+(mm.src==='auto'?' (auto: VK − EK − FBA)':'')};}
+    return {val:null,reason:'Keine Marge – VK, EK + FBA-Geb. eintragen (oder Marge direkt)'};
   }
   if(key==='differenz'){
     var t=(c.differenzierung||'').trim();if(t.length>40)return {val:8,reason:'Differenzierung beschrieben'};if(t.length>5)return {val:5,reason:'Ansatz vorhanden'};return {val:null,reason:'Noch offen – via Review-Mining (Schritt 3)'};
@@ -691,7 +701,12 @@ function decisionAuto(c,key){
     return {val:null,reason:'Risiko nicht eingestuft'};
   }
   if(key==='kapital'){
-    if(c.ek!=null&&c.ek>0){var inv=c.ek*500;var v=inv<2000?9:inv<4000?7:inv<7000?5:inv<12000?3:1;return {val:v,reason:'~'+Math.round(inv).toLocaleString('de-DE')+' € Startbudget (500 Stk)'};}
+    if(c.ek!=null&&c.ek>0){
+      var menge=(c.startMenge!=null&&c.startMenge>0)?c.startMenge:500;
+      var inv=c.ek*menge;
+      var v=inv<2000?9:inv<4000?7:inv<7000?5:inv<12000?3:1;
+      return {val:v,reason:'~'+Math.round(inv).toLocaleString('de-DE')+' € Startbudget ('+menge+' Stk × EK)'};
+    }
     return {val:null,reason:'Kein EK für Startbudget'};
   }
   return {val:null,reason:''};
@@ -721,7 +736,16 @@ function decisionRedFlags(c){
   var f=[];
   if(c.vk!=null&&c.vk>0&&c.vk<15)f.push({hard:true,t:'Preis < 15 € → Margenfalle',s:'Preis <15 €'});
   if(c.avgReviews!=null&&c.avgReviews>2000)f.push({hard:true,t:'⌀ Reviews Top-10 > 2.000 → hohe Einstiegsbarriere',s:'>2.000 Rev.'});
-  if(c.nettoMarge!=null&&c.nettoMarge<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich',s:'Marge <15 %'});
+  var _fm=decisionMarge(c);
+  if(_fm.val!=null&&_fm.val<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich'+(_fm.src==='auto'?' (auto berechnet)':''),s:'Marge <15 %'});
+  // Monopol-Risiko: eine Marke dominiert die Top-Plätze (Daten aus Xray-Paste/Nischen-Scan)
+  var _ns=c.nischenScan;
+  if(_ns&&_ns.domBrand&&_ns.count>0&&_ns.domCount>0){
+    var _share=Math.round(_ns.domCount/_ns.count*100);
+    var _brand=String(_ns.domBrand).replace(/[<>"'&]/g,'').substring(0,40);
+    if(_share>60)f.push({hard:true,t:'Marke „'+_brand+'" hält '+_share+' % der Top-Plätze → Monopol-Risiko',s:'Monopol '+_share+' %'});
+    else if(_share>=40)f.push({hard:false,t:'Marken-Dominanz: „'+_brand+'" hält '+_share+' % der Top-Plätze',s:'Marke '+_share+' %'});
+  }
   if(c.ipRisiko==='ja')f.push({hard:true,t:'Marken-/Patent-/IP-Risiko → Abmahn-/Sperrgefahr',s:'IP-Risiko'});
   if(c.risiko==='hoch')f.push({hard:true,t:'Hohes Risiko (Recht/Haftung/Retouren)',s:'Hohes Risiko'});
   if(c.gewicht!=null&&c.gewicht>5)f.push({hard:true,t:'Gewicht > 5 kg → Sperrgut/hohe FBA-Kosten, Marge in Gefahr',s:'>5 kg'});
@@ -1641,7 +1665,7 @@ function researchUpdateField(id,field,value){
   var c=D.research.candidates.find(function(x){return x.id===id});
   if(!c)return;
   // Coerce numeric fields
-  if(['vk','top10Umsatz','avgReviews','ek','fbaGebuehren','nettoMarge','gewicht'].indexOf(field)>-1){
+  if(['vk','top10Umsatz','avgReviews','ek','fbaGebuehren','nettoMarge','gewicht','startMenge'].indexOf(field)>-1){
     var num=parseFloat(value);
     c[field]=isNaN(num)?null:num;
   }else{
@@ -1654,7 +1678,7 @@ function researchUpdateField(id,field,value){
   // Stats/Badge bei Status-Änderung
   if(field==='status'){researchRenderStatsBar();researchUpdateBadge();}
   // Score-relevante Felder → Tabelle neu rendern (aktualisiert Score-Badge)
-  if(['avgReviews','nettoMarge','konkurrenz','risiko','ppcRisiko','differenzierung','status','vk','gewicht','saisonal','gating','ipRisiko'].indexOf(field)>-1){
+  if(['avgReviews','nettoMarge','konkurrenz','risiko','ppcRisiko','differenzierung','status','vk','gewicht','saisonal','gating','ipRisiko','ek','fbaGebuehren','startMenge','top10Umsatz'].indexOf(field)>-1){
     researchRenderTable();
     if(typeof renderPipeline==='function'&&document.getElementById('pipelineBoard'))renderPipeline();
   }
@@ -1704,8 +1728,8 @@ function researchOpenEdit(id){
   h+='<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--tx3);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--bd)"><span><b style="color:var(--gn)">AUTO</b> = aus dem Listing geladen</span><span><b style="color:var(--ac)">BERECHNET</b> = aus deinen Zahlen</span><span><b style="color:var(--tx2)">DU</b> = selbst eintragen (Helium 10 / Lieferant / Einschätzung)</span></div>';
   h+=field('Produktname',inp('name',c.name,'text'),'Aus dem Konkurrenz-Listing.','auto');
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Kategorie',inp('kategorie',c.kategorie,'text'),'Automatisch (oberste Amazon-Kategorie) – verfeinerbar.','auto')+field('Hauptkeyword',inp('hauptkeyword',c.hauptkeyword,'text'),'Aus Helium 10 Cerebro / Black Box.','self')+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'),'Konkurrenz-Preis, automatisch.','auto')+field('EK €',inp('ek',c.ek,'number',';text-align:right'),'Dein Einkaufspreis beim Lieferanten.','self')+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'),'VK − EK − Gebühren − PPC.','calc')+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'),'Aus Helium 10 Xray.','self')+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'),'Bewertungsanzahl, automatisch.','auto')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'),'Konkurrenz-Preis, automatisch.','auto')+field('EK €',inp('ek',c.ek,'number',';text-align:right'),'Einkaufspreis beim Lieferanten.','self')+field('FBA-Geb. €',inp('fbaGebuehren',c.fbaGebuehren,'number',';text-align:right'),'Je Stück – aus dem Gebühren-Center.','self')+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'),'Leer = auto: (VK − EK − FBA) / VK.','calc')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Top-10 Umsatz €',inp('top10Umsatz',c.top10Umsatz,'number',';text-align:right'),'Aus Helium 10 Xray.','self')+field('⌀ Reviews',inp('avgReviews',c.avgReviews,'number',';text-align:right'),'Bewertungsanzahl, automatisch.','auto')+field('Startmenge Stk',inp('startMenge',c.startMenge,'number',';text-align:right'),'Für den Kapitalbedarf (leer = 500).','self')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'+field('Konkurrenz',selF('konkurrenz',c.konkurrenz||'',risk),'Deine Einschätzung.','self')+field('PPC-Risiko',selF('ppcRisiko',c.ppcRisiko||'',risk),'Deine Einschätzung.','self')+field('Risiko',selF('risiko',c.risiko||'',risk),'Deine Einschätzung.','self')+'</div>';
   var jn=[['','—'],['nein','nein'],['ja','ja']];
   h+='<div style="margin:2px 0 10px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px">⚠️ Red-Flag-Check</div>';
@@ -2403,11 +2427,13 @@ function dossierHtml(c){
   h+=kv('Verkaufspreis (VK)',eur(c.vk));
   h+=kv('Einkaufspreis (EK)',eur(c.ek));
   h+=kv('FBA-Gebühren',eur(c.fbaGebuehren),'inkl. Versand durch Amazon');
-  h+=kv('Netto-Marge',c.nettoMarge!=null?('<span style="color:'+(c.nettoMarge>=25?K.gn:c.nettoMarge>=15?K.ac:K.rd)+'">'+c.nettoMarge+' %</span>'):'<span style="color:'+K.ac+'">offen</span>','nach FBA + PPC; Ziel ≥ 25 %');
-  if(c.vk!=null&&c.nettoMarge!=null)h+=kv('Gewinn je Stück',fmt(c.vk*c.nettoMarge/100)+' €');
-  if(c.ek!=null&&c.ek>0)h+=kv('Startbudget (500 Stück)','~'+Math.round(c.ek*500).toLocaleString('de-DE')+' €','EK × 500, ohne PPC-Anlauf');
+  var dmm=decisionMarge(c);
+  h+=kv('Netto-Marge',dmm.val!=null?('<span style="color:'+(dmm.val>=25?K.gn:dmm.val>=15?K.ac:K.rd)+'">'+dmm.val+' %</span>'):'<span style="color:'+K.ac+'">offen</span>',dmm.src==='auto'?'auto: (VK − EK − FBA) / VK; Ziel ≥ 25 %':'nach FBA + PPC; Ziel ≥ 25 %');
+  if(c.vk!=null&&dmm.val!=null)h+=kv('Gewinn je Stück',fmt(c.vk*dmm.val/100)+' €');
+  var dmenge=(c.startMenge!=null&&c.startMenge>0)?c.startMenge:500;
+  if(c.ek!=null&&c.ek>0)h+=kv('Startbudget ('+dmenge+' Stück)','~'+Math.round(c.ek*dmenge).toLocaleString('de-DE')+' €','EK × '+dmenge+', ohne PPC-Anlauf');
   h+='</table>';
-  if(c.nettoMarge==null||c.fbaGebuehren==null)h+='<div style="font-size:10.5px;color:'+K.ac+';margin-top:5px">⚠️ Margenrechnung unvollständig – im 💶 Gebühren-Rechner mit der echten Amazon-Rate-Card (Stand 1.2.2026) ermitteln.</div>';
+  if(dmm.val==null||c.fbaGebuehren==null)h+='<div style="font-size:10.5px;color:'+K.ac+';margin-top:5px">⚠️ Margenrechnung unvollständig – im 💶 Gebühren-Rechner mit der echten Amazon-Rate-Card (Stand 1.2.2026) ermitteln.</div>';
 
   // ── Review-Insights ──
   var rm=c.reviewMining;
@@ -11561,7 +11587,8 @@ function xrayPasteConfirm(){
     // kompatibel zum Nischen-Scan (grüne ✓-Anzeige, Ergebnis im Scan-Modal sichtbar)
     nischenScan:{count:s.agg.topN,okCount:s.agg.topN,failCount:0,avgPrice:s.agg.medPrice,avgReviews:s.agg.avgReviews,
       minReviews:s.agg.minReviews,maxReviews:s.agg.maxReviews,beatable:s.agg.beatable,asins:s.agg.asins,at:s.agg.at,
-      avgRevenue:s.agg.avgRevenue,totalRevenue:s.agg.totalRevenue,avgRating:s.agg.avgRating,source:'xray-paste'},
+      avgRevenue:s.agg.avgRevenue,totalRevenue:s.agg.totalRevenue,avgRating:s.agg.avgRating,source:'xray-paste',
+      domBrand:s.agg.domBrand||null,domCount:s.agg.domCount||0},
     createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
   };
   c.computedScore=researchCalcScore(c);
