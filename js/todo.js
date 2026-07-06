@@ -35,7 +35,8 @@ const SMARTS=[
  {id:'all',icon:'🗂️',label:'Alle Aufgaben',c:'#4d5568'},
  {id:'done',icon:'✅',label:'Erledigt',c:'#059669'},
 ];
-const STATUS_COLORS={offen:'#7b8395',in_arbeit:'#1d4ed8',wartet:'#d97706',erledigt:'#059669'};
+const STATUS_COLORS={offen:'#64748b',in_arbeit:'#2563eb',wartet:'#d97706',erledigt:'#059669'};
+const PRIO_COLORS={dringend:'#dc2626',hoch:'#ea580c',mittel:'#eab308',niedrig:'#3b82f6',keine:'transparent'};
 // Farbige Icon-Kachel (Herzstück des warmen Looks — überall wiederverwendet)
 const icoTile=(icon,color,big)=>'<span class="td-ico'+(big?' big':'')+'" style="--ic:'+esc(color||'#d97706')+'">'+esc(icon||'•')+'</span>';
 const listTile=(l,big)=>icoTile(l.icon||l.name[0].toUpperCase(),l.color||'#d97706',big);
@@ -304,7 +305,7 @@ function skeleton(){
  '<div class="td-wrap">'
  +'<aside class="td-side" id="tdSide"></aside>'
  +'<main class="td-main">'
- + '<div class="td-toolbar">'
+ + '<div class="td-toolbar" id="tdToolbar">'
  +  '<div id="tdTitle" class="td-htitle"></div>'
  +  '<span id="tdLiveDot" style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block"></span>'
  +  '<div style="flex:1"></div>'
@@ -335,14 +336,14 @@ function renderSidebar(){
  h+=SMARTS.map(s=>{
   const on=S.scope.type==='smart'&&S.scope.id===s.id;
   const badge=s.id==='inbox'&&cnt[S.inboxId]?'<span class="td-badge">'+cnt[S.inboxId]+'</span>':'';
-  return'<button class="td-nav'+(on?' on':'')+'" onclick="td.setScope(\'smart\',\''+s.id+'\')">'+icoTile(s.icon,s.c)+'<span class="td-navlbl">'+s.label+'</span>'+badge+'</button>';
+  return'<button class="td-nav'+(on?' on':'')+'" style="--ic:'+s.c+'" onclick="td.setScope(\'smart\',\''+s.id+'\')">'+icoTile(s.icon,s.c)+'<span class="td-navlbl">'+s.label+'</span>'+badge+'</button>';
  }).join('');
  h+='<div class="td-sec">LISTEN <button class="td-mini" title="Neue Liste" onclick="td.newList()">＋</button><button class="td-mini" title="Neuer Ordner" onclick="td.newFolder()">📁＋</button></div>';
  const rootLists=S.lists.filter(l=>!l.folderId&&!l.isInbox);
  const listBtn=l=>{
   const on=S.scope.type==='list'&&S.scope.id===l.id;
   const shared=l.role!=='owner'?' <span class="td-sharemark" title="geteilt — Rolle: '+esc(l.role)+'">👥</span>':'';
-  return'<button class="td-nav td-list'+(on?' on':'')+'" ondragover="td.dragOver(event)" ondrop="td.dropOnList(event,\''+l.id+'\')" oncontextmenu="td.listMenu(event,\''+l.id+'\')" onclick="td.setScope(\'list\',\''+l.id+'\')">'
+  return'<button class="td-nav td-list'+(on?' on':'')+'" style="--ic:'+esc(l.color||'#d97706')+'" ondragover="td.dragOver(event)" ondrop="td.dropOnList(event,\''+l.id+'\')" oncontextmenu="td.listMenu(event,\''+l.id+'\')" onclick="td.setScope(\'list\',\''+l.id+'\')">'
    +listTile(l)+'<span class="td-navlbl">'+esc(l.name)+shared+'</span>'
    +(cnt[l.id]?'<span class="td-badge">'+cnt[l.id]+'</span>':'')+'</button>';
  };
@@ -350,7 +351,7 @@ function renderSidebar(){
  S.folders.forEach(f=>{
   const inside=S.lists.filter(l=>l.folderId===f.id);
   const on=S.scope.type==='folder'&&S.scope.id===f.id;
-  h+='<button class="td-nav td-folder'+(on?' on':'')+'" oncontextmenu="td.folderMenu(event,\''+f.id+'\')" onclick="td.setScope(\'folder\',\''+f.id+'\')">'+icoTile('📁',f.color||'#8a7a5f')+'<span class="td-navlbl">'+esc(f.name)+'</span></button>';
+  h+='<button class="td-nav td-folder'+(on?' on':'')+'" style="--ic:#64748b" oncontextmenu="td.folderMenu(event,\''+f.id+'\')" onclick="td.setScope(\'folder\',\''+f.id+'\')">'+icoTile('📁','#64748b')+'<span class="td-navlbl">'+esc(f.name)+'</span></button>';
   h+='<div class="td-indent">'+inside.map(listBtn).join('')+'</div>';
  });
  h+='<div class="td-sec">TAGS <button class="td-mini" title="Tags verwalten" onclick="td.openTagManager()">⚙</button></div>';
@@ -364,7 +365,7 @@ function renderSidebar(){
   h+='<div class="td-sec">GESPEICHERTE FILTER</div>';
   h+=S.savedFilters.map(f=>'<button class="td-nav'+(S.scope.type==='filter'&&S.scope.id===f.id?' on':'')+'" onclick="td.applySavedFilter(\''+f.id+'\')">💾 '+esc(f.name)+' <span class="td-mini" onclick="event.stopPropagation();td.deleteSavedFilter(\''+f.id+'\')" title="Filter löschen">✕</span></button>').join('');
  }
- h+='<div class="td-sec"></div><button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" onclick="td.setScope(\'trash\')">'+icoTile('🗑','#7b8395')+'<span class="td-navlbl">Papierkorb</span></button>';
+ h+='<div class="td-sec"></div><button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" style="--ic:#64748b" onclick="td.setScope(\'trash\')">'+icoTile('🗑','#64748b')+'<span class="td-navlbl">Papierkorb</span></button>';
  el.innerHTML=h;
 }
 
@@ -394,6 +395,7 @@ function renderAll(){
  if(!isActive())return;
  skeleton();
  const meta=scopeMeta();
+ const tb=$('tdToolbar');if(tb)tb.style.setProperty('--sc',meta.color);
  const openN=currentTasks().filter(t=>!t.completed).length;
  $('tdTitle').innerHTML=icoTile(meta.icon,meta.color,true)
   +'<div class="td-htxt"><div class="td-hname">'+esc(meta.name)+'</div>'
@@ -414,7 +416,10 @@ function taskRow(t,idx){
  const over=t.dueDate&&!t.completed&&t.dueDate<todayStr();
  const sel=S.sel.has(t.id);
  const chips=[];
- if(t.dueDate)chips.push('<span class="td-chip'+(over?' over':'')+'">📅 '+fmtDate(t.dueDate)+(t.dueTime?' '+t.dueTime:'')+'</span>');
+ if(t.dueDate){
+  const dcls=over?' over':(t.dueDate===todayStr()&&!t.completed?' today':'');
+  chips.push('<span class="td-chip'+dcls+'">📅 '+fmtDate(t.dueDate)+(t.dueTime?' '+t.dueTime:'')+'</span>');
+ }
  if(t.priority&&t.priority!=='keine')chips.push('<span class="td-chip">'+PRIOS.find(p=>p.id===t.priority).icon+'</span>');
  (t.tags||[]).forEach(tg=>chips.push('<span class="td-chip td-tag" style="--tc:'+esc(tg.color||'#7b8395')+'">#'+esc(tg.name)+'</span>'));
  if(t.checklist&&t.checklist.total)chips.push('<span class="td-chip">☑ '+t.checklist.done+'/'+t.checklist.total+'</span>');
@@ -425,7 +430,7 @@ function taskRow(t,idx){
  if(t.assignedTo)chips.push('<span class="td-chip td-ava" title="Zugewiesen: '+esc(personName(t.assignedTo))+'">'+esc(personName(t.assignedTo).slice(0,2).toUpperCase())+'</span>');
  if(t.repeatRule)chips.push('<span class="td-chip">🔁</span>');
  const trash=S.scope.type==='trash';
- return'<div class="td-row'+(t.completed?' done':'')+(sel?' sel':'')+(S.focus===idx?' foc':'')+(S.detailId===t.id?' open':'')+'" data-id="'+t.id+'" data-idx="'+idx+'" draggable="true"'
+ return'<div class="td-row td-pr-'+t.priority+(t.completed?' done':'')+(sel?' sel':'')+(S.focus===idx?' foc':'')+(S.detailId===t.id?' open':'')+'" data-id="'+t.id+'" data-idx="'+idx+'" draggable="true"'
   +' ondragstart="td.dragStart(event,\''+t.id+'\')" ondragover="td.dragOver(event)" ondrop="td.dropOnRow(event,\''+t.id+'\')"'
   +' onclick="td.rowClick(event,\''+t.id+'\','+idx+')">'
   +'<span class="td-selbox" onclick="td.toggleSel(event,\''+t.id+'\','+idx+')">'+(sel?'☑':'☐')+'</span>'
