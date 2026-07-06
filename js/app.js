@@ -732,6 +732,164 @@ function decisionMigrate(c){
     if(n)c.score2.risiko=Math.round((lo+ri)/n);
   }
 }
+// ═══ COMPLIANCE-CHECK (Deutschland): Pflichten je Produkt aus Kategorie + Name ═══
+// Der Burggraben gegenüber US-Tools: deutsche/EU-Pflichten automatisch erkennen.
+// Regeltabelle statt KI — deterministisch, erklärbar, offline. KEINE Rechtsberatung:
+// die Liste ist eine Arbeits-Checkliste, der Hinweis dazu steht in der UI.
+var COMPLIANCE_BASE=[
+  {k:'gpsr', t:'GPSR: verantwortliche Person in der EU + Anschrift auf Produkt/Verpackung', hard:true, info:'EU-Produktsicherheitsverordnung (gilt seit 13.12.2024): EU-Verantwortlicher, technische Unterlagen, Rückverfolgbarkeit. Amazon prüft das Feld im Listing.'},
+  {k:'lucid', t:'VerpackG: LUCID-Registrierung + Verpackung bei dualem System lizenzieren', hard:true, info:'VOR dem ersten Verkauf Pflicht — Amazon gleicht die LUCID-Nummer ab und sperrt sonst.'},
+  {k:'kennz', t:'Herstellerkennzeichnung: Name/Anschrift (Importeur), Modell-/Chargennummer', hard:false, info:'Auf Produkt oder Verpackung, dauerhaft lesbar.'},
+  {k:'reach', t:'REACH: SVHC-Freiheit vom Lieferanten schriftlich bestätigen lassen', hard:false, info:'Besonders bei Kunststoff, Beschichtungen, Farben relevant.'}
+];
+var COMPLIANCE_RULES=[
+  {id:'elektro', label:'⚡ Elektronik / Elektrogeräte', match:/elektro|electronic|usb|akku|batter|\bled\b|lampe|leucht|ladeger|kopfhörer|lautsprecher|kamera|drohne|smart[- ]?(home|watch)|funk|bluetooth|wifi/i, catMatch:/elektro|electronic|computer|beleuchtung|foto/i, items:[
+    {k:'ce_lvd', t:'CE-Kennzeichnung + EU-Konformitätserklärung (LVD/EMV)', hard:true, info:'Prüfberichte vom Lieferanten anfordern und selbst aufbewahren.'},
+    {k:'weee', t:'ElektroG: WEEE-Registrierung bei stiftung ear VOR dem Verkauf', hard:true, info:'Amazon sperrt Elektro-Angebote ohne gültige WEEE-Nr. Registrierung dauert Wochen — früh starten!'},
+    {k:'rohs', t:'RoHS-Konformität bestätigen lassen', hard:false},
+    {k:'battg', t:'Bei Batterie/Akku: BattG-Registrierung + Kennzeichnung', hard:false, info:'Auch wenn die Batterie nur beiliegt.'},
+    {k:'red', t:'Bei Funk (Bluetooth/WLAN): RED-Richtlinie in der Konformitätserklärung', hard:false}
+  ]},
+  {id:'spielzeug', label:'🧸 Spielzeug / Kinderprodukte', match:/spielzeug|\btoy\b|kinder|\bbaby\b|kleinkind|puppe|bauklötze|puzzle/i, catMatch:/spielzeug|toys|baby/i, items:[
+    {k:'en71', t:'Spielzeugrichtlinie: EN-71-Prüfbericht + CE-Kennzeichnung', hard:true, info:'Prüfbericht MUSS auf deine Produktversion ausgestellt sein — nicht auf ein „ähnliches" Produkt des Lieferanten.'},
+    {k:'warn', t:'Deutsche Warnhinweise + Altersangabe auf Produkt/Verpackung', hard:true},
+    {k:'baby_norm', t:'Bei Babyartikeln: zutreffende Spezialnorm klären (z. B. EN 1400 Schnuller, EN 16890 Matratzen)', hard:false}
+  ]},
+  {id:'textil', label:'👕 Textilien / Fashion', match:/shirt|hose|jacke|textil|socke|mütze|schal|bekleidung|kleid|pullover|leggings|handschuh|bettwäsche|handtuch/i, catMatch:/fashion|bekleidung|textil/i, items:[
+    {k:'texkenn', t:'Textilkennzeichnung: Faserzusammensetzung deutsch, fest am Produkt', hard:true, info:'„100 % Baumwolle" statt „100% cotton" — häufigster Abmahngrund bei Textilien.'},
+    {k:'oeko', t:'Schadstoffprüfung (AZO-Farbstoffe / OEKO-TEX) beim Lieferanten anfragen', hard:false}
+  ]},
+  {id:'lfgb', label:'🍽️ Lebensmittelkontakt (Küche/Trinkflaschen …)', match:/küche|kitchen|besteck|teller|tasse|becher|flasche|lunchbox|brotdose|trinkflasche|schneidebrett|topf|pfanne|vorratsdose|strohhalm|kaffee|teekanne/i, catMatch:/küche|kitchen/i, items:[
+    {k:'lfgb', t:'LFGB-Prüfbericht für Lebensmittelkontakt (Glas-Gabel-Symbol)', hard:true, info:'Der Standard-China-Bericht ist oft nur FDA (USA) — für DE ausdrücklich LFGB verlangen.'},
+    {k:'lfgb_decl', t:'Konformitätserklärung EU 1935/2004 vom Lieferanten', hard:false}
+  ]},
+  {id:'kosmetik', label:'🧴 Kosmetik / Körperpflege', match:/kosmetik|creme|serum|shampoo|seife|lotion|\bbeauty\b|make-?up|nagel|wimpern/i, catMatch:/kosmetik|beauty|drogerie/i, items:[
+    {k:'cpnp', t:'CPNP-Notifizierung + verantwortliche Person (EU-Kosmetikverordnung)', hard:true, info:'Ohne CPNP-Meldung ist der Verkauf illegal — Aufwand und Kosten VOR der Produktentscheidung klären!'},
+    {k:'inci', t:'INCI-Liste + Sicherheitsbewertung (CPSR) vorhanden', hard:true}
+  ]}
+];
+/** Pflichten-Profil eines Kandidaten/Produkts: Basis + erkannte Kategorie-Gruppen. */
+function complianceFor(c){
+  var text=((c.name||'')+' '+(c.kategorie||'')+' '+(c.hauptkeyword||''));
+  var cat=(c.kategorie||'');
+  var groups=[{id:'basis',label:'📋 Grundpflichten (jedes Produkt)',items:COMPLIANCE_BASE}];
+  COMPLIANCE_RULES.forEach(function(r){
+    if(r.match.test(text)||r.catMatch.test(cat))groups.push(r);
+  });
+  var total=0,hard=0,done=0,hardOpen=0,st=(c.compliance||{});
+  groups.forEach(function(g){g.items.forEach(function(i){
+    total++;if(st[i.k])done++;
+    if(i.hard){hard++;if(!st[i.k])hardOpen++;}
+  });});
+  return {groups:groups,total:total,done:done,hard:hard,hardOpen:hardOpen,special:groups.length>1};
+}
+function complianceToggle(candId,key,on){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});if(!c)return;
+  c.compliance=c.compliance||{};
+  if(on)c.compliance[key]=true;else delete c.compliance[key];
+  c.updatedAt=new Date().toISOString();save();
+  var cnt=document.getElementById('compCount_'+candId);
+  if(cnt){var cf=complianceFor(c);cnt.textContent=cf.done+' / '+cf.total+' erledigt';}
+}
+window.complianceToggle=complianceToggle;
+/** Checklisten-HTML für den Kandidaten-Editor / das Dossier (readOnly = ohne Checkboxen). */
+function complianceHtml(c,readOnly){
+  var cf=complianceFor(c);
+  var st=c.compliance||{};
+  var h='';
+  cf.groups.forEach(function(g){
+    h+='<div style="font-size:11px;font-weight:800;color:var(--tx2);margin:10px 0 4px">'+g.label+'</div>';
+    g.items.forEach(function(i){
+      var ok=!!st[i.k];
+      h+='<label style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:12px;color:var(--tx);cursor:'+(readOnly?'default':'pointer')+'"'+(i.info?' title="'+esc(i.info)+'"':'')+'>'+
+        (readOnly
+          ?'<span style="flex-shrink:0">'+(ok?'✅':'⬜️')+'</span>'
+          :'<input type="checkbox" '+(ok?'checked':'')+' onchange="complianceToggle(\''+c.id+'\',\''+i.k+'\',this.checked)" style="width:15px;height:15px;accent-color:var(--gn);flex-shrink:0;cursor:pointer;margin-top:1px">')+
+        '<span style="'+(ok?'color:var(--tx3);text-decoration:line-through':'')+'">'+(i.hard?'<b style="color:var(--rd)">●</b> ':'')+esc(i.t)+(i.info&&!readOnly?' <span style="color:var(--tx3)">ⓘ</span>':'')+'</span>'+
+      '</label>';
+    });
+  });
+  h+='<div style="font-size:10px;color:var(--tx3);margin-top:8px">● = kritisch (Verkaufs-/Sperr-Risiko) · Automatisch erkannt aus Kategorie + Produktname · Checkliste, keine Rechtsberatung.</div>';
+  return h;
+}
+
+// ═══ SOURCING-BRÜCKE: professionelle Lieferanten-Anfrage (EN) aus dem Kandidaten ═══
+// Deterministisches Template (keine KI nötig): Specs aus USPs/Differenzierung,
+// Menge aus startMenge, Zertifikate aus dem Compliance-Profil. 1 Klick → kopieren → Alibaba.
+var SOURCING_CERTS={ce_lvd:'CE (LVD/EMC) declaration of conformity + test reports',rohs:'RoHS test report',battg:'Battery safety documentation (UN38.3 if lithium)',red:'RED declaration (Bluetooth/WiFi radio)',en71:'EN 71 (part 1–3) test report issued for THIS product',lfgb:'LFGB food-contact test report (German standard — FDA is NOT sufficient)',lfgb_decl:'EU 1935/2004 declaration of conformity',oeko:'OEKO-TEX certificate or AZO-free dye test report',cpnp:'Full ingredient documentation for EU CPNP notification',inci:'INCI list + safety assessment (CPSR) documentation',reach:'REACH SVHC compliance statement',gpsr:'Technical documentation for EU GPSR compliance'};
+function sourcingInquiryText(c){
+  var u=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
+  var qty=(c.startMenge&&c.startMenge>0)?c.startMenge:500;
+  var specs=[];
+  ((c.beat&&c.beat.usps)||c.compUsps||[]).slice(0,5).forEach(function(s){specs.push('- '+s);});
+  ((c.reviewMining&&c.reviewMining.diffIdeas)||[]).slice(0,4).forEach(function(s){specs.push('- IMPROVEMENT (vs. competitors): '+s);});
+  if(c.differenzierung&&!specs.length)specs.push('- '+c.differenzierung);
+  var certs=[];var cf=complianceFor(c);var seen={};
+  cf.groups.forEach(function(g){g.items.forEach(function(i){var t=SOURCING_CERTS[i.k];if(t&&!seen[t]){seen[t]=1;certs.push('- '+t);}});});
+  var lines=[];
+  lines.push('Subject: Product inquiry — '+(c.name||'product')+' ('+qty+' units, Germany)');
+  lines.push('');
+  lines.push('Hello,');
+  lines.push('');
+  lines.push('we are an Amazon seller from Germany and are looking for a reliable manufacturer for the following product:');
+  lines.push('');
+  lines.push('PRODUCT');
+  lines.push('- Product: '+(c.name||'—'));
+  if(c.compAsin)lines.push('- Reference (similar specification): https://www.amazon.de/dp/'+c.compAsin);
+  if(c.kategorie)lines.push('- Category: '+c.kategorie);
+  if(c.gewicht)lines.push('- Approx. weight: '+c.gewicht+' kg');
+  if(specs.length){lines.push('');lines.push('REQUIRED SPECIFICATIONS');specs.forEach(function(s){lines.push(s);});}
+  lines.push('');
+  lines.push('ORDER DETAILS');
+  lines.push('- First order: '+qty+' units (trial order — monthly reorders if quality convinces)');
+  lines.push(c.ek!=null&&c.ek>0?'- Target unit price: around EUR '+c.ek.toFixed(2)+' — please quote your best EXW and FOB price':'- Please quote your best EXW and FOB price');
+  lines.push('- Destination: Germany (please also quote DDP if available)');
+  if(certs.length){
+    lines.push('');
+    lines.push('CERTIFICATES / COMPLIANCE (mandatory for the German market)');
+    certs.forEach(function(s){lines.push(s);});
+    lines.push('Please confirm exactly which of these documents you can provide FOR THIS PRODUCT.');
+  }
+  lines.push('');
+  lines.push('QUESTIONS');
+  lines.push('1. MOQ and price tiers for '+qty+' / '+(qty*2)+' / '+(qty*6)+' units?');
+  lines.push('2. Production lead time after order confirmation?');
+  lines.push('3. Sample: cost incl. express shipping to Germany (DHL/FedEx) and production time?');
+  lines.push('4. Custom logo/branding on product and packaging — from which quantity, at what cost?');
+  lines.push('5. Payment terms (e.g. 30/70 T/T)? Trade Assurance accepted?');
+  lines.push('');
+  lines.push('Please include unit weight, carton dimensions and units per carton in your quotation.');
+  lines.push('');
+  lines.push('Best regards');
+  lines.push(u?u.username:'');
+  return lines.join('\n');
+}
+function sourcingOpen(candId){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;})
+      ||(D.research.shortlist||[]).find(function(x){return x.id===candId;});
+  if(!c){toast('Eintrag nicht gefunden');return;}
+  var old=document.getElementById('sourcingModal');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='sourcingModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,41,.55);display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;backdrop-filter:blur(2px)';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:min(680px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd)">'+
+      '<div><div style="font-weight:800;font-size:16px;color:var(--tx)">🏭 Lieferanten-Anfrage (Alibaba &amp; Co.)</div>'+
+      '<div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Fertige englische Anfrage aus deinen Kandidaten-Daten — Zertifikate aus dem Compliance-Check inklusive. Vor dem Senden anpassen!</div></div>'+
+      '<button onclick="document.getElementById(\'sourcingModal\').remove()" style="background:none;border:none;font-size:22px;color:var(--tx2);cursor:pointer">✕</button></div>'+
+    '<textarea id="sourcingText" style="flex:1;min-height:380px;margin:14px 20px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;font-family:\'SF Mono\',Menlo,monospace;font-size:12px;color:var(--tx);resize:vertical;line-height:1.55"></textarea>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;padding:0 20px 16px">'+
+      '<button class="btn" onclick="document.getElementById(\'sourcingModal\').remove()">Schließen</button>'+
+      '<button class="btn btn-p" onclick="var t=document.getElementById(\'sourcingText\');t.select();navigator.clipboard.writeText(t.value).then(function(){toast(\'📋 Anfrage kopiert — auf Alibaba einfügen\')});">📋 Kopieren</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('sourcingText').value=sourcingInquiryText(c);
+}
+window.sourcingOpen=sourcingOpen;
+
 // Rote/gelbe Flags
 function decisionRedFlags(c){
   var f=[];
@@ -754,6 +912,10 @@ function decisionRedFlags(c){
   if(c.gating==='ja')f.push({hard:false,t:'Amazon-Gating → Kategorie-Freischaltung nötig (Zeit/Nachweise)',s:'Gating'});
   if(c.saisonal==='ja')f.push({hard:false,t:'Saisonal → schwankender Umsatz, Kapital zeitweise gebunden',s:'Saisonal'});
   if(c.ppcRisiko==='hoch')f.push({hard:false,t:'Hohes PPC-Risiko',s:'PPC hoch'});
+  // Compliance: Spezial-Kategorie (Elektro/Spielzeug/Textil/LFGB/Kosmetik) mit
+  // ungeprüften kritischen DE-Pflichten → weiches Signal Richtung Checkliste
+  var _cf=complianceFor(c);
+  if(_cf.special&&_cf.hardOpen>0)f.push({hard:false,t:_cf.hardOpen+' kritische DE-Pflicht(en) ungeprüft — Compliance-Check im ✏️-Editor',s:'🧾 '+_cf.hardOpen+' Pflichten'});
   return f;
 }
 // Gesamturteil
@@ -969,6 +1131,7 @@ function renderAuswahl(){
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'pruefen\')" title="weiter prüfen" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">🔍</button>';
     html+='<button class="btn btn-sm" onclick="auswahlOrderSample(\''+it.id+'\')" title="Muster bestellt (übernimmt auch in Produktliste)" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📦</button>';
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'abgelehnt\')" title="ablehnen" style="background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌</button>';
+    html+='<button class="btn btn-sm" onclick="sourcingOpen(\''+it.id+'\')" title="Lieferanten-Anfrage generieren (EN, inkl. Zertifikate)" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🏭</button>';
     html+='<button class="btn btn-sm" onclick="go(\'inhalt\')" title="Im KI-Bildstudio Bilder erstellen" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">🎨</button>';
     html+='<button class="btn btn-sm" onclick="auswahlDelete(\''+it.id+'\')" title="entfernen" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🗑</button>';
     html+='</div></div>';
@@ -1914,6 +2077,9 @@ function researchOpenEdit(id){
     field('Gating?',selF('gating',c.gating||'',jn),'Amazon-Freischaltung nötig?','self')+
     field('IP-Risiko?',selF('ipRisiko',c.ipRisiko||'',jn),'Marke/Patent/Design geschützt?','self')+
   '</div>';
+  var cfE=complianceFor(c);
+  h+='<div style="margin:2px 0 8px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px">🧾 Compliance-Check Deutschland <span id="compCount_'+id+'" style="background:'+(cfE.done>=cfE.total?'var(--gnd);color:var(--gn)':'var(--s3);color:var(--tx2)')+';border-radius:8px;padding:1px 8px;letter-spacing:0;text-transform:none;font-weight:700">'+cfE.done+' / '+cfE.total+' erledigt</span></div>';
+  h+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px 14px;margin-bottom:12px">'+complianceHtml(c,false)+'</div>';
   h+=field('Status (Pipeline)',selF('status',normalizeStatus(c.status),statusOpts));
   h+=field('Differenzierung (warum besser?)','<textarea onchange="researchUpdateField(\''+id+'\',\'differenzierung\',this.value)" style="'+IN+';min-height:60px;resize:vertical">'+esc(c.differenzierung||'')+'</textarea>','Wird bei „🏆 besser vermarkten" teils automatisch befüllt.','');
   h+=field('USPs (eine pro Zeile)','<textarea onchange="researchUpdateUsps(\''+id+'\',this.value)" placeholder="z. B. Edelstahl rostfrei&#10;Ohne Bohren montierbar" style="'+IN+';min-height:80px;resize:vertical">'+esc((c.compUsps||[]).join('\n'))+'</textarea>','Aus dem Konkurrenz-Listing.','auto');
@@ -1921,6 +2087,7 @@ function researchOpenEdit(id){
   if(c.compAsin||imgs){h+='<div style="margin-top:6px;padding-top:12px;border-top:1px dashed var(--bd)">';if(c.compAsin)h+='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Konkurrenz-ASIN: <b>'+esc(c.compAsin)+'</b></div>';if(imgs)h+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';h+='</div>';}
   h+='</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bd)">';
+  h+='<button class="btn btn-sm" onclick="sourcingOpen(\''+id+'\')" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd)" title="Fertige englische Lieferanten-Anfrage (inkl. Zertifikat-Liste) generieren">🏭 Lieferanten-Anfrage</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️ Scorecard</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenWorkflow(\''+id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋 Workflow</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchPromoteToProduct(\''+id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">★ Als Produkt übernehmen</button>';
@@ -2580,6 +2747,18 @@ function dossierHtml(c){
     });
     h+='</div>';
   }
+
+  // ── Compliance-Check Deutschland ──
+  var dcf=complianceFor(c);
+  h+=sec('Compliance-Check Deutschland ('+dcf.done+' / '+dcf.total+' erledigt'+(dcf.hardOpen?' · '+dcf.hardOpen+' kritische offen':'')+')');
+  var dst=c.compliance||{};
+  dcf.groups.forEach(function(g){
+    h+='<div style="font-size:11px;font-weight:800;color:'+K.mut+';margin:8px 0 3px">'+g.label+'</div>';
+    g.items.forEach(function(i){
+      h+='<div style="font-size:12px;color:'+(dst[i.k]?K.mut:K.tx)+';padding:2px 0">'+(dst[i.k]?'✅':'⬜️')+' '+(i.hard?'<b style="color:'+K.rd+'">●</b> ':'')+esc(i.t)+'</div>';
+    });
+  });
+  h+='<div style="font-size:10px;color:'+K.mut+';margin-top:5px">● = kritisch · automatisch erkannt aus Kategorie/Name · Arbeits-Checkliste, keine Rechtsberatung.</div>';
 
   // ── Markt & Wettbewerb ──
   var ns=c.nischenScan;
@@ -11310,8 +11489,9 @@ function detectHeliumType(headers){
   var lower=headers.map(function(h){return h.toLowerCase().trim()});
   var joined=lower.join('|');
 
-  // Black Box: ASIN + Price + BSR + Reviews + Sales/Revenue (engl. + dt. Oberfläche)
-  if(joined.indexOf('asin')>=0&&(joined.indexOf('bsr')>=0||joined.indexOf('best seller rank')>=0)
+  // Black Box / Jungle Scout: ASIN + Rang + Sales/Revenue (engl. + dt. Oberfläche)
+  if(joined.indexOf('asin')>=0
+     &&(joined.indexOf('bsr')>=0||joined.indexOf('best seller rank')>=0||(joined.indexOf('rank')>=0&&joined.indexOf('keyword')<0))
      &&(joined.indexOf('sales')>=0||joined.indexOf('revenue')>=0||joined.indexOf('parent level sales')>=0
         ||joined.indexOf('umsatz')>=0||joined.indexOf('verkäufe')>=0)){
     return 'blackbox';
@@ -11359,8 +11539,8 @@ function mapHeliumRow(row,type){
     result.brand=getHelField(row,['Brand','brand','Marke']);
     result.price=parseNum(getHelField(row,['Price','Sale Price','Current Price','Preis','Buy Box Price','List Price']));
     result.bsr=parseNum(getHelField(row,['BSR','Best Seller Rank','Best Sellers Rank','Parent Level BSR','Rank']));
-    result.sales=parseNum(getHelField(row,['Sales','Monthly Sales','Sales (Last 30 Days)','Parent Level Sales','Parent Level Monthly Sales','ASIN Sales','Est. Sales','Est Monthly Sales','Verkäufe','Monatliche Verkäufe','Units Sold']));
-    result.revenue=parseNum(getHelField(row,['Revenue','Monthly Revenue','Parent Level Revenue','Parent Level Monthly Revenue','ASIN Revenue','Est. Revenue','Est Monthly Revenue','Umsatz','Monatlicher Umsatz']));
+    result.sales=parseNum(getHelField(row,['Sales','Monthly Sales','Sales (Last 30 Days)','Parent Level Sales','Parent Level Monthly Sales','ASIN Sales','Est. Sales','Est Monthly Sales','Estimated Monthly Sales','Est. Mo. Sales','Mo. Sales','Verkäufe','Monatliche Verkäufe','Units Sold']));
+    result.revenue=parseNum(getHelField(row,['Revenue','Monthly Revenue','Parent Level Revenue','Parent Level Monthly Revenue','ASIN Revenue','Est. Revenue','Est Monthly Revenue','Estimated Monthly Revenue','Est. Mo. Revenue','Mo. Revenue','Umsatz','Monatlicher Umsatz']));
     result.reviews=parseNum(getHelField(row,['Review Count','Reviews','Number of Reviews','Anzahl Reviews','Ratings','Ratings Count','Bewertungen','Anzahl Bewertungen','Reviews Count']));
     result.rating=parseNum(getHelField(row,['Rating','Review Rating','Reviews Rating','Stars','Sterne','Bewertung','Ratings Rating']));
     result.imageCount=parseNum(getHelField(row,['Number of Images','Image Count','# Images','Images']));
