@@ -2131,123 +2131,98 @@ function researchOpenWorkflow(id){
   researchShowTab('workflow');
 }
 
+// ═══ PRÜFPLAN (ehem. Workflow-Tracker): Status kommt AUS DEN DATEN, nicht aus Häkchen ═══
+// Je Kandidat: was fehlt noch für eine belastbare Entscheidung? Jeder offene Punkt
+// verlinkt direkt aufs richtige Werkzeug. Einzig „Dossier geprüft" ist manuell.
+function pruefplanFor(c){
+  var vd=decisionVerdict(c),rcf=decisionConfidence(c),cf=complianceFor(c),mm=decisionMarge(c);
+  var eid=c.id;
+  var items=[
+    {phase:'📥 Daten holen',color:'pu',label:'Marktdaten vorhanden (Umsatz/Reviews aus Helium, Xray oder Scan)',done:(c.top10Umsatz!=null||c.avgReviews!=null||!!c.nischenScan),tool:'⚡ Xray-Paste',act:"if(typeof xrayPasteOpen==='function')xrayPasteOpen()"},
+    {phase:'📥 Daten holen',color:'pu',label:'Konkurrenz-Referenz verknüpft (ASIN + Bilder)',done:!!c.compAsin,tool:'✏️ Editor',act:"pipelineEditCand('"+eid+"')"},
+    {phase:'🧭 Markt prüfen',color:'bl',label:'Wettbewerb bewertet (⌀ Reviews der Top-10)',done:decisionEff(c,'wettbewerb')!=null,tool:'🔍 Nischen-Scan',act:"nischenScanOpen('"+eid+"')"},
+    {phase:'🧭 Markt prüfen',color:'bl',label:'Differenzierung erarbeitet (Review-Mining / eigenes Konzept)',done:(!!c.reviewMining||((c.differenzierung||'').trim().length>5)),tool:'🔬 Review-Mining',act:"reviewMiningOpen('"+eid+"')"},
+    {phase:'🧮 Kalkulieren',color:'ac',label:'Einkaufspreis liegt vor (Lieferant angefragt)',done:(c.ek!=null&&c.ek>0),tool:'🏭 Lieferanten-Anfrage',act:"sourcingOpen('"+eid+"')"},
+    {phase:'🧮 Kalkulieren',color:'ac',label:'Netto-Marge berechnet (VK − EK − FBA)',done:mm.val!=null,tool:'✏️ Daten eintragen',act:"pipelineEditCand('"+eid+"')"},
+    {phase:'🧮 Kalkulieren',color:'ac',label:'Startbudget geklärt (Startmenge × EK)',done:(c.ek!=null&&c.ek>0&&c.startMenge!=null&&c.startMenge>0),tool:'✏️ Startmenge',act:"pipelineEditCand('"+eid+"')"},
+    {phase:'⚖️ Entscheiden',color:'gn',label:'Risiko-Felder geprüft (Gewicht, Saison, Gating, IP)',done:!!(c.risiko||c.gewicht!=null||c.saisonal||c.gating||c.ipRisiko),tool:'✏️ Red-Flag-Check',act:"pipelineEditCand('"+eid+"')"},
+    {phase:'⚖️ Entscheiden',color:'gn',label:'Compliance: kritische DE-Pflichten abgehakt',done:(cf.hardOpen===0&&cf.total>0&&(c.compliance&&Object.keys(c.compliance).length>0)),tool:'🧾 Compliance-Check',act:"pipelineEditCand('"+eid+"')"},
+    {phase:'⚖️ Entscheiden',color:'gn',label:'Scorecard-Urteil steht (≥ 4 Dimensionen mit Basis)',done:(vd.score>0&&(rcf.data+rcf.manual)>=4),tool:'⚖️ Scorecard',act:"researchOpenScore('"+eid+"')"},
+    {phase:'⚖️ Entscheiden',color:'gn',label:'Dossier erstellt und kritisch gelesen',done:!!c.pruefplanDossier,tool:'📄 Dossier',act:"dossierOpen('"+eid+"')",manual:true}
+  ];
+  var done=items.filter(function(i){return i.done;}).length;
+  return {items:items,done:done,total:items.length,pct:Math.round(done/items.length*100)};
+}
+function pruefplanDossierToggle(candId,on){
+  researchInit();
+  var c=D.research.candidates.find(function(x){return x.id===candId;});if(!c)return;
+  c.pruefplanDossier=!!on;c.updatedAt=new Date().toISOString();save();
+  researchRenderWorkflow();
+}
+window.pruefplanDossierToggle=pruefplanDossierToggle;
+
 function researchRenderWorkflow(){
   researchInit();
   var container=document.getElementById('researchWorkflowContent');
   if(!container)return;
   var cands=D.research.candidates;
 
-  // Picker if no candidate selected
-  if(!researchSelectedCandidate || !cands.find(function(c){return c.id===researchSelectedCandidate})){
+  // ── Kein Kandidat gewählt: Übersicht mit Auto-Fortschritt (Top 20 nach Fortschritt) ──
+  if(!researchSelectedCandidate||!cands.find(function(c){return c.id===researchSelectedCandidate})){
     if(cands.length===0){
-      container.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:50px 30px;text-align:center;color:var(--tx2)"><div style="font-size:48px;margin-bottom:14px">📋</div><div style="font-weight:700;color:var(--tx);margin-bottom:6px;font-size:16px">Keine Kandidaten vorhanden</div><div style="font-size:13px;margin-bottom:18px">Lege zuerst einen Kandidaten in der Master-Tabelle an, um den Workflow-Tracker zu nutzen.</div><button class="btn btn-p" onclick="researchShowTab(\'overview\')">← Zur Master-Tabelle</button></div>';
+      container.innerHTML='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:50px 30px;text-align:center;color:var(--tx2)"><div style="font-size:48px;margin-bottom:14px">✅</div><div style="font-weight:700;color:var(--tx);margin-bottom:6px;font-size:16px">Noch keine Kandidaten</div><div style="font-size:13px;margin-bottom:18px">Importiere Produkte oder lege einen Kandidaten an — der Prüfplan zeigt dir dann automatisch, was bis zur Entscheidung noch fehlt.</div><button class="btn btn-p" onclick="researchShowTab(\'overview\')">← Zur Master-Tabelle</button></div>';
       return;
     }
-    var pickerHtml=helpBox('📋','Workflow-Tracker: Schritt für Schritt durch die Recherche','Jeder Kandidat hat einen eigenen <b>20-Schritte-Workflow</b> mit Checklisten, Notizfeldern und passenden KI-Prompts. Wähle einen Kandidaten, um seinen Fortschritt zu sehen, Schritte abzuhaken und Notizen pro Schritt zu speichern.<br><span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Bei jedem Schritt findest du den passenden Prompt zum Kopieren und einen Direktlink zum Tool (Claude, Perplexity, Gemini, Helium 10).</span>',{variant:'purple',lessonId:'rp_3'});
-    pickerHtml+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:24px"><h3 style="margin:0 0 12px 0">Wähle einen Kandidaten</h3><div style="color:var(--tx2);font-size:13px;margin-bottom:16px">Klick auf einen Kandidaten, um seinen 20-Schritte-Workflow zu öffnen:</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">';
-    cands.forEach(function(c){
-      var cfg=PIPELINE_STATUS[normalizeStatus(c.status)]||PIPELINE_STATUS.idee;
-      pickerHtml+='<button onclick="researchOpenWorkflow(\''+c.id+'\')" style="text-align:left;padding:14px 16px;background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--'+cfg.color+');border-radius:10px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;gap:10px" onmouseover="this.style.background=\'var(--s3)\'" onmouseout="this.style.background=\'var(--s2)\'">'+
-        '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">Schritt '+(c.currentStep||1)+' / 20 · '+esc(cfg.label)+'</div></div>'+
-        '<span style="font-size:18px;color:var(--pu)">→</span>'+
-      '</button>';
+    var h=helpBox('✅','Prüfplan: Was fehlt noch bis zur Entscheidung?','Der Prüfplan füllt sich <b>automatisch aus deinen Daten</b> — kein Abhaken von Hand. Jeder offene Punkt hat einen Knopf direkt zum passenden Werkzeug (Xray-Paste, Nischen-Scan, Review-Mining, Lieferanten-Anfrage, Compliance …). Ziel: <b>alle Punkte grün → Entscheidung ist belastbar.</b>',{variant:'purple'});
+    var list=cands.slice().map(function(c){return {c:c,pp:pruefplanFor(c)};}).sort(function(a,b){return b.pp.pct-a.pp.pct||new Date(b.c.updatedAt||0)-new Date(a.c.updatedAt||0);}).slice(0,20);
+    h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:20px 22px"><h3 style="margin:0 0 4px 0">Kandidat wählen</h3><div style="color:var(--tx2);font-size:12px;margin-bottom:14px">Sortiert nach Prüf-Fortschritt — die 20 am weitesten geprüften zuerst. Alle anderen erreichst du über die Master-Tabelle (📋-Aktion).</div><div style="display:flex;flex-direction:column;gap:8px">';
+    list.forEach(function(x){
+      var c=x.c,pp=x.pp;
+      var pimg=(c.compImages&&c.compImages[0])||'';
+      var pthumb=pimg?'<img src="'+esc(pimg)+'" loading="lazy" class="pzoom" style="width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.style.display=\'none\'">':'<div style="width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0">📦</div>';
+      var pcol=pp.pct>=80?'gn':pp.pct>=40?'ac':'tx3';
+      h+='<div onclick="researchOpenWorkflow(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;cursor:pointer" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+pthumb+
+        '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1;height:6px;background:var(--s3);border-radius:4px;overflow:hidden;max-width:220px"><div style="height:100%;width:'+pp.pct+'%;background:var(--'+pcol+')"></div></div><span style="font-size:11px;color:var(--'+pcol+');font-weight:700">'+pp.done+' / '+pp.total+'</span></div></div>'+
+        '<span style="font-size:16px;color:var(--pu)">→</span></div>';
     });
-    pickerHtml+='</div></div>';
-    container.innerHTML=pickerHtml;
+    h+='</div></div>';
+    container.innerHTML=h;
     return;
   }
 
-  // Render workflow for selected candidate
+  // ── Prüfplan des gewählten Kandidaten ──
   var c=cands.find(function(x){return x.id===researchSelectedCandidate});
-  var ws=D.research.workflowState[c.id]||{steps:{},stepNotes:{}};
-  var currentStep=c.currentStep||1;
-  var stepStates=ws.steps||{};
-  var stepNotes=ws.stepNotes||{};
-
+  var pp=pruefplanFor(c);
+  var vd=decisionVerdict(c);
+  var himg=(c.compImages&&c.compImages[0])||'';
   var html='';
-  // Header with breadcrumb
   html+='<div style="background:linear-gradient(135deg,var(--pud),var(--s2));border:1px solid var(--pu);border-radius:12px;padding:18px 22px;margin-bottom:18px">'+
-    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+    '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
       '<button class="btn btn-sm" onclick="researchSelectedCandidate=null;researchRenderWorkflow()" style="font-size:11px">← Andere Kandidaten</button>'+
-      '<div style="flex:1;min-width:200px"><div style="font-family:\'Playfair Display\',serif;font-size:22px;color:var(--tx);font-weight:700">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'Aktueller Schritt: '+currentStep+' / 20</div></div>'+
-      '<div style="display:flex;gap:6px;align-items:center">'+
-        '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-size:11px">⚖️ Score</button>'+
-        '<button class="btn btn-sm" onclick="researchOpenLearnLink()" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-size:11px">📖 Methodik</button>'+
-      '</div>'+
+      (himg?'<img src="'+esc(himg)+'" class="pzoom" style="width:46px;height:46px;object-fit:cover;border-radius:10px;border:1px solid var(--bd);background:#fff">':'')+
+      '<div style="flex:1;min-width:200px"><div style="font-family:\'Playfair Display\',serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'Score '+(vd.score>0?vd.score:'—')+' · '+vd.label+'</div></div>'+
+      '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-size:11px">⚖️ Scorecard</button>'+
     '</div>'+
-    // Progress bar
-    '<div style="margin-top:14px"><div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(Object.keys(stepStates).filter(function(k){return stepStates[k]}).length/20*100)+'%;background:linear-gradient(90deg,var(--pu),var(--ac));transition:width .3s"></div></div><div style="font-size:11px;color:var(--tx2);margin-top:4px">'+Object.keys(stepStates).filter(function(k){return stepStates[k]}).length+' von 20 Schritten erledigt</div></div>'+
+    '<div style="margin-top:14px"><div style="height:9px;background:var(--s3);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pp.pct+'%;background:linear-gradient(90deg,var(--pu),var(--gn));transition:width .3s"></div></div>'+
+    '<div style="font-size:12px;color:var(--tx2);margin-top:5px;font-weight:600">'+pp.done+' von '+pp.total+' Prüf-Punkten erfüllt'+(pp.done===pp.total?' — Entscheidung ist belastbar 🎉':' — offene Punkte unten direkt erledigen')+'</div></div>'+
   '</div>';
-
-  // Phases group
-  var phases=['Recherche','Analyse','Validierung','Entscheidung'];
-  var phaseColors={'Recherche':'pu','Analyse':'bl','Validierung':'ac','Entscheidung':'gn'};
-
-  phases.forEach(function(phase){
-    var phaseSteps=RESEARCH_WORKFLOW_STEPS.filter(function(s){return s.phase===phase});
-    var pcolor=phaseColors[phase];
-    html+='<div style="margin-bottom:22px">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--'+pcolor+'d)">'+
-        '<h3 style="margin:0;color:var(--'+pcolor+');font-size:13px;text-transform:uppercase;letter-spacing:2px">'+esc(phase)+'-Phase</h3>'+
-        '<span style="font-size:11px;color:var(--tx3)">Schritte '+phaseSteps[0].num+' – '+phaseSteps[phaseSteps.length-1].num+'</span>'+
-      '</div>';
-
-    phaseSteps.forEach(function(step){
-      var done=!!stepStates[step.num];
-      var isCurrent=step.num===currentStep;
-      var notes=stepNotes[step.num]||'';
-      var promptObj=step.promptId?RESEARCH_PROMPTS.find(function(p){return p.id===step.promptId}):null;
-      var bgColor=done?'var(--gnd)':(isCurrent?'var(--pud)':'var(--s2)');
-      var borderColor=done?'var(--gn)':(isCurrent?'var(--pu)':'var(--bd)');
-
-      html+='<div style="background:'+bgColor+';border:1.5px solid '+borderColor+';border-radius:10px;padding:14px 18px;margin-bottom:10px'+(isCurrent?';box-shadow:0 4px 14px rgba(109,40,217,.18)':'')+'">'+
-        '<div style="display:flex;align-items:flex-start;gap:12px">'+
-          '<label style="display:flex;align-items:center;cursor:pointer;flex-shrink:0;padding-top:2px">'+
-            '<input type="checkbox" '+(done?'checked':'')+' onchange="researchToggleStep(\''+c.id+'\','+step.num+',this.checked)" style="width:20px;height:20px;accent-color:var(--gn);cursor:pointer">'+
-          '</label>'+
-          '<div style="flex:1;min-width:0">'+
-            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
-              '<span style="background:var(--'+pcolor+');color:#fff;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700">Schritt '+step.num+'</span>'+
-              (isCurrent?'<span style="background:var(--ac);color:#fff;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;animation:pulse 2s infinite">⚡ AKTUELL</span>':'')+
-              '<span style="font-size:14px;font-weight:700;color:var(--tx)'+(done?';text-decoration:line-through;color:var(--tx3)':'')+'">'+esc(step.title)+'</span>'+
-            '</div>'+
-            '<div style="font-size:12px;color:var(--tx2);margin-bottom:8px"><b>🛠 Tool:</b> '+esc(step.tool)+' · <b>🎯 Ziel:</b> '+esc(step.goal)+'</div>';
-      // Prompt
-      if(promptObj){
-        var promptInlineId='wf_prompt_'+c.id+'_'+step.num;
-        html+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:8px;margin-top:6px;overflow:hidden">'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--s2);border-bottom:1px solid var(--bd)">'+
-            '<span style="font-size:11px;font-weight:700;color:var(--tx2)">📋 '+esc(promptObj.title)+'</span>'+
-            '<div style="display:flex;gap:5px">'+
-              '<button onclick="wikaCopyPrompt(\''+promptInlineId+'\',this)" style="background:var(--ac);color:#fff;border:none;padding:3px 9px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700">📋 Kopieren</button>'+
-              (promptObj.tool?'<a href="'+researchToolUrl(promptObj.tool)+'" target="_blank" rel="noopener" style="background:var(--bl);color:#fff;border:none;padding:3px 9px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;text-decoration:none">↗ Tool</a>':'')+
-            '</div>'+
-          '</div>'+
-          '<pre id="'+promptInlineId+'" style="margin:0;padding:10px 14px;background:var(--s1);font-family:\'SF Mono\',Menlo,Consolas,monospace;font-size:11px;line-height:1.5;color:var(--tx);white-space:pre-wrap;max-height:160px;overflow-y:auto">'+esc(promptObj.text)+'</pre>'+
-        '</div>';
-      }
-      // Notes textarea
-      html+='<textarea placeholder="Notizen zu diesem Schritt (Ergebnisse, Erkenntnisse, To-Dos)..." onchange="researchUpdateStepNote(\''+c.id+'\','+step.num+',this.value)" style="width:100%;min-height:50px;margin-top:8px;padding:8px 10px;background:var(--s1);border:1px solid var(--bd);border-radius:6px;font-family:inherit;font-size:12px;color:var(--tx);resize:vertical">'+esc(notes)+'</textarea>';
-      // Action buttons
-      html+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
-        '<button class="btn btn-sm" onclick="researchSetCurrentStep(\''+c.id+'\','+step.num+')" style="font-size:10px;padding:4px 10px;background:'+(isCurrent?'var(--pu)':'var(--s3)')+';color:'+(isCurrent?'#fff':'var(--tx2)')+';border:1px solid '+(isCurrent?'var(--pu)':'var(--bd)')+'">'+(isCurrent?'✓ Aktueller Schritt':'Als aktuell markieren')+'</button>'+
-        (step.lessonId?'<button class="btn btn-sm" onclick="researchOpenLesson(\''+step.lessonId+'\')" style="font-size:10px;padding:4px 10px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📖 Methodik nachlesen</button>':'')+
-      '</div>';
-
-      html+='</div></div></div>';
-    });
-
-    html+='</div>';
+  var lastPhase='';
+  pp.items.forEach(function(it){
+    if(it.phase!==lastPhase){
+      lastPhase=it.phase;
+      html+='<div style="font-size:12px;font-weight:800;color:var(--'+it.color+');text-transform:uppercase;letter-spacing:1.5px;margin:16px 0 8px">'+it.phase+'</div>';
+    }
+    html+='<div style="display:flex;align-items:center;gap:12px;background:'+(it.done?'var(--gnd)':'var(--s1)')+';border:1px solid '+(it.done?'var(--gn)':'var(--bd)')+';border-radius:10px;padding:11px 16px;margin-bottom:8px">'+
+      (it.manual
+        ?'<input type="checkbox" '+(it.done?'checked':'')+' onchange="pruefplanDossierToggle(\''+c.id+'\',this.checked)" style="width:19px;height:19px;accent-color:var(--gn);cursor:pointer;flex-shrink:0" title="Manuell bestätigen">'
+        :'<span style="font-size:17px;flex-shrink:0" title="'+(it.done?'Automatisch erkannt: erledigt':'Automatisch erkannt: offen')+'">'+(it.done?'✅':'⬜️')+'</span>')+
+      '<div style="flex:1;min-width:0;font-size:13px;font-weight:600;color:'+(it.done?'var(--tx2)':'var(--tx)')+'">'+it.label+(it.manual?'':' <span style="font-size:9.5px;color:var(--tx3);font-weight:700;background:var(--s2);border-radius:6px;padding:1px 6px;vertical-align:1px">AUTO</span>')+'</div>'+
+      (it.done?'':'<button class="btn btn-sm" onclick="'+it.act.replace(/"/g,'&quot;')+'" style="font-size:11px;background:var(--'+it.color+'d);color:var(--'+it.color+');border:1px solid var(--'+it.color+');font-weight:700;white-space:nowrap">'+it.tool+' →</button>')+
+    '</div>';
   });
-
+  html+='<div style="font-size:11px;color:var(--tx3);margin-top:10px">AUTO-Punkte erkennen sich selbst aus deinen Daten — nur „Dossier geprüft" bestätigst du bewusst von Hand.</div>';
   container.innerHTML=html;
-}
-
-function researchToolUrl(tool){
-  if(tool==='claude')return 'https://claude.ai/new';
-  if(tool==='perplexity')return 'https://www.perplexity.ai/';
-  if(tool==='gemini')return 'https://gemini.google.com/app';
-  return '#';
 }
 
 function researchToggleStep(candId,stepNum,checked){

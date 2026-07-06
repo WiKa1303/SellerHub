@@ -354,14 +354,14 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-research">
   <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;📋 Workflow-Tracker — 20-Schritte-Checkliste pro Kandidat&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle & 20-Schritte-Workflow</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Validieren" · ← zurück</button>
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;✅ Prüfplan — füllt sich automatisch aus deinen Daten&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle · Prüfplan · Scorecard</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Validieren" · ← zurück</button>
   </div>
   <div class="page-body">
 
     <!-- ─── TAB-NAVIGATION ─── -->
     <div id="researchTabNav" style="display:flex;gap:2px;margin-bottom:18px;border-bottom:2px solid var(--bd);padding-bottom:0;flex-wrap:wrap">
       <button class="researchTab" data-tab="overview" onclick="researchShowTab('overview')" title="Übersicht aller Kandidaten mit allen Recherche-Feldern" style="padding:12px 20px;background:var(--s1);border:1.5px solid var(--pu);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--pu);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;margin-bottom:-2px">🗂️ Master-Tabelle</button>
-      <button class="researchTab" data-tab="workflow" onclick="researchShowTab('workflow')" title="20-Schritte-Workflow pro Kandidat mit Checklisten und Prompts" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">📋 Workflow-Tracker</button>
+      <button class="researchTab" data-tab="workflow" onclick="researchShowTab('workflow')" title="Prüfplan: zeigt automatisch, was je Kandidat bis zur Entscheidung noch fehlt" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">✅ Prüfplan</button>
       <button class="researchTab" data-tab="score" onclick="researchShowTab('score')" title="Entscheidungs-Scorecard: 6 Dimensionen → GO/PRÜFEN/NO-GO" style="padding:12px 20px;background:transparent;border:1.5px solid transparent;border-bottom:2px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;margin-bottom:-2px">⚖️ Scorecard</button>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 12px">
         <button class="btn btn-sm" onclick="researchOpenLearnLink()" title="Die komplette Methodik im Lernzentrum nachlesen" style="font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📖 Methodik im Lernzentrum</button>
@@ -454,7 +454,7 @@
         </div>
       </div>
 
-      <div style="margin-top:10px;font-size:11px;color:var(--tx3);font-style:italic">💡 Tipp: Klick auf einen Kandidaten, um den Workflow-Tracker oder die Score-Matrix zu öffnen.</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--tx3);font-style:italic">💡 Tipp: Klick auf einen Kandidaten, um Prüfplan oder Scorecard zu öffnen.</div>
     </div>
 
     <!-- ═════════════════════════════════════════════════════════════ -->
