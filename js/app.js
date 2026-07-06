@@ -12259,17 +12259,61 @@ function renderDashHub(){
   el.innerHTML=h;
 }
 
-// ═══ NEWS & EVENTS — Seller-Radar als kompletter Bereich (p-news) ═══
-function renderNewsPage(force){
+// ═══ NEWS & EVENTS — Seller-Radar als kuratierter Bereich (p-news) ═══
+// Je Item merkbar: ⭐ Favorit (oben gepinnt) · ✓ gelesen (gedimmt) · ✕ ausgeblendet.
+// Status liegt in wika_news_state (in der Sync-Positivliste → geräteübergreifend).
+var NEWS_MAX=12;                 // „max 10–15 untereinander" → harte Kappung
+var newsFilterMode='alle';       // alle | fav | neu
+function newsState(){try{return JSON.parse(localStorage.getItem('wika_news_state')||'{}')||{};}catch(e){return {};}}
+function newsSetState(s){
+  try{localStorage.setItem('wika_news_state',JSON.stringify(s));}catch(e){}
+  if(typeof syQueue==='function')try{syQueue('wika_news_state');}catch(e){}
+}
+function newsAct(id,action){
+  var s=newsState();var e=s[id]||{};
+  if(action==='fav')e.fav=!e.fav;
+  if(action==='read')e.read=!e.read;
+  if(action==='del'){e.del=true;toast('Ausgeblendet — unten wiederherstellbar');}
+  s[id]=e;newsSetState(s);
+  renderNewsPage(false,true); // aus dem Cache neu malen (kein API-Call)
+}
+function newsResetDeleted(){
+  var s=newsState();Object.keys(s).forEach(function(k){delete s[k].del;});
+  newsSetState(s);renderNewsPage(false,true);toast('Ausgeblendete Einträge wiederhergestellt');
+}
+function newsSetFilter(m){newsFilterMode=m;renderNewsPage(false,true);}
+window.newsAct=newsAct;window.newsResetDeleted=newsResetDeleted;window.newsSetFilter=newsSetFilter;
+
+// Events: nur Amazon-/FBA-relevant (Titel-Match), nur Zukunft, nur aktuelles Jahr.
+// Viele Event-Meldungen haben KEIN extrahierbares Start-Datum → dann gelten sie als
+// frische Ankündigung (max. 21 Tage alt, laufendes Jahr) mit Hinweis „Termin s. Artikel".
+var EVENT_RELEVANT=/amazon|fba|seller|marktplatz|marketplace|e-?commerce|onlineh(a|ä)ndler|händler|prime|ppc/i;
+function newsEventVisible(ev){
+  var now=new Date();
+  if(ev.event_start){
+    var d=new Date(ev.event_start);
+    if(isNaN(d.getTime()))return false;
+    if(d.getTime()<now.getTime()-864e5)return false;            // verstrichen (1 Tag Kulanz)
+    if(d.getFullYear()!==now.getFullYear())return false;         // nur aktuelles Jahr
+  }else{
+    var p=new Date(ev.publish_date);
+    if(isNaN(p.getTime())||p.getFullYear()!==now.getFullYear())return false;
+    if(now.getTime()-p.getTime()>21*864e5)return false;          // alte Ankündigung = wahrscheinlich vorbei
+  }
+  return EVENT_RELEVANT.test(ev.title||'');
+}
+
+function renderNewsPage(force,fromCache){
   var el=document.getElementById('newsBody');
   if(!el)return;
   var stand=document.getElementById('newsStand');
   var cached=null;try{cached=JSON.parse(localStorage.getItem('wika_news_cache')||'null');}catch(e){}
-  if(cached&&!force)newsPageHtml(cached);
+  if(cached&&(fromCache||!force))newsPageHtml(cached);
+  if(fromCache&&cached)return; // reine UI-Aktion: kein Netz nötig
   var api=radarApi();
-  var prof=radarProfileParams();// '' oder '?...'
+  var prof=radarProfileParams();
   Promise.all([
-    fetch(api+'/api/news'+(prof?prof+'&':'?')+'limit=25').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+    fetch(api+'/api/news'+(prof?prof+'&':'?')+'limit=40').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
     fetch(api+'/api/events').then(function(r){return r.ok?r.json():{items:[]};}).catch(function(){return {items:[]};}),
     fetch(api+'/api/forecast').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function(res){
@@ -12277,43 +12321,109 @@ function renderNewsPage(force){
     try{localStorage.setItem('wika_news_cache',JSON.stringify(d));}catch(e){}
     newsPageHtml(d);
   }).catch(function(e){
-    if(!cached)el.innerHTML='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:10px;padding:14px 18px;color:var(--rd);font-size:13px;font-weight:600">📡 Radar-API nicht erreichbar ('+esc(e&&e.message||'Netzwerk')+') — später erneut versuchen.</div>';
+    if(!cached)el.innerHTML='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:12px;padding:16px 20px;color:var(--rd);font-size:13px;font-weight:600">📡 Radar-API nicht erreichbar ('+esc(e&&e.message||'Netzwerk')+') — später erneut versuchen.</div>';
     if(stand)stand.textContent='API nicht erreichbar';
   });
+
+  // ── kleine Bausteine ──
+  function actBtns(id,st){
+    function ab(label,title,on,action){
+      return '<button onclick="event.stopPropagation();newsAct(\''+id+'\',\''+action+'\')" title="'+title+'" style="border:1px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--acd)':'var(--s1)')+';color:'+(on?'var(--ac)':'var(--tx3)')+';border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit;line-height:1.4">'+label+'</button>';
+    }
+    return '<div style="display:flex;gap:5px;flex-shrink:0">'+
+      ab(st.fav?'⭐':'☆',st.fav?'Favorit entfernen':'Favorisieren (wird oben gepinnt)',st.fav,'fav')+
+      ab('✓',st.read?'Als ungelesen markieren':'Als gelesen markieren',st.read,'read')+
+      ab('✕','Ausblenden',false,'del')+
+    '</div>';
+  }
+  function sortWithState(items,s){
+    return items.filter(function(x){return !(s[x.id]&&s[x.id].del);})
+      .sort(function(a,b){
+        var fa=(s[a.id]&&s[a.id].fav)?1:0,fb=(s[b.id]&&s[b.id].fav)?1:0;
+        if(fa!==fb)return fb-fa; // Favoriten zuerst, sonst API-Reihenfolge (Relevanz)
+        return 0;
+      });
+  }
+
   function newsPageHtml(d){
-    if(stand)stand.textContent='Stand: '+(d.at?radarRelTime(d.at):'—')+' · '+d.news.length+' Meldungen · '+d.events.length+' Events';
-    var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px"><div style="grid-column:span 1;min-width:0">';
-    // ── News-Spalte ──
-    h+='<div class="card"><h3 style="margin-bottom:6px">📰 News für FBA-Seller</h3><div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Sortiert nach Relevanz-Score — 🤖 = KI-bewertet, 🔥 = Keyword-Score</div>';
-    if(d.news.length){
-      d.news.forEach(function(n){
+    var s=newsState();
+    var news=sortWithState(d.news,s);
+    var hiddenCount=d.news.length-news.length;
+    if(newsFilterMode==='fav')news=news.filter(function(n){return s[n.id]&&s[n.id].fav;});
+    if(newsFilterMode==='neu')news=news.filter(function(n){return !(s[n.id]&&s[n.id].read);});
+    news=news.slice(0,NEWS_MAX);
+    var events=sortWithState(d.events.filter(newsEventVisible),s);
+    var unread=d.news.filter(function(n){return !(s[n.id]&&(s[n.id].read||s[n.id].del));}).length;
+    if(stand)stand.textContent='Stand: '+(d.at?radarRelTime(d.at):'—');
+
+    var h='';
+    // ── Kopfband: Kennzahlen + Filter (Premium-Anmutung) ──
+    h+='<div style="background:linear-gradient(135deg,#182238,#0f1729);border-radius:16px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:220px"><div style="font-family:\'Playfair Display\',serif;font-size:19px;font-weight:700;color:#fff">Dein Seller-Radar</div>'+
+      '<div style="font-size:12px;color:#aeb8d0;margin-top:3px">Kuratierte Nachrichten &amp; FBA-Events für den DACH-Raum — täglich frisch, von dir sortiert.</div></div>'+
+      '<div style="display:flex;gap:18px;flex-wrap:wrap">'+
+        '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fff">'+unread+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Ungelesen</div></div>'+
+        '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fbb040">'+Object.keys(s).filter(function(k){return s[k].fav&&!s[k].del;}).length+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Favoriten</div></div>'+
+        '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fff">'+events.length+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Events '+new Date().getFullYear()+'</div></div>'+
+      '</div></div>';
+    // Filter-Leiste
+    function fbtn(mode,label){var on=newsFilterMode===mode;return '<button onclick="newsSetFilter(\''+mode+'\')" style="border:1.5px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--acd)':'var(--s1)')+';color:'+(on?'var(--ac)':'var(--tx2)')+';font-weight:700;border-radius:10px;padding:7px 16px;font-size:12.5px;cursor:pointer;font-family:inherit">'+label+'</button>';}
+    h+='<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">'+fbtn('alle','Alle')+fbtn('neu','● Ungelesen')+fbtn('fav','⭐ Favoriten')+
+      (hiddenCount>0?'<button onclick="newsResetDeleted()" style="margin-left:auto;border:none;background:none;color:var(--tx3);font-size:11.5px;cursor:pointer;font-family:inherit;text-decoration:underline">'+hiddenCount+' ausgeblendete wiederherstellen</button>':'')+'</div>';
+
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px;align-items:start"><div style="grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:18px;align-items:start" class="news-grid">';
+
+    // ── News-Liste (max 12, Karten mit Dringlichkeits-Akzent) ──
+    h+='<div style="min-width:0">';
+    if(news.length){
+      news.forEach(function(n){
+        var st=s[n.id]||{};
         var cat=n.ai_category&&RADAR_CAT[n.ai_category]?RADAR_CAT[n.ai_category]:null;
         var score=n.ai_score!=null?n.ai_score:n.relevance_score;
         var sum=(n.ai_summary&&n.ai_summary.length)?n.ai_summary:[];
-        h+='<a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--bd)">'+
-          '<div style="font-size:13.5px;font-weight:700;color:var(--tx);line-height:1.45">'+(n.ai_urgency==='hoch'?'<span style="color:var(--rd)" title="dringend">⚠️ </span>':'')+esc(n.title)+'</div>'+
-          (sum.length?'<div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5">'+sum.slice(0,2).map(function(s){return '→ '+esc(s);}).join('<br>')+'</div>':'')+
-          '<div style="font-size:10.5px;color:var(--tx3);margin-top:5px">'+
-            (cat?'<span style="background:var(--'+cat[0]+(cat[0]==='tx3'?'':'d')+');color:var(--'+cat[0]+');border-radius:7px;padding:1px 7px;font-weight:700;margin-right:6px">'+cat[1]+'</span>':'')+
-            esc(n.source)+' · '+radarRelTime(n.publish_date)+' · '+(n.ai_score!=null?'🤖':'🔥')+' '+score+'</div></a>';
+        var accent=n.ai_urgency==='hoch'?'var(--rd)':st.fav?'var(--ac)':'var(--bd2)';
+        h+='<div style="background:var(--s1);border:1px solid var(--bd);border-left:3px solid '+accent+';border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:box-shadow .15s'+(st.read?';opacity:.55':'')+'" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(15,23,41,.08)\'" onmouseout="this.style.boxShadow=\'none\'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'+
+            '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10.5px">'+
+              (st.fav?'<span style="color:var(--ac);font-weight:800">⭐</span>':'')+
+              (cat?'<span style="background:var(--'+cat[0]+(cat[0]==='tx3'?'':'d')+');color:var(--'+cat[0]+');border-radius:7px;padding:2px 8px;font-weight:700">'+cat[1]+'</span>':'')+
+              (n.ai_urgency==='hoch'?'<span style="background:var(--rdd);color:var(--rd);border-radius:7px;padding:2px 8px;font-weight:700">⚠️ dringend</span>':'')+
+              '<span style="color:var(--tx3)">'+esc(n.source)+' · '+radarRelTime(n.publish_date)+' · '+(n.ai_score!=null?'🤖':'🔥')+' '+score+'</span>'+
+            '</div>'+actBtns(n.id,st)+
+          '</div>'+
+          '<a href="'+esc(n.url)+'" target="_blank" rel="noopener" style="text-decoration:none"><div style="font-size:14px;font-weight:700;color:var(--tx);line-height:1.45">'+esc(n.title)+'</div></a>'+
+          (sum.length?'<div style="font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.55">'+sum.slice(0,2).map(function(x){return '→ '+esc(x);}).join('<br>')+'</div>':'')+
+        '</div>';
       });
-    }else h+='<div style="font-size:12px;color:var(--tx3);padding:10px 0">Noch keine Meldungen — der Crawler läuft 2× täglich (6 &amp; 15 Uhr).</div>';
-    h+='</div></div><div style="min-width:0">';
-    // ── Events-Spalte ──
-    h+='<div class="card" style="margin-bottom:18px"><h3 style="margin-bottom:10px">📅 Kommende Events</h3>';
-    if(d.events.length){
-      d.events.forEach(function(ev){
-        var when=ev.event_start?new Date(ev.event_start).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'long'}):'';
-        h+='<a href="'+esc(ev.url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:10px 0;border-bottom:1px solid var(--bd)">'+
-          '<div style="font-size:12.5px;font-weight:700;color:var(--tx);line-height:1.4">'+esc(ev.title)+'</div>'+
-          '<div style="font-size:10.5px;color:var(--tx3);margin-top:3px">'+(when?'🗓 '+when+' · ':'')+esc(ev.source)+'</div></a>';
-      });
-    }else h+='<div style="font-size:12px;color:var(--tx3)">Aktuell keine kommenden Events im Radar.</div>';
+      h+='<div style="font-size:11px;color:var(--tx3);padding:4px 2px">Zeigt die '+news.length+' relevantesten Meldungen'+(newsFilterMode!=='alle'?' (Filter aktiv)':'')+' — ausgeblendete zählen nicht.</div>';
+    }else{
+      h+='<div style="background:var(--s1);border:1px dashed var(--bd2);border-radius:14px;padding:36px 20px;text-align:center;color:var(--tx3)"><div style="font-size:34px;margin-bottom:8px">'+(newsFilterMode==='fav'?'⭐':'📰')+'</div><div style="font-size:13px;font-weight:600;color:var(--tx2)">'+(newsFilterMode==='fav'?'Noch keine Favoriten — markiere Meldungen mit ☆':newsFilterMode==='neu'?'Alles gelesen — stark! 💪':'Noch keine Meldungen — der Crawler läuft 2× täglich.')+'</div></div>';
+    }
     h+='</div>';
-    // ── Trend-Prognose ──
+
+    // ── Rechte Spalte: Events + Prognose ──
+    h+='<div style="min-width:0">';
+    h+='<div class="card" style="margin-bottom:18px;border-top:3px solid var(--ac)"><h3 style="margin-bottom:4px">📅 FBA-Events '+new Date().getFullYear()+'</h3><div style="font-size:11px;color:var(--tx3);margin-bottom:10px">Nur kommende, Amazon-relevante Termine — Vergangenes wird automatisch entfernt.</div>';
+    if(events.length){
+      events.forEach(function(ev){
+        var st=s[ev.id]||{};
+        var hasStart=!!ev.event_start;
+        var d2=new Date(hasStart?ev.event_start:ev.publish_date);
+        var tage=Math.ceil((d2.getTime()-Date.now())/864e5);
+        var when=hasStart?(tage<=0?'heute':tage===1?'morgen':'in '+tage+' Tagen'):'🗓 Termin s. Artikel';
+        h+='<div style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--bd)'+(st.read?';opacity:.55':'')+'">'+
+          '<div style="flex-shrink:0;width:46px;text-align:center;background:'+(hasStart?'var(--acd)':'var(--s2)')+';border-radius:10px;padding:6px 2px"><div style="font-size:16px;font-weight:800;color:'+(hasStart?'var(--ac)':'var(--tx3)')+';line-height:1.1">'+d2.getDate()+'</div><div style="font-size:9px;font-weight:700;color:'+(hasStart?'var(--ac)':'var(--tx3)')+';text-transform:uppercase">'+d2.toLocaleDateString('de-DE',{month:'short'}).replace('.','')+'</div></div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<a href="'+esc(ev.url)+'" target="_blank" rel="noopener" style="text-decoration:none"><div style="font-size:12.5px;font-weight:700;color:var(--tx);line-height:1.4">'+(st.fav?'⭐ ':'')+esc(ev.title)+'</div></a>'+
+            '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+when+' · '+esc(ev.source)+'</div>'+
+            '<div style="margin-top:5px">'+actBtns(ev.id,st)+'</div>'+
+          '</div></div>';
+      });
+    }else h+='<div style="font-size:12px;color:var(--tx3);padding:8px 0">Kein kommendes FBA-Event im Radar — neue Termine erscheinen hier automatisch.</div>';
+    h+='</div>';
     if(d.fc&&d.fc.items&&d.fc.items.length){
       var FC_DIR={steigend:['gn','↗ steigend'],fallend:['rd','↘ fallend'],stabil:['tx3','→ stabil']};
-      h+='<div class="card"><h3 style="margin-bottom:10px">📈 Trend-Prognose · 7 Tage</h3>';
+      h+='<div class="card" style="border-top:3px solid var(--pu)"><h3 style="margin-bottom:10px">📈 Trend-Prognose · 7 Tage</h3>';
       d.fc.items.forEach(function(f){
         var dir=FC_DIR[f.direction]||FC_DIR.stabil;
         h+='<div style="padding:7px 0;border-bottom:1px solid var(--bd)" title="'+esc(f.reasoning||'')+'">'+
@@ -12323,7 +12433,7 @@ function renderNewsPage(force){
       });
       h+='<div style="font-size:10.5px;color:var(--tx3);margin-top:8px">Deterministische Holt-Prognose — Konfidenz steigt mit jedem gesammelten Tag.</div></div>';
     }
-    h+='</div></div>';
+    h+='</div></div></div>';
     el.innerHTML=h;
   }
 }

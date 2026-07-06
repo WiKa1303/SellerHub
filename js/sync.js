@@ -27,7 +27,8 @@ var SY_KEYS=[
   'wika_radar_profile',   // Seller-Profil fürs Radar
   'shub_prodView',        // Ansichts-Einstellung Produktliste (Tabelle/Karten)
   'bsr_calib',            // BSR-Kalibrierung (eigene Schätz-Stützpunkte)
-  'ig_usp_notext'         // Bildstudio-Einstellung (USP-Bilder ohne Text)
+  'ig_usp_notext',        // Bildstudio-Einstellung (USP-Bilder ohne Text)
+  'wika_news_state'       // News & Events: Favoriten/Gelesen/Ausgeblendet je Item
 ];
 var SY_PREFIXES=[
   'wika_info_dismissed_'  // weggeklickte Info-Boxen (UI-Einstellung, geräteübergreifend sinnvoll)
