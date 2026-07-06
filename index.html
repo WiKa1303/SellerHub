@@ -182,7 +182,8 @@
 
   <nav class="sidebar-nav">
     <button class="nav-btn active" onclick="go('dashboard')"><span class="ico">🏠</span>Dashboard</button>
-    <button class="nav-btn" onclick="go('news')" style="margin-bottom:8px" title="Seller-Radar komplett: News, Events, Trends & Prognosen für den DACH-Raum"><span class="ico">📰</span>News &amp; Events <span style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:800;letter-spacing:.5px">NEU</span></button>
+    <button class="nav-btn" onclick="go('check')" title="Lohnt sich dieses Produkt? ASIN oder Amazon-Link einfügen → Urteil in Sekunden"><span class="ico">⚡</span>Schnell-Check <span style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:800;letter-spacing:.5px">NEU</span></button>
+    <button class="nav-btn" onclick="go('news')" style="margin-bottom:8px" title="Seller-Radar komplett: News, Events, Trends & Prognosen für den DACH-Raum"><span class="ico">📰</span>News &amp; Events</button>
 
     <!-- ═══ KERN: PRODUKTRECHERCHE ═══ -->
     <div class="nav-group open has-active" id="navgrp-recherche">
@@ -1731,6 +1732,12 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: PROFIT DASHBOARD                                         -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══ SCHNELL-CHECK — Lohnt sich dieses Produkt? (das Kern-Werkzeug) ═══ -->
+<div class="page" id="p-check">
+  <div class="page-header"><h1><span class="hico">⚡</span>Schnell-Check <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Lohnt sich dieses Produkt? Antwort in Sekunden.</span></h1></div>
+  <div class="page-body"><div id="quickCheckBody"></div></div>
+</div>
+
 <!-- ═══ NEWS & EVENTS — der Seller-Radar als eigener Bereich ═══ -->
 <div class="page" id="p-news">
   <div class="page-header"><h1><span class="hico">📰</span>News &amp; Events <span style="font-size:13px;color:var(--tx2);font-weight:400;margin-left:8px">Marktüberblick für Amazon-Händler · DACH · täglich aktualisiert</span></h1></div>
