@@ -1850,9 +1850,98 @@ function pipeCol(icon,title,color,count,cards){
   '</div>';
 }
 
+// ═══ RECHERCHE-ZENTRALE (Variante A): 3 Türen → 3 Phasen — die Karte, nicht die Arbeitsfläche ═══
+// Türen: Schnell-Check (1 Produkt) · Import (Nische/Liste) · KI-Recherche (Ideen generieren).
+// Phasen: Sammeln (Ideen-Pool) → Prüfen (Tabelle/Prüfplan/Scorecard) → Entscheiden (Engere Wahl).
+// Die klassische Board-Ansicht bleibt als umschaltbare Zweitansicht erhalten.
+function pipeSetView(m){try{localStorage.setItem('wika_pipe_view',m);}catch(e){}renderPipeline();}
+window.pipeSetView=pipeSetView;
 function renderPipeline(){
   researchInit();
   var board=document.getElementById('pipelineBoard');
+  if(!board)return;
+  var mode='zentrale';try{mode=localStorage.getItem('wika_pipe_view')||'zentrale';}catch(e){}
+  // Ansicht-Umschalter (beide Modi)
+  function switcher(){
+    function sw(m,label){var on=mode===m;return '<button onclick="pipeSetView(\''+m+'\')" style="border:1.5px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--acd)':'var(--s1)')+';color:'+(on?'var(--ac)':'var(--tx2)')+';font-weight:700;border-radius:9px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">'+label+'</button>';}
+    return '<div style="display:flex;gap:6px;justify-content:flex-end;margin-bottom:12px">'+sw('zentrale','🎯 Zentrale')+sw('board','🗂️ Board')+'</div>';
+  }
+  board.style.cssText='display:block'; // Container neutralisieren (Original war flex fürs Kanban)
+  if(mode==='board'){
+    board.innerHTML='';
+    var swEl=document.createElement('div');swEl.innerHTML=switcher();board.appendChild(swEl);
+    var boardInner=document.createElement('div');boardInner.id='pipelineBoardInner';
+    boardInner.style.cssText='display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start';
+    board.appendChild(boardInner);
+    renderPipelineBoard(boardInner);
+    return;
+  }
+
+  // ── Daten für die Zentrale ──
+  var shortIds={};(D.research.shortlist||[]).forEach(function(s){if(s.sourceCandidateId)shortIds[s.sourceCandidateId]=true;});
+  var ideen=(D.ideen||[]).filter(function(i){return !i.promoted&&normalizeStatus(i.status)!=='abgelehnt';});
+  var cands=(D.research.candidates||[]).filter(function(c){var st=normalizeStatus(c.status);return !shortIds[c.id]&&st!=='abgelehnt'&&st!=='aktiv'&&st!=='muster';});
+  var sl=(D.research.shortlist||[]);
+  var offen=sl.filter(function(s){return s.decision==='pruefen'&&!s.movedToProducts;}).length;
+  var goCount=cands.filter(function(c){return decisionVerdict(c).verdict==='go';}).length;
+
+  function miniThumb(it){
+    var img=(it.compImages&&it.compImages[0])||it.bildUrl||'';
+    return img?'<img src="'+esc(img)+'" class="pzoom" loading="lazy" style="width:28px;height:28px;object-fit:cover;border-radius:6px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.style.display=\'none\'">':'<span style="width:28px;height:28px;border-radius:6px;background:var(--s2);border:1px solid var(--bd);display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">📦</span>';
+  }
+  function miniRows(items,nameOf){
+    if(!items.length)return '<div style="font-size:11px;color:var(--tx3);padding:6px 0">— leer —</div>';
+    return items.slice(0,3).map(function(it){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11.5px;color:var(--tx);min-width:0">'+miniThumb(it)+'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(nameOf(it))+'</span></div>';
+    }).join('');
+  }
+  function door(icon,title,desc,btns){
+    return '<div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'+
+      '<div style="font-size:26px">'+icon+'</div>'+
+      '<div style="font-weight:800;font-size:14.5px;color:var(--tx)">'+title+'</div>'+
+      '<div style="font-size:11.5px;color:var(--tx2);line-height:1.5;flex:1">'+desc+'</div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+btns+'</div></div>';
+  }
+  function phase(num,icon,title,color,count,purpose,rows,cta,ctaAct,extra){
+    return '<div style="background:var(--s1);border:1px solid var(--bd);border-top:3px solid var(--'+color+');border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">'+
+      '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:800;color:var(--'+color+');letter-spacing:1.5px">PHASE '+num+'</span><span style="flex:1"></span><span style="background:var(--'+color+'d);color:var(--'+color+');font-weight:800;border-radius:10px;padding:2px 10px;font-size:13px">'+count+'</span></div>'+
+      '<div style="font-weight:800;font-size:15px;color:var(--tx)">'+icon+' '+title+'</div>'+
+      '<div style="font-size:11px;color:var(--tx2);line-height:1.5">'+purpose+'</div>'+
+      '<div style="border-top:1px solid var(--bd);padding-top:6px;flex:1;min-height:80px">'+rows+'</div>'+
+      '<button class="btn btn-sm" onclick="'+ctaAct+'" style="background:var(--'+color+');color:#fff;border:none;font-weight:800;font-size:12px;width:100%">'+cta+' →</button>'+
+      (extra||'')+
+    '</div>';
+  }
+  var h=switcher();
+  // ── 3 Türen ──
+  h+='<div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Eingang — so kommen Produkte rein</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:22px">'+
+    door('⚡','Schnell-Check','<b>1 Produkt</b> prüfen: Amazon-Link oder ASIN einfügen → Urteil in Sekunden. Bei GO mit einem Klick übernehmen.',
+      '<button class="btn btn-sm btn-p" onclick="go(\'check\')" style="font-weight:800;font-size:11.5px">⚡ Produkt prüfen</button>')+
+    door('📋','Import (Nische / Liste)','<b>Viele Produkte</b> auf einmal: Helium-10-, Jungle-Scout-Export oder Xray-Tabelle einfügen → landen als Kandidaten in der Prüf-Tabelle.',
+      '<button class="btn btn-sm" onclick="if(typeof xrayPasteOpen===\'function\')xrayPasteOpen()" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-weight:700;font-size:11.5px">⚡ Xray-Paste</button>'+
+      '<button class="btn btn-sm" onclick="go(\'helium\')" style="font-size:11.5px">📥 Datei-Import</button>')+
+    door('🤖','KI-Recherche','<b>Ideen generieren lassen:</b> fertigen Prompt kopieren, in Claude oder Perplexity ausführen, Antwort einfügen → Ideen landen im Pool.',
+      '<button class="btn btn-sm" onclick="if(typeof openImportModal===\'function\')openImportModal()" style="background:var(--bld);color:var(--bl);border:1px solid var(--bl);font-weight:700;font-size:11.5px">🤖 KI-Import öffnen</button>')+
+  '</div>';
+  // ── 3 Phasen ──
+  h+='<div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Der Trichter — Sammeln → Prüfen → Entscheiden</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+
+    phase(1,'💡','Sammeln','pu',ideen.length,'Rohe Einfälle und KI-Ideen — noch <b>ohne Daten</b>. Ziel: Daten holen (dann wird die Idee automatisch zum Kandidaten) oder löschen.',
+      miniRows(ideen,function(i){return i.name||i.title||'(Unbenannt)';}),'Ideen-Pool öffnen',"go('ideen')",
+      '<button class="btn btn-sm" onclick="if(typeof openIdeeModal===\'function\')openIdeeModal()" style="font-size:10.5px;width:100%">➕ Idee von Hand anlegen</button>')+
+    phase(2,'🔍','Prüfen','ac',cands.length,'Kandidaten <b>mit Daten</b> — hier passiert die Arbeit: Tabelle sichten (Checkboxen!), Prüfplan füllen, Scorecard urteilt.'+(goCount?' Aktuell <b style="color:var(--gn)">'+goCount+'× GO</b>.':''),
+      miniRows(cands.slice().sort(function(a,b){return researchCalcScore(b)-researchCalcScore(a);}),function(c){return c.name;}),'Prüf-Tabelle öffnen',"go('research')",
+      '<div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="go(\'research\');researchShowTab(\'workflow\')" style="flex:1;font-size:10.5px">✅ Prüfplan</button><button class="btn btn-sm" onclick="go(\'research\');researchShowTab(\'score\')" style="flex:1;font-size:10.5px">⚖️ Scorecard</button><button class="btn btn-sm" onclick="if(typeof pipelineAddCandidate===\'function\')pipelineAddCandidate()" style="font-size:10.5px" title="Kandidat von Hand anlegen">➕</button></div>')+
+    phase(3,'⭐','Entscheiden','gn',sl.length,'Nur die <b>GO-Kandidaten</b>: Lieferanten-Anfrage, Muster bestellen, final entscheiden → Produktliste.'+(offen?' <b>'+offen+'</b> warten auf Entscheidung.':''),
+      miniRows(sl,function(s){return s.name;}),'Engere Wahl öffnen',"go('auswahl')")+
+  '</div>';
+  h+='<div style="font-size:11px;color:var(--tx3);margin-top:14px;text-align:center">Regel 1: <b>Idee ≠ Kandidat</b> — Daten holen ist der Übergang. · Regel 2: <b>Das Scorecard-Urteil entscheidet</b>, nicht das Karten-Schieben. · Die klassische Board-Ansicht gibt es oben rechts.</div>';
+  board.innerHTML=h;
+}
+function renderPipelineBoard(boardTarget){
+  researchInit();
+  var board=boardTarget||document.getElementById('pipelineBoard');
   if(!board)return;
   var shortCandIds={};
   (D.research.shortlist||[]).forEach(function(s){if(s.sourceCandidateId)shortCandIds[s.sourceCandidateId]=true;});

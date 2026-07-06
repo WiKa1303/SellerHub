@@ -189,7 +189,7 @@
     <div class="nav-group open has-active" id="navgrp-recherche">
       <button class="nav-group-header" onclick="toggleNavGroup('recherche')"><span class="grp-ico">🔎</span><span class="grp-label">Produktrecherche</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
-        <button class="nav-btn" onclick="go('pipeline')" title="Dein Recherche-Trichter: Idee → Validieren → Shortlist → Entscheidung"><span class="ico">🗂️</span><span class="nav-lbl"><span>Pipeline</span><span class="nav-sub">dein Trichter – hier arbeitest du</span></span><span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
+        <button class="nav-btn" onclick="go('pipeline')" title="Die Karte deiner Recherche: 3 Wege rein (Schnell-Check, Import, KI) → Sammeln → Prüfen → Entscheiden"><span class="ico">🗂️</span><span class="nav-lbl"><span>Recherche-Zentrale</span><span class="nav-sub">Sammeln → Prüfen → Entscheiden</span></span><span id="researchBadge" style="margin-left:auto;background:var(--pu);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <div class="nav-sec">Werkzeuge</div>
         <button class="nav-btn" onclick="go('helium')" title="Helium-10-Exporte (Black Box/Xray/Cerebro) importieren – füttert Ideen & Kandidaten"><span class="ico">📥</span><span class="nav-lbl"><span>Daten holen</span><span class="nav-sub">Helium-10-Import</span></span></button>
         <button class="nav-btn" onclick="go('nischen')" title="Mehrere Nischen objektiv vergleichen und ranken"><span class="ico">🧭</span><span class="nav-lbl"><span>Nischen vergleichen</span><span class="nav-sub">mehrere Nischen ranken</span></span></button>
@@ -253,21 +253,9 @@
 <!-- PAGE: RECHERCHE-PIPELINE (Kanban über alle Stufen)            -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-pipeline">
-  <div class="page-header"><h1><span class="hico">🗂️</span>Recherche-Pipeline <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Idee → Validieren → Shortlist → Entscheidung</span></h1></div>
+  <div class="page-header"><h1><span class="hico">🎯</span>Recherche-Zentrale <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Sammeln → Prüfen → Entscheiden · 3 Wege rein: Schnell-Check, Import, KI</span></h1></div>
   <div class="page-body">
-    <div class="help-box purple"><div class="help-icon">🗂️</div><div class="help-body">
-      <div class="help-title">Dein Recherche-Trichter auf einen Blick</div>
-      <div class="help-text">Du recherchierst <b>beliebig viele Produkte parallel</b> – jeder Kandidat ist eine eigene, gespeicherte Recherche und wandert eigenständig von links nach rechts. Mit „→" schiebst du ihn in die nächste Stufe; Bewertung &amp; Ampel kommen aus dem <b>Scorecard</b>.</div>
-    </div></div>
-    <!-- Start-Leiste: Recherche direkt hier starten -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-      <span style="font-size:12px;color:var(--tx2);font-weight:700;margin-right:2px">Neue Recherche starten:</span>
-      <button class="btn btn-sm" onclick="xrayPasteOpen()" title="Xray-Tabelle einfügen → Nischen-Kandidat mit Ampel in 10 Sekunden" style="background:linear-gradient(135deg,var(--pu),var(--ac));border:none;color:#fff;font-weight:700">⚡ Xray-Paste</button>
-      <button class="btn btn-p btn-sm" onclick="go('helium')">📥 Helium-Import</button>
-      <button class="btn btn-sm" onclick="go('research');setTimeout(function(){var e=document.getElementById('researchAsinInput');if(e){e.focus();e.scrollIntoView({block:'center'})}},160)">🔗 ASIN analysieren</button>
-      <button class="btn btn-sm" onclick="openIdeeModal()">➕ Idee</button>
-      <button class="btn btn-sm" onclick="pipelineAddCandidate()">➕ Kandidat</button>
-    </div>
+    <!-- Die Zentrale rendert sich komplett in #pipelineBoard (3 Türen → 3 Phasen; Board umschaltbar) -->
     <div id="pipelineBoard" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;align-items:flex-start"></div>
   </div>
 </div>
@@ -355,7 +343,7 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-research">
   <div class="page-header" style="background:linear-gradient(135deg,var(--pud),var(--s2));border-bottom:2px solid var(--pu)">
-    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;✅ Prüfplan — füllt sich automatisch aus deinen Daten&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle · Prüfplan · Scorecard</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Validieren" · ← zurück</button>
+    <h1><span class="hico">⚔️</span>Konkurrenz-Tabelle<span class="wika-help" data-tooltip="Operative Arbeitsfläche für aktive Recherche-Kandidaten.&#10;&#10;Drei Tabs:&#10;🗂️ Master-Tabelle — alle Kandidaten mit Live-Marge&#10;✅ Prüfplan — füllt sich automatisch aus deinen Daten&#10;⚖️ Score-Matrix — gewichtete Bewertung (7 Kriterien)&#10;&#10;Die Prompt-Bibliothek findest du jetzt im Ideen-Pool. Die komplette Methodik im Lernzentrum.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px" id="researchBreadcrumb">Master-Tabelle · Prüfplan · Scorecard</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🎯 Phase 2 „Prüfen" · ← zur Zentrale</button>
   </div>
   <div class="page-body">
 
@@ -484,7 +472,7 @@
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-auswahl">
   <div class="page-header">
-    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🗂️ Pipeline-Stufe „Shortlist & Entscheidung" · ← zurück</button>
+    <h1><span class="hico">⭐</span>Engere Wahl<span class="wika-help" data-tooltip="Deine engere Auswahl: hier landen Produkte, die du aus der Konkurrenz-Tabelle uebernommen hast. Schau sie genau an und entscheide: Muster bestellen, ablehnen oder weiter pruefen. Bei 'Muster bestellen / Go' wandert das Produkt in die Produktliste.">ⓘ</span> <span style="font-size:12px;color:var(--tx2);font-weight:400;margin-left:8px">Engere Auswahl &amp; Entscheidung – Muster bestellen, ablehnen, weiter prüfen</span></h1><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline">🎯 Phase 3 „Entscheiden" · ← zur Zentrale</button>
   </div>
   <div class="page-body">
     <div class="help-box gold">
@@ -500,7 +488,7 @@
 </div>
 
 <div class="page" id="p-ideen">
-  <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline" style="margin-left:12px">🗂️ Pipeline-Stufe „Idee" · ← zurück</button></div>
+  <div class="page-header"><h1><span class="hico">💡</span>Ideen-Pool<span class="wika-help" data-tooltip="Der Sammelplatz für rohe Produktideen — bevor sie zu Recherche-Kandidaten werden.&#10;&#10;Ideen kommen aus: Perplexity-Recherche, Brainstorming, Trends, Kundengespräche.&#10;&#10;Workflow:&#10;1. Idee anlegen&#10;2. Kurz bewerten (Potenzial niedrig/mittel/hoch)&#10;3. Vielversprechende Ideen in Recherche-Kandidaten umwandeln">ⓘ</span></h1><span class="meta" id="ideenCount"></span><button class="stage-back" onclick="go('pipeline')" title="Zurück zur Pipeline" style="margin-left:12px">🎯 Phase 1 „Sammeln" · ← zur Zentrale</button></div>
   <div class="page-body">
 
     <!-- Help-Box -->
