@@ -308,7 +308,25 @@
     if(rEl)rTxt=rEl.textContent;
     if(!rTxt){const rm=html.match(/([\d.,]+)\s*(?:Bewertungen|Sternebewertungen|ratings|global ratings|customer reviews)/i);if(rm)rTxt=rm[1];}
     if(rTxt){const rn=rTxt.replace(/[^\d]/g,"");if(rn)reviews=parseInt(rn,10);}
-    return {title, usps, imageUrls, price, category, reviews};
+    // ⌀ Sterne („4,4 von 5" / "4.4 out of 5") — entscheidendes Recherche-Signal
+    let rating=null,raTxt="";
+    const raEl=doc.querySelector("#acrPopover .a-icon-alt, [data-hook='rating-out-of-text'], #averageCustomerReviews .a-icon-alt");
+    if(raEl)raTxt=raEl.textContent;
+    if(!raTxt){const ram=html.match(/(\d[.,]\d)\s*(?:von 5|out of 5)/i);if(ram)raTxt=ram[1];}
+    {const ram2=(raTxt||"").match(/(\d[.,]\d)/);if(ram2){const rv=parseFloat(ram2[1].replace(",","."));if(rv>=1&&rv<=5)rating=rv;}}
+    // Bestseller-Rang: erste Nennung nach dem Label = Hauptkategorie
+    let bsr=null,bsrCategory="";
+    const bz=html.split(/Bestseller-?Rang|Best Sellers Rank|Amazon Bestseller/i)[1];
+    if(bz){
+      const bm2=bz.slice(0,2000).replace(/<[^>]+>/g," ").match(/(?:Nr\.\s*|#)([\d.,]+)\s+in\s+([^(|\n]{3,80})/i);
+      if(bm2){bsr=parseInt(bm2[1].replace(/[.,]/g,""),10)||null;bsrCategory=bm2[2].replace(/\s+/g," ").trim();}
+    }
+    // Verkauft Amazon selbst? + Anzahl Verkäufer/Angebote auf dem Listing
+    const soldByAmazon=/Verkauf(?:\s+und\s+Versand)?\s+durch\s+Amazon(?!\s+Marketplace)|sold by\s+Amazon\.(?:de|com)/i.test(html);
+    let offerCount=null;
+    const om=html.match(/(?:Neu|New)\s*\((\d+)\)\s*(?:ab|from)/i)||html.match(/(?:Alle\s+Angebote(?:\s+anzeigen)?|See\s+All\s+Buying\s+Options)[^()<>]{0,40}\((\d+)\)/i);
+    if(om)offerCount=parseInt(om[1],10)||null;
+    return {title, usps, imageUrls, price, category, reviews, rating, bsr, bsrCategory, soldByAmazon, offerCount};
   }
   // ── Aus Recherche-Kandidat laden (Daten kommen aus der Produktfindung) ──
   function igPopulateCands(){
@@ -664,8 +682,8 @@
       const html=await igFetchVia(target);
       const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);
       let r=igParseListing(html);
-      // jina.ai liefert oft KEIN Preis/Kategorie/Reviews/komplette Galerie → rohes Amazon-HTML nachladen und Lücken füllen
-      if(!r.price || !r.category || r.reviews==null || r.imageUrls.length<2){
+      // jina.ai liefert oft KEIN Preis/Kategorie/Reviews/BSR/komplette Galerie → rohes Amazon-HTML nachladen und Lücken füllen
+      if(!r.price || !r.category || r.reviews==null || r.bsr==null || r.rating==null || r.offerCount==null || r.imageUrls.length<2){
         try{
           const rawHtml=await igFetchRawProxy(target);
           if(rawHtml){
@@ -675,11 +693,16 @@
             if(!r.price && r2.price)r.price=r2.price;
             if(!r.category && r2.category)r.category=r2.category;
             if(r.reviews==null && r2.reviews!=null)r.reviews=r2.reviews;
+            if(r.rating==null && r2.rating!=null)r.rating=r2.rating;
+            if(r.bsr==null && r2.bsr!=null){r.bsr=r2.bsr;r.bsrCategory=r2.bsrCategory;}
+            if(r.offerCount==null && r2.offerCount!=null)r.offerCount=r2.offerCount;
+            if(!r.soldByAmazon && r2.soldByAmazon)r.soldByAmazon=true;
             const seen=new Set(r.imageUrls);for(const u of r2.imageUrls){if(!seen.has(u)){seen.add(u);r.imageUrls.push(u);}}
           }
         }catch(e){}
       }
-      return {title:r.title, desc:r.usps.join(" "), usps:r.usps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:r.imageUrls.slice(0,9), asin:asin||"", price:r.price, category:r.category, reviews:r.reviews, blocked};
+      return {title:r.title, desc:r.usps.join(" "), usps:r.usps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:r.imageUrls.slice(0,9), asin:asin||"", price:r.price, category:r.category, reviews:r.reviews,
+        rating:(r.rating!=null?r.rating:null), bsr:(r.bsr!=null?r.bsr:null), bsrCategory:r.bsrCategory||"", soldByAmazon:!!r.soldByAmazon, offerCount:(r.offerCount!=null?r.offerCount:null), blocked};
     },
     async beat(ref, lang, onStep){
       lang=lang||"Deutsch";

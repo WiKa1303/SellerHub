@@ -162,6 +162,16 @@ r = await post('/api/import/amazon', { urlOrAsin: 'B0AAAAAA01' }, token);
 t('Abgelaufener Cache (> 24 h) → frischer Import (cached:false)', r.status === 200 && (await r.json()).cached === false);
 t('Frischer Import zählt wieder: import_calls = 2', (await getUsage(userId, todayKey())).import_calls === 2);
 
+// ── Alt-Cache VOR der Parser-Erweiterung (kein offerCount-Schlüssel) → Miss + Neu-Fetch ──
+await db().query(`UPDATE import_cache SET data = $1, fetched_at = $2`,
+  [JSON.stringify({ asin: 'B0AAAAAA01', title: 'Alter Eintrag ohne neue Felder' }), new Date()]);
+r = await post('/api/import/amazon', { urlOrAsin: 'B0AAAAAA01' }, token);
+const stale = await r.json();
+t('Alt-Cache (ohne offerCount) wird NICHT ausgeliefert → frisch geparst',
+  r.status === 200 && stale.cached === false && stale.offerCount === 7, JSON.stringify({ cached: stale.cached, offerCount: stale.offerCount }));
+// Zähler zurücksetzen (dieser Zusatz-Import soll die Zähler-Assertions unten nicht verschieben)
+await db().query(`UPDATE ai_usage SET import_calls = 2`);
+
 // ── 502: Captcha-/Bot-Block (Marker) → ehrliche Konzept-Meldung, zählt trotzdem ──
 upstreamNext = { status: 200, html: CAPTCHA_HTML };
 r = await post('/api/import/amazon', { urlOrAsin: 'B0BBBBBB02' }, token);

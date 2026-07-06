@@ -200,9 +200,11 @@ export async function importProduct({ urlOrAsin, marketplace = 'de', userId }) {
   if (!asin) return { status: 400, error: 'Keine gültige Eingabe — erwartet Amazon-URL mit /dp/… bzw. /gp/product/… oder eine 10-stellige ASIN' };
   if (marketplace !== 'de') return { status: 400, error: 'Nur marketplace "de" wird in v1 unterstützt' };
 
-  // Cache-Treffer < 24 h: aus dem Cache antworten — zählt NICHT gegen das Tageslimit
+  // Cache-Treffer < 24 h: aus dem Cache antworten — zählt NICHT gegen das Tageslimit.
+  // Alt-Einträge von VOR der Parser-Erweiterung (Schnell-Check-Signale) erkennt man am
+  // fehlenden offerCount-Schlüssel → als Miss behandeln, sonst fehlen dem Urteil die Daten.
   const hit = await getCached(asin, marketplace, new Date(Date.now() - CACHE_TTL_MS));
-  if (hit) return { status: 200, ...hit.data, cached: true };
+  if (hit && hit.data && hit.data.offerCount !== undefined) return { status: 200, ...hit.data, cached: true };
 
   // Tageslimit (nur Frisch-Importe) — geprüft VOR dem Fetch
   const day = todayKey();
