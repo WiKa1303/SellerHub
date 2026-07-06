@@ -1259,7 +1259,7 @@ function researchRenderAsinResult(id){
   var res=document.getElementById('researchAsinResult');if(!res)return;
   var c=((D.research&&D.research.candidates)||[]).find(function(x){return x.id===id;});
   if(!c){res.innerHTML='';return;}
-  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
+  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" class="pzoom" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
   var uspLi=(c.compUsps||[]).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
   var h='';
   h+='<div style="background:var(--s1);border:1.5px solid var(--pu);border-radius:12px;padding:16px;margin-top:12px">';
@@ -1513,7 +1513,7 @@ function renderPipeline(){
   function pipeThumb(it,size){
     var img=(it.compImages&&it.compImages[0])||'';
     var t=img
-      ?'<img src="'+esc(img)+'" loading="lazy" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:'+size+'px;height:'+size+'px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0&quot;>📦</div>\'">'
+      ?'<img src="'+esc(img)+'" loading="lazy" alt="" class="pzoom" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:'+size+'px;height:'+size+'px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0&quot;>📦</div>\'">'
       :'<div style="width:'+size+'px;height:'+size+'px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0" title="Kein Bild vorhanden">📦</div>';
     return it.compAsin?'<a href="https://www.amazon.de/dp/'+esc(it.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(it.compAsin)+')" style="flex-shrink:0;line-height:0">'+t+'</a>':t;
   }
@@ -1670,7 +1670,7 @@ function researchRenderTable(){
     // Hauptbild ganz vorn: aus compImages[0] (Import/ASIN-Analyse); Klick → Amazon-Listing
     var mimg=(c.compImages&&c.compImages[0])||'';
     var mthumb=mimg
-      ?'<img src="'+esc(mimg)+'" loading="lazy" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0&quot;>📦</div>\'">'
+      ?'<img src="'+esc(mimg)+'" loading="lazy" alt="" class="pzoom" style="width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0&quot;>📦</div>\'">'
       :'<div style="width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0" title="Kein Bild — kommt per ASIN-Analyse oder Import mit Bild-Spalte">📦</div>';
     if(c.compAsin)mthumb='<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(c.compAsin)+')" style="flex-shrink:0;line-height:0">'+mthumb+'</a>';
     html+='<tr data-cid="'+c.id+'">'+
@@ -1748,7 +1748,7 @@ function researchOpenEdit(id){
   function inp(f,val,type,extra){return '<input type="'+(type||'text')+'" value="'+esc(val!=null?String(val):'')+'" onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+(extra||'')+'">';}
   function selF(f,curVal,opts){return '<select onchange="researchUpdateField(\''+id+'\',\''+f+'\',this.value)" style="'+IN+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(curVal===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
   var score=researchCalcScore(c);var scc=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
-  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
+  var imgs=(c.compImages||[]).slice(0,9).map(function(u){return '<img src="'+esc(u)+'" class="pzoom" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
   var ov=document.createElement('div');ov.id='researchEditOverlay';
   ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,41,.55);display:flex;align-items:flex-start;justify-content:center;z-index:99999;padding:30px 16px;overflow-y:auto;backdrop-filter:blur(2px)';
   ov.onclick=function(e){if(e.target===ov)researchCloseEdit();};
@@ -14625,3 +14625,33 @@ function showPendingBanner(meta,type){
     document.head.appendChild(style);
   }
 }
+
+// ═══ Produktbild-Zoom (pzoom): Hover auf ein Thumbnail → große Vorschau daneben ═══
+// Delegiert auf document — funktioniert damit in Tabelle, Pipeline und Editor,
+// auch für später nachgerenderte Karten. Popup ist pointer-events:none (kein Flackern).
+(function(){
+  var pop=null;
+  function hidePz(){if(pop&&pop.parentNode)pop.parentNode.removeChild(pop);pop=null;}
+  document.addEventListener('mouseover',function(e){
+    var img=e.target;
+    if(!(img&&img.tagName==='IMG'&&img.classList&&img.classList.contains('pzoom')))return;
+    hidePz();
+    pop=document.createElement('div');
+    pop.id='pzPop';
+    var big=document.createElement('img');
+    big.src=img.src;big.alt='';
+    big.onerror=hidePz; // kaputtes Bild: kein leeres Popup stehen lassen
+    pop.appendChild(big);
+    document.body.appendChild(pop);
+    var r=img.getBoundingClientRect(),w=280,h=280;
+    var left=r.right+12;
+    if(left+w>window.innerWidth-8)left=r.left-w-12; // rechts kein Platz → links andocken
+    if(left<8)left=8;
+    var top=Math.max(8,Math.min(window.innerHeight-h-8,r.top-60));
+    pop.style.left=left+'px';pop.style.top=top+'px';
+  });
+  document.addEventListener('mouseout',function(e){
+    if(e.target&&e.target.classList&&e.target.classList.contains('pzoom'))hidePz();
+  });
+  document.addEventListener('scroll',hidePz,true);
+})();

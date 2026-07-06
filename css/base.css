@@ -396,3 +396,10 @@ img{max-width:100%}
 .lesson-gfx{width:100%;display:flex;justify-content:center}
 .lesson-gfx svg{width:100% !important;max-width:380px !important;height:auto !important}
 .visual-grid .lesson-gfx svg{max-width:340px !important}
+
+/* ═══ Produktbild-Zoom: Hover auf Thumbnails → große Vorschau (pzoom) ═══ */
+.pzoom{transition:transform .12s ease;cursor:zoom-in}
+.pzoom:hover{transform:scale(1.07)}
+#pzPop{position:fixed;z-index:100000;background:#fff;border:1px solid var(--bd2);border-radius:12px;box-shadow:0 18px 50px rgba(15,23,41,.28);padding:8px;pointer-events:none;animation:pzIn .13s ease}
+#pzPop img{width:264px;height:264px;object-fit:contain;display:block;border-radius:8px}
+@keyframes pzIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
