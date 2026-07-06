@@ -4,7 +4,8 @@ import { newDb } from 'pg-mem';
 import { initDb, db, getUsage, todayKey } from '../src/data/db.js';
 import { buildApi } from '../src/api/routes.js';
 import { config } from '../src/core/config.js';
-import { importFetch, parseAsin, parseProduct, proxyImage, IMAGE_HOSTS, MAX_IMAGE_BYTES } from '../src/services/import/index.js';
+import { importFetch, parseAsin, parseProduct, proxyImage, fetchAmazonPage, IMAGE_HOSTS, MAX_IMAGE_BYTES } from '../src/services/import/index.js';
+import { validateConfig } from '../src/core/config.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -230,6 +231,44 @@ t('/internal: Import-Limit + Cache-Größe + import_calls je Nutzer', r.status =
   && ihtml.includes('Import-Limit/Tag') && ihtml.includes('Import-Cache (Produkte)')
   && ihtml.includes('Import-Calls heute') && ihtml.includes('import@test.de'));
 t('/internal: KI-Proxy-Sektion (Modul 2) weiterhin vorhanden', ihtml.includes('KI-Proxy (Modul 2)') && ihtml.includes('Text-Limit/Tag'));
+
+// ── Scraping-Proxy (SCRAPING_PROXY_URL): Proxy zuerst, Direktabruf als Fallback ──
+config.scrapingProxyUrl = 'https://proxy.test/v1?key=GEHEIM&url={url}';
+upstreamCalls = []; upstreamNext = null; // Standard-Mock: 200 + FIXTURE
+let pg = await fetchAmazonPage('B0AAAAAA01');
+t('Proxy: Abruf läuft über die Proxy-URL (Ziel URL-encodiert)', !pg.error && upstreamCalls.length === 1
+  && upstreamCalls[0].url === 'https://proxy.test/v1?key=GEHEIM&url=' + encodeURIComponent('https://www.amazon.de/dp/B0AAAAAA01'),
+  upstreamCalls[0] && upstreamCalls[0].url);
+t('Proxy: KEINE Browser-Header an den Proxy', Object.keys(upstreamCalls[0].opts.headers || {}).length === 0);
+
+// Proxy scheitert (403) → Direktabruf mit Browser-Headern als zweite Chance
+upstreamCalls = [];
+importFetch(async (url, opts) => {
+  upstreamCalls.push({ url, opts });
+  const isProxy = url.startsWith('https://proxy.test/');
+  return {
+    ok: !isProxy, status: isProxy ? 403 : 200,
+    headers: { get: () => null },
+    text: async () => (isProxy ? '' : FIXTURE),
+    arrayBuffer: async () => new Uint8Array().buffer,
+  };
+});
+pg = await fetchAmazonPage('B0AAAAAA01');
+t('Proxy: bei Proxy-Fehler Direktabruf als Fallback', !pg.error && upstreamCalls.length === 2
+  && upstreamCalls[1].url === 'https://www.amazon.de/dp/B0AAAAAA01'
+  && !!(upstreamCalls[1].opts.headers || {})['User-Agent'],
+  upstreamCalls.map(c => c.url.split('?')[0]).join(' → '));
+config.scrapingProxyUrl = '';
+
+// validateConfig: Vorlage ohne {url}-Platzhalter wird abgelehnt
+const dbUrlBackup = config.databaseUrl;
+config.databaseUrl = 'postgres://test';
+config.scrapingProxyUrl = 'https://proxy.test/v1?key=X&url=OHNE-PLATZHALTER';
+let cfgErr = '';
+try { validateConfig(); } catch (e) { cfgErr = e.message; }
+t('Config: SCRAPING_PROXY_URL ohne {url} → Konfigurationsfehler', cfgErr.includes('SCRAPING_PROXY_URL'), cfgErr.split('\n')[1]);
+config.scrapingProxyUrl = '';
+config.databaseUrl = dbUrlBackup;
 
 srv.close();
 

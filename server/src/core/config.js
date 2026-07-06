@@ -35,6 +35,10 @@ export const config = {
   // ═══ Amazon-Import (Modul 3, KONZEPT-Import-Listing.md) ═══
   // Kostenbremse: max. FRISCH-Importe je Nutzer/Tag (Cache-Treffer zählen nicht)
   importPerDay: parseInt(process.env.IMPORT_PER_DAY || '20', 10),
+  // Optionaler Scraping-Proxy (Amazon blockt Rechenzentrums-IPs wie Railway):
+  // URL-Vorlage MIT {url}-Platzhalter, z. B. http://api.scraperapi.com?api_key=KEY&url={url}
+  // Leer = Direktabruf wie bisher (bewusster Degradations-Pfad).
+  scrapingProxyUrl: process.env.SCRAPING_PROXY_URL || '',
 
   // ═══ Push-Zustellung (Phase 5) ═══
   // Beide Kanäle optional & fail-soft: ohne Konfiguration überspringt der Dispatcher
@@ -97,6 +101,9 @@ export function validateConfig() {
   }
   if (config.crawlCron.trim().split(/\s+/).length !== 5) problems.push(`CRAWL_CRON sieht nicht nach Cron-Syntax aus: "${config.crawlCron}"`);
   if (config.pushWebhookUrl && !/^https?:\/\//.test(config.pushWebhookUrl)) problems.push(`PUSH_WEBHOOK_URL muss mit http(s):// beginnen (ist: "${config.pushWebhookUrl}")`);
+  if (config.scrapingProxyUrl && (!/^https?:\/\//.test(config.scrapingProxyUrl) || !config.scrapingProxyUrl.includes('{url}'))) {
+    problems.push('SCRAPING_PROXY_URL muss mit http(s):// beginnen und den Platzhalter {url} enthalten');
+  }
   if (problems.length) throw new Error('Ungültige Konfiguration:\n  - ' + problems.join('\n  - '));
   const warnings = [];
   if (!config.adminKey) warnings.push('ADMIN_KEY leer — POST /api/admin/crawl ist deaktiviert');
@@ -104,5 +111,6 @@ export function validateConfig() {
   if (!config.anthropicApiKey) warnings.push('ANTHROPIC_API_KEY fehlt — Intelligence-Module laufen im Degradations-Modus (Keyword-Scoring)');
   if (!config.pushWebhookUrl && !config.pushNtfyTopic) warnings.push('PUSH_WEBHOOK_URL/PUSH_NTFY_TOPIC leer — Push-Zustellung inaktiv (Alerts bleiben in der Queue sichtbar)');
   if (!config.geminiApiKey) warnings.push('GEMINI_API_KEY leer — KI-Proxy inaktiv (503) — Clients nutzen eigenen Key/Fallback');
+  if (!config.scrapingProxyUrl) warnings.push('SCRAPING_PROXY_URL leer — Amazon-Import nur per Direktabruf (Rechenzentrums-IPs oft geblockt, Client-Fallback greift)');
   return warnings;
 }

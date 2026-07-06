@@ -50,28 +50,54 @@ export function parseAsin(input) {
   return null;
 }
 
-/**
- * Produktseite holen (amazon.de/dp/ASIN). Timeout 20 s (AbortController).
- * Bot-Block (HTTP ≠ 200 ODER Captcha-Marker im HTML) → {error} mit der Konzept-Meldung.
- * @returns {{html:string}|{error:string}}
- */
-export async function fetchAmazonPage(asin) {
+// Scraping-Proxys rendern teils serverseitig — mehr Geduld als beim Direktabruf.
+export const PROXY_TIMEOUT_MS = 30_000;
+
+/** Ziel-URL in die SCRAPING_PROXY_URL-Vorlage einsetzen — oder null (kein Proxy konfiguriert). */
+function proxyWrap(targetUrl) {
+  const tpl = config.scrapingProxyUrl;
+  if (!tpl || !tpl.includes('{url}')) return null;
+  return tpl.replace('{url}', encodeURIComponent(targetUrl));
+}
+
+/** Ein HTML-Abruf mit Timeout; HTTP ≠ 200 oder Captcha-Marker → {error}. */
+async function fetchHtml(url, headers, timeoutMs) {
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), IMPORT_TIMEOUT_MS);
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
   let res, html;
   try {
-    res = await doFetch(`https://www.amazon.de/dp/${asin}`, {
-      headers: BROWSER_HEADERS, redirect: 'follow', signal: ac.signal,
-    });
+    res = await doFetch(url, { headers, redirect: 'follow', signal: ac.signal });
     html = await res.text();
   } catch (e) {
-    const reason = e.name === 'AbortError' ? `Timeout nach ${Math.round(IMPORT_TIMEOUT_MS / 1000)} s` : e.message;
+    const reason = e.name === 'AbortError' ? `Timeout nach ${Math.round(timeoutMs / 1000)} s` : e.message;
     return { error: ('Amazon nicht erreichbar: ' + reason).slice(0, 300) };
   } finally {
     clearTimeout(timer);
   }
   if (res.status !== 200 || BLOCK_PATTERN.test(html)) return { error: BLOCK_MESSAGE };
   return { html };
+}
+
+/**
+ * Produktseite holen (amazon.de/dp/ASIN).
+ * Mit SCRAPING_PROXY_URL: Proxy ZUERST (Rechenzentrums-IPs sind bei Amazon praktisch
+ * immer geblockt), bei Proxy-Fehler Direktabruf als zweite Chance. Ohne Konfiguration:
+ * Direktabruf wie bisher (Degradations-Pfad). An den Proxy gehen KEINE Browser-Header —
+ * der setzt seine eigenen (und würde unsere u. U. weiterreichen).
+ * @returns {{html:string}|{error:string}}
+ */
+export async function fetchAmazonPage(asin) {
+  const target = `https://www.amazon.de/dp/${asin}`;
+  const proxied = proxyWrap(target);
+  if (proxied) {
+    const viaProxy = await fetchHtml(proxied, {}, PROXY_TIMEOUT_MS);
+    if (!viaProxy.error) return viaProxy;
+    // Proxy-Host statt voller URL loggen — die Vorlage enthält den API-Key!
+    let proxyHost = 'Proxy';
+    try { proxyHost = new URL(config.scrapingProxyUrl.replace('{url}', '')).host; } catch {}
+    log.warn(`Import [${asin}]: Scraping-Proxy ${proxyHost} fehlgeschlagen (${viaProxy.error}) — versuche Direktabruf`);
+  }
+  return fetchHtml(target, BROWSER_HEADERS, IMPORT_TIMEOUT_MS);
 }
 
 /** li-Texte, die keine echten Bullets sind (leere, „Mehr anzeigen"-Umschalter, ›-Pfeile). */

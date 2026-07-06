@@ -404,6 +404,7 @@ dem Fetch — ein fehlgeschlagener Abruf zählt bewusst (Schutz vor Retry-Stürm
 | ENV | Default | Zweck |
 |---|---|---|
 | `IMPORT_PER_DAY` | 20 | max. Frisch-Importe je Nutzer/Tag (Cache-Treffer zählen nicht) |
+| `SCRAPING_PROXY_URL` | leer | optionaler Scraping-Proxy als URL-Vorlage mit `{url}`-Platzhalter, z. B. `http://api.scraperapi.com?api_key=KEY&url={url}`. Gesetzt → Proxy ZUERST (Rechenzentrums-IPs sind bei Amazon meist geblockt), Direktabruf als Fallback; leer → Direktabruf wie bisher. Log nennt nur den Proxy-Host (Key maskiert) |
 
 Sichtbarkeit: Import-Zeile in der Sektion „KI-Proxy (Modul 2) & Amazon-Import (Modul 3)"
 in `/internal` (Import-Limit, Cache-Größe, `import_calls` heute je Nutzer) + Log je

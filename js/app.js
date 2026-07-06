@@ -1486,7 +1486,9 @@ function renderPipeline(){
     var vd=decisionVerdict(c);
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
     var cf=decisionConfidence(c);
-    c2+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px 11px">'+
+    // Harte Red Flags blockieren GO → Karte rot umranden (10-Sekunden-Urteil auf einen Blick)
+    var cardBorder=vd.hard>0?'border:1.5px solid var(--rd);box-shadow:0 0 0 3px var(--rdd)':'border:1px solid var(--bd)';
+    c2+='<div style="background:var(--s1);'+cardBorder+';border-radius:9px;padding:10px 11px"'+(vd.hard>0?' title="'+vd.hard+' harte'+(vd.hard===1?'r':'')+' Red Flag — GO ist blockiert"':'')+'>'+
       '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
       '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span></div>'+
       pipeFlagChips(vd.flags)+
@@ -12094,6 +12096,15 @@ function renderResearchRoadmap(){
     html+='<div style="font-size:12.5px;color:var(--tx);margin-bottom:16px">👉 <b>Noch nicht begonnen:</b> '+esc(steps[current].title)+' <button class="btn btn-p btn-sm" onclick="'+steps[current].go+'" style="margin-left:6px">Starten →</button></div>';
   }else{
     html+='<div style="font-size:12.5px;color:var(--tx);margin-bottom:16px">🎉 Du nutzt alle 5 Stufen. Weiter geht\'s in der <button class="btn btn-p btn-sm" onclick="go(\'pipeline\')" style="margin-left:4px">Pipeline →</button></div>';
+  }
+  // Flag-Summary: Kandidaten mit hartem Red Flag (GO blockiert) auf einen Blick
+  var hardCands=cands.filter(function(c){var st=normalizeStatus(c.status);return st!=='abgelehnt'&&decisionVerdict(c).hard>0;});
+  if(hardCands.length){
+    var hardNames=hardCands.slice(0,3).map(function(c){return esc((c.name||'').substring(0,32));}).join(', ')+(hardCands.length>3?' u. a.':'');
+    html+='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--rd);font-weight:600;margin:-6px 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+      '<span>🚩 '+hardCands.length+' Kandidat'+(hardCands.length===1?'':'en')+' mit hartem Red Flag (GO blockiert): '+hardNames+'</span>'+
+      '<button onclick="go(\'pipeline\')" style="background:none;border:none;color:var(--rd);font-weight:700;cursor:pointer;padding:0;font-size:12px;text-decoration:underline">Pipeline →</button>'+
+    '</div>';
   }
   html+='<div style="display:flex;flex-direction:column;gap:8px">';
   steps.forEach(function(s,idx){
