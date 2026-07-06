@@ -1650,8 +1650,16 @@ function researchRenderTable(){
     var cfg=PIPELINE_STATUS[statusKey];
     var score=researchCalcScore(c);
     var scoreColor=score>=70?'gn':score>=50?'ac':score>0?'rd':'tx3';
+    // Hauptbild ganz vorn: aus compImages[0] (Import/ASIN-Analyse); Klick → Amazon-Listing
+    var mimg=(c.compImages&&c.compImages[0])||'';
+    var mthumb=mimg
+      ?'<img src="'+esc(mimg)+'" loading="lazy" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0&quot;>📦</div>\'">'
+      :'<div style="width:36px;height:36px;border-radius:7px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0" title="Kein Bild — kommt per ASIN-Analyse oder Import mit Bild-Spalte">📦</div>';
+    if(c.compAsin)mthumb='<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(c.compAsin)+')" style="flex-shrink:0;line-height:0">'+mthumb+'</a>';
     html+='<tr data-cid="'+c.id+'">'+
-      '<td style="position:sticky;left:0;background:var(--s1)"><button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="width:100%;min-width:180px;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button></td>'+
+      '<td style="position:sticky;left:0;background:var(--s1)"><div style="display:flex;align-items:center;gap:8px;min-width:220px">'+mthumb+
+        '<button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="flex:1;min-width:0;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button>'+
+      '</div></td>'+
       '<td><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.kategorie?esc(c.kategorie):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
       '<td class="nc"><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.vk!=null?'€ '+Number(c.vk).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
       '<td class="nc"><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.avgReviews!=null?Number(c.avgReviews).toLocaleString('de-DE'):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
