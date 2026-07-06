@@ -11121,14 +11121,15 @@ function detectHeliumType(headers){
   var lower=headers.map(function(h){return h.toLowerCase().trim()});
   var joined=lower.join('|');
 
-  // Black Box: ASIN + Price + BSR + Reviews + Sales/Revenue
+  // Black Box: ASIN + Price + BSR + Reviews + Sales/Revenue (engl. + dt. Oberfläche)
   if(joined.indexOf('asin')>=0&&(joined.indexOf('bsr')>=0||joined.indexOf('best seller rank')>=0)
-     &&(joined.indexOf('sales')>=0||joined.indexOf('revenue')>=0||joined.indexOf('parent level sales')>=0)){
+     &&(joined.indexOf('sales')>=0||joined.indexOf('revenue')>=0||joined.indexOf('parent level sales')>=0
+        ||joined.indexOf('umsatz')>=0||joined.indexOf('verkäufe')>=0)){
     return 'blackbox';
   }
-  // Cerebro/Magnet: Keyword + Search Volume + (CPR or Magnet IQ)
-  if((joined.indexOf('keyword phrase')>=0||joined.indexOf('keyword')>=0)
-     &&(joined.indexOf('search volume')>=0||joined.indexOf('search vol')>=0)){
+  // Cerebro/Magnet: Keyword + Search Volume / Suchvolumen
+  if((joined.indexOf('keyword phrase')>=0||joined.indexOf('keyword')>=0||joined.indexOf('suchbegriff')>=0)
+     &&(joined.indexOf('search volume')>=0||joined.indexOf('search vol')>=0||joined.indexOf('suchvolumen')>=0)){
     return 'keywords';
   }
   // Xray: similar to Black Box but typically has "Active Sellers" or "Storefront"
@@ -11140,13 +11141,22 @@ function detectHeliumType(headers){
   return 'unknown';
 }
 
+// Header-Normalisierung: Helium hängt Währung/Einheiten an ("Price $", "Reviews Rating",
+// "Active Sellers #", "Weight (lbs)") — für den Vergleich zählen nur Buchstaben/Ziffern.
+function helNorm(s){return String(s||'').toLowerCase().replace(/[^a-z0-9äöüß]/g,'');}
 function getHelField(row,candidates){
+  // exakter Treffer zuerst (schnellster Weg)
   for(var i=0;i<candidates.length;i++){
     var c=candidates[i];
-    if(row[c]!==undefined&&row[c]!=='')return row[c];
-    var keys=Object.keys(row);
+    if(row[c]!==undefined&&row[c]!==''&&row[c]!=='-'&&row[c]!=='N/A')return row[c];
+  }
+  // normalisierter Vergleich: "Price $" ≙ "Price", "Reviews Rating" ≙ "reviewsrating" …
+  var keys=Object.keys(row);
+  for(var i2=0;i2<candidates.length;i2++){
+    var cn=helNorm(candidates[i2]);
     for(var j=0;j<keys.length;j++){
-      if(keys[j].toLowerCase().trim()===c.toLowerCase().trim()&&row[keys[j]]!=='')return row[keys[j]];
+      var v=row[keys[j]];
+      if(v!==''&&v!=='-'&&v!=='N/A'&&helNorm(keys[j])===cn)return v;
     }
   }
   return '';
@@ -11156,29 +11166,29 @@ function mapHeliumRow(row,type){
   var result={};
   if(type==='blackbox'||type==='xray'||type==='asin_generic'){
     result.asin=getHelField(row,['ASIN','asin','Asin']);
-    result.name=getHelField(row,['Product Details','Title','Product Title','Name','Product Name']);
+    result.name=getHelField(row,['Product Details','Title','Product Title','Name','Product Name','Produktdetails','Titel','Produktname','Product']);
     result.brand=getHelField(row,['Brand','brand','Marke']);
-    result.price=parseNum(getHelField(row,['Price','Sale Price','Current Price','Preis']));
-    result.bsr=parseNum(getHelField(row,['BSR','Best Seller Rank','Best Sellers Rank','Parent Level BSR']));
-    result.sales=parseNum(getHelField(row,['Sales','Monthly Sales','Sales (Last 30 Days)','Parent Level Sales','Parent Level Monthly Sales']));
-    result.revenue=parseNum(getHelField(row,['Revenue','Monthly Revenue','Parent Level Revenue','Parent Level Monthly Revenue']));
-    result.reviews=parseNum(getHelField(row,['Review Count','Reviews','Number of Reviews','Anzahl Reviews']));
-    result.rating=parseNum(getHelField(row,['Rating','Review Rating','Stars','Sterne']));
-    result.imageCount=parseNum(getHelField(row,['Number of Images','Image Count','# Images']));
-    result.weight=parseNum(getHelField(row,['Weight','Item Weight','Gewicht']));
-    result.category=getHelField(row,['Category','Top Level Category','Kategorie']);
-    result.sellers=parseNum(getHelField(row,['Number of Sellers','Active Sellers','Anzahl Verkäufer']));
-    result.imageUrl=getHelField(row,['Image URL','Image','Product Image']);
-    result.amazonUrl=getHelField(row,['Amazon URL','URL','Product URL']);
+    result.price=parseNum(getHelField(row,['Price','Sale Price','Current Price','Preis','Buy Box Price','List Price']));
+    result.bsr=parseNum(getHelField(row,['BSR','Best Seller Rank','Best Sellers Rank','Parent Level BSR','Rank']));
+    result.sales=parseNum(getHelField(row,['Sales','Monthly Sales','Sales (Last 30 Days)','Parent Level Sales','Parent Level Monthly Sales','ASIN Sales','Est. Sales','Est Monthly Sales','Verkäufe','Monatliche Verkäufe','Units Sold']));
+    result.revenue=parseNum(getHelField(row,['Revenue','Monthly Revenue','Parent Level Revenue','Parent Level Monthly Revenue','ASIN Revenue','Est. Revenue','Est Monthly Revenue','Umsatz','Monatlicher Umsatz']));
+    result.reviews=parseNum(getHelField(row,['Review Count','Reviews','Number of Reviews','Anzahl Reviews','Ratings','Ratings Count','Bewertungen','Anzahl Bewertungen','Reviews Count']));
+    result.rating=parseNum(getHelField(row,['Rating','Review Rating','Reviews Rating','Stars','Sterne','Bewertung','Ratings Rating']));
+    result.imageCount=parseNum(getHelField(row,['Number of Images','Image Count','# Images','Images']));
+    result.weight=parseNum(getHelField(row,['Weight','Item Weight','Gewicht','Weight (lbs)','Weight (kg)','Gewicht (kg)']));
+    result.category=getHelField(row,['Category','Top Level Category','Kategorie','Categories','Hauptkategorie']);
+    result.sellers=parseNum(getHelField(row,['Number of Sellers','Active Sellers','Anzahl Verkäufer','Seller Count','Anzahl Anbieter']));
+    result.imageUrl=getHelField(row,['Image URL','Image','Product Image','Bild-URL']);
+    result.amazonUrl=getHelField(row,['Amazon URL','URL','Product URL','Amazon-URL']);
     if(!result.amazonUrl&&result.asin)result.amazonUrl='https://www.amazon.de/dp/'+result.asin;
   }else if(type==='keywords'){
-    result.keyword=getHelField(row,['Keyword Phrase','Keyword','keyword']);
-    result.searchVolume=parseNum(getHelField(row,['Search Volume','Search Vol.','search volume']));
+    result.keyword=getHelField(row,['Keyword Phrase','Keyword','keyword','Keyword-Phrase','Suchbegriff']);
+    result.searchVolume=parseNum(getHelField(row,['Search Volume','Search Vol.','search volume','Suchvolumen']));
     result.cpr=parseNum(getHelField(row,['CPR','Cerebro Product Rank']));
-    result.magnetIQ=parseNum(getHelField(row,['Magnet IQ Score','IQ Score']));
-    result.competingProducts=parseNum(getHelField(row,['Competing Products','Number of Competing Products']));
-    result.organicRank=parseNum(getHelField(row,['Organic Rank','Position']));
-    result.sponsoredRank=parseNum(getHelField(row,['Sponsored Rank']));
+    result.magnetIQ=parseNum(getHelField(row,['Magnet IQ Score','IQ Score','Magnet IQ']));
+    result.competingProducts=parseNum(getHelField(row,['Competing Products','Number of Competing Products','Konkurrierende Produkte']));
+    result.organicRank=parseNum(getHelField(row,['Organic Rank','Position','Organischer Rang']));
+    result.sponsoredRank=parseNum(getHelField(row,['Sponsored Rank','Gesponserter Rang']));
   }
   return result;
 }
