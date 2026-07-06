@@ -1489,18 +1489,23 @@ function renderPipeline(){
     var cf=decisionConfidence(c);
     // Harte Red Flags blockieren GO → Karte rot umranden (10-Sekunden-Urteil auf einen Blick)
     var cardBorder=vd.hard>0?'border:1.5px solid var(--rd);box-shadow:0 0 0 3px var(--rdd)':'border:1px solid var(--bd)';
+    // Produktname klickbar → Amazon-Listing (compAsin aus Import/ASIN-Analyse)
+    var azUrl=c.compAsin?('https://www.amazon.de/dp/'+esc(c.compAsin)):'';
+    var nameHtml=azUrl
+      ?'<a href="'+azUrl+'" target="_blank" rel="noopener" title="Auf Amazon öffnen: '+esc(c.compAsin)+'" style="color:var(--tx);text-decoration:none;border-bottom:1px dashed var(--bd2)" onmouseover="this.style.color=\'var(--ac)\'" onmouseout="this.style.color=\'var(--tx)\'">'+esc(c.name)+' <span style="font-size:10px;color:var(--tx3)">↗</span></a>'
+      :esc(c.name);
     c2+='<div style="background:var(--s1);'+cardBorder+';border-radius:9px;padding:10px 11px"'+(vd.hard>0?' title="'+vd.hard+' harte'+(vd.hard===1?'r':'')+' Red Flag — GO ist blockiert"':'')+'>'+
-      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;color:var(--tx);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(c.name)+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
-      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;gap:6px;align-items:flex-start;margin-bottom:4px"><div style="font-weight:600;font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+nameHtml+'</div><div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div></div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+emoji+' '+vd.label+' · <span style="color:var(--'+cf.color+')" title="Daten-Konfidenz: '+cf.data+' von '+cf.total+' Dimensionen aus echten Daten">⚙️ '+cf.data+'/'+cf.total+'</span>'+(c.compAsin?' · <a href="'+azUrl+'" target="_blank" rel="noopener" style="font-family:monospace;color:var(--tx3);font-size:9.5px" title="Auf Amazon öffnen">'+esc(c.compAsin)+'</a>':'')+'</div>'+
       pipeFlagChips(vd.flags)+
-      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
-        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:10.5px" title="Scorecard öffnen">⚖️</button>'+
-        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenWorkflow(\''+c.id+'\')" style="font-size:10.5px" title="20-Schritte-Workflow">📋</button>'+
-        '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬</button>'+
-        '<button class="btn btn-sm" onclick="dossierOpen(\''+c.id+'\')" style="font-size:10.5px" title="Entscheidungs-Dossier (druckfertiger One-Pager)">📄</button>'+
-        '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat bearbeiten (alle Felder)">✏️</button>'+
-        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">⭐ Shortlist →</button>'+
-        '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat löschen">🗑</button>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+
+        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:11px;font-weight:700" title="Scorecard: bewerten & Urteil sehen">⚖️ Bewerten</button>'+
+        '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:11px" title="Daten eintragen (VK, EK, FBA, Reviews …)">✏️ Daten</button>'+
+        '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬</button>'+
+        '<button class="btn btn-sm" onclick="dossierOpen(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px" title="Entscheidungs-Dossier (druckfertiger One-Pager)">📄</button>'+
+        '<span style="flex:1"></span>'+
+        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">⭐ Shortlist →</button>'+
+        '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px" title="Kandidat löschen">🗑</button>'+
       '</div>'+
     '</div>';
   });
