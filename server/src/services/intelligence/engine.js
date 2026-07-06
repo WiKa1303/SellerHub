@@ -3,8 +3,8 @@
 // Trend-Score aus Wachstum/Volumen/Relevanz/Impact/Quellenvielfalt.
 // Nur die SPRACHE (Zusammenfassung + Handlungsempfehlung) kommt von der KI —
 // und nur für die Top-Themen (Kostenbremse).
-import { analyzedItemsSince, upsertTrendTopic, upsertTopicDaily } from '../../data/db.js';
-import { buildClusters, topicLabel } from './topics.js';
+import { analyzedItemsSince, unanalyzedItemsSince, upsertTrendTopic, upsertTopicDaily } from '../../data/db.js';
+import { buildClusters, topicLabel, fallbackTopic } from './topics.js';
 import { interpretTopics } from './interpret.js';
 import { log } from '../../core/logger.js';
 
@@ -78,6 +78,22 @@ export async function runTrendEngine() {
   trendState.running = true;
   try {
     const items = await analyzedItemsSince(LONG_D);
+    // Degradations-Pfad: nicht-analysierte Items (kein API-Key / Backlog) bekommen ein
+    // deterministisches Keyword-Topic — sonst bliebe die Kette Trends→Forecast ohne KI leer.
+    // Sobald die KI ein Item analysiert hat, gilt NUR noch ihr ai_topic (Query-Disjunktion).
+    let viaFallback = 0;
+    for (const raw of await unanalyzedItemsSince(LONG_D)) {
+      const slug = fallbackTopic(raw.title, raw.summary);
+      if (!slug) continue;
+      items.push({
+        id: raw.id, title: raw.title, url: raw.url, source: raw.source,
+        publish_date: raw.publish_date, country: raw.country,
+        ai_topic: slug, ai_score: raw.relevance_score ?? 0,
+        ai_category: null, ai_urgency: null, ai_impact: null, ai_opportunity: null, ai_summary: [],
+      });
+      viaFallback++;
+    }
+    if (viaFallback) log.info(`Trend-Engine: ${viaFallback} Items via Keyword-Topic-Fallback (ohne KI-Analyse)`);
     const clusters = buildClusters(items).filter(c => c.items.length >= 2); // 1 Artikel ≠ Trend
     const topics = clusters.map(c => {
       const metrics = computeMetrics(c);

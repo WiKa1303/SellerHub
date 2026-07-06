@@ -13,6 +13,17 @@ export async function analyzedItemsSince(days = 30) {
   return r.rows.map(parseAiSummary);
 }
 
+/** NICHT-analysierte Items der letzten N Tage — Input für den Keyword-Topic-Fallback
+ *  (Degradations-Pfad ohne ANTHROPIC_API_KEY). relevance_score ersetzt den KI-Score. */
+export async function unanalyzedItemsSince(days = 30) {
+  const since = new Date(Date.now() - days * 864e5).toISOString();
+  const r = await db().query(
+    `SELECT id, title, summary, url, source, publish_date, country, relevance_score
+     FROM news_events
+     WHERE ai_analyzed_at IS NULL AND publish_date >= $1`, [since]);
+  return r.rows;
+}
+
 export async function upsertTrendTopic(t) {
   const now = new Date().toISOString();
   await db().query(

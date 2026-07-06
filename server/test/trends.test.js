@@ -3,8 +3,9 @@
 import { newDb } from 'pg-mem';
 import { initDb, insertItem, saveAiResult, queryTrends, queryAlerts, topicHistory } from '../src/data/db.js';
 import { aiClient } from '../src/services/intelligence/analyze.js';
-import { buildClusters } from '../src/services/intelligence/topics.js';
+import { buildClusters, fallbackTopic } from '../src/services/intelligence/topics.js';
 import { computeMetrics, dailyBuckets, runTrendEngine } from '../src/services/intelligence/engine.js';
+import { runForecast } from '../src/services/intelligence/forecast.js';
 import { classifyAlert, generateAlerts } from '../src/services/alerts/rules.js';
 import { buildApi } from '../src/api/routes.js';
 
@@ -134,6 +135,46 @@ const alertsApi = await (await fetch(base + '/api/alerts?level=critical')).json(
 t('GET /api/alerts filtert nach Level', alertsApi.items.every(a => a.alert_level === 'critical'));
 const health = await (await fetch(base + '/api/health')).json();
 t('Health zeigt Trend-/Alert-Status', health.modules.trends.topics === 2 && health.modules.alerts.created >= 3);
+
+// ── Degradations-Pfad: Keyword-Topic-Fallback ohne KI-Analyse (Modul-Konvention!) ──
+t('fallbackTopic: FBA-Gebühren erkannt (Kompositum)',
+  fallbackTopic('Amazon kündigt neue Gebührenerhöhung an') === 'fba-gebuehren');
+t('fallbackTopic: Recht/Abmahnung erkannt',
+  fallbackTopic('Neues Urteil: Abmahnwelle im Onlinehandel') === 'recht-abmahnung');
+t('fallbackTopic: „ki" nur als ganzes Wort (keine Kisten/Kinder)',
+  fallbackTopic('Kisten und Kinderspielzeug im Vergleich') === null);
+t('fallbackTopic: KI als Wort erkannt',
+  fallbackTopic('Wie KI den Onlinehandel verändert') === 'ki-ecommerce');
+t('fallbackTopic: Off-Topic → null',
+  fallbackTopic('Horoskop für die kommende Woche') === null);
+t('fallbackTopic: Priorität spezifisch vor generisch (GPSR vor Recht)',
+  fallbackTopic('GPSR: neue Pflichten und Fristen per Gesetz') === 'produktsicherheit-gpsr');
+
+// Rohe (nicht-analysierte) Items → Fallback-Topic → Trend + Zeitreihe + Forecast
+async function seedRaw(title, age, source) {
+  const id = 'raw-' + (++seq);
+  await insertItem({ id, title, titleNorm: title.toLowerCase() + ' ' + seq, summary: '',
+    url: 'https://x.de/' + id, source, publishDate: daysAgo(age), country: 'DE', type: 'news', relevanceScore: 55, eventStart: null });
+}
+await seedRaw('Amazon kündigt neue FBA-Gebühren an', 1, 'Wortfilter.de');
+await seedRaw('FBA-Gebühren steigen: Was Händler jetzt wissen müssen', 2, 'shopanbieter.de');
+await seedRaw('Analyse: Gebührenerhöhung trifft Private-Label-Seller', 4, 'Wortfilter.de');
+const er2 = await runTrendEngine();
+t('Fallback: Engine clustert Keyword-Topics ohne KI', er2.topics >= 3, JSON.stringify(er2));
+const trends2 = await queryTrends({ limit: 10 });
+const fb = trends2.find(x => x.id === 'fba-gebuehren');
+t('Fallback: Trend „FBA-Gebühren" mit kuratiertem Namen', !!fb && fb.topic_name === 'FBA-Gebühren', fb && fb.topic_name);
+const hist2 = await topicHistory('fba-gebuehren', 30);
+t('Fallback: Zeitreihe gefüllt (3 Erwähnungen)', hist2.reduce((a, d) => a + d.mentions, 0) === 3);
+
+// Komplette Kette bis zur API: Forecast rechnet auf der Fallback-Zeitreihe
+await runForecast();
+const fapi = await (await fetch(base + '/api/forecast')).json();
+t('Fallback-Kette: /api/forecast liefert Prognosen', fapi.count >= 1 && fapi.items.some(i => i.topic === 'fba-gebuehren'),
+  fapi.count + ' Topics prognostiziert');
+const ffb = fapi.items.find(i => i.topic === 'fba-gebuehren');
+t('Forecast: 7 Prognosetage + ehrliche Konfidenz (wenig Datenpunkte → gedeckelt)',
+  !!ffb && ffb.days.length === 7 && ffb.confidence <= 35, ffb && ('conf=' + ffb.confidence));
 
 srv.close();
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen`);
