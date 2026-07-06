@@ -12262,7 +12262,8 @@ function renderDashHub(){
 // ═══ NEWS & EVENTS — Seller-Radar als kuratierter Bereich (p-news) ═══
 // Je Item merkbar: ⭐ Favorit (oben gepinnt) · ✓ gelesen (gedimmt) · ✕ ausgeblendet.
 // Status liegt in wika_news_state (in der Sync-Positivliste → geräteübergreifend).
-var NEWS_MAX=12;                 // „max 10–15 untereinander" → harte Kappung
+var NEWS_PAGE_SIZE=10;           // 10 je Seite, mehr → Blätterung 1·2·3·Weiter
+var newsPageNum=1;
 var newsFilterMode='alle';       // alle | fav | neu
 function newsState(){try{return JSON.parse(localStorage.getItem('wika_news_state')||'{}')||{};}catch(e){return {};}}
 function newsSetState(s){
@@ -12281,8 +12282,12 @@ function newsResetDeleted(){
   var s=newsState();Object.keys(s).forEach(function(k){delete s[k].del;});
   newsSetState(s);renderNewsPage(false,true);toast('Ausgeblendete Einträge wiederhergestellt');
 }
-function newsSetFilter(m){newsFilterMode=m;renderNewsPage(false,true);}
-window.newsAct=newsAct;window.newsResetDeleted=newsResetDeleted;window.newsSetFilter=newsSetFilter;
+function newsSetFilter(m){newsFilterMode=m;newsPageNum=1;renderNewsPage(false,true);}
+function newsSetPage(p){
+  newsPageNum=p;renderNewsPage(false,true);
+  var el=document.getElementById('newsBody');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+window.newsAct=newsAct;window.newsResetDeleted=newsResetDeleted;window.newsSetFilter=newsSetFilter;window.newsSetPage=newsSetPage;
 
 // Events: nur Amazon-/FBA-relevant (Titel-Match), nur Zukunft, nur aktuelles Jahr.
 // Viele Event-Meldungen haben KEIN extrahierbares Start-Datum → dann gelten sie als
@@ -12313,7 +12318,7 @@ function renderNewsPage(force,fromCache){
   var api=radarApi();
   var prof=radarProfileParams();
   Promise.all([
-    fetch(api+'/api/news'+(prof?prof+'&':'?')+'limit=40').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+    fetch(api+'/api/news'+(prof?prof+'&':'?')+'limit=60').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
     fetch(api+'/api/events').then(function(r){return r.ok?r.json():{items:[]};}).catch(function(){return {items:[]};}),
     fetch(api+'/api/forecast').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function(res){
@@ -12337,21 +12342,21 @@ function renderNewsPage(force,fromCache){
     '</div>';
   }
   function sortWithState(items,s){
+    // Ausgeblendete raus, Rest streng NACH DATUM (neueste zuerst) — vorhersehbare Ordnung
     return items.filter(function(x){return !(s[x.id]&&s[x.id].del);})
-      .sort(function(a,b){
-        var fa=(s[a.id]&&s[a.id].fav)?1:0,fb=(s[b.id]&&s[b.id].fav)?1:0;
-        if(fa!==fb)return fb-fa; // Favoriten zuerst, sonst API-Reihenfolge (Relevanz)
-        return 0;
-      });
+      .sort(function(a,b){return new Date(b.publish_date).getTime()-new Date(a.publish_date).getTime();});
   }
 
   function newsPageHtml(d){
     var s=newsState();
-    var news=sortWithState(d.news,s);
-    var hiddenCount=d.news.length-news.length;
-    if(newsFilterMode==='fav')news=news.filter(function(n){return s[n.id]&&s[n.id].fav;});
-    if(newsFilterMode==='neu')news=news.filter(function(n){return !(s[n.id]&&s[n.id].read);});
-    news=news.slice(0,NEWS_MAX);
+    var newsAll=sortWithState(d.news,s);
+    var hiddenCount=d.news.length-newsAll.length;
+    if(newsFilterMode==='fav')newsAll=newsAll.filter(function(n){return s[n.id]&&s[n.id].fav;});
+    if(newsFilterMode==='neu')newsAll=newsAll.filter(function(n){return !(s[n.id]&&s[n.id].read);});
+    // Blätterung: 10 je Seite, streng nach Datum
+    var totalPages=Math.max(1,Math.ceil(newsAll.length/NEWS_PAGE_SIZE));
+    if(newsPageNum>totalPages)newsPageNum=totalPages;
+    var news=newsAll.slice((newsPageNum-1)*NEWS_PAGE_SIZE,newsPageNum*NEWS_PAGE_SIZE);
     var events=sortWithState(d.events.filter(newsEventVisible),s);
     var unread=d.news.filter(function(n){return !(s[n.id]&&(s[n.id].read||s[n.id].del));}).length;
     if(stand)stand.textContent='Stand: '+(d.at?radarRelTime(d.at):'—');
@@ -12359,8 +12364,8 @@ function renderNewsPage(force,fromCache){
     var h='';
     // ── Kopfband: Kennzahlen + Filter (Premium-Anmutung) ──
     h+='<div style="background:linear-gradient(135deg,#182238,#0f1729);border-radius:16px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:220px"><div style="font-family:\'Playfair Display\',serif;font-size:19px;font-weight:700;color:#fff">Dein Seller-Radar</div>'+
-      '<div style="font-size:12px;color:#aeb8d0;margin-top:3px">Kuratierte Nachrichten &amp; FBA-Events für den DACH-Raum — täglich frisch, von dir sortiert.</div></div>'+
+      '<div style="flex:1;min-width:220px"><div style="font-family:\'Playfair Display\',serif;font-size:19px;font-weight:700;color:#fff">Marktüberblick <span style="font-size:12px;color:#fbb040;font-weight:600;letter-spacing:.5px">AMAZON &amp; E-COMMERCE · DACH</span></div>'+
+      '<div style="font-size:12px;color:#aeb8d0;margin-top:3px">Aktuelle Branchen-Nachrichten und FBA-Termine — täglich aktualisiert, chronologisch sortiert.</div></div>'+
       '<div style="display:flex;gap:18px;flex-wrap:wrap">'+
         '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fff">'+unread+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Ungelesen</div></div>'+
         '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fbb040">'+Object.keys(s).filter(function(k){return s[k].fav&&!s[k].del;}).length+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Favoriten</div></div>'+
@@ -12395,7 +12400,19 @@ function renderNewsPage(force,fromCache){
           (sum.length?'<div style="font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.55">'+sum.slice(0,2).map(function(x){return '→ '+esc(x);}).join('<br>')+'</div>':'')+
         '</div>';
       });
-      h+='<div style="font-size:11px;color:var(--tx3);padding:4px 2px">Zeigt die '+news.length+' relevantesten Meldungen'+(newsFilterMode!=='alle'?' (Filter aktiv)':'')+' — ausgeblendete zählen nicht.</div>';
+      // ── Blätterung: « 1 2 3 Weiter » ──
+      if(totalPages>1){
+        function pbtn(label,page,on,dis){
+          if(dis)return '<span style="padding:7px 13px;color:var(--tx3);font-size:12.5px">'+label+'</span>';
+          return '<button onclick="newsSetPage('+page+')" style="border:1.5px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--ac)':'var(--s1)')+';color:'+(on?'#fff':'var(--tx2)')+';font-weight:700;border-radius:9px;padding:7px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;min-width:38px">'+label+'</button>';
+        }
+        h+='<div style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:14px;flex-wrap:wrap">';
+        h+=pbtn('‹ Zurück',newsPageNum-1,false,newsPageNum===1);
+        for(var pi=1;pi<=totalPages;pi++)h+=pbtn(pi,pi,pi===newsPageNum,false);
+        h+=pbtn('Weiter ›',newsPageNum+1,false,newsPageNum===totalPages);
+        h+='</div>';
+      }
+      h+='<div style="font-size:11px;color:var(--tx3);padding:8px 2px;text-align:center">Seite '+newsPageNum+' von '+totalPages+' · '+newsAll.length+' Meldungen'+(newsFilterMode!=='alle'?' (Filter aktiv)':'')+' · neueste zuerst</div>';
     }else{
       h+='<div style="background:var(--s1);border:1px dashed var(--bd2);border-radius:14px;padding:36px 20px;text-align:center;color:var(--tx3)"><div style="font-size:34px;margin-bottom:8px">'+(newsFilterMode==='fav'?'⭐':'📰')+'</div><div style="font-size:13px;font-weight:600;color:var(--tx2)">'+(newsFilterMode==='fav'?'Noch keine Favoriten — markiere Meldungen mit ☆':newsFilterMode==='neu'?'Alles gelesen — stark! 💪':'Noch keine Meldungen — der Crawler läuft 2× täglich.')+'</div></div>';
     }
