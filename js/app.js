@@ -11307,9 +11307,12 @@ function confirmHeliumImport(){
   var count=0;
 
   if(dest==='kandidaten'){
+    // Schutz vor Pipeline-Flutung: komplette Black-Box-Exporte haben oft 200 Zeilen —
+    // das sind Rohtreffer, keine validierten Kandidaten. Ehrlich nachfragen.
+    if(validRows.length>30&&!confirm('⚠️ '+validRows.length+' Zeilen als Recherche-Kandidaten anlegen?\n\nDas flutet die Stufe „Validieren". Für ungefilterte Helium-Listen ist der 💡 Ideen-Pool das bessere Ziel (dort grob sichten, die besten 5–20 in die Pipeline schieben).\n\nTrotzdem alle als Kandidaten anlegen?'))return;
     researchInit();
     validRows.forEach(function(r){
-      var nm=r.name||r.asin;if(!nm)return;
+      var nm=r.name||((r.brand?r.brand+' ':'')+(r.asin||'')).trim();if(!nm)return;
       D.research.candidates.unshift({
         id:'cand_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+count,
         name:nm.substring(0,120), kategorie:r.category||'', hauptkeyword:'',
