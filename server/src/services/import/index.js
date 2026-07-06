@@ -108,7 +108,11 @@ function isNoiseBullet(text) {
 /**
  * Produktseite tolerant parsen (Regex/String, keine DOM-Lib): fehlende Felder bleiben
  * leer, KEIN Abbruch — solange der Titel gefunden wird. Ohne Titel → {error}.
- * @returns {{title,bullets:string[],description,brand,images:string[],price}|{error:string}}
+ * Zusätzlich die ENTSCHEIDENDEN Recherche-Signale (Schnell-Check): reviews, rating,
+ * bsr + bsrCategory, category (Breadcrumb), soldByAmazon — alles best effort.
+ * @returns {{title,bullets:string[],description,brand,images:string[],price,
+ *   reviews:number|null,rating:number|null,bsr:number|null,bsrCategory:string,
+ *   category:string,soldByAmazon:boolean}|{error:string}}
  */
 export function parseProduct(html, asin) {
   const src = String(html ?? '');
@@ -155,7 +159,27 @@ export function parseProduct(html, asin) {
   const mPrice = src.match(/class="[^"]*\ba-price\b[^"]*"[\s\S]{0,500}?class="[^"]*a-offscreen[^"]*"[^>]*>([^<]+)</i);
   const price = mPrice ? stripTags(mPrice[1]) : '';
 
-  return { title, bullets, description, brand, images, price };
+  // Bewertungen: Anzahl (#acrCustomerReviewText „1.234 Sternebewertungen") + ⌀ Sterne („4,4 von 5")
+  const mRev = src.match(/id="acrCustomerReviewText"[^>]*>\s*([\d.,]+)/i);
+  const reviews = mRev ? (parseInt(mRev[1].replace(/[.,]/g, ''), 10) || null) : null;
+  const mRat = src.match(/(\d[.,]\d)\s*(?:von 5|out of 5)/i);
+  const rating = mRat ? parseFloat(mRat[1].replace(',', '.')) : null;
+
+  // Bestseller-Rang: erste Nennung nach dem Label = HAUPT-Kategorie (die zählt fürs Urteil)
+  const bsrZone = src.split(/Bestseller-?Rang|Best Sellers Rank|Amazon Bestseller/i)[1]?.slice(0, 1500) || '';
+  const mBsr = bsrZone.match(/(?:Nr\.\s*|#)([\d.,]+)\s+in\s+([^(<|\n]+)/i);
+  const bsr = mBsr ? (parseInt(mBsr[1].replace(/[.,]/g, ''), 10) || null) : null;
+  const bsrCategory = mBsr ? stripTags(mBsr[2]).trim().slice(0, 80) : '';
+
+  // Kategorie: erster Breadcrumb-Eintrag (#wayfinding-breadcrumbs)
+  const bcZone = src.split(/id="wayfinding-breadcrumbs/i)[1]?.slice(0, 4000) || '';
+  const mBc = bcZone.match(/<a[^>]*>([\s\S]*?)<\/a>/i);
+  const category = mBc ? stripTags(mBc[1]) : '';
+
+  // Verkauft Amazon selbst? („Verkauf durch Amazon" — hartes Warnsignal in der Recherche)
+  const soldByAmazon = /Verkauf(?:\s+und\s+Versand)?\s+durch\s+Amazon(?!\s+Marketplace)|sold by\s+Amazon\.(?:de|com)/i.test(src);
+
+  return { title, bullets, description, brand, images, price, reviews, rating, bsr, bsrCategory, category, soldByAmazon };
 }
 
 /**

@@ -38,7 +38,13 @@ var data = {"colorImages":{"initial":[
 });
 </script>
 <div id="productDescription" class="a-section a-spacing-small"><p>Eine sch&ouml;ne Beschreibung des Produkts.</p></div>
-</body></html>`;
+</body></html>`.replace('<div id="feature-bullets">',
+  // Signale wie auf echten Seiten VOR den Bullets: Breadcrumb, Reviews/Sterne, Verkäufer
+  `<div id="wayfinding-breadcrumbs_feature_div"><ul><li><a class="a-link-normal" href="/kueche">K&uuml;che, Haushalt &amp; Wohnen</a></li><li><a href="/tropf">Tr&ouml;pfler</a></li></ul></div>
+<div id="averageCustomerReviews"><span class="a-icon-alt">4,4 von 5 Sternen</span><span id="acrCustomerReviewText" class="a-size-base">1.234 Sternebewertungen</span></div>
+<div id="merchant-info">Verkauf durch Amazon</div>
+<div id="detailBullets"><span class="a-text-bold">Amazon Bestseller-Rang:</span> Nr. 2.345 in K&uuml;che, Haushalt &amp; Wohnen (Siehe Top 100) <span>Nr. 12 in Tr&ouml;pfler</span></div>
+<div id="feature-bullets">`);
 
 const CAPTCHA_HTML = `<html><body><h4>Geben Sie die angezeigten Zeichen in das Feld ein</h4>
 <p>Bei Fragen: api-services-support@amazon.com</p><form action="/errors/validateCaptcha"></form></body></html>`;
@@ -121,6 +127,11 @@ t('Roundtrip: Bullet-Entities dekodiert', p.bullets?.[0] === 'Erster Punkt mit �
 t('Roundtrip: brand bereinigt („Besuche den …-Store" entfernt)', p.brand === 'TestMarke', p.brand);
 t('Roundtrip: description aus #productDescription', p.description === 'Eine schöne Beschreibung des Produkts.', p.description);
 t('Roundtrip: price aus erster .a-offscreen', p.price === '19,99 €', p.price);
+t('Roundtrip: reviews aus acrCustomerReviewText', p.reviews === 1234, p.reviews);
+t('Roundtrip: rating aus „4,4 von 5"', p.rating === 4.4, p.rating);
+t('Roundtrip: BSR Haupt-Kategorie (erste Nennung)', p.bsr === 2345 && /K.che/.test(p.bsrCategory), p.bsr + ' in ' + p.bsrCategory);
+t('Roundtrip: category aus Breadcrumb', /K.che/.test(p.category), p.category);
+t('Roundtrip: soldByAmazon erkannt', p.soldByAmazon === true);
 t('Roundtrip: 5 Bilder, hiRes zuerst, dedupliziert',
   p.images?.length === 5 && p.images[0].includes('71abc._AC_SL1500_') && p.images[1].includes('81def._AC_SL1500_')
   && p.images[4].includes('91ghi._AC_SL1000_'), JSON.stringify(p.images));

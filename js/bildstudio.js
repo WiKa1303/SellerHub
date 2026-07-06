@@ -650,7 +650,16 @@
       const be=await igBackendImport(asin||raw);
       if(be){
         const bUsps=[...new Set((be.bullets||[]).map(b=>String(b||"").replace(/\s+/g," ").trim()).filter(Boolean))];
-        return {title:(be.title||"").replace(/\s+/g," ").trim(), desc:be.description||bUsps.join(" "), usps:bUsps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:(be.images||[]).slice(0,9), asin:be.asin||asin||"", price:(be.price!=null?be.price:null), category:"", reviews:null, blocked:false};
+        // Preis kommt vom Backend als Roh-String („19,99 €") → Zahl fürs Rechnen
+        let bPrice=null;
+        if(be.price!=null){
+          const pm=String(be.price).replace(/[^\d,.]/g,"").replace(/\.(?=\d{3})/g,"").replace(",",".");
+          const pv=parseFloat(pm);if(!isNaN(pv)&&pv>0)bPrice=pv;
+        }
+        return {title:(be.title||"").replace(/\s+/g," ").trim(), desc:be.description||bUsps.join(" "), usps:bUsps.slice(0,5).map(b=>b.length>70?b.slice(0,70):b), imageUrls:(be.images||[]).slice(0,9), asin:be.asin||asin||"",
+          price:bPrice, category:be.category||"", reviews:(be.reviews!=null?be.reviews:null),
+          rating:(be.rating!=null?be.rating:null), bsr:(be.bsr!=null?be.bsr:null), bsrCategory:be.bsrCategory||"",
+          soldByAmazon:!!be.soldByAmazon, brand:be.brand||"", blocked:false};
       }
       const html=await igFetchVia(target);
       const blocked=/Robot Check|Geben Sie die angezeigten Zeichen|automated access|api-services-support@amazon|To discuss automated/i.test(html) && !/id="productTitle"/.test(html);

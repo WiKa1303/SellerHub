@@ -702,25 +702,49 @@ function decisionMarge(c){
   if(c.vk!=null&&c.vk>0&&c.ek!=null&&c.ek>0&&c.fbaGebuehren!=null){
     return {val:Math.round((c.vk-c.ek-c.fbaGebuehren)/c.vk*1000)/10,src:'auto'};
   }
+  // Vorab-Schätzung NUR aus dem Preis (Faustregeln): EK ≈ VK ÷ 4, FBA nach Preisklasse,
+  // USt (19 %) raus. Reicht für „lohnt weiterrecherchieren?" — ersetzt keine Kalkulation
+  // und ist als Schätzung gekennzeichnet (kein hartes No-Go allein daraus).
+  if(c.vk!=null&&c.vk>0){
+    var ekEst=c.vk*0.25;
+    var fbaEst=Math.min(7,Math.max(3,c.vk*0.12+2.8));
+    var mEst=(c.vk/1.19-ekEst-fbaEst)/c.vk*100;
+    return {val:Math.round(mEst*10)/10,src:'geschätzt'};
+  }
   return {val:null,src:null};
 }
 // Auto-Schätzung einer Dimension aus den Kandidatendaten → {val:0-10|null, reason}
 function decisionAuto(c,key){
   if(key==='nachfrage'){
-    if(c.top10Umsatz!=null&&c.top10Umsatz>0){var u=c.top10Umsatz;var v=u>=30000?10:u>=20000?9:u>=12000?8:u>=8000?7:u>=5000?6:u>=3000?4:2;return {val:v,reason:'Top-Umsatz '+Math.round(u).toLocaleString('de-DE')+' €/M'};}
-    return {val:null,reason:'Kein Umsatz-/Nachfragewert erfasst'};
+    if(c.top10Umsatz!=null&&c.top10Umsatz>0){
+      var u=c.top10Umsatz;var v=u>=30000?10:u>=20000?9:u>=12000?8:u>=8000?7:u>=5000?6:u>=3000?4:2;
+      var reason=c.qcAutoUmsatz&&c.bsr
+        ?('~'+Math.round(u).toLocaleString('de-DE')+' €/M aus BSR Nr. '+Number(c.bsr).toLocaleString('de-DE')+' geschätzt ('+(c.qcSales||'?')+' Verkäufe/M)')
+        :('Top-Umsatz '+Math.round(u).toLocaleString('de-DE')+' €/M');
+      return {val:v,reason:reason};
+    }
+    return {val:null,reason:'Kein Umsatz-/Nachfragewert erfasst (BSR nicht lesbar)'};
   }
   if(key==='wettbewerb'){
-    if(c.avgReviews!=null){var r=c.avgReviews;var v=r<100?10:r<300?8:r<600?6:r<1000?4:r<2000?2:1;return {val:v,reason:'⌀ '+Math.round(r).toLocaleString('de-DE')+' Reviews Top-10'};}
-    return {val:null,reason:'Keine ⌀-Review-Zahl erfasst'};
+    if(c.avgReviews!=null){
+      var r=c.avgReviews;var v=r<100?10:r<300?8:r<600?6:r<1000?4:r<2000?2:1;
+      return {val:v,reason:'⌀ '+Math.round(r).toLocaleString('de-DE')+' Reviews'+(c.rating!=null?' · '+c.rating.toLocaleString('de-DE')+' ★':'')};
+    }
+    return {val:null,reason:'Keine Review-Zahl erfasst'};
   }
   if(key==='wirtschaft'){
     var mm=decisionMarge(c);
-    if(mm.val!=null){var m=mm.val;var v=m>=35?10:m>=30?8:m>=25?6:m>=20?4:m>=15?2:1;return {val:v,reason:'Netto-Marge '+m+' %'+(mm.src==='auto'?' (auto: VK − EK − FBA)':'')};}
-    return {val:null,reason:'Keine Marge – VK, EK + FBA-Geb. eintragen (oder Marge direkt)'};
+    if(mm.val!=null){
+      var m=mm.val;var v=m>=35?10:m>=30?8:m>=25?6:m>=20?4:m>=15?2:1;
+      var msrc=mm.src==='geschätzt'?' (Schätzung nur aus Preis: EK ≈ VK÷4 + FBA-Klasse — EK/FBA im Feintuning präzisieren)':mm.src==='auto'?' (auto: VK − EK − FBA)':'';
+      return {val:v,reason:'Netto-Marge '+(mm.src==='geschätzt'?'~':'')+m+' %'+msrc};
+    }
+    return {val:null,reason:'Kein Verkaufspreis — Marge nicht schätzbar'};
   }
   if(key==='differenz'){
-    var t=(c.differenzierung||'').trim();if(t.length>40)return {val:8,reason:'Differenzierung beschrieben'};if(t.length>5)return {val:5,reason:'Ansatz vorhanden'};return {val:null,reason:'Noch offen – via Review-Mining (Schritt 3)'};
+    var t=(c.differenzierung||'').trim();if(t.length>40)return {val:8,reason:'Differenzierung beschrieben'};if(t.length>5)return {val:5,reason:'Ansatz vorhanden'};
+    if(c.rating!=null&&c.rating<=4.2)return {val:6,reason:'Konkurrenz nur ⌀ '+c.rating.toLocaleString('de-DE')+' ★ → sichtbares Verbesserungspotenzial (per Review-Mining konkretisieren)'};
+    return {val:null,reason:'Noch offen – via Review-Mining (Schritt 3)'};
   }
   if(key==='risiko'){
     if(c.risiko){var v=c.risiko==='niedrig'?9:c.risiko==='mittel'?6:3;return {val:v,reason:'Risiko: '+c.risiko};}
@@ -905,9 +929,35 @@ async function quickCheckRun(){
         if(d.reviews!=null)qcState.c.avgReviews=d.reviews;
         if(d.category)qcState.c.kategorie=d.category;
         if(d.images&&d.images.length)qcState.c.compImages=d.images.slice(0,5);
+        else if(d.imageUrls&&d.imageUrls.length)qcState.c.compImages=d.imageUrls.slice(0,5);
         else if(d.imageUrl)qcState.c.compImages=[d.imageUrl];
         if(d.usps&&d.usps.length)qcState.c.compUsps=d.usps.slice(0,6);
-        qcState.fetchNote='✓ Listing geladen';
+        // Entscheidende Recherche-Signale (neu vom Parser): Sterne, BSR, Verkäufer, Marke
+        if(d.rating!=null)qcState.c.rating=d.rating;
+        if(d.soldByAmazon)qcState.c.soldByAmazon=true;
+        if(d.brand)qcState.c.compBrand=d.brand;
+        if(d.bsr!=null&&d.bsr>0){
+          qcState.c.bsr=d.bsr;
+          qcState.c.bsrCat=d.bsrCategory||d.category||'';
+          // Nachfrage SOFORT aus dem BSR schätzen (gleiche Logik wie der BSR-Schätzer
+          // in „Marge rechnen") — ehrlich als Schätzung gekennzeichnet, überschreibbar.
+          if(qcState.c.vk!=null&&qcState.c.top10Umsatz==null&&typeof estimateMonthlySalesBsr==='function'){
+            var _sales=estimateMonthlySalesBsr(qcBsrCatKey(qcState.c.bsrCat),d.bsr);
+            if(_sales!=null&&_sales>0){
+              qcState.c.qcSales=Math.round(_sales);
+              qcState.c.top10Umsatz=Math.round(_sales*qcState.c.vk);
+              qcState.c.qcAutoUmsatz=true;
+            }
+          }
+        }
+        // Fund-Notiz: WAS wurde automatisch erkannt? (Transparenz für Schritt 2/3)
+        var _found=[];
+        if(qcState.c.vk!=null)_found.push(qcState.c.vk.toLocaleString('de-DE')+' €');
+        if(qcState.c.avgReviews!=null)_found.push(Math.round(qcState.c.avgReviews).toLocaleString('de-DE')+' Rev.');
+        if(qcState.c.rating!=null)_found.push(qcState.c.rating.toLocaleString('de-DE')+' ★');
+        if(qcState.c.bsr!=null)_found.push('BSR '+qcState.c.bsr.toLocaleString('de-DE'));
+        if(qcState.c.soldByAmazon)_found.push('⚠️ Amazon verkauft selbst');
+        qcState.fetchNote='✓ Listing geladen'+(_found.length?' — erkannt: '+_found.join(' · '):'');
         qcSetProgress(78,'Listing gelesen: '+String(d.title||asin).substring(0,50)+' …');
       }else{
         if(!qcState.fetchNote)qcState.fetchNote='⚠️ Listing nicht abrufbar — Zahlen von Hand eintragen';
@@ -934,21 +984,45 @@ async function quickCheckRun(){
 }
 window.quickCheckRun=quickCheckRun;
 
-// Die 5 Kern-Zahlen fürs Urteil — welche fehlen noch?
+// Die 3 ENTSCHEIDENDEN Zahlen fürs Urteil — kommen normalerweise automatisch von Amazon
+// (Preis + Reviews direkt aus dem Listing, Umsatz aus dem BSR geschätzt).
+// EK/FBA sind bewusst KEINE Pflicht mehr: dafür gibt es die Faustregel-Schätzung
+// aus dem Preis; echte Zahlen verfeinern die Marge später (Feintuning).
 var QC_FIELDS=[
-  {f:'top10Umsatz',label:'Top-10-Umsatz / Monat',unit:'€',hint:'Aus Helium 10 Xray: ⌀ Revenue der Top-10 — misst die Nachfrage. Ohne Helium: grob schätzen.'},
-  {f:'avgReviews',label:'⌀ Reviews Top-10',unit:'Rev.',hint:'Eintrittsbarriere: &lt;300 gut · &gt;1.000 schwer · &gt;2.000 No-Go.'},
-  {f:'vk',label:'Verkaufspreis',unit:'€',hint:'Preis des Konkurrenz-Listings auf Amazon.'},
-  {f:'ek',label:'Einkaufspreis (Schätzung)',unit:'€',hint:'Alibaba-Schätzung reicht: Faustregel VK ÷ 4 bis ÷ 5.'},
-  {f:'fbaGebuehren',label:'FBA-Gebühren / Stück',unit:'€',hint:'Grob: 4–6 € Standardgröße. Genau: 💶 Marge rechnen.'}
+  {f:'top10Umsatz',label:'Nachfrage: Umsatz / Monat',unit:'€',hint:'Kommt automatisch aus dem Bestseller-Rang (BSR) des Listings. Genauer: Helium 10 Xray ⌀ Revenue der Top-10.'},
+  {f:'avgReviews',label:'Wettbewerb: Reviews',unit:'Rev.',hint:'Kommt automatisch vom Listing. Eintrittsbarriere: &lt;300 gut · &gt;1.000 schwer · &gt;2.000 No-Go.'},
+  {f:'vk',label:'Verkaufspreis',unit:'€',hint:'Kommt automatisch vom Listing. Unter 15 € = Margenfalle.'}
+];
+// Optionales Feintuning (verfeinert nur die Wirtschaftlichkeits-Schätzung)
+var QC_OPT_FIELDS=[
+  {f:'ek',label:'Einkaufspreis',unit:'€',opt:true,hint:'Optional — ohne Eingabe gilt die Faustregel EK ≈ VK ÷ 4.'},
+  {f:'fbaGebuehren',label:'FBA-Gebühren / Stück',unit:'€',opt:true,hint:'Optional — ohne Eingabe Schätzung nach Preisklasse. Genau: 💶 Marge rechnen.'}
 ];
 function qcMissing(){
   if(!qcState.c)return [];
   return QC_FIELDS.filter(function(x){return qcState.c[x.f]==null;});
 }
+// BSR-Kategorie-Text (deutsch) → Kalibrier-Schlüssel des BSR-Schätzers
+function qcBsrCatKey(t){
+  t=String(t||'').toLowerCase();
+  if(/küche|kueche|haushalt/.test(t))return 'kueche';
+  if(/drogerie|körperpflege/.test(t))return 'drogerie';
+  if(/beauty|kosmetik/.test(t))return 'beauty';
+  if(/elektro|computer|foto|zubehör/.test(t))return 'elektro';
+  if(/spielzeug|spielwaren/.test(t))return 'spiel';
+  if(/sport|freizeit/.test(t))return 'sport';
+  if(/haustier|tier/.test(t))return 'tier';
+  if(/garten/.test(t))return 'garten';
+  if(/baumarkt|gewerbe|industrie/.test(t))return 'baumarkt';
+  if(/büro|buero|schreibwaren/.test(t))return 'buero';
+  return 'std';
+}
 function qcNumField(x,val){
-  return '<div style="background:var(--s1);border:1.5px solid '+(val!=null?'var(--gn)':'var(--ac)')+';border-radius:10px;padding:10px 14px">'+
-    '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+x.label+' '+(val!=null?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--ac)">fehlt</span>')+'</div>'+
+  // Optionale Felder (Feintuning) schreien nicht „fehlt" — neutraler Rahmen
+  var bd=val!=null?'var(--gn)':(x.opt?'var(--bd)':'var(--ac)');
+  var state=val!=null?'<span style="color:var(--gn)">✓</span>':(x.opt?'<span style="color:var(--tx3)">optional</span>':'<span style="color:var(--ac)">fehlt</span>');
+  return '<div style="background:var(--s1);border:1.5px solid '+bd+';border-radius:10px;padding:10px 14px">'+
+    '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+x.label+' '+state+'</div>'+
     '<div style="display:flex;align-items:center;gap:6px"><input type="number" step="any" value="'+(val!=null?val:'')+'" placeholder="—" onchange="quickCheckField(\''+x.f+'\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:15px;font-weight:700;color:var(--tx);text-align:right;outline:none"><span style="font-size:12px;color:var(--tx3);flex-shrink:0">'+x.unit+'</span></div>'+
     '<div style="font-size:9.5px;color:var(--tx3);margin-top:4px;line-height:1.35">'+x.hint+'</div></div>';
 }
@@ -1024,8 +1098,8 @@ function quickCheckRenderStep(){ // Schritt 2: fehlende Daten ERST abfragen
     '<div style="flex:1;min-width:200px"><div style="font-weight:800;font-size:15px;color:var(--tx)">'+esc(c.name)+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx2);margin-top:2px">'+esc(qcState.fetchNote)+(have.length?' · Automatisch da: <b>'+have.map(function(x){return x.label;}).join(', ')+'</b>':'')+'</div></div>'+
     '<span style="background:var(--acd);color:var(--ac);font-weight:800;font-size:11px;border-radius:10px;padding:4px 12px;flex-shrink:0">SCHRITT 2 / 3</span></div>';
-  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px">Für ein belastbares Urteil fehlen noch '+missing.length+' Zahl'+(missing.length===1?'':'en')+':</div>';
-  h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">Je mehr du ausfüllst, desto ehrlicher das Urteil — die Konfidenz-Anzeige zeigt später, worauf es beruht.</div>';
+  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px">Es fehlen noch '+missing.length+' entscheidende Zahl'+(missing.length===1?'':'en')+' (Amazon hat sie nicht geliefert):</div>';
+  h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">Nur diese Werte entscheiden über das Urteil — Einkaufspreis &amp; FBA-Gebühren sind bewusst NICHT nötig (dafür rechnet eine Faustregel-Schätzung; verfeinern kannst du sie nach dem Urteil).</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">';
   missing.forEach(function(x){h+=qcNumField(x,c[x.f]);});
   h+='</div>';
@@ -1065,10 +1139,16 @@ function quickCheckRenderResult(){ // Schritt 3: Urteil + Begründung + Zahlen e
   h+=qcWhyHtml(c,vd);
   // Zahlen (weiter editierbar — Urteil aktualisiert nach Feld-Verlassen)
   h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:14px">';
-  h+='<div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:10px">📊 Zahlen anpassen <span style="font-weight:400;color:var(--tx3);font-size:11px">— Feld verlassen (Tab/Enter) aktualisiert das Urteil</span></div>';
+  h+='<div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:10px">📊 Entscheidende Zahlen <span style="font-weight:400;color:var(--tx3);font-size:11px">— Feld verlassen (Tab/Enter) aktualisiert das Urteil</span></div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">';
   QC_FIELDS.forEach(function(x){h+=qcNumField(x,c[x.f]);});
-  h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">Netto-Marge (auto)</div><div style="font-size:20px;font-weight:800;color:var(--'+(mm.val==null?'tx3':mm.val>=25?'gn':mm.val>=15?'ac':'rd')+')">'+(mm.val!=null?mm.val+' %':'—')+'</div><div style="font-size:9.5px;color:var(--tx3);margin-top:2px">(VK − EK − FBA) ÷ VK · Ziel ≥ 25 %</div></div>';
+  h+='</div>';
+  // Feintuning: verfeinert NUR die Wirtschaftlichkeits-Schätzung — kein Pflichtfeld
+  h+='<div style="font-size:11px;font-weight:800;color:var(--tx2);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.8px">🔧 Feintuning der Marge (optional)</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">';
+  QC_OPT_FIELDS.forEach(function(x){h+=qcNumField(x,c[x.f]);});
+  var mmLabel=mm.src==='geschätzt'?'Netto-Marge (Faustregel-Schätzung)':mm.src==='auto'?'Netto-Marge (aus EK + FBA)':'Netto-Marge (manuell)';
+  h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+mmLabel+'</div><div style="font-size:20px;font-weight:800;color:var(--'+(mm.val==null?'tx3':mm.val>=25?'gn':mm.val>=15?'ac':'rd')+')">'+(mm.val!=null?(mm.src==='geschätzt'?'~':'')+mm.val+' %':'—')+'</div><div style="font-size:9.5px;color:var(--tx3);margin-top:2px">'+(mm.src==='geschätzt'?'EK ≈ VK÷4 · FBA nach Preisklasse · ohne USt — echte Zahlen links eintragen macht es genau':'(VK − EK − FBA) ÷ VK · Ziel ≥ 25 %')+'</div></div>';
   h+='</div></div>';
   // Aktionen
   h+='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
@@ -1087,7 +1167,7 @@ function renderQuickCheck(){
   // Eingabe-Karte (Schritt 1)
   h+='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:16px;padding:26px 28px;margin-bottom:16px;text-align:center">'+
     '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px">Lohnt sich dieses Produkt?</div>'+
-    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Schritt 1: Amazon-Link oder ASIN einfügen · Schritt 2: fehlende Zahlen ergänzen · Schritt 3: Urteil mit Begründung.</div>'+
+    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Link/ASIN einfügen → Preis, Reviews, Sterne &amp; BSR kommen automatisch von Amazon → sofortiges Urteil mit Begründung. Zahlen fehlen nur, wenn Amazon sie nicht liefert.</div>'+
     '<div style="display:flex;gap:8px;max-width:560px;margin:0 auto">'+
       '<input id="qcInput" placeholder="https://www.amazon.de/dp/… oder B0XXXXXXXX" onkeydown="if(event.key===\'Enter\')quickCheckRun()" '+(qcState.step==='loading'?'disabled':'')+' style="flex:1;background:var(--s1);border:1.5px solid var(--bd2);border-radius:11px;padding:13px 16px;font-family:inherit;font-size:14px;color:var(--tx);outline:none" onfocus="this.style.borderColor=\'var(--ac)\'" onblur="this.style.borderColor=\'var(--bd2)\'">'+
       '<button class="btn btn-p" onclick="quickCheckRun()" style="font-weight:800;white-space:nowrap" '+(qcState.step==='loading'?'disabled':'')+'>'+(qcState.step==='loading'?'⏳ Prüfe …':'⚡ Prüfen')+'</button>'+
@@ -1192,7 +1272,9 @@ function decisionRedFlags(c){
   if(c.vk!=null&&c.vk>0&&c.vk<15)f.push({hard:true,t:'Preis < 15 € → Margenfalle',s:'Preis <15 €'});
   if(c.avgReviews!=null&&c.avgReviews>2000)f.push({hard:true,t:'⌀ Reviews Top-10 > 2.000 → hohe Einstiegsbarriere',s:'>2.000 Rev.'});
   var _fm=decisionMarge(c);
-  if(_fm.val!=null&&_fm.val<15)f.push({hard:true,t:'Netto-Marge < 15 % → unwirtschaftlich'+(_fm.src==='auto'?' (auto berechnet)':''),s:'Marge <15 %'});
+  // Marge aus echten Zahlen < 15 % = hart. Reine Preis-Schätzung = weich (erst EK/FBA klären).
+  if(_fm.val!=null&&_fm.val<15)f.push({hard:_fm.src!=='geschätzt',t:'Netto-Marge < 15 % → unwirtschaftlich'+(_fm.src==='auto'?' (auto berechnet)':_fm.src==='geschätzt'?' (grobe Preis-Schätzung — mit echten EK/FBA prüfen)':''),s:'Marge <15 %'});
+  if(c.soldByAmazon)f.push({hard:true,t:'Amazon verkauft dieses Produkt selbst → Preisdruck, kaum Buy-Box-Chance',s:'Amazon selbst'});
   // Monopol-Risiko: eine Marke dominiert die Top-Plätze (Daten aus Xray-Paste/Nischen-Scan)
   var _ns=c.nischenScan;
   if(_ns&&_ns.domBrand&&_ns.count>0&&_ns.domCount>0){
