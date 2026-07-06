@@ -590,7 +590,7 @@
   <div class="detail-header">
     <button class="detail-back" onclick="go('produkte')">← Zurück zur Liste</button>
     <div class="detail-title">
-      <h1 style="cursor:pointer" onclick="editTitleInline()" title="Klick zum Bearbeiten des Produktnamens">📋 <span class="pname" id="dTitle">—</span> <span style="font-size:14px;color:var(--tx3);margin-left:6px">✏️</span></h1>
+      <h1 style="cursor:pointer;display:flex;align-items:center;gap:12px" onclick="editTitleInline()" title="Klick zum Bearbeiten des Produktnamens"><span id="dHeadImg" style="line-height:0"></span><span>📋 <span class="pname" id="dTitle">—</span> <span style="font-size:14px;color:var(--tx3);margin-left:6px">✏️</span></span></h1>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span id="dSaveStatus" style="font-size:12px;color:var(--gn);display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:var(--s2)">✓ Gespeichert</span>
         <button class="btn btn-p" id="dSaveBtn" onclick="saveDetailManual()" style="background:linear-gradient(135deg,var(--ac),var(--ac2));border:none;color:#fff;font-weight:700;padding:8px 16px">💾 Speichern</button>

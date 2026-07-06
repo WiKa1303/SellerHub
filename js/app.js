@@ -823,6 +823,11 @@ function researchPromoteToProduct(candId,opts){
     kategorie:c.kategorie||'',
     vk:(c.vk!=null?c.vk:null),
     avgReviews:(c.avgReviews!=null?c.avgReviews:null),
+    ek:(c.ek!=null?c.ek:null),
+    fbaGebuehren:(c.fbaGebuehren!=null?c.fbaGebuehren:null),
+    gewicht:(c.gewicht!=null?c.gewicht:null),
+    bsr:(c.bsr!=null?c.bsr:null),
+    wettbewerber:(c.wettbewerber!=null?c.wettbewerber:null),
     score:researchCalcScore(c),
     compAsin:c.compAsin||'',
     compImages:(c.compImages||[]).slice(0,9),
@@ -863,9 +868,9 @@ function auswahlOrderSample(id){
   if(it.movedToProducts){toast('Schon in der Produktliste');go('produkte');return;}
   var p={
     name:it.name||'Produkt', kategorie:it.kategorie||'', status:'Bestellt',
-    asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
-    fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
-    bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    asin:it.compAsin||'', einkaufspreis:(it.ek!=null?it.ek:0), verkaufspreis:(it.vk!=null?it.vk:0),
+    fbaGebuehren:(it.fbaGebuehren!=null?it.fbaGebuehren:0), versand:0, zoll:0, sonstigeKosten:0, gewicht:(it.gewicht!=null?Math.round(it.gewicht*1000):0), masse:'',
+    bsr:(it.bsr!=null?it.bsr:0), bewertungenZahl:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:(it.wettbewerber!=null?it.wettbewerber:0), bewertung:0,
     bild:(it.compImages&&it.compImages[0])||'',
     quelle:'Produktfindung', suchvolumen:0,
     notizen:(it.notes?it.notes+' · ':'')+'Aus Produktfindung übernommen (Muster bestellt)'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
@@ -884,9 +889,9 @@ function auswahlAddToProduktliste(id){
   if(it.movedToProducts){toast('Schon in der Produktliste');go('produkte');return;}
   var p={
     name:it.name||'Produkt', kategorie:it.kategorie||'', status:'Recherche',
-    asin:it.compAsin||'', einkaufspreis:0, verkaufspreis:(it.vk!=null?it.vk:0),
-    fbaGebuehren:0, versand:0, zoll:0, sonstigeKosten:0, gewicht:0, masse:'',
-    bsr:0, bewertungen:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:0, bewertung:0,
+    asin:it.compAsin||'', einkaufspreis:(it.ek!=null?it.ek:0), verkaufspreis:(it.vk!=null?it.vk:0),
+    fbaGebuehren:(it.fbaGebuehren!=null?it.fbaGebuehren:0), versand:0, zoll:0, sonstigeKosten:0, gewicht:(it.gewicht!=null?Math.round(it.gewicht*1000):0), masse:'',
+    bsr:(it.bsr!=null?it.bsr:0), bewertungenZahl:(it.avgReviews!=null?it.avgReviews:0), wettbewerber:(it.wettbewerber!=null?it.wettbewerber:0), bewertung:0,
     bild:(it.compImages&&it.compImages[0])||'',
     quelle:'Produktfindung', suchvolumen:0,
     notizen:(it.notes?it.notes+' · ':'')+'Aus Engerer Wahl übernommen'+(it.compAsin?' · Konkurrenz-ASIN '+it.compAsin:''),
@@ -2574,7 +2579,9 @@ function fillProdSelects(){
 }
 
 // ═══════════════ CALCULATIONS ═══════════════
-function cp(p){var ek=p.einkaufspreis||0,vk=p.verkaufspreis||0,fba=p.fbaGebuehren||0,vs=p.versand||0,zl=p.zoll||0,so=p.sonstigeKosten||0;var tc=ek+fba+vs+zl+so;var pr=vk-tc;return{tc:tc,pr:pr,m:vk>0?(pr/vk)*100:null,roi:ek>0?(pr/ek)*100:null}}
+// Wirtschaftlichkeit: OHNE erfasste Kosten (EK/FBA/…) gibt es keine ehrliche Marge —
+// incomplete:true statt „100 % Marge"-Unsinn; Anzeigen zeigen dann „—".
+function cp(p){var ek=p.einkaufspreis||0,vk=p.verkaufspreis||0,fba=p.fbaGebuehren||0,vs=p.versand||0,zl=p.zoll||0,so=p.sonstigeKosten||0;var tc=ek+fba+vs+zl+so;var incomplete=tc<=0;var pr=vk-tc;return{tc:tc,pr:pr,incomplete:incomplete,m:(vk>0&&!incomplete)?(pr/vk)*100:null,roi:ek>0?(pr/ek)*100:null}}
 function mc(m){return m===null?'':'color:'+(m>=30?'var(--gn)':m>=15?'var(--ac)':'var(--rd)')}
 function pf(id){return parseFloat(document.getElementById(id).value)||0}
 function fmt(v){return v?Number(v).toFixed(2):'—'}
@@ -2668,7 +2675,7 @@ function renderProds(){
       +'<td class="nc">'+fmt(p.einkaufspreis)+'</td>'
       +'<td class="nc">'+fmt(p.verkaufspreis)+'</td>'
       +'<td class="nc" style="font-weight:700;'+mc(c.m)+'">'+(c.m!==null?c.m.toFixed(1)+'%':'—')+'</td>'
-      +'<td class="nc" style="font-weight:600;'+(c.pr>=0?'color:var(--gn)':'color:var(--rd)')+'">'+(p.verkaufspreis?c.pr.toFixed(2)+'€':'—')+'</td>'
+      +'<td class="nc" style="font-weight:600;'+(c.pr>=0?'color:var(--gn)':'color:var(--rd)')+'">'+((p.verkaufspreis&&!c.incomplete)?c.pr.toFixed(2)+'€':'—')+'</td>'
       +'<td class="nc">'+(c.roi!==null?c.roi.toFixed(0)+'%':'—')+'</td>'
       +'<td class="nc">'+(p.bsr?Number(p.bsr).toLocaleString('de-DE'):'—')+'</td>'
       +'<td>'+stars+'</td>'
@@ -2896,6 +2903,19 @@ function openProductDetail(idx){
   if(idx<0||idx>=D.products.length)return;
   currentDetailIdx=idx;
   var p=D.products[idx];
+
+  // Hauptbild im Kopf (Klick → Amazon, Hover → pzoom-Vorschau)
+  var hi=document.getElementById('dHeadImg');
+  if(hi){
+    if(p.bild){
+      hi.innerHTML='<img src="'+esc(p.bild)+'" class="pzoom" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:11px;border:1px solid var(--bd);background:#fff" onerror="this.parentNode.innerHTML=\'\'">';
+      if(p.asin){
+        hi.style.cursor='zoom-in';
+        hi.onclick=function(ev){ev.stopPropagation();window.open('https://www.amazon.de/dp/'+p.asin,'_blank');};
+        hi.title='Auf Amazon öffnen ('+p.asin+')';
+      }else{hi.onclick=function(ev){ev.stopPropagation();};hi.title='';}
+    }else{hi.innerHTML='';hi.onclick=null;}
+  }
 
   // Header info
   var titleEl=document.getElementById('dTitle');
@@ -3470,18 +3490,20 @@ function recalcDetail(){
   // Overview cards
   document.getElementById('dMarge').textContent=c.m!==null?c.m.toFixed(1)+'%':'—';
   document.getElementById('dMarge').style.cssText=c.m!==null?mc(c.m):'';
-  document.getElementById('dGewinn').textContent=p.verkaufspreis?c.pr.toFixed(2)+'€':'—';
+  document.getElementById('dGewinn').textContent=(p.verkaufspreis&&!c.incomplete)?c.pr.toFixed(2)+'€':'—';
   document.getElementById('dGewinn').style.color=c.pr>=0?'var(--gn)':'var(--rd)';
+  document.getElementById('dGewinn').title=c.incomplete?'Einkaufspreis + FBA-Gebühren im Tab „Kalkulation" eintragen':'';
   document.getElementById('dROI').textContent=c.roi!==null?c.roi.toFixed(0)+'%':'—';
   document.getElementById('dVK').textContent=p.verkaufspreis?fmt(p.verkaufspreis)+'€':'—';
   document.getElementById('dBSR').textContent=p.bsr?Number(p.bsr).toLocaleString('de-DE'):'—';
   document.getElementById('dWb').textContent=p.wettbewerber||'—';
-  document.getElementById('dBe').textContent=p.bewertungenZahl?Number(p.bewertungenZahl).toLocaleString('de-DE'):'—';
+  var _be=p.bewertungenZahl||p.bewertungen; // Alt-Feld „bewertungen" (Übernahme aus Engerer Wahl) mitlesen
+  document.getElementById('dBe').textContent=_be?Number(_be).toLocaleString('de-DE'):'—';
   document.getElementById('dSv').textContent=p.suchvolumen?Number(p.suchvolumen).toLocaleString('de-DE'):'—';
 
   // Live calc card
-  document.getElementById('dlcKosten').textContent=p.verkaufspreis?c.tc.toFixed(2)+'€':'—';
-  document.getElementById('dlcGewinn').textContent=p.verkaufspreis?c.pr.toFixed(2)+'€':'—';
+  document.getElementById('dlcKosten').textContent=(p.verkaufspreis&&!c.incomplete)?c.tc.toFixed(2)+'€':'—';
+  document.getElementById('dlcGewinn').textContent=(p.verkaufspreis&&!c.incomplete)?c.pr.toFixed(2)+'€':'—';
   document.getElementById('dlcGewinn').style.color=c.pr>=0?'var(--gn)':'var(--rd)';
   document.getElementById('dlcMarge').textContent=c.m!==null?c.m.toFixed(1)+'%':'—';
   document.getElementById('dlcMarge').style.cssText=c.m!==null?mc(c.m):'';
@@ -11349,6 +11371,8 @@ function confirmHeliumImport(){
         vk:(r.price!=null?r.price:null),
         top10Umsatz:(r.revenue!=null?r.revenue:null),
         avgReviews:(r.reviews!=null?r.reviews:null),
+        bsr:(r.bsr!=null?r.bsr:null),
+        wettbewerber:(r.sellers!=null?r.sellers:null),
         konkurrenz:'', schwaechen:'', differenzierung:'',
         ek:null, fbaGebuehren:null, ppcRisiko:'', nettoMarge:null, risiko:'',
         status:'recherche', currentStep:1,
