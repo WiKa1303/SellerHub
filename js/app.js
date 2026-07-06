@@ -1487,8 +1487,15 @@ function renderPipeline(){
 
   // ── Stufe 2: Validieren (Kandidaten, noch nicht in Shortlist) ──
   var cands=(D.research.candidates||[]).filter(function(c){var st=normalizeStatus(c.status);return !shortCandIds[c.id]&&st!=='abgelehnt'&&st!=='aktiv'&&st!=='muster';});
+  // Kanban = Arbeitsboard, kein Massenlager: nur die Top 10 nach Score anzeigen,
+  // der Rest wird in der Master-Tabelle gesichtet (Verweis-Karte unten).
+  var candsTotal=cands.length;
+  var candsShown=cands;
+  if(candsTotal>10){
+    candsShown=cands.slice().sort(function(a,b){return researchCalcScore(b)-researchCalcScore(a);}).slice(0,10);
+  }
   var c2='';
-  cands.forEach(function(c){
+  candsShown.forEach(function(c){
     var vd=decisionVerdict(c);
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
     var cf=decisionConfidence(c);
@@ -1513,6 +1520,15 @@ function renderPipeline(){
       '</div>'+
     '</div>';
   });
+
+  // Mehr als 10 Kandidaten: Verweis-Karte zur Master-Tabelle (dort sichtet man schneller)
+  if(candsTotal>10){
+    c2+='<div style="background:var(--acd);border:1.5px dashed var(--ac);border-radius:9px;padding:12px;text-align:center">'+
+      '<div style="font-size:12.5px;color:var(--tx);font-weight:700;margin-bottom:2px">+ '+(candsTotal-10)+' weitere Kandidaten</div>'+
+      '<div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px;line-height:1.45">Das Board zeigt die <b>Top 10 nach Score</b> — Sichten, Sortieren und Aufräumen geht in der Tabelle schneller.</div>'+
+      '<button class="btn btn-sm" onclick="go(\'research\')" style="background:var(--ac);color:#fff;border:none;font-weight:700;font-size:11px">📋 Alle '+candsTotal+' in der Tabelle sichten →</button>'+
+    '</div>';
+  }
 
   // Hauptbild-Thumbnail + Amazon-Link (gemeinsames Muster für Shortlist/Entscheidung)
   function pipeThumb(it,size){
@@ -1640,6 +1656,12 @@ function researchRenderStatsBar(){
   bar.innerHTML=html;
 }
 
+var researchTablePage=1,researchTableSig='';
+function researchTableGoPage(p){
+  researchTablePage=p;researchRenderTable();
+  var t=document.getElementById('researchMasterTable');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+}
+window.researchTableGoPage=researchTableGoPage;
 function researchRenderTable(){
   researchInit();
   researchRenderStatsBar();
@@ -1662,9 +1684,29 @@ function researchRenderTable(){
   if(cands.length===0){
     tbody.innerHTML='';
     if(empty)empty.style.display='block';
+    var pgEmpty=document.getElementById('researchTablePager');if(pgEmpty)pgEmpty.innerHTML='';
     return;
   }
   if(empty)empty.style.display='none';
+
+  // ── Sortierung (Standard: Score absteigend — die besten zuerst) ──
+  var sortSel=document.getElementById('researchSort');
+  var sortMode=sortSel?sortSel.value:'score';
+  cands.sort(function(a,b){
+    if(sortMode==='neu')return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+    if(sortMode==='vk')return (b.vk||0)-(a.vk||0);
+    if(sortMode==='reviews')return (a.avgReviews==null?1e12:a.avgReviews)-(b.avgReviews==null?1e12:b.avgReviews); // wenige Reviews = gut → aufsteigend
+    return researchCalcScore(b)-researchCalcScore(a);
+  });
+
+  // ── Blätterung: 30 je Seite; bei Filter-/Suchwechsel zurück auf Seite 1 ──
+  var sig=filterStatus+'|'+searchQ+'|'+sortMode;
+  if(sig!==researchTableSig){researchTablePage=1;researchTableSig=sig;}
+  var RT_PAGE=30;
+  var totalPages=Math.max(1,Math.ceil(cands.length/RT_PAGE));
+  if(researchTablePage>totalPages)researchTablePage=totalPages;
+  var candsAll=cands.length;
+  cands=cands.slice((researchTablePage-1)*RT_PAGE,researchTablePage*RT_PAGE);
 
   var html='';
   cands.forEach(function(c){
@@ -1696,6 +1738,24 @@ function researchRenderTable(){
     '</tr>';
   });
   tbody.innerHTML=html;
+
+  // ── Blätter-Leiste unter der Tabelle ──
+  var pager=document.getElementById('researchTablePager');
+  if(pager){
+    if(totalPages<=1){pager.innerHTML='<div style="font-size:11px;color:var(--tx3);text-align:center;padding:8px">'+candsAll+' Kandidat'+(candsAll===1?'':'en')+'</div>';}
+    else{
+      function rpb(label,page,on,dis){
+        if(dis)return '<span style="padding:7px 12px;color:var(--tx3);font-size:12px">'+label+'</span>';
+        return '<button onclick="researchTableGoPage('+page+')" style="border:1.5px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--ac)':'var(--s1)')+';color:'+(on?'#fff':'var(--tx2)')+';font-weight:700;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;min-width:34px">'+label+'</button>';
+      }
+      var ph='<div style="display:flex;gap:5px;justify-content:center;align-items:center;padding:12px 0 4px;flex-wrap:wrap">';
+      ph+=rpb('‹',researchTablePage-1,false,researchTablePage===1);
+      for(var pi=1;pi<=totalPages;pi++)ph+=rpb(pi,pi,pi===researchTablePage,false);
+      ph+=rpb('›',researchTablePage+1,false,researchTablePage===totalPages);
+      ph+='</div><div style="font-size:11px;color:var(--tx3);text-align:center;padding-bottom:6px">Seite '+researchTablePage+' von '+totalPages+' · '+candsAll+' Kandidaten · sortiert nach '+(sortMode==='neu'?'Neueste':sortMode==='vk'?'VK':sortMode==='reviews'?'wenigsten Reviews':'Score')+'</div>';
+      pager.innerHTML=ph;
+    }
+  }
 }
 
 function researchUpdateField(id,field,value){

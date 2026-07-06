@@ -404,6 +404,12 @@
             <option value="abgelehnt">❌ Abgelehnt</option>
           </select>
           <input type="text" id="researchSearch" placeholder="🔍 Suchen..." oninput="researchRenderTable()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px;width:180px">
+          <select id="researchSort" onchange="researchRenderTable()" title="Sortierung" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px">
+            <option value="score">⚖️ Score (beste zuerst)</option>
+            <option value="reviews">💬 Wenigste Reviews</option>
+            <option value="vk">💶 VK (höchster zuerst)</option>
+            <option value="neu">🕐 Neueste zuerst</option>
+          </select>
         </div>
       </div>
 
@@ -438,6 +444,7 @@
           </thead>
           <tbody id="researchTableBody"></tbody>
         </table>
+        <div id="researchTablePager"></div>
         <div id="researchTableEmpty" style="display:none;padding:50px 30px;text-align:center;color:var(--tx2);font-size:14px">
           <div style="font-size:48px;margin-bottom:14px">🎯</div>
           <div style="font-weight:700;color:var(--tx);margin-bottom:6px;font-size:16px">Noch keine Kandidaten</div>
