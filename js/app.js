@@ -838,18 +838,39 @@ function complianceHtml(c,readOnly){
   return h;
 }
 
-// ═══ SCHNELL-CHECK: „Lohnt sich dieses Produkt?" in wenigen Klicks ═══
-// Das Kern-Versprechen der App: ASIN/Link rein → Listing laden → sofortiges Urteil
-// (Scorecard-Hirn: decisionVerdict/Marge/Flags/Compliance). Lücken trägt man DIREKT
-// im Ergebnis nach (live). Erst „Übernehmen" speichert — Verwerfen kostet nichts.
-var qcState={c:null,loading:false,fetchNote:''};
-function quickCheckReset(){qcState={c:null,loading:false,fetchNote:''};renderQuickCheck();
-  var inp=document.getElementById('qcInput');if(inp){inp.value='';inp.focus();}}
+// ═══ SCHNELL-CHECK: „Lohnt sich dieses Produkt?" — 3 Schritte mit Fortschritt ═══
+// Schritt 1: Link/ASIN → Listing laden (Prozent-Anzeige). Schritt 2: fehlende
+// Kern-Zahlen ERST abfragen. Schritt 3: Urteil MIT Klartext-Begründung je Dimension.
+// Nichts wird gespeichert, bis „Übernehmen" gedrückt wird.
+var qcState={c:null,step:'input',fetchNote:'',progress:0,progLabel:''};
+var qcProgTimer=null;
+function qcSetProgress(pct,label){
+  qcState.progress=pct;if(label)qcState.progLabel=label;
+  var bar=document.getElementById('qcProgBar'),lb=document.getElementById('qcProgLabel'),pt=document.getElementById('qcProgPct');
+  if(bar)bar.style.width=pct+'%';
+  if(lb&&label)lb.textContent=label;
+  if(pt)pt.textContent=Math.round(pct)+' %';
+}
+function qcProgDrift(target){ // weich Richtung Ziel laufen, solange der Fetch arbeitet
+  if(qcProgTimer)clearInterval(qcProgTimer);
+  qcProgTimer=setInterval(function(){
+    if(qcState.progress<target)qcSetProgress(Math.min(target,qcState.progress+1.5));
+    else{clearInterval(qcProgTimer);qcProgTimer=null;}
+  },180);
+}
+function quickCheckReset(){
+  if(qcProgTimer){clearInterval(qcProgTimer);qcProgTimer=null;}
+  qcState={c:null,step:'input',fetchNote:'',progress:0,progLabel:''};
+  renderQuickCheck();
+  var inp=document.getElementById('qcInput');if(inp){inp.value='';inp.focus();}
+}
 function quickCheckField(field,val){
   if(!qcState.c)return;
   var num=parseFloat(String(val).replace(',','.'));
   qcState.c[field]=isNaN(num)?null:num;
-  quickCheckRenderResult(); // live neu bewerten
+  // onchange (nicht oninput): kein Fokus-Verlust beim Tippen; Neu-Rendern erst nach Verlassen
+  if(qcState.step==='data')quickCheckRenderStep();
+  if(qcState.step==='result')quickCheckRenderResult();
 }
 window.quickCheckReset=quickCheckReset;window.quickCheckField=quickCheckField;
 
@@ -860,38 +881,78 @@ async function quickCheckRun(){
   var asin=null;
   var m=raw.match(/\/dp\/([A-Z0-9]{10})/i)||raw.match(/\/gp\/product\/([A-Z0-9]{10})/i)||(/^[A-Z0-9]{10}$/i.test(raw)?[null,raw]:null);
   if(m)asin=m[1].toUpperCase();
-  qcState.loading=true;qcState.fetchNote='';
   qcState.c={id:'qc_temp',name:asin?('Produkt '+asin):raw.substring(0,120),kategorie:'',hauptkeyword:'',
     vk:null,top10Umsatz:null,avgReviews:null,ek:null,fbaGebuehren:null,nettoMarge:null,startMenge:null,
     risiko:'',gewicht:null,saisonal:'',gating:'',ipRisiko:'',ppcRisiko:'',differenzierung:'',konkurrenz:'',schwaechen:'',
     compAsin:asin||'',compImages:[],compUsps:[],score2:{},scoreMatrix:{},notes:''};
+  qcState.step='loading';qcState.fetchNote='';qcState.progress=0;
   renderQuickCheck();
+  qcSetProgress(8,asin?('ASIN erkannt: '+asin):'Kein Link erkannt — Produktname übernommen');
+  await new Promise(function(r){setTimeout(r,250);});
   if(asin&&window.SHImport&&window.SHImport.fetchListing){
+    qcSetProgress(20,'Amazon-Listing wird geladen …');
+    qcProgDrift(70); // läuft weich weiter, solange der Abruf dauert
     try{
       var d=await window.SHImport.fetchListing(asin);
-      // Amazon-Fehlerseiten (404/Captcha) nicht als Produkt übernehmen
+      if(qcProgTimer){clearInterval(qcProgTimer);qcProgTimer=null;}
       if(d&&d.title&&/seite wurde nicht gefunden|page not found|tut uns leid|etwas schief|captcha|not a robot/i.test(d.title)){
-        d=null;qcState.fetchNote='⚠️ ASIN nicht (mehr) verfügbar oder Amazon blockt — Zahlen unten von Hand eintragen';
+        d=null;qcState.fetchNote='⚠️ ASIN nicht (mehr) verfügbar oder Amazon blockt — Zahlen von Hand eintragen';
       }
       if(d){
         if(d.title)qcState.c.name=String(d.title).substring(0,120);
         if(d.price!=null)qcState.c.vk=d.price;
         if(d.reviews!=null)qcState.c.avgReviews=d.reviews;
-        if(d.brand)qcState.c.konkurrenz='';
         if(d.category)qcState.c.kategorie=d.category;
         if(d.images&&d.images.length)qcState.c.compImages=d.images.slice(0,5);
         else if(d.imageUrl)qcState.c.compImages=[d.imageUrl];
         if(d.usps&&d.usps.length)qcState.c.compUsps=d.usps.slice(0,6);
         qcState.fetchNote='✓ Listing geladen';
-      }else qcState.fetchNote='⚠️ Listing nicht abrufbar — Zahlen unten von Hand eintragen (Helium 10 / Amazon-Seite)';
-    }catch(e){qcState.fetchNote='⚠️ Listing nicht abrufbar — Zahlen unten von Hand eintragen (Helium 10 / Amazon-Seite)';}
-  }else if(!asin){
-    qcState.fetchNote='Kein Link erkannt — Produktname übernommen, Zahlen unten eintragen';
+        qcSetProgress(78,'Listing gelesen: '+String(d.title||asin).substring(0,50)+' …');
+      }else{
+        if(!qcState.fetchNote)qcState.fetchNote='⚠️ Listing nicht abrufbar — Zahlen von Hand eintragen';
+        qcSetProgress(78,'Listing nicht abrufbar — weiter mit manuellen Zahlen');
+      }
+    }catch(e){
+      if(qcProgTimer){clearInterval(qcProgTimer);qcProgTimer=null;}
+      qcState.fetchNote='⚠️ Listing nicht abrufbar — Zahlen von Hand eintragen';
+      qcSetProgress(78,'Listing nicht abrufbar — weiter mit manuellen Zahlen');
+    }
+  }else{
+    if(!asin)qcState.fetchNote='Kein Link erkannt — Zahlen von Hand eintragen';
+    qcSetProgress(78,'Weiter mit manuellen Zahlen');
   }
-  qcState.loading=false;
+  await new Promise(function(r){setTimeout(r,350);});
+  qcSetProgress(90,'DE-Pflichten werden geprüft …');
+  await new Promise(function(r){setTimeout(r,350);});
+  qcSetProgress(100,'Fertig — fehlende Zahlen prüfen');
+  await new Promise(function(r){setTimeout(r,300);});
+  // Schritt 2: fehlen Kern-Zahlen? → ERST abfragen, DANN rechnen
+  var missing=qcMissing();
+  qcState.step=missing.length?'data':'result';
   renderQuickCheck();
 }
 window.quickCheckRun=quickCheckRun;
+
+// Die 5 Kern-Zahlen fürs Urteil — welche fehlen noch?
+var QC_FIELDS=[
+  {f:'top10Umsatz',label:'Top-10-Umsatz / Monat',unit:'€',hint:'Aus Helium 10 Xray: ⌀ Revenue der Top-10 — misst die Nachfrage. Ohne Helium: grob schätzen.'},
+  {f:'avgReviews',label:'⌀ Reviews Top-10',unit:'Rev.',hint:'Eintrittsbarriere: &lt;300 gut · &gt;1.000 schwer · &gt;2.000 No-Go.'},
+  {f:'vk',label:'Verkaufspreis',unit:'€',hint:'Preis des Konkurrenz-Listings auf Amazon.'},
+  {f:'ek',label:'Einkaufspreis (Schätzung)',unit:'€',hint:'Alibaba-Schätzung reicht: Faustregel VK ÷ 4 bis ÷ 5.'},
+  {f:'fbaGebuehren',label:'FBA-Gebühren / Stück',unit:'€',hint:'Grob: 4–6 € Standardgröße. Genau: 💶 Marge rechnen.'}
+];
+function qcMissing(){
+  if(!qcState.c)return [];
+  return QC_FIELDS.filter(function(x){return qcState.c[x.f]==null;});
+}
+function qcNumField(x,val){
+  return '<div style="background:var(--s1);border:1.5px solid '+(val!=null?'var(--gn)':'var(--ac)')+';border-radius:10px;padding:10px 14px">'+
+    '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+x.label+' '+(val!=null?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--ac)">fehlt</span>')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:6px"><input type="number" step="any" value="'+(val!=null?val:'')+'" placeholder="—" onchange="quickCheckField(\''+x.f+'\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:15px;font-weight:700;color:var(--tx);text-align:right;outline:none"><span style="font-size:12px;color:var(--tx3);flex-shrink:0">'+x.unit+'</span></div>'+
+    '<div style="font-size:9.5px;color:var(--tx3);margin-top:4px;line-height:1.35">'+x.hint+'</div></div>';
+}
+function quickCheckCompute(){qcState.step='result';renderQuickCheck();}
+window.quickCheckCompute=quickCheckCompute;
 
 function quickCheckSave(){
   if(!qcState.c)return;
@@ -911,7 +972,71 @@ function quickCheckSave(){
 }
 window.quickCheckSave=quickCheckSave;
 
-function quickCheckRenderResult(){
+// Klartext-Begründung: WARUM dieses Urteil? Je Dimension eine verständliche Zeile.
+function qcWhyHtml(c,vd){
+  var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:14px">';
+  h+='<div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:4px">🧠 Warum '+vd.label+'?</div>';
+  // Zusammenfassungs-Satz
+  var hardFlags=vd.flags.filter(function(f){return f.hard;});
+  var summary='';
+  if(vd.verdict==='nogo')summary=hardFlags.length?('Mindestens ein <b>hartes Warnsignal</b> macht dieses Produkt unattraktiv: '+esc(hardFlags[0].t)+(hardFlags.length>1?' (+'+(hardFlags.length-1)+' weitere)':'')):'Der Gesamtscore von <b>'+vd.score+' / 100</b> liegt unter 50 — zu viele Dimensionen sind schwach.';
+  else if(vd.verdict==='pruefen')summary=hardFlags.length?('Der Score wäre okay, aber ein hartes Warnsignal blockiert das GO: '+esc(hardFlags[0].t)):'Score '+vd.score+' / 100 — solide, aber nicht überzeugend. Die schwachen Dimensionen unten gezielt verbessern oder verwerfen.';
+  else if(vd.verdict==='go')summary='Score <b>'+vd.score+' / 100</b>, keine harten Warnsignale — die Zahlen sprechen für einen Versuch. Vor dem Geldausgeben: Muster + Dossier.';
+  else summary='Noch keine bewertbaren Daten — Zahlen unten eintragen.';
+  h+='<div style="font-size:12.5px;color:var(--tx2);line-height:1.55;margin-bottom:12px">'+summary+'</div>';
+  // Je Dimension eine Zeile: Wert + Begründung in Klartext
+  DECISION_DIMS.forEach(function(d){
+    var eff=decisionEff(c,d.key);
+    var a=decisionAuto(c,d.key);
+    var manual=(c.score2&&typeof c.score2[d.key]==='number'&&c.score2[d.key]>0);
+    var col=eff==null?'tx3':eff>=7?'gn':eff>=4?'ac':'rd';
+    var icon=eff==null?'⚪':eff>=7?'🟢':eff>=4?'🟡':'🔴';
+    var reason=manual?('manuell auf '+eff+'/10 gesetzt'):(a.reason||'');
+    h+='<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-top:1px solid var(--bd);font-size:12px">'+
+      '<span style="flex-shrink:0">'+icon+'</span>'+
+      '<span style="font-weight:700;color:var(--tx);min-width:130px;flex-shrink:0">'+esc(d.label)+' <span style="color:var(--tx3);font-weight:400">('+d.weight+' %)</span></span>'+
+      '<span style="font-weight:800;color:var(--'+col+');min-width:44px;flex-shrink:0">'+(eff!=null?eff+' / 10':'—')+'</span>'+
+      '<span style="color:var(--tx2);line-height:1.45">'+esc(reason)+'</span>'+
+    '</div>';
+  });
+  // Harte + weiche Flags ausformuliert
+  if(vd.flags.length){
+    h+='<div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.8px">Warnsignale</div>';
+    vd.flags.forEach(function(f){
+      h+='<div style="font-size:12px;color:var(--'+(f.hard?'rd':'ac')+');padding:3px 0">'+(f.hard?'🔴':'🟡')+' '+esc(f.t)+'</div>';
+    });
+  }
+  h+='</div>';
+  return h;
+}
+
+function quickCheckRenderStep(){ // Schritt 2: fehlende Daten ERST abfragen
+  var box=document.getElementById('qcResult');
+  if(!box||!qcState.c)return;
+  var c=qcState.c;
+  var missing=qcMissing();
+  var have=QC_FIELDS.filter(function(x){return c[x.f]!=null;});
+  var img=(c.compImages&&c.compImages[0])||'';
+  var h='<div style="background:var(--s1);border:1.5px solid var(--ac);border-radius:16px;padding:20px 24px">';
+  h+='<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap">'+
+    (img?'<img src="'+esc(img)+'" class="pzoom" style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--bd);background:#fff">':'')+
+    '<div style="flex:1;min-width:200px"><div style="font-weight:800;font-size:15px;color:var(--tx)">'+esc(c.name)+'</div>'+
+    '<div style="font-size:11.5px;color:var(--tx2);margin-top:2px">'+esc(qcState.fetchNote)+(have.length?' · Automatisch da: <b>'+have.map(function(x){return x.label;}).join(', ')+'</b>':'')+'</div></div>'+
+    '<span style="background:var(--acd);color:var(--ac);font-weight:800;font-size:11px;border-radius:10px;padding:4px 12px;flex-shrink:0">SCHRITT 2 / 3</span></div>';
+  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px">Für ein belastbares Urteil fehlen noch '+missing.length+' Zahl'+(missing.length===1?'':'en')+':</div>';
+  h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">Je mehr du ausfüllst, desto ehrlicher das Urteil — die Konfidenz-Anzeige zeigt später, worauf es beruht.</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">';
+  missing.forEach(function(x){h+=qcNumField(x,c[x.f]);});
+  h+='</div>';
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    '<button class="btn btn-p" onclick="quickCheckCompute()" style="font-weight:800">⚖️ Urteil berechnen</button>'+
+    '<button class="btn" onclick="quickCheckReset()">✕ Abbrechen</button>'+
+    '<span style="font-size:10.5px;color:var(--tx3);align-self:center;margin-left:auto">Auch mit Lücken möglich — fehlende Dimensionen bleiben dann unbewertet.</span>'+
+  '</div></div>';
+  box.innerHTML=h;
+}
+
+function quickCheckRenderResult(){ // Schritt 3: Urteil + Begründung + Zahlen editierbar
   var box=document.getElementById('qcResult');
   if(!box)return;
   var c=qcState.c;
@@ -923,41 +1048,28 @@ function quickCheckRenderResult(){
   var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
   var img=(c.compImages&&c.compImages[0])||'';
   var h='';
-  // ── Urteils-Karte ──
+  // Urteils-Karte
   h+='<div style="background:linear-gradient(135deg,var(--'+vd.color+'d),var(--s1));border:2px solid var(--'+vd.color+');border-radius:16px;padding:20px 24px;margin-bottom:14px">';
   h+='<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">';
   if(img)h+='<img src="'+esc(img)+'" class="pzoom" style="width:76px;height:76px;object-fit:cover;border-radius:12px;border:1px solid var(--bd);background:#fff;flex-shrink:0">';
   h+='<div style="flex:1;min-width:220px">'+
     '<div style="font-weight:800;font-size:16px;color:var(--tx);line-height:1.35">'+(c.compAsin?'<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" style="color:var(--tx);text-decoration:none;border-bottom:1px dashed var(--bd2)">'+esc(c.name)+' ↗</a>':esc(c.name))+'</div>'+
-    '<div style="font-size:12px;color:var(--tx2);margin-top:4px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+(qcState.fetchNote?esc(qcState.fetchNote)+' · ':'')+'<span style="color:var(--'+cf.color+')" title="Wie viele der 6 Dimensionen auf echten Daten beruhen">⚙️ '+cf.data+' / '+cf.total+' Dimensionen mit Daten</span></div>'+
+    '<div style="font-size:12px;color:var(--tx2);margin-top:4px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'<span style="color:var(--'+cf.color+')" title="Wie viele der 6 Dimensionen auf echten Daten beruhen">⚙️ '+cf.data+' / '+cf.total+' Dimensionen mit Daten</span> · 🧾 '+comp.total+' DE-Pflichten erkannt</div>'+
     (vd.weakest&&vd.score>0?'<div style="font-size:12px;color:var(--tx2);margin-top:4px">Größter Schwachpunkt: <b>'+esc(vd.weakest.label)+'</b> ('+vd.weakest.val+' / 10)</div>':'')+
   '</div>';
   h+='<div style="text-align:center;flex-shrink:0"><div style="font-size:44px;font-weight:800;color:var(--'+vd.color+');line-height:1;font-family:\'Playfair Display\',serif">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px">Score / 100</div></div>';
   h+='<div style="background:var(--'+vd.color+');color:#fff;font-weight:800;font-size:17px;padding:10px 20px;border-radius:12px;flex-shrink:0">'+emoji+' '+vd.label+'</div>';
-  h+='</div>';
-  if(vd.flags.length&&typeof pipeFlagChips==='function')h+='<div style="margin-top:12px">'+pipeFlagChips(vd.flags)+'</div>';
-  h+='</div>';
-  // ── Die 4 Kern-Zahlen: vorhandene zeigen, fehlende DIREKT eintragen ──
-  function numField(label,field,val,hint,unit){
-    return '<div style="background:var(--s1);border:1px solid '+(val!=null?'var(--gn)':'var(--bd2)')+';border-radius:10px;padding:10px 14px">'+
-      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+label+' '+(val!=null?'<span style="color:var(--gn)">✓</span>':'<span style="color:var(--ac)">fehlt</span>')+'</div>'+
-      '<div style="display:flex;align-items:center;gap:6px"><input type="number" step="any" value="'+(val!=null?val:'')+'" placeholder="—" oninput="quickCheckField(\''+field+'\',this.value)" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:7px 9px;font-family:inherit;font-size:14px;font-weight:700;color:var(--tx);text-align:right;outline:none"><span style="font-size:12px;color:var(--tx3);flex-shrink:0">'+unit+'</span></div>'+
-      '<div style="font-size:9.5px;color:var(--tx3);margin-top:4px;line-height:1.35">'+hint+'</div></div>';
-  }
+  h+='</div></div>';
+  // WARUM — Klartext je Dimension + Warnsignale
+  h+=qcWhyHtml(c,vd);
+  // Zahlen (weiter editierbar — Urteil aktualisiert nach Feld-Verlassen)
   h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:14px">';
-  h+='<div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:10px">📊 Die 4 Zahlen, die zählen <span style="font-weight:400;color:var(--tx3);font-size:11px">— eintippen aktualisiert das Urteil sofort</span></div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'+
-    numField('Top-10-Umsatz / Monat','top10Umsatz',c.top10Umsatz,'Aus Helium 10 Xray (⌀ Revenue) — misst die Nachfrage.','€')+
-    numField('⌀ Reviews Top-10','avgReviews',c.avgReviews,'Eintrittsbarriere: <300 gut, >1.000 schwer, >2.000 No-Go.','Rev.')+
-    numField('Verkaufspreis','vk',c.vk,'Preis des Konkurrenz-Listings.','€')+
-    numField('Einkaufspreis (Schätzung)','ek',c.ek,'Alibaba-Schätzung reicht: Faustregel VK ÷ 4 bis ÷ 5.','€')+
-  '</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px">'+
-    numField('FBA-Gebühren / Stück','fbaGebuehren',c.fbaGebuehren,'Grob: 4–6 € Standardgröße. Genau: 💶 Marge rechnen.','€')+
-    '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">Netto-Marge (auto)</div><div style="font-size:20px;font-weight:800;color:var(--'+(mm.val==null?'tx3':mm.val>=25?'gn':mm.val>=15?'ac':'rd')+')">'+(mm.val!=null?mm.val+' %':'—')+'</div><div style="font-size:9.5px;color:var(--tx3);margin-top:2px">(VK − EK − FBA) ÷ VK · Ziel ≥ 25 %</div></div>'+
-    '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">🧾 DE-Pflichten erkannt</div><div style="font-size:20px;font-weight:800;color:var(--tx)">'+comp.total+'</div><div style="font-size:9.5px;color:var(--tx3);margin-top:2px">'+(comp.special?'inkl. Spezial-Kategorie — Details nach Übernahme im Editor':'nur Grundpflichten')+'</div></div>'+
-  '</div></div>';
-  // ── Aktionen ──
+  h+='<div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:10px">📊 Zahlen anpassen <span style="font-weight:400;color:var(--tx3);font-size:11px">— Feld verlassen (Tab/Enter) aktualisiert das Urteil</span></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">';
+  QC_FIELDS.forEach(function(x){h+=qcNumField(x,c[x.f]);});
+  h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">Netto-Marge (auto)</div><div style="font-size:20px;font-weight:800;color:var(--'+(mm.val==null?'tx3':mm.val>=25?'gn':mm.val>=15?'ac':'rd')+')">'+(mm.val!=null?mm.val+' %':'—')+'</div><div style="font-size:9.5px;color:var(--tx3);margin-top:2px">(VK − EK − FBA) ÷ VK · Ziel ≥ 25 %</div></div>';
+  h+='</div></div>';
+  // Aktionen
   h+='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
     '<button class="btn btn-p" onclick="quickCheckSave()" style="font-weight:800">💾 Als Kandidat übernehmen</button>'+
     '<button class="btn" onclick="quickCheckReset()">🔄 Verwerfen &amp; nächstes Produkt</button>'+
@@ -971,20 +1083,29 @@ function renderQuickCheck(){
   if(!el)return;
   var h='';
   h+='<div style="max-width:860px;margin:0 auto">';
-  // ── Eingabe-Karte ──
+  // Eingabe-Karte (Schritt 1)
   h+='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:16px;padding:26px 28px;margin-bottom:16px;text-align:center">'+
     '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px">Lohnt sich dieses Produkt?</div>'+
-    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Amazon-Link oder ASIN einfügen — oder Produktname eintippen und Zahlen aus Helium ergänzen.</div>'+
+    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Schritt 1: Amazon-Link oder ASIN einfügen · Schritt 2: fehlende Zahlen ergänzen · Schritt 3: Urteil mit Begründung.</div>'+
     '<div style="display:flex;gap:8px;max-width:560px;margin:0 auto">'+
-      '<input id="qcInput" placeholder="https://www.amazon.de/dp/… oder B0XXXXXXXX" onkeydown="if(event.key===\'Enter\')quickCheckRun()" style="flex:1;background:var(--s1);border:1.5px solid var(--bd2);border-radius:11px;padding:13px 16px;font-family:inherit;font-size:14px;color:var(--tx);outline:none" onfocus="this.style.borderColor=\'var(--ac)\'" onblur="this.style.borderColor=\'var(--bd2)\'">'+
-      '<button class="btn btn-p" onclick="quickCheckRun()" style="font-weight:800;white-space:nowrap" '+(qcState.loading?'disabled':'')+'>'+(qcState.loading?'⏳ Lade …':'⚡ Prüfen')+'</button>'+
+      '<input id="qcInput" placeholder="https://www.amazon.de/dp/… oder B0XXXXXXXX" onkeydown="if(event.key===\'Enter\')quickCheckRun()" '+(qcState.step==='loading'?'disabled':'')+' style="flex:1;background:var(--s1);border:1.5px solid var(--bd2);border-radius:11px;padding:13px 16px;font-family:inherit;font-size:14px;color:var(--tx);outline:none" onfocus="this.style.borderColor=\'var(--ac)\'" onblur="this.style.borderColor=\'var(--bd2)\'">'+
+      '<button class="btn btn-p" onclick="quickCheckRun()" style="font-weight:800;white-space:nowrap" '+(qcState.step==='loading'?'disabled':'')+'>'+(qcState.step==='loading'?'⏳ Prüfe …':'⚡ Prüfen')+'</button>'+
     '</div>'+
     '<div style="font-size:10.5px;color:var(--tx3);margin-top:10px">Nichts wird gespeichert, bis du „Übernehmen" klickst — Verwerfen kostet nichts.</div>'+
   '</div>';
+  // Fortschritts-Karte (nur beim Laden)
+  if(qcState.step==='loading'){
+    h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:20px 24px;margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span id="qcProgLabel" style="font-size:13px;font-weight:700;color:var(--tx)">'+esc(qcState.progLabel||'Starte Prüfung …')+'</span><span id="qcProgPct" style="font-size:16px;font-weight:800;color:var(--ac)">'+Math.round(qcState.progress)+' %</span></div>'+
+      '<div style="height:10px;background:var(--s2);border-radius:6px;overflow:hidden"><div id="qcProgBar" style="height:100%;width:'+qcState.progress+'%;background:linear-gradient(90deg,var(--ac),var(--gn));transition:width .3s ease"></div></div>'+
+      '<div style="font-size:10.5px;color:var(--tx3);margin-top:8px">Listing laden → Daten lesen → DE-Pflichten prüfen → fehlende Zahlen abfragen → Urteil</div>'+
+    '</div>';
+  }
   h+='<div id="qcResult"></div>';
   h+='</div>';
   el.innerHTML=h;
-  quickCheckRenderResult();
+  if(qcState.step==='data')quickCheckRenderStep();
+  else if(qcState.step==='result')quickCheckRenderResult();
 }
 window.renderQuickCheck=renderQuickCheck;
 
