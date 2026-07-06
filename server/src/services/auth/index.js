@@ -7,8 +7,8 @@ import { promisify } from 'node:util';
 import { config } from '../../core/config.js';
 import { log } from '../../core/logger.js';
 import {
-  createUser, findByEmail, updateLastLogin, updatePassword,
-  createSession, findValidSession, touchSession, deleteSession,
+  createUser, findByEmail, findById, listUsers, updateLastLogin, updatePassword, updateRole,
+  createSession, findValidSession, touchSession, deleteSession, deleteSessionsForUser,
 } from '../../data/db.js';
 
 const scrypt = promisify(crypto.scrypt);
@@ -133,6 +133,39 @@ export async function changePassword(user, currentPassword, newPassword) {
   }
   await updatePassword(row.id, await hashPassword(newPassword));
   log.info(`Auth: Passwort geändert für ${row.email}`);
+  return { status: 200, ok: true };
+}
+
+// ── Nutzer-Admin (Modul 4) — Betreiber-Funktionen; die Routen prüfen den ADMIN_KEY ──
+
+// UUID-Format vorab prüfen: sonst wirft Postgres bei kaputten IDs (uuid-Spalte) einen 500er.
+const validId = (id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id || ''));
+
+/** Alle Konten (öffentliche Felder) — für die Betreiber-Übersicht. */
+export async function adminListUsers() {
+  return (await listUsers()).map(publicUser);
+}
+
+/** Passwort-Reset durch den Betreiber: setzt neu UND widerruft alle Sessions des Kontos. */
+export async function adminResetPassword(userId, newPassword) {
+  if (!validId(userId)) return { status: 404, error: 'Konto nicht gefunden' };
+  if (typeof newPassword !== 'string' || newPassword.length < 8) {
+    return { status: 400, error: 'Neues Passwort muss mindestens 8 Zeichen haben' };
+  }
+  const user = await findById(userId);
+  if (!user) return { status: 404, error: 'Konto nicht gefunden' };
+  await updatePassword(user.id, await hashPassword(newPassword));
+  const revoked = await deleteSessionsForUser(user.id);
+  log.info(`Auth: Admin-Passwort-Reset für ${user.email} (${revoked} Session(s) widerrufen)`);
+  return { status: 200, ok: true, revokedSessions: revoked };
+}
+
+/** Rolle setzen ('user' | 'admin') — z. B. Betreiber-Konto zum Admin machen. */
+export async function adminSetRole(userId, role) {
+  if (role !== 'user' && role !== 'admin') return { status: 400, error: 'Rolle muss "user" oder "admin" sein' };
+  if (!validId(userId)) return { status: 404, error: 'Konto nicht gefunden' };
+  if (!(await updateRole(userId, role))) return { status: 404, error: 'Konto nicht gefunden' };
+  log.info(`Auth: Rolle geändert → ${role} (${userId})`);
   return { status: 200, ok: true };
 }
 

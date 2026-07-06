@@ -32,6 +32,18 @@ export async function deleteSession(tokenHash) {
   await db().query(`DELETE FROM sessions WHERE token_hash = $1`, [tokenHash]);
 }
 
+/** Alle Sessions eines Kontos widerrufen (Admin-Passwort-Reset). Liefert die Anzahl. */
+export async function deleteSessionsForUser(userId) {
+  const r = await db().query(`DELETE FROM sessions WHERE user_id = $1`, [userId]);
+  return r.rowCount || 0;
+}
+
+/** Abgelaufene Sessions endgültig entfernen (Worker-Aufräumlauf). Liefert die Anzahl. */
+export async function deleteExpiredSessions(now) {
+  const r = await db().query(`DELETE FROM sessions WHERE expires_at <= $1`, [now.toISOString()]);
+  return r.rowCount || 0;
+}
+
 /** Anzahl aktiver (nicht abgelaufener) Sessions — read-only für /internal. */
 export async function countActiveSessions(now) {
   const r = await db().query(`SELECT count(*) AS n FROM sessions WHERE expires_at > $1`,

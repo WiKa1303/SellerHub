@@ -6,7 +6,7 @@
 import { pathToFileURL } from 'node:url';
 import cron from 'node-cron';
 import { config, validateConfig } from '../core/config.js';
-import { initDb } from '../data/db.js';
+import { initDb, deleteExpiredSessions } from '../data/db.js';
 import { runCrawl } from '../services/crawler/run.js';
 import { runIntelligencePipeline } from '../services/intelligence/registry.js';
 import { aiEnabled } from '../core/ai-client.js';
@@ -14,6 +14,10 @@ import { log } from '../core/logger.js';
 
 /** Ein kompletter Verarbeitungslauf. Fehler einzelner Stufen sind isoliert. */
 export async function crawlAndAnalyze() {
+  try {
+    const removed = await deleteExpiredSessions(new Date());
+    if (removed > 0) log.info(`Session-Aufräumen: ${removed} abgelaufene Session(s) entfernt`);
+  } catch (e) { log.error('Session-Aufräumen fehlgeschlagen:', e.message); }
   await runCrawl();
   const results = await runIntelligencePipeline();
   log.info('Intelligence-Pipeline:', JSON.stringify(results));

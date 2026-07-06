@@ -300,6 +300,38 @@ function syLogout(){
   syToast('☁️ Vom Cloud-Konto abgemeldet — Daten bleiben lokal erhalten');
 }
 
+// ─── Passwort ändern (POST /api/auth/change-password, Modul 4) ───
+function syPwErr(msg){var e=document.getElementById('syPwError');if(e){e.textContent=msg;e.style.display='block';}}
+function syPwOpen(){
+  syMenuHide();
+  if(!syToken())return syOpen();
+  ['syPwCur','syPwNew','syPwNew2'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var err=document.getElementById('syPwError');if(err)err.style.display='none';
+  var mo=document.getElementById('syPwModal');if(mo)mo.classList.add('show');
+  var cur=document.getElementById('syPwCur');if(cur)setTimeout(function(){cur.focus();},50);
+}
+function syPwClose(){var mo=document.getElementById('syPwModal');if(mo)mo.classList.remove('show');}
+function syPwSubmit(){
+  var cur=document.getElementById('syPwCur').value||'';
+  var nw=document.getElementById('syPwNew').value||'';
+  var nw2=document.getElementById('syPwNew2').value||'';
+  var err=document.getElementById('syPwError');if(err)err.style.display='none';
+  if(!cur||!nw)return syPwErr('Bitte alle Felder ausfüllen.');
+  if(nw.length<8)return syPwErr('Das neue Passwort braucht mindestens 8 Zeichen.');
+  if(nw!==nw2)return syPwErr('Die neuen Passwörter stimmen nicht überein.');
+  if(nw===cur)return syPwErr('Das neue Passwort muss sich vom aktuellen unterscheiden.');
+  var sb=document.getElementById('syPwSubmitBtn');if(sb)sb.disabled=true;
+  syFetch('/api/auth/change-password',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({currentPassword:cur,newPassword:nw})
+  }).then(function(res){return res.json().catch(function(){return {};}).then(function(d){
+    if(sb)sb.disabled=false;
+    if(!res.ok)return syPwErr(d.error||('Passwort-Änderung fehlgeschlagen (HTTP '+res.status+')'));
+    syPwClose();
+    syToast('🔑 Cloud-Passwort geändert');
+  });}).catch(function(){if(sb)sb.disabled=false;syPwErr('Server nicht erreichbar.');});
+}
+
 // ─── Icon-Klick + Mini-Menü (angemeldet: E-Mail, Jetzt syncen, Abmelden) ───
 function syBtnClick(){
   if(!syToken())return syOpen();
@@ -355,6 +387,9 @@ window.syMode=syMode;
 window.sySubmit=sySubmit;
 window.syLogout=syLogout;
 window.syNow=syNow;
+window.syPwOpen=syPwOpen;
+window.syPwClose=syPwClose;
+window.syPwSubmit=syPwSubmit;
 window.syFetch=syFetch;
 
 if(syToken()){sySetState('pending');syPull();}

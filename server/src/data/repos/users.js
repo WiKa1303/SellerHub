@@ -28,3 +28,22 @@ export async function updateLastLogin(id) {
 export async function updatePassword(id, passwordHash) {
   await db().query(`UPDATE users SET password_hash = $2 WHERE id = $1`, [id, passwordHash]);
 }
+
+// ── Nutzer-Admin (Modul 4) ──
+
+export async function findById(id) {
+  const r = await db().query(`SELECT ${USER_COLS} FROM users WHERE id = $1`, [id]);
+  return r.rows[0] || null;
+}
+
+/** Alle Konten, neueste zuerst — password_hash bleibt im Repo (Service gibt publicUser raus). */
+export async function listUsers() {
+  const r = await db().query(`SELECT ${USER_COLS} FROM users ORDER BY created_at DESC`);
+  return r.rows;
+}
+
+/** Rolle setzen ('user' | 'admin' — der Service validiert). Liefert true bei Treffer. */
+export async function updateRole(id, role) {
+  const r = await db().query(`UPDATE users SET role = $2 WHERE id = $1`, [id, role]);
+  return (r.rowCount || 0) > 0;
+}

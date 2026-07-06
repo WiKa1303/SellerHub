@@ -22,7 +22,8 @@ SellerHub/
 └── backups/            ← alte Stände (inkl. SellerHub.BACKUP-vor-split.html), nicht bearbeiten
 ```
 - Die Blöcke wurden 1:1 an den ursprünglichen `<script>`/`<style>`-Grenzen extrahiert — Lade-Reihenfolge und Positionen im Dokument sind unverändert. Neue Features weiterhin in `js/app.js` (bzw. Seiten-HTML in `index.html`).
-- Helles Theme, Schriften DM Sans + Playfair Display (Google-Fonts-Link). Login-Standard-Admin: `wika01` / `wika1303`.
+- Helles Theme, Schriften DM Sans + Playfair Display (Google-Fonts-Link).
+- **Login = Cloud-Konto** (seit 6.7.2026, Modul 4): Das Gate in `js/auth.js` authentifiziert gegen das Radar-Backend (`/api/auth/login`, gleiche Konten wie der Cloud-Sync `sy_token`/`sy_user`). Registrierung braucht den `REGISTRATION_CODE` (Railway-Var). Offline-Pfad: war das Gerät schon mal angemeldet, gibt es bei Server-Ausfall „Offline weiterarbeiten". Der alte lokale WikaAuth-Store (`wika_users_v1`, wika01/wika1303) ist abgelöst; `window.WikaAuth` existiert nur noch als Kompatibilitäts-Schicht für admin.js/app.js.
 - Code-Bezeichner heißen intern teils `wika`/`Wika` (z. B. `WikaAuth`) — NICHT umbenennen, nur die sichtbare Marke ist „SellerHub".
 - ⚠️ App-DATEN hängen am Browser-Speicherpfad: Der Wechsel von `SellerHub.html` auf `index.html` ist ein neuer Pfad → einmalig Daten migrieren via Export (in `backups/SellerHub.BACKUP-vor-split.html` öffnen → ⬇ Export) und Import in `index.html`.
 
@@ -36,7 +37,7 @@ SellerHub/
 Die App ist rein statisch. Upload-Skript: **`./deploy-frontend.sh`** (rsync, lädt nur index.html + css/ + js/; Zugangsdaten aus netcup CCP → Webhosting als `WEBSPACE_HOST`/`WEBSPACE_USER`).
 Das Backend (Seller-Radar) läuft separat auf Railway: https://radar-production-388a.up.railway.app (Custom Domain api.amzsellerhub.de eingerichtet, wartet auf DENIC-Delegation). CORS ist offen, Standard-API-URL steht in js/app.js (`RADAR_API_DEFAULT`).
 - Auf einer echten Domain ist `localStorage` an die **Domain** gebunden (stabil), nicht mehr an den Dateipfad wie bei `file://`. Daten von lokal mitnehmen: Export/Import (`sellerhub-data.json`).
-- ⚠️ Der eingebaute Login (`WikaAuth`) ist nur clientseitig — kein echter Schutz, da jeder den Quelltext lesen kann. Für einen öffentlichen, geschützten Live-Betrieb später ein Backend nötig.
+- Der Login läuft seit Modul 4 gegen das Backend (echte Konten, scrypt + Sessions). Die App-DATEN liegen weiterhin im localStorage des Browsers — das Gate schützt den Zugang, nicht die lokalen Daten.
 
 ## Aufbau (Kurz)
 - Seiten = `<div class="page" id="p-NAME">`, Wechsel über `go('name')`; Sidebar-Navigation als Accordion.

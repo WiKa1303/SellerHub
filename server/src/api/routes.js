@@ -9,7 +9,7 @@ import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
 import { log } from '../core/logger.js';
 import { renderInternal } from './internal.js';
-import { registerUser, loginUser, logoutSession, changePassword, authMiddleware } from '../services/auth/index.js';
+import { registerUser, loginUser, logoutSession, changePassword, authMiddleware, adminListUsers, adminResetPassword, adminSetRole } from '../services/auth/index.js';
 import { listSyncData, applySyncBatch } from '../services/sync/index.js';
 import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
 import { importProduct, proxyImage as proxyImportImage } from '../services/import/index.js';
@@ -355,12 +355,46 @@ export function buildApi() {
     });
   });
 
-  // POST /api/admin/crawl – manueller Trigger (ADMIN_KEY); danach die komplette Intelligence-Pipeline (async)
-  app.post('/api/admin/crawl', async (req, res) => {
+  // ADMIN_KEY-Wächter (X-Api-Key) — leerer/ungesetzter Key = Admin-Endpunkte deaktiviert
+  const requireAdminKey = (req, res, next) => {
     if (!config.adminKey || req.get('X-Api-Key') !== config.adminKey) return res.status(401).json({ error: 'unauthorized' });
+    next();
+  };
+
+  // POST /api/admin/crawl – manueller Trigger (ADMIN_KEY); danach die komplette Intelligence-Pipeline (async)
+  app.post('/api/admin/crawl', requireAdminKey, async (req, res) => {
     const stats = await runCrawl();
     runIntelligencePipeline().catch(() => {});
     res.json({ ok: true, stats });
+  });
+
+  // ═══ Nutzer-Admin (Modul 4) — Betreiber-Endpunkte hinter ADMIN_KEY ═══
+
+  // GET /api/admin/users – alle Konten (öffentliche Felder)
+  app.get('/api/admin/users', requireAdminKey, async (req, res) => {
+    try {
+      res.set('Cache-Control', 'no-store');
+      const users = await adminListUsers();
+      res.json({ users, count: users.length });
+    } catch (e) { fail(res, e); }
+  });
+
+  // POST /api/admin/users/:id/reset-password – {newPassword}; widerruft alle Sessions des Kontos
+  app.post('/api/admin/users/:id/reset-password', requireAdminKey, express.json(), async (req, res) => {
+    try {
+      const r = await adminResetPassword(req.params.id, (req.body || {}).newPassword);
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      res.json({ ok: true, revokedSessions: r.revokedSessions });
+    } catch (e) { fail(res, e); }
+  });
+
+  // POST /api/admin/users/:id/role – {role: 'user' | 'admin'}
+  app.post('/api/admin/users/:id/role', requireAdminKey, express.json(), async (req, res) => {
+    try {
+      const r = await adminSetRole(req.params.id, (req.body || {}).role);
+      if (r.error) return res.status(r.status).json({ error: r.error });
+      res.json({ ok: true });
+    } catch (e) { fail(res, e); }
   });
 
   return app;

@@ -1,7 +1,7 @@
 // ═══ Konten & Daten-Sync-Tests (Modul 1): Register, Login, Sessions, Sync, Limits ═══
 //   node test/auth.test.js
 import { newDb } from 'pg-mem';
-import { initDb, db, createSession, findValidSession } from '../src/data/db.js';
+import { initDb, db, createSession, findValidSession, deleteExpiredSessions } from '../src/data/db.js';
 import { buildApi } from '../src/api/routes.js';
 import { config } from '../src/core/config.js';
 import { hashPassword, verifyPassword, sha256, _resetLoginLimiter } from '../src/services/auth/index.js';
@@ -153,6 +153,14 @@ await createSession({ tokenHash: sha256('abgelaufen'), userId, expiresAt: new Da
 t('findValidSession: abgelaufene Session → null',
   await findValidSession(sha256('abgelaufen'), new Date()) === null);
 
+// ── Session-Aufräumen (Worker): abgelaufene löschen, gültige behalten ──
+await createSession({ tokenHash: sha256('noch-gueltig'), userId, expiresAt: new Date(Date.now() + 864e5) });
+const removed = await deleteExpiredSessions(new Date());
+t('deleteExpiredSessions: entfernt abgelaufene Session(s)', removed >= 1, removed + ' entfernt');
+const restHashes = (await db().query(`SELECT token_hash FROM sessions`)).rows.map(x => x.token_hash);
+t('deleteExpiredSessions: abgelaufene weg aus der Tabelle', !restHashes.includes(sha256('abgelaufen')));
+t('deleteExpiredSessions: gültige Session bleibt erhalten', restHashes.includes(sha256('noch-gueltig')));
+
 // ── Login-Rate-Limit: max. 10 Fehlversuche / 15 min je E-Mail ──
 _resetLoginLimiter();
 await post('/api/auth/register', { email: 'limit@test.de', password: 'passwort1', inviteCode: 'einladung-123' });
@@ -164,6 +172,48 @@ t('Rate-Limit: 11. Versuch → 429 (auch mit korrektem Passwort)', r.status === 
 _resetLoginLimiter();
 r = await post('/api/auth/login', { email: 'limit@test.de', password: 'passwort1' });
 t('Rate-Limit: nach Fenster-Reset wieder Login möglich', r.status === 200);
+
+// ── Nutzer-Admin (Modul 4): ADMIN_KEY-Endpunkte ──
+config.adminKey = 'admin-test-key';
+const adm = (path, body, method) => fetch(base + path, {
+  method: method || (body ? 'POST' : 'GET'),
+  headers: { 'Content-Type': 'application/json', 'X-Api-Key': 'admin-test-key' },
+  body: body ? JSON.stringify(body) : undefined,
+});
+r = await fetch(base + '/api/admin/users');
+t('admin/users: ohne X-Api-Key → 401', r.status === 401);
+r = await fetch(base + '/api/admin/users', { headers: { 'X-Api-Key': 'falscher-key' } });
+t('admin/users: falscher Key → 401', r.status === 401);
+r = await adm('/api/admin/users');
+let admd = await r.json();
+t('admin/users: Kontenliste mit öffentlichen Feldern', r.status === 200 && admd.count >= 2
+  && admd.users.every(u => u.email && !('password_hash' in u)), admd.count + ' Konten');
+const anna = admd.users.find(u => u.email === 'anna@test.de');
+
+r = await adm('/api/admin/users/' + anna.id + '/role', { role: 'chef' });
+t('admin/role: ungültige Rolle → 400', r.status === 400);
+r = await adm('/api/admin/users/' + anna.id + '/role', { role: 'admin' });
+t('admin/role: Rolle → admin gesetzt', r.status === 200);
+r = await adm('/api/admin/users');
+admd = await r.json();
+t('admin/role: Liste zeigt neue Rolle', admd.users.find(u => u.id === anna.id).role === 'admin');
+r = await adm('/api/admin/users/kaputte-id/role', { role: 'user' });
+t('admin/role: kaputte ID → 404 (kein 500)', r.status === 404);
+
+// Reset: Anna anmelden, dann Passwort per Admin resetten → Session weg, neues PW gilt
+r = await post('/api/auth/login', { email: 'anna@test.de', password: 'neues-passwort' });
+const annaToken = (await r.json()).token;
+r = await adm('/api/admin/users/' + anna.id + '/reset-password', { newPassword: 'kurz' });
+t('admin/reset: zu kurzes Passwort → 400', r.status === 400);
+r = await adm('/api/admin/users/' + anna.id + '/reset-password', { newPassword: 'reset-passwort-1' });
+const resetd = await r.json();
+t('admin/reset: 200 + widerrufene Sessions', r.status === 200 && resetd.revokedSessions >= 1, JSON.stringify(resetd));
+r = await get('/api/auth/me', annaToken);
+t('admin/reset: alte Session danach ungültig (me → 401)', r.status === 401);
+r = await post('/api/auth/login', { email: 'anna@test.de', password: 'reset-passwort-1' });
+t('admin/reset: Login mit neuem Passwort funktioniert', r.status === 200);
+r = await adm('/api/admin/users/' + crypto.randomUUID() + '/reset-password', { newPassword: 'reset-passwort-1' });
+t('admin/reset: unbekannte (valide) UUID → 404', r.status === 404);
 
 // ── /internal zeigt die Konten-Sektion (read-only) ──
 r = await fetch(base + '/internal');

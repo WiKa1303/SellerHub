@@ -1,31 +1,35 @@
 /* ═══════════════════════════════════════════════════════════════
-   WIKA AUTH SYSTEM
-   - User store in localStorage (key: wika_users_v1)
-   - Session in sessionStorage
-   - Roles: 'admin' | 'user'
-   - Password expires after 14 days -> forced change
+   SELLERHUB AUTH — Cloud-Login (Modul 4)
+   - Anmeldung läuft gegen das Radar-Backend (/api/auth) — dieselben
+     Konten wie der Cloud-Sync (js/sync.js, sy_token/sy_user).
+   - window.WikaAuth bleibt als Kompatibilitäts-Schicht für admin.js/
+     app.js erhalten (Lizenz-Logik ist Geschichte: Cloud-Konto = permanent).
+   - Offline-Pfad: Gerät war schon mal angemeldet (sy_user vorhanden),
+     Server nicht erreichbar → "Offline weiterarbeiten" (Daten sind lokal).
    ═══════════════════════════════════════════════════════════════ */
 (function(){
   document.documentElement.style.overflow='hidden';
   document.body.style.overflow='hidden';
 
-  var USERS_KEY='wika_users_v1';
-  var SESSION_KEY='wika_auth_session_v2';
-  var FAIL_KEY='wika_auth_fails_v1';
-  var PW_LIFETIME_DAYS=14;
-  var PW_LIFETIME_MS=PW_LIFETIME_DAYS*24*60*60*1000;
+  var USERS_KEY='wika_users_v1'; // Alt-Store (v1) — nur noch für admin.js-Kompatibilität
 
-  // ── Hash function (simple but better than plaintext) ──
+  // ── API-Basis: identische Logik wie syApi() in js/sync.js (lädt erst später) ──
+  var API_DEFAULT='https://radar-production-388a.up.railway.app';
+  function api(){try{return (localStorage.getItem('wika_radar_api')||API_DEFAULT).replace(/\/+$/,'');}catch(e){return API_DEFAULT;}}
+
+  function syToken(){try{return localStorage.getItem('sy_token')||'';}catch(e){return '';}}
+  function syUser(){try{return JSON.parse(localStorage.getItem('sy_user')||'null');}catch(e){return null;}}
+  function syStore(token,user){
+    localStorage.setItem('sy_token',token);
+    localStorage.setItem('sy_user',JSON.stringify(user||{}));
+  }
+
+  // ── Alt-Hash (FNV-1a) — nur noch für den v1-Store in admin.js ──
   function hash(s){
-    // Salted hash via repeated FNV-1a — not cryptographic but fine for a local tool
     var salt='wika_salt_2024_';
     var str=salt+s+salt;
     var h=2166136261;
-    for(var i=0;i<str.length;i++){
-      h^=str.charCodeAt(i);
-      h=(h*16777619)>>>0;
-    }
-    // Mix again
+    for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=(h*16777619)>>>0;}
     var s2=h.toString(16);
     for(var j=0;j<3;j++){
       var h2=2166136261;
@@ -34,51 +38,12 @@
     }
     return s2;
   }
-
-  // ── User store API ──
   function loadUsers(){
-    try{
-      var raw=localStorage.getItem(USERS_KEY);
-      if(!raw)return null;
-      return JSON.parse(raw);
-    }catch(e){return null;}
+    try{var raw=localStorage.getItem(USERS_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
   }
   function saveUsers(arr){
-    try{localStorage.setItem(USERS_KEY,JSON.stringify(arr));return true;}
-    catch(e){return false;}
+    try{localStorage.setItem(USERS_KEY,JSON.stringify(arr));return true;}catch(e){return false;}
   }
-  function ensureSeed(){
-    var users=loadUsers();
-    if(users && users.length){
-      // Migration: ensure all users have license fields
-      var changed=false;
-      for(var i=0;i<users.length;i++){
-        if(typeof users[i].email==='undefined'){users[i].email='';changed=true;}
-        if(typeof users[i].status==='undefined'){users[i].status=users[i].role==='admin'?'active':'active';changed=true;}
-        if(typeof users[i].licenseKey==='undefined'){users[i].licenseKey=users[i].role==='admin'?'WIKA-ADMIN-PERMANENT':genLicense();changed=true;}
-        if(typeof users[i].licenseExpiresAt==='undefined'){users[i].licenseExpiresAt=users[i].role==='admin'?null:(users[i].pwSetAt||Date.now())+PW_LIFETIME_MS;changed=true;}
-      }
-      if(changed)saveUsers(users);
-      return users;
-    }
-    // First start: create admin (permanent license)
-    var seed=[{
-      username:'wika01',
-      email:'',
-      passHash:hash('wika1303'),
-      role:'admin',
-      status:'active',
-      pwSetAt:Date.now(),
-      mustChange:false,
-      createdAt:Date.now(),
-      licenseKey:'WIKA-ADMIN-PERMANENT',
-      licenseExpiresAt:null  // null = permanent
-    }];
-    saveUsers(seed);
-    return seed;
-  }
-
-  // ── License key generator: WIKA-XXXX-XXXX-XXXX ──
   function genLicense(){
     var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     function block(n){
@@ -95,35 +60,11 @@
     return 'WIKA-'+block(4)+'-'+block(4)+'-'+block(4);
   }
 
-  ensureSeed();
-
-  // ── Notfall-Reset: Datei mit #reset öffnen, um den Admin-Login wiederherzustellen ──
-  try{
-    if((location.hash||'').toLowerCase().indexOf('reset')>-1){
-      var _ru=loadUsers()||[];
-      var _admin=null;
-      for(var _ri=0;_ri<_ru.length;_ri++){ if(_ru[_ri].role==='admin'){_admin=_ru[_ri];break;} }
-      if(!_admin && _ru.length){_admin=_ru[0];}
-      if(_admin){
-        _admin.passHash=hash('wika1303');
-        _admin.pwSetAt=Date.now();
-        _admin.mustChange=false;
-        _admin.status='active';
-        if(_admin.role==='admin')_admin.licenseExpiresAt=null;
-        saveUsers(_ru);
-      }
-      try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
-      try{localStorage.removeItem(FAIL_KEY);localStorage.removeItem(FAIL_KEY+'_until');}catch(e){}
-      try{if(location.hash)history.replaceState(null,'',location.pathname);}catch(e){}
-      alert('🔓 Login wurde zurückgesetzt.\n\nBenutzer: '+(_admin?_admin.username:'wika01')+'\nPasswort: wika1303\n\nBitte melde dich an und ändere das Passwort danach.');
-    }
-  }catch(e){}
-
-  // Expose to global so admin page can use them
+  // ── Kompat-Schicht: admin.js/app.js erwarten window.WikaAuth ──
   window.WikaAuth={
     USERS_KEY:USERS_KEY,
-    PW_LIFETIME_DAYS:PW_LIFETIME_DAYS,
-    PW_LIFETIME_MS:PW_LIFETIME_MS,
+    PW_LIFETIME_DAYS:14,
+    PW_LIFETIME_MS:14*24*60*60*1000,
     hash:hash,
     genLicense:genLicense,
     loadUsers:loadUsers,
@@ -144,61 +85,45 @@
       }
       return null;
     },
-    daysLeft:function(u){
-      return PW_LIFETIME_DAYS; // Passwortablauf deaktiviert -> immer volle Laufzeit, keine Warnung
-    },
-    isExpired:function(u){
-      return false; // Passwortablauf dauerhaft abgeschaltet (kein 14-Tage-Zwang mehr)
-    },
-    // License helpers
-    licenseDaysLeft:function(u){
-      if(!u)return 0;
-      if(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined')return Infinity;
-      var left=u.licenseExpiresAt-Date.now();
-      return Math.max(0,Math.ceil(left/(24*60*60*1000)));
-    },
-    licenseMsLeft:function(u){
-      if(!u)return 0;
-      if(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined')return Infinity;
-      return Math.max(0,u.licenseExpiresAt-Date.now());
-    },
-    isLicenseExpired:function(u){
-      if(!u)return true;
-      if(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined')return false;
-      return Date.now()>=u.licenseExpiresAt;
-    },
+    // Passwort-/Lizenz-Ablauf: mit Cloud-Konten dauerhaft deaktiviert
+    daysLeft:function(){return 14;},
+    isExpired:function(){return false;},
+    licenseDaysLeft:function(){return Infinity;},
+    licenseMsLeft:function(){return Infinity;},
+    isLicenseExpired:function(){return false;},
+    // Cloud-Nutzer im alten Nutzer-Format (username/role/…): quelle = sy_user
     currentUser:function(){
-      try{
-        var raw=sessionStorage.getItem(SESSION_KEY);
-        if(!raw)return null;
-        var s=JSON.parse(raw);
-        if(!s||!s.username)return null;
-        return this.findUser(s.username);
-      }catch(e){return null;}
+      var u=syUser();
+      if(!u)return null;
+      if(!syToken() && !offlineMode)return null;
+      return {
+        username:u.displayName||String(u.email||'').split('@')[0]||'Cloud-Nutzer',
+        email:u.email||'',
+        role:u.role==='admin'?'admin':'user',
+        status:'active',
+        pwSetAt:0,mustChange:false,createdAt:0,
+        licenseKey:'CLOUD',
+        licenseExpiresAt:null // null = permanent (Lizenz-Anzeigen zeigen ∞)
+      };
     },
     logout:function(){
-      try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
+      var t=syToken();
+      if(t){try{fetch(api()+'/api/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}}).catch(function(){});}catch(e){}}
+      try{localStorage.removeItem('sy_token');localStorage.removeItem('sy_user');}catch(e){}
       location.reload();
     }
   };
 
-  // ── If session valid, unlock immediately ──
-  try{
-    var raw=sessionStorage.getItem(SESSION_KEY);
-    if(raw){
-      var s=JSON.parse(raw);
-      var u=window.WikaAuth.findUser(s&&s.username);
-      if(u && !window.WikaAuth.isExpired(u) && !u.mustChange){
-        wikaUnlock(true);
-        return;
-      }else{
-        // Session exists but user expired/changed -> drop session
-        sessionStorage.removeItem(SESSION_KEY);
-      }
-    }
-  }catch(e){}
+  var offlineMode=false; // "Offline weiterarbeiten" gewählt (kein Token, aber lokale Daten)
 
-  // ── UI helpers ──
+  // ── Gültige Cloud-Sitzung auf diesem Gerät? → direkt entsperren ──
+  // (Server-Prüfung passiert lazy: sync.js verwirft den Token bei 401.)
+  if(syToken()){
+    wikaUnlock(true);
+    return;
+  }
+
+  // ── UI-Helfer ──
   window.wikaTogglePw=function(inputId,btnId){
     var i=document.getElementById(inputId);
     var b=document.getElementById(btnId);
@@ -208,21 +133,16 @@
   };
 
   function showLoginErr(msg){var e=document.getElementById('wikaLoginError');e.textContent=msg;e.style.display='block';}
-  function clearLoginErr(){document.getElementById('wikaLoginError').style.display='none';}
-  function showChangeErr(msg){var e=document.getElementById('wikaChangePwError');e.textContent=msg;e.style.display='block';}
-  function clearChangeErr(){document.getElementById('wikaChangePwError').style.display='none';}
+  function clearLoginErr(){var e=document.getElementById('wikaLoginError');e.style.display='none';var b=document.getElementById('wikaOfflineBtn');if(b)b.remove();}
+  function showRegErr(msg){var e=document.getElementById('wikaRegError');e.textContent=msg;e.style.display='block';}
+  function clearRegErr(){document.getElementById('wikaRegError').style.display='none';}
 
   function showView(which){
     document.getElementById('wikaViewLogin').style.display=(which==='login'?'block':'none');
     document.getElementById('wikaViewRegister').style.display=(which==='register'?'block':'none');
-    document.getElementById('wikaViewRegSuccess').style.display=(which==='regSuccess'?'block':'none');
-    document.getElementById('wikaViewChangePw').style.display=(which==='change'?'block':'none');
-    // Tabs visible for login/register, hidden for change/success
-    var tabs=document.getElementById('wikaAuthTabs');
-    if(tabs)tabs.style.display=(which==='login'||which==='register')?'flex':'none';
   }
 
-  // Tab switcher
+  // Tab-Umschalter (Anmelden / Registrieren)
   window.wikaSwitchTab=function(which){
     var tL=document.getElementById('wikaTabLogin');
     var tR=document.getElementById('wikaTabReg');
@@ -239,132 +159,6 @@
     }
   };
 
-  // ── Registration ──
-  function showRegErr(msg){var e=document.getElementById('wikaRegError');e.textContent=msg;e.style.display='block';}
-  function clearRegErr(){document.getElementById('wikaRegError').style.display='none';}
-
-  var _lastRegistration=null; // {username,email,licenseKey,validUntil,verifyCode}
-
-  window.wikaTryRegister=function(ev){
-    if(ev)ev.preventDefault();
-    clearRegErr();
-
-    var u=(document.getElementById('wikaRegUser').value||'').trim();
-    var em=(document.getElementById('wikaRegEmail').value||'').trim();
-    var p1=document.getElementById('wikaRegPw').value||'';
-    var p2=document.getElementById('wikaRegPw2').value||'';
-
-    if(u.length<3){return showRegErr('Benutzername muss mindestens 3 Zeichen lang sein.');}
-    if(!/^[a-zA-Z0-9_-]+$/.test(u)){return showRegErr('Nur Buchstaben, Zahlen, Unter-/Bindestrich erlaubt.');}
-    if(!em || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){return showRegErr('Bitte eine gültige E-Mail-Adresse eingeben.');}
-    if(p1.length<6){return showRegErr('Passwort muss mindestens 6 Zeichen lang sein.');}
-    if(p1!==p2){return showRegErr('Die Passwörter stimmen nicht überein.');}
-
-    if(window.WikaAuth.findUser(u)){return showRegErr('Dieser Benutzername ist bereits vergeben.');}
-    if(window.WikaAuth.findUserByEmail(em)){return showRegErr('Diese E-Mail-Adresse ist bereits registriert.');}
-
-    var users=window.WikaAuth.loadUsers()||[];
-    var licenseKey=window.WikaAuth.genLicense();
-    var now=Date.now();
-    var validUntil=now+PW_LIFETIME_MS;
-    // Verify code (6 chars) for the activation mail
-    var vchars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    var verify='';
-    if(window.crypto && crypto.getRandomValues){
-      var arr=new Uint32Array(6);
-      crypto.getRandomValues(arr);
-      for(var i=0;i<6;i++)verify+=vchars[arr[i]%vchars.length];
-    }else{
-      for(var j=0;j<6;j++)verify+=vchars[Math.floor(Math.random()*vchars.length)];
-    }
-
-    users.push({
-      username:u,
-      email:em,
-      passHash:hash(p1),
-      role:'user',
-      status:'active',  // already usable, but admin will see new registration
-      pwSetAt:now,
-      mustChange:false,
-      createdAt:now,
-      licenseKey:licenseKey,
-      licenseExpiresAt:validUntil,
-      verifyCode:verify
-    });
-    window.WikaAuth.saveUsers(users);
-
-    _lastRegistration={username:u,email:em,licenseKey:licenseKey,validUntil:validUntil,verifyCode:verify};
-
-    // Update success view
-    document.getElementById('wikaRegLicenseKey').textContent=licenseKey;
-    var d=new Date(validUntil);
-    var dStr=d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-    document.getElementById('wikaRegValidUntil').textContent='Gültig bis '+dStr+' (14 Tage)';
-
-    showView('regSuccess');
-    return false;
-  };
-
-  window.wikaOpenRegMail=function(){
-    if(!_lastRegistration)return;
-    var r=_lastRegistration;
-    // Find first admin's email (or fallback)
-    var adminEmail='';
-    var allUsers=window.WikaAuth.loadUsers()||[];
-    for(var ai=0;ai<allUsers.length;ai++){
-      if(allUsers[ai].role==='admin' && allUsers[ai].email){adminEmail=allUsers[ai].email;break;}
-    }
-    if(!adminEmail)adminEmail='admin@wika.local'; // fallback if no admin email set yet
-    var ADMIN_EMAIL=adminEmail;
-    var d=new Date(r.validUntil);
-    var dStr=d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-
-    var subject='SellerHub · Registrierungs-Bestätigung & Lizenzkey';
-    var body=
-      'Hallo!\n\n'+
-      'Vielen Dank für deine Registrierung bei SellerHub.\n\n'+
-      '═══════════════════════════════════════\n'+
-      '  DEINE ZUGANGSDATEN\n'+
-      '═══════════════════════════════════════\n\n'+
-      'Benutzername:    '+r.username+'\n'+
-      'E-Mail:          '+r.email+'\n'+
-      'Lizenzkey:       '+r.licenseKey+'\n'+
-      'Bestätigungscode: '+r.verifyCode+'\n'+
-      'Gültig bis:      '+dStr+' (14 Tage)\n\n'+
-      '═══════════════════════════════════════\n'+
-      '  WICHTIG\n'+
-      '═══════════════════════════════════════\n\n'+
-      '➜ Bewahre diesen Lizenzkey sicher auf.\n'+
-      '➜ Nach 14 Tagen läuft deine Lizenz ab.\n'+
-      '➜ Eine Verlängerung kann jederzeit beim\n'+
-      '  Administrator angefordert werden.\n\n'+
-      'Diese Mail an dich selbst zur Bestätigung\n'+
-      'und gleichzeitig als Kopie an den Admin.\n\n'+
-      '— SellerHub · Smarte Werkzeuge für E-Commerce-Profis';
-    // Send to user (CC admin)
-    var url='mailto:'+encodeURIComponent(r.email)+'?cc='+encodeURIComponent(ADMIN_EMAIL)+
-            '&subject='+encodeURIComponent(subject)+
-            '&body='+encodeURIComponent(body);
-    window.location.href=url;
-  };
-
-  window.wikaCopyRegKey=function(){
-    if(!_lastRegistration)return;
-    var key=_lastRegistration.licenseKey;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(key).then(function(){
-        var btn=event.target;
-        var orig=btn.textContent;
-        btn.textContent='✓ Kopiert!';
-        setTimeout(function(){btn.textContent=orig;},1500);
-      }).catch(function(){
-        prompt('Lizenzkey:',key);
-      });
-    }else{
-      prompt('Lizenzkey:',key);
-    }
-  };
-
   function shake(){
     var box=document.getElementById('wikaLoginBox');
     if(!box)return;
@@ -377,202 +171,84 @@
     },50);
   }
 
-  // ── Pending user (for forced password change before unlock) ──
-  var pendingUser=null;
-  var pendingReason='';
+  // Nach Login/Registrierung: Token speichern, entsperren, Cloud-Sync anstoßen
+  function finishLogin(token,user){
+    try{syStore(token,user);}catch(e){showLoginErr('Token konnte nicht gespeichert werden (Speicher voll?).');return;}
+    wikaUnlock(false);
+    if(window.syNow)setTimeout(function(){window.syNow();},80); // sync.js ist bereits geladen → sofort abgleichen
+  }
 
+  // ── Anmelden (POST /api/auth/login — Rate-Limit macht der Server) ──
   window.wikaTryLogin=function(ev){
     if(ev)ev.preventDefault();
     clearLoginErr();
-
-    var u=(document.getElementById('wikaLoginUser').value||'').trim();
-    var p=document.getElementById('wikaLoginPass').value||'';
-
-    // Use localStorage for persistent lockout (survives tab close on the same browser)
-    var fails=parseInt(localStorage.getItem(FAIL_KEY)||'0',10);
-    var lockUntil=parseInt(localStorage.getItem(FAIL_KEY+'_until')||'0',10);
-    if(lockUntil>Date.now()){
-      var sec=Math.ceil((lockUntil-Date.now())/1000);
-      var mins=Math.ceil(sec/60);
-      showLoginErr('🔒 Zu viele Versuche. Gesperrt für '+(sec<60?sec+' Sek.':mins+' Min.'));
-      return false;
-    }
-
-    var user=window.WikaAuth.findUser(u);
-    if(!user || user.passHash!==hash(p)){
-      fails+=1;
-      try{localStorage.setItem(FAIL_KEY,String(fails));}catch(e){}
-      // Progressive lockout: 5 → 30s, 10 → 5min, 15 → 30min, 20+ → 24h
-      var lockDuration=0;
-      if(fails>=20)lockDuration=24*60*60*1000;
-      else if(fails>=15)lockDuration=30*60*1000;
-      else if(fails>=10)lockDuration=5*60*1000;
-      else if(fails>=5)lockDuration=30*1000;
-      if(lockDuration>0){
-        var until=Date.now()+lockDuration;
-        try{localStorage.setItem(FAIL_KEY+'_until',String(until));}catch(e){}
-        var label=lockDuration>=3600000?(lockDuration/3600000)+' Std.':lockDuration>=60000?(lockDuration/60000)+' Min.':(lockDuration/1000)+' Sek.';
-        showLoginErr('🔒 Zu viele Fehlversuche. Gesperrt für '+label+'.');
-      }else{
-        showLoginErr('❌ Falscher Benutzername oder Passwort. ('+fails+'/5)');
+    var email=(document.getElementById('wikaLoginUser').value||'').trim().toLowerCase();
+    var pw=document.getElementById('wikaLoginPass').value||'';
+    if(!email||!pw){showLoginErr('Bitte E-Mail und Passwort eingeben.');return false;}
+    fetch(api()+'/api/auth/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,password:pw})
+    }).then(function(res){return res.json().catch(function(){return {};}).then(function(d){
+      if(!res.ok){
+        shake();
+        showLoginErr(d.error||('Anmeldung fehlgeschlagen (HTTP '+res.status+')'));
+        var pf=document.getElementById('wikaLoginPass');if(pf){pf.value='';pf.focus();}
+        return;
       }
+      finishLogin(d.token,d.user||{email:email});
+    });}).catch(function(){
       shake();
-      document.getElementById('wikaLoginPass').value='';
-      document.getElementById('wikaLoginPass').focus();
-      return false;
-    }
-
-    // Successful credential check — clear all fail counters
-    try{localStorage.removeItem(FAIL_KEY);}catch(e){}
-    try{localStorage.removeItem(FAIL_KEY+'_until');}catch(e){}
-    // Also clear old sessionStorage values from previous versions
-    try{sessionStorage.removeItem(FAIL_KEY);}catch(e){}
-    try{sessionStorage.removeItem(FAIL_KEY+'_until');}catch(e){}
-
-    // Account status check (pending / blocked)
-    if(user.status==='pending'){
-      showLoginErr('⏳ Dein Account wartet auf Aktivierung durch einen Administrator.');
-      return false;
-    }
-    if(user.status==='blocked'){
-      showLoginErr('🚫 Dein Account wurde gesperrt. Bitte wende dich an den Administrator.');
-      return false;
-    }
-
-    // License expiry check (admins with null = never expire)
-    if(window.WikaAuth.isLicenseExpired(user)){
-      showLoginErr('⌛ Dein Lizenzkey ist abgelaufen. Bitte fordere eine Verlängerung beim Administrator an.');
-      // Show contact button
-      setTimeout(function(){
+      showLoginErr('⚠️ Server nicht erreichbar. Bitte Internetverbindung prüfen.');
+      // Gerät war schon mal angemeldet → lokales Weiterarbeiten anbieten (Daten liegen lokal)
+      if(syUser()){
         var box=document.getElementById('wikaLoginError');
-        if(box && !document.getElementById('wikaExpiredMailBtn')){
+        if(box && !document.getElementById('wikaOfflineBtn')){
           var b=document.createElement('button');
-          b.id='wikaExpiredMailBtn';
+          b.id='wikaOfflineBtn';
           b.type='button';
-          b.textContent='✉️ Verlängerung anfordern';
-          b.style.cssText='display:block;margin:10px auto 0;padding:8px 16px;border-radius:8px;border:none;background:#d97706;color:#fff;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700';
-          b.onclick=function(){wikaSendRenewalMail(user);};
+          b.textContent='📴 Offline weiterarbeiten (ohne Sync)';
+          b.style.cssText='display:block;margin:10px auto 0;padding:8px 16px;border-radius:8px;border:none;background:#475066;color:#fff;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700';
+          b.onclick=function(){offlineMode=true;wikaUnlock(false);};
           box.appendChild(b);
         }
-      },100);
-      return false;
-    }
-
-    // Force password change?
-    if(user.mustChange){
-      pendingUser=user.username;
-      pendingReason='Beim ersten Login muss das Passwort geändert werden.';
-      document.getElementById('wikaChangePwReason').textContent=pendingReason;
-      showView('change');
-      setTimeout(function(){var f=document.getElementById('wikaNewPw1');if(f)f.focus();},50);
-      return false;
-    }
-    if(window.WikaAuth.isExpired(user)){
-      pendingUser=user.username;
-      pendingReason='Dein Passwort ist nach '+PW_LIFETIME_DAYS+' Tagen abgelaufen. Bitte neu setzen.';
-      document.getElementById('wikaChangePwReason').textContent=pendingReason;
-      showView('change');
-      setTimeout(function(){var f=document.getElementById('wikaNewPw1');if(f)f.focus();},50);
-      return false;
-    }
-
-    // All good -> session
-    try{
-      sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:user.username,loginAt:Date.now()}));
-    }catch(e){}
-    wikaUnlock(false);
-    return false;
-  };
-
-  // ── Passwort vergessen: sichtbarer Reset direkt vom Login-Screen ──
-  window.wikaForgotPw=function(){
-    var users=loadUsers()||[];
-    if(!users.length){ alert('Es sind keine Konten gespeichert.'); return; }
-    var pre=(document.getElementById('wikaLoginUser')||{}).value||'';
-    var name=window.prompt('Passwort zurücksetzen für welchen Benutzer?\n\nVorhandene Konten:\n• '+users.map(function(u){return u.username+(u.role==='admin'?' (Admin)':'');}).join('\n• '), (pre||users[0].username));
-    if(name===null) return;
-    name=(name||'').toLowerCase().trim();
-    var user=null;
-    for(var i=0;i<users.length;i++){ if((users[i].username||'').toLowerCase()===name){user=users[i];break;} }
-    if(!user){ alert('Benutzer „'+name+'" nicht gefunden.'); return; }
-    var np=window.prompt('Neues Passwort für „'+user.username+'" eingeben (mind. 6 Zeichen):','');
-    if(np===null) return;
-    np=(np||'').trim();
-    if(np.length<6){ alert('Das Passwort muss mindestens 6 Zeichen haben.'); return; }
-    user.passHash=hash(np);
-    user.pwSetAt=Date.now();
-    user.mustChange=false;
-    user.status='active';
-    if(user.role==='admin')user.licenseExpiresAt=null;
-    saveUsers(users);
-    try{localStorage.removeItem(FAIL_KEY);localStorage.removeItem(FAIL_KEY+'_until');}catch(e){}
-    try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
-    alert('✓ Passwort für „'+user.username+'" wurde neu gesetzt.\n\nDu kannst dich jetzt mit dem neuen Passwort anmelden.');
-    var uf=document.getElementById('wikaLoginUser'); if(uf)uf.value=user.username;
-    var pf=document.getElementById('wikaLoginPass'); if(pf){pf.value='';pf.focus();}
-    if(typeof clearLoginErr==='function')clearLoginErr();
-  };
-
-  // Mailto helper (used by login expiry + dashboard countdown)
-  window.wikaSendRenewalMail=function(user){
-    // Find first admin's email (or fallback)
-    var adminEmail='';
-    var allUsers=window.WikaAuth.loadUsers()||[];
-    for(var ai=0;ai<allUsers.length;ai++){
-      if(allUsers[ai].role==='admin' && allUsers[ai].email){adminEmail=allUsers[ai].email;break;}
-    }
-    if(!adminEmail)adminEmail='admin@wika.local';
-    var ADMIN_EMAIL=adminEmail;
-    var subject='SellerHub · Lizenz-Verlängerung anfordern';
-    var body=
-      'Hallo Administrator,\n\n'+
-      'ich bitte um eine Verlängerung meiner SellerHub-Lizenz.\n\n'+
-      '──────────────────────────────────\n'+
-      'Benutzername: '+(user.username||'')+'\n'+
-      'E-Mail: '+(user.email||'')+'\n'+
-      'Aktueller Lizenzkey: '+(user.licenseKey||'—')+'\n'+
-      'Status: '+(window.WikaAuth.isLicenseExpired(user)?'ABGELAUFEN':'läuft bald ab')+'\n'+
-      '──────────────────────────────────\n\n'+
-      'Bitte verlängere meine Lizenz oder generiere einen neuen Key.\n\n'+
-      'Vielen Dank!\n'+
-      (user.username||'');
-    var url='mailto:'+ADMIN_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-    window.location.href=url;
-  };
-
-  window.wikaSubmitNewPw=function(ev){
-    if(ev)ev.preventDefault();
-    clearChangeErr();
-    if(!pendingUser){showChangeErr('Sitzung abgelaufen. Bitte neu anmelden.');setTimeout(function(){location.reload();},1200);return false;}
-
-    var p1=document.getElementById('wikaNewPw1').value||'';
-    var p2=document.getElementById('wikaNewPw2').value||'';
-
-    if(p1.length<6){showChangeErr('Passwort muss mindestens 6 Zeichen lang sein.');return false;}
-    if(p1!==p2){showChangeErr('Die Passwörter stimmen nicht überein.');return false;}
-
-    var users=window.WikaAuth.loadUsers()||[];
-    for(var i=0;i<users.length;i++){
-      if(users[i].username===pendingUser){
-        // Block reusing the same password
-        if(users[i].passHash===hash(p1)){
-          showChangeErr('Bitte wähle ein anderes Passwort als das alte.');
-          return false;
-        }
-        users[i].passHash=hash(p1);
-        users[i].pwSetAt=Date.now();
-        users[i].mustChange=false;
-        break;
       }
-    }
-    window.WikaAuth.saveUsers(users);
-
-    try{
-      sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:pendingUser,loginAt:Date.now()}));
-    }catch(e){}
-    pendingUser=null;
-    wikaUnlock(false);
+    });
     return false;
+  };
+
+  // ── Registrieren (POST /api/auth/register, Einladungscode-Pflicht) ──
+  window.wikaTryRegister=function(ev){
+    if(ev)ev.preventDefault();
+    clearRegErr();
+    var name=(document.getElementById('wikaRegUser').value||'').trim();
+    var email=(document.getElementById('wikaRegEmail').value||'').trim().toLowerCase();
+    var p1=document.getElementById('wikaRegPw').value||'';
+    var p2=document.getElementById('wikaRegPw2').value||'';
+    var code=(document.getElementById('wikaRegCode').value||'').trim();
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){return showRegErr('Bitte eine gültige E-Mail-Adresse eingeben.');}
+    if(p1.length<8){return showRegErr('Das Passwort braucht mindestens 8 Zeichen.');}
+    if(p1!==p2){return showRegErr('Die Passwörter stimmen nicht überein.');}
+    if(!code){return showRegErr('Bitte den Einladungscode eingeben (vom Betreiber).');}
+    fetch(api()+'/api/auth/register',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,password:p1,displayName:name,inviteCode:code})
+    }).then(function(res){return res.json().catch(function(){return {};}).then(function(d){
+      if(!res.ok)return showRegErr(d.error||('Registrierung fehlgeschlagen (HTTP '+res.status+')'));
+      // Frisch registriert → direkt anmelden
+      fetch(api()+'/api/auth/login',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:email,password:p1})
+      }).then(function(r2){return r2.json().catch(function(){return {};}).then(function(d2){
+        if(!r2.ok)return showRegErr(d2.error||'Konto erstellt — Anmeldung bitte manuell durchführen.');
+        finishLogin(d2.token,d2.user||{email:email});
+      });}).catch(function(){showRegErr('Konto erstellt — Server für die Anmeldung nicht erreichbar.');});
+    });}).catch(function(){showRegErr('Server nicht erreichbar. Bitte Internetverbindung prüfen.');});
+    return false;
+  };
+
+  // ── Passwort vergessen: Reset kann nur der Betreiber (Nutzer-Admin) ──
+  window.wikaForgotPw=function(){
+    alert('🔑 Passwort vergessen?\n\nDein Konto liegt in der SellerHub-Cloud — das Passwort kann nur der Betreiber zurücksetzen.\n\nBitte melde dich per E-Mail:\nwissam.kahil@gmail.com');
   };
 
   function wikaUnlock(silent){
@@ -587,7 +263,7 @@
     }
     document.documentElement.style.overflow='';
     document.body.style.overflow='';
-    // After unlock, hide admin items if user is not admin
+    // Nach dem Entsperren: Admin-Elemente je nach Rolle ein-/ausblenden
     if(document.readyState==='loading'){
       document.addEventListener('DOMContentLoaded',function(){applyRoleVisibility();injectFooterControls();});
     }else{
@@ -596,7 +272,7 @@
     }
   }
 
-  // ── Hide/show admin sidebar entries based on role ──
+  // ── Admin-Sidebar-Einträge je nach Cloud-Rolle ──
   function applyRoleVisibility(){
     var u=window.WikaAuth.currentUser();
     var isAdmin=u && u.role==='admin';
@@ -604,34 +280,28 @@
     for(var i=0;i<adminItems.length;i++){
       adminItems[i].style.display=isAdmin?'':'none';
     }
-    // If non-admin somehow tries to view admin page, kick them out
+    // Nicht-Admins von der Admin-Seite werfen
     if(!isAdmin){
       var p=document.getElementById('p-admin');
       if(p && p.classList.contains('active')){
         if(window.go)window.go('dashboard');
       }
     }
-    // Update header user info
+    // Nutzer-Info im Sidebar-Footer
     var info=document.getElementById('wikaUserInfo');
     if(info && u){
-      var d=window.WikaAuth.daysLeft(u);
-      var ld=window.WikaAuth.licenseDaysLeft(u);
-      var permanent=(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined');
       var roleLabel=isAdmin?'Admin':'Benutzer';
       var color=isAdmin?'#d97706':'#1d4ed8';
-      var licInfo=permanent
-        ? '<span style="color:#10b981" title="Lizenz: permanent">Lic ∞</span>'
-        : '<span title="Tage bis Lizenz-Ablauf" style="color:'+(ld<=3?'#dc2626':ld<=7?'#f59e0b':'#10b981')+'">Lic '+ld+'d</span>';
-      info.innerHTML='<span style="color:'+color+';font-weight:700">'+roleLabel+'</span> · '+u.username+'<br><span title="Tage bis Passwort-Ablauf" style="color:'+(d<=3?'#dc2626':'#6b7488')+'">PW '+d+'d</span> · '+licInfo;
+      var mode=offlineMode?'<span style="color:#f59e0b">📴 offline</span>':'<span style="color:#10b981">☁️ Cloud</span>';
+      info.innerHTML='<span style="color:'+color+';font-weight:700">'+roleLabel+'</span> · '+u.username+'<br>'+mode+(u.email?' · '+u.email:'');
     }
   }
   window.wikaApplyRoleVisibility=applyRoleVisibility;
 
-  // ── Footer logout + change password buttons ──
+  // ── Footer: Nutzer-Info + Abmelden-Button ──
   function injectFooterControls(){
     var foot=document.querySelector('.sidebar-footer');
     if(!foot || document.getElementById('wikaLogoutBtn'))return;
-    var u=window.WikaAuth.currentUser();
     var userLine=document.createElement('div');
     userLine.id='wikaUserInfo';
     userLine.style.cssText='font-size:10px;color:#a8b1cc;padding:4px 0;border-top:1px solid rgba(255,255,255,.08);margin-top:4px;padding-top:8px';

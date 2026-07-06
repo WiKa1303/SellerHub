@@ -35,13 +35,13 @@
     <div id="wikaViewLogin">
       <div style="margin-bottom:24px">
         <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">🔒 Anmeldung</div>
-        <div style="font-size:13px;color:#6b7488;text-align:center">Bitte gib deine Zugangsdaten ein</div>
+        <div style="font-size:13px;color:#6b7488;text-align:center">Melde dich mit deinem SellerHub-Konto an</div>
       </div>
 
-      <form id="wikaLoginForm" autocomplete="off" onsubmit="return wikaTryLogin(event)">
+      <form id="wikaLoginForm" onsubmit="return wikaTryLogin(event)">
         <div style="margin-bottom:14px">
-          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Benutzername</label>
-          <input type="text" id="wikaLoginUser" autocomplete="off" autofocus
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">E-Mail-Adresse</label>
+          <input type="email" id="wikaLoginUser" autocomplete="email" placeholder="du@example.com" autofocus
             style="width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;transition:all .15s;box-sizing:border-box"
             onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
             onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
@@ -49,7 +49,7 @@
         <div style="margin-bottom:18px">
           <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort</label>
           <div style="position:relative">
-            <input type="password" id="wikaLoginPass" autocomplete="off"
+            <input type="password" id="wikaLoginPass" autocomplete="current-password"
               style="width:100%;padding:13px 46px 13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;transition:all .15s;box-sizing:border-box"
               onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
               onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
@@ -81,13 +81,13 @@
     <div id="wikaViewRegister" style="display:none">
       <div style="margin-bottom:20px">
         <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">＋ Konto erstellen</div>
-        <div style="font-size:13px;color:#6b7488;text-align:center">14 Tage Probe-Lizenz · per E-Mail bestätigen</div>
+        <div style="font-size:13px;color:#6b7488;text-align:center">Cloud-Konto mit Einladungscode · Daten-Sync inklusive</div>
       </div>
 
-      <form id="wikaRegForm" autocomplete="off" onsubmit="return wikaTryRegister(event)">
+      <form id="wikaRegForm" onsubmit="return wikaTryRegister(event)">
         <div style="margin-bottom:12px">
-          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Benutzername</label>
-          <input type="text" id="wikaRegUser" autocomplete="off" placeholder="z.B. max_mustermann"
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Anzeigename</label>
+          <input type="text" id="wikaRegUser" autocomplete="name" placeholder="z.B. Wissam"
             style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
             onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
             onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
@@ -102,7 +102,7 @@
         <div style="margin-bottom:12px">
           <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort</label>
           <div style="position:relative">
-            <input type="password" id="wikaRegPw" autocomplete="new-password" placeholder="min. 6 Zeichen"
+            <input type="password" id="wikaRegPw" autocomplete="new-password" placeholder="min. 8 Zeichen"
               style="width:100%;padding:12px 44px 12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
               onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
               onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
@@ -110,9 +110,16 @@
               style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px 8px;color:#6b7488">👁️</button>
           </div>
         </div>
-        <div style="margin-bottom:16px">
+        <div style="margin-bottom:12px">
           <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort wiederholen</label>
           <input type="password" id="wikaRegPw2" autocomplete="new-password"
+            style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
+            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
+        </div>
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Einladungscode *</label>
+          <input type="text" id="wikaRegCode" autocomplete="off" placeholder="Code vom Betreiber"
             style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
             onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
             onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
@@ -122,77 +129,7 @@
 
         <button type="submit"
           style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35)">
-          Registrieren & Lizenzkey erhalten →
-        </button>
-      </form>
-    </div>
-
-    <!-- REGISTRATION SUCCESS VIEW -->
-    <div id="wikaViewRegSuccess" style="display:none">
-      <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:48px;margin-bottom:10px">✅</div>
-        <div style="font-size:20px;font-weight:700;color:#0f1729;margin-bottom:6px">Registrierung erfolgreich!</div>
-        <div style="font-size:13px;color:#6b7488">Dein 14-Tage-Lizenzkey wurde erstellt</div>
-      </div>
-
-      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #d97706;border-radius:12px;padding:18px;margin-bottom:18px;text-align:center">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#92400e;font-weight:700;margin-bottom:6px">🔑 Dein Lizenzkey</div>
-        <div id="wikaRegLicenseKey" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:18px;font-weight:700;color:#92400e;letter-spacing:1.5px;word-break:break-all"></div>
-        <div id="wikaRegValidUntil" style="font-size:12px;color:#92400e;margin-top:8px;font-weight:600"></div>
-      </div>
-
-      <div style="background:#f1f4f9;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#475066;line-height:1.5">
-        <b style="color:#0f1729">📧 Nächster Schritt:</b><br>
-        Klicke auf "E-Mail öffnen" — dein Mail-Programm öffnet sich mit einer vorbereiteten Bestätigungs-Mail. Sende sie ab, um deine Registrierung abzuschließen.
-      </div>
-
-      <button type="button" onclick="wikaOpenRegMail()" id="wikaOpenMailBtn"
-        style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35);margin-bottom:10px">
-        ✉️ E-Mail öffnen & senden
-      </button>
-      <button type="button" onclick="wikaCopyRegKey()"
-        style="width:100%;padding:11px 20px;border-radius:10px;border:1.5px solid #c4cdd9;background:#fff;color:#475066;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
-        📋 Lizenzkey kopieren
-      </button>
-      <button type="button" onclick="wikaSwitchTab('login')"
-        style="width:100%;padding:11px 20px;border-radius:10px;border:none;background:transparent;color:#6b7488;font-family:inherit;font-size:12px;cursor:pointer">
-        ← Zurück zur Anmeldung
-      </button>
-    </div>
-
-    <!-- PASSWORD CHANGE VIEW (forced on expiry or first login) -->
-    <div id="wikaViewChangePw" style="display:none">
-      <div style="margin-bottom:18px">
-        <div style="font-size:18px;font-weight:700;color:#0f1729;text-align:center;margin-bottom:6px">🔄 Passwort ändern</div>
-        <div id="wikaChangePwReason" style="font-size:13px;color:#6b7488;text-align:center"></div>
-      </div>
-
-      <form autocomplete="off" onsubmit="return wikaSubmitNewPw(event)">
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Neues Passwort</label>
-          <div style="position:relative">
-            <input type="password" id="wikaNewPw1" autocomplete="off" autofocus
-              style="width:100%;padding:13px 46px 13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
-              onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
-            <button type="button" onclick="wikaTogglePw('wikaNewPw1','wikaNewPw1Toggle')" id="wikaNewPw1Toggle"
-              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px 8px;color:#6b7488">👁️</button>
-          </div>
-          <div style="font-size:11px;color:#8a96aa;margin-top:4px">Mindestens 6 Zeichen</div>
-        </div>
-        <div style="margin-bottom:18px">
-          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#475066;font-weight:600;margin-bottom:6px">Passwort wiederholen</label>
-          <input type="password" id="wikaNewPw2" autocomplete="off"
-            style="width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid #c4cdd9;background:#f8fafc;color:#0f1729;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box"
-            onfocus="this.style.borderColor='#d97706';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(217,119,6,.12)'"
-            onblur="this.style.borderColor='#c4cdd9';this.style.background='#f8fafc';this.style.boxShadow='none'">
-        </div>
-
-        <div id="wikaChangePwError" style="display:none;background:rgba(220,38,38,.10);border:1px solid rgba(220,38,38,.3);color:#dc2626;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center"></div>
-
-        <button type="submit"
-          style="width:100%;padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(217,119,6,.35)">
-          Passwort speichern →
+          Konto erstellen →
         </button>
       </form>
     </div>
@@ -236,6 +173,7 @@
   <div id="syMenu" style="display:none;position:fixed;top:64px;left:18px;width:260px;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column;padding:8px">
     <div id="syMenuUser" style="padding:8px 10px;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--bd);margin-bottom:6px;word-break:break-all"></div>
     <button class="btn btn-sm" onclick="syNow()" style="width:100%;justify-content:flex-start;margin-bottom:4px;font-size:12px">🔄 Jetzt syncen</button>
+    <button class="btn btn-sm" onclick="syPwOpen()" style="width:100%;justify-content:flex-start;margin-bottom:4px;font-size:12px">🔑 Passwort ändern</button>
     <button class="btn btn-sm" onclick="syLogout()" style="width:100%;justify-content:flex-start;font-size:12px">🚪 Abmelden</button>
   </div>
   <!-- Notification Panel -->
@@ -1879,7 +1817,36 @@
   <div class="page-header"><h1><span class="hico">🛡️</span>Benutzerverwaltung</h1><span class="meta" id="adminUserCount"></span></div>
   <div class="page-body">
 
-    <!-- Info-Banner -->
+    <!-- ═══ CLOUD-KONTEN (Betreiber, ADMIN_KEY — Modul 4) ═══ -->
+    <div class="card" style="margin-bottom:22px">
+      <h3>☁️ Cloud-Konten (Server)</h3>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:12px">
+        Echte SellerHub-Konten auf dem Server (Login + Sync). Benötigt den <b>ADMIN_KEY</b> aus dem Railway-Dashboard — er bleibt nur auf diesem Gerät gespeichert.
+      </div>
+      <div class="toolbar" style="margin-bottom:12px">
+        <input type="password" id="shAdminKey" placeholder="ADMIN_KEY" autocomplete="off" style="max-width:280px">
+        <button class="btn btn-p" onclick="shCloudLoadUsers()">📋 Konten laden</button>
+        <div style="margin-left:auto;font-size:12px;color:var(--tx2)" id="shCloudStatsLine"></div>
+      </div>
+      <div id="shCloudError" style="display:none;background:var(--rdd);border:1px solid var(--rd);color:var(--rd);padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px"></div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px">
+          <thead>
+            <tr style="border-bottom:2px solid var(--bd);text-align:left">
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">E-Mail</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Name</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Rolle</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Erstellt</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Letzter Login</th>
+              <th style="padding:10px 12px;font-weight:700;color:var(--tx2);font-size:11px;text-transform:uppercase;letter-spacing:.5px;text-align:right">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="shCloudUsersBody"><tr><td colspan="6" style="padding:14px 12px;color:var(--tx3)">Noch nicht geladen — ADMIN_KEY eingeben und „Konten laden" klicken.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Info-Banner (Alt: lokaler v1-Store) -->
     <div style="background:linear-gradient(135deg,rgba(217,119,6,.10),rgba(217,119,6,.04));border:1px solid rgba(217,119,6,.3);border-left:4px solid var(--ac);border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:14px">
       <div style="font-size:24px">🔐</div>
       <div style="flex:1">
@@ -2383,6 +2350,34 @@
     <div class="mf">
       <button class="btn" onclick="syClose()">Abbrechen</button>
       <button class="btn btn-p" onclick="sySubmit()" id="sySubmitBtn">Anmelden</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CLOUD-PASSWORT-ÄNDERN MODAL (js/sync.js) ═══ -->
+<div class="mo" id="syPwModal" onclick="if(event.target===this)syPwClose()">
+  <div class="modal" style="width:440px">
+    <div class="mh"><h2>🔑 Cloud-Passwort ändern</h2><button class="mc" onclick="syPwClose()">✕</button></div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr">
+        <div class="fi">
+          <label>Aktuelles Passwort *</label>
+          <input id="syPwCur" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')syPwSubmit()">
+        </div>
+        <div class="fi">
+          <label>Neues Passwort * (min. 8 Zeichen)</label>
+          <input id="syPwNew" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')syPwSubmit()">
+        </div>
+        <div class="fi">
+          <label>Neues Passwort wiederholen *</label>
+          <input id="syPwNew2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')syPwSubmit()">
+        </div>
+      </div>
+      <div id="syPwError" style="display:none;background:var(--rdd);border:1px solid var(--rd);color:var(--rd);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;font-weight:600"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="syPwClose()">Abbrechen</button>
+      <button class="btn btn-p" onclick="syPwSubmit()" id="syPwSubmitBtn">Passwort ändern</button>
     </div>
   </div>
 </div>

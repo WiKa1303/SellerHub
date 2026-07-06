@@ -30,6 +30,9 @@ function renderLicensePanel(){
   var isAdmin=u.role==='admin';
   var permanent=(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined');
 
+  // Cloud-Konten sind permanent: normale Nutzer brauchen keine Lizenz-Box mehr
+  if(permanent && !isAdmin){panel.style.display='none';return;}
+
   // Admins with permanent license -> compact info card
   if(isAdmin && permanent){
     panel.style.display='block';
@@ -685,4 +688,95 @@ function adminSendLicenseUpdateMail(u){
   window.location.href='mailto:'+encodeURIComponent(u.email)+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CLOUD-KONTEN (Betreiber, ADMIN_KEY — Modul 4)
+   Verwaltet die ECHTEN Server-Konten (/api/admin/users). Der ADMIN_KEY
+   bleibt gerätelokal (sh_admin_key, bewusst NICHT in der Sync-Positivliste).
+   ═══════════════════════════════════════════════════════════════ */
+function shCloudApi(){
+  var DEF='https://radar-production-388a.up.railway.app';
+  try{return (localStorage.getItem('wika_radar_api')||DEF).replace(/\/+$/,'');}catch(e){return DEF;}
+}
+function shAdminKey(){
+  var inp=document.getElementById('shAdminKey');
+  var k=(inp&&inp.value||'').trim();
+  if(k){try{localStorage.setItem('sh_admin_key',k);}catch(e){}return k;}
+  try{k=localStorage.getItem('sh_admin_key')||'';}catch(e){}
+  if(k&&inp)inp.value=k;
+  return k;
+}
+function shCloudErr(msg){
+  var e=document.getElementById('shCloudError');
+  if(!e)return;
+  if(!msg){e.style.display='none';return;}
+  e.textContent=msg;e.style.display='block';
+}
+function shCloudFetch(path,body){
+  return fetch(shCloudApi()+path,{
+    method:body?'POST':'GET',
+    headers:Object.assign({'X-Api-Key':shAdminKey()},body?{'Content-Type':'application/json'}:{}),
+    body:body?JSON.stringify(body):undefined
+  }).then(function(res){return res.json().catch(function(){return {};}).then(function(d){
+    if(res.status===401)throw new Error('ADMIN_KEY falsch oder nicht gesetzt (Railway-Dashboard → radar → Variables).');
+    if(!res.ok)throw new Error(d.error||('HTTP '+res.status));
+    return d;
+  });});
+}
+var _shCloudUsers=[];
+function shCloudLoadUsers(){
+  shCloudErr('');
+  if(!shAdminKey())return shCloudErr('Bitte zuerst den ADMIN_KEY eingeben.');
+  shCloudFetch('/api/admin/users').then(function(d){
+    _shCloudUsers=d.users||[];
+    shCloudRender();
+  }).catch(function(e){shCloudErr(e.message||'Server nicht erreichbar.');});
+}
+function shCloudRender(){
+  var tb=document.getElementById('shCloudUsersBody');
+  if(!tb)return;
+  var stats=document.getElementById('shCloudStatsLine');
+  if(stats)stats.textContent=_shCloudUsers.length+' Konten · '+_shCloudUsers.filter(function(u){return u.role==='admin';}).length+' Admin(s)';
+  if(!_shCloudUsers.length){tb.innerHTML='<tr><td colspan="6" style="padding:14px 12px;color:var(--tx3)">Keine Konten vorhanden.</td></tr>';return;}
+  tb.innerHTML=_shCloudUsers.map(function(u){
+    var isAdmin=u.role==='admin';
+    return '<tr style="border-bottom:1px solid var(--bd)">'+
+      '<td style="padding:10px 12px;font-weight:600">'+adminEscape(u.email)+'</td>'+
+      '<td style="padding:10px 12px">'+adminEscape(u.displayName||'—')+'</td>'+
+      '<td style="padding:10px 12px"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:'+(isAdmin?'rgba(217,119,6,.15);color:var(--ac)':'rgba(29,78,216,.10);color:#1d4ed8')+'">'+(isAdmin?'Admin':'Benutzer')+'</span></td>'+
+      '<td style="padding:10px 12px;color:var(--tx2)">'+adminFmtDate(u.createdAt)+'</td>'+
+      '<td style="padding:10px 12px;color:var(--tx2)">'+adminFmtDate(u.lastLoginAt)+'</td>'+
+      '<td style="padding:10px 12px;text-align:right;white-space:nowrap">'+
+        '<button class="btn btn-sm" onclick="shCloudResetPw(\''+u.id+'\')" title="Neues Passwort setzen (widerruft alle Sitzungen)">🔑 Reset</button> '+
+        '<button class="btn btn-sm" onclick="shCloudToggleRole(\''+u.id+'\')" title="Rolle umschalten">'+(isAdmin?'⬇️ Zu Benutzer':'⬆️ Zu Admin')+'</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+function shCloudFind(id){
+  for(var i=0;i<_shCloudUsers.length;i++)if(_shCloudUsers[i].id===id)return _shCloudUsers[i];
+  return null;
+}
+function shCloudResetPw(id){
+  var u=shCloudFind(id);if(!u)return;
+  var np=window.prompt('Neues Passwort für '+u.email+' (mind. 8 Zeichen):\n\nAlle aktiven Sitzungen des Kontos werden widerrufen.','');
+  if(np===null)return;
+  np=np.trim();
+  if(np.length<8)return shCloudErr('Das Passwort braucht mindestens 8 Zeichen.');
+  shCloudErr('');
+  shCloudFetch('/api/admin/users/'+id+'/reset-password',{newPassword:np}).then(function(d){
+    if(typeof window.toast==='function')window.toast('🔑 Passwort für '+u.email+' gesetzt ('+(d.revokedSessions||0)+' Sitzung(en) widerrufen)');
+  }).catch(function(e){shCloudErr(e.message);});
+}
+function shCloudToggleRole(id){
+  var u=shCloudFind(id);if(!u)return;
+  var neu=u.role==='admin'?'user':'admin';
+  if(!confirm(u.email+' → Rolle "'+(neu==='admin'?'Admin':'Benutzer')+'"?'))return;
+  shCloudErr('');
+  shCloudFetch('/api/admin/users/'+id+'/role',{role:neu}).then(function(){
+    u.role=neu;
+    shCloudRender();
+    if(typeof window.toast==='function')window.toast('🛡️ '+u.email+' ist jetzt '+(neu==='admin'?'Admin':'Benutzer'));
+  }).catch(function(e){shCloudErr(e.message);});
 }
