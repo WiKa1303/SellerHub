@@ -2312,6 +2312,12 @@ function researchOpenScore(id){
   researchShowTab('score');
 }
 
+var researchRankPage=1;
+function researchRankGoPage(p){
+  researchRankPage=p;researchRenderScore();
+  var el=document.getElementById('researchScoreContent');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+window.researchRankGoPage=researchRankGoPage;
 function researchRenderScore(){
   researchInit();
   var container=document.getElementById('researchScoreContent');
@@ -2403,26 +2409,50 @@ function researchRenderScore(){
     html+='</div>';
   }
 
-  // Ranking
+  // Ranking (blätterbar: 20 je Seite; Rang bleibt global über alle Seiten korrekt)
   var ranked=cands.slice().map(function(c){return {c:c,vd:decisionVerdict(c)}}).sort(function(a,b){return b.vd.score-a.vd.score});
+  var RANK_PAGE=20;
+  var rankPages=Math.max(1,Math.ceil(ranked.length/RANK_PAGE));
+  if(researchRankPage>rankPages)researchRankPage=rankPages;
+  var rankSlice=ranked.slice((researchRankPage-1)*RANK_PAGE,researchRankPage*RANK_PAGE);
 
   html+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 22px">'+
-    '<h3 style="margin:0 0 14px 0">🏆 Ranking aller Kandidaten</h3>'+
+    '<h3 style="margin:0 0 14px 0">🏆 Ranking aller Kandidaten <span style="font-size:11px;color:var(--tx3);font-weight:400">· '+ranked.length+' gesamt, nach Score</span></h3>'+
     '<div style="display:flex;flex-direction:column;gap:8px">';
-  ranked.forEach(function(item,idx){
+  rankSlice.forEach(function(item,i){
+    var idx=(researchRankPage-1)*RANK_PAGE+i;
     var c=item.c,vd=item.vd,s=vd.score;
     var cfg=PIPELINE_STATUS[normalizeStatus(c.status)]||PIPELINE_STATUS.idee;
     var emoji=vd.verdict==='go'?'🟢':vd.verdict==='nogo'?'🔴':vd.verdict==='pruefen'?'🟡':'⚪';
     var rcf=decisionConfidence(c);
     var isTop3=idx<3&&s>0;
-    html+='<div onclick="researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+(isTop3?'var(--'+vd.color+'d)':'var(--s2)')+';border:1px solid '+(isTop3?'var(--'+vd.color+')':'var(--bd)')+';border-radius:10px;cursor:pointer'+(researchSelectedCandidate===c.id?';box-shadow:0 0 0 2px var(--ac)':'')+'" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+
-      '<div style="font-size:16px;font-weight:800;color:var(--tx3);min-width:28px;text-align:center">#'+(idx+1)+'</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+' · <span style="color:var(--'+rcf.color+')" title="Daten-Konfidenz: '+rcf.data+' von '+rcf.total+' Dimensionen aus echten Daten">⚙️ '+rcf.data+'/'+rcf.total+' Daten</span></div></div>'+
+    // Hauptbild mit Zoom-Hover (pzoom); Bild-Klick → Amazon, Zeilen-Klick → Scorecard
+    var rimg=(c.compImages&&c.compImages[0])||'';
+    var rthumb=rimg
+      ?'<img src="'+esc(rimg)+'" loading="lazy" alt="" class="pzoom" style="width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);flex-shrink:0;background:#fff" onerror="this.outerHTML=\'<div style=&quot;width:40px;height:40px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0&quot;>📦</div>\'">'
+      :'<div style="width:40px;height:40px;border-radius:8px;background:var(--s1);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0" title="Kein Bild vorhanden">📦</div>';
+    if(c.compAsin)rthumb='<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Auf Amazon öffnen ('+esc(c.compAsin)+')" style="flex-shrink:0;line-height:0">'+rthumb+'</a>';
+    html+='<div onclick="researchOpenScore(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:'+(isTop3?'var(--'+vd.color+'d)':'var(--s2)')+';border:1px solid '+(isTop3?'var(--'+vd.color+')':'var(--bd)')+';border-radius:10px;cursor:pointer'+(researchSelectedCandidate===c.id?';box-shadow:0 0 0 2px var(--ac)':'')+'" onmouseover="this.style.transform=\'translateX(3px)\'" onmouseout="this.style.transform=\'\'">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--tx3);min-width:34px;text-align:center">#'+(idx+1)+'</div>'+
+      rthumb+
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--tx);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+esc(cfg.label)+' · <span style="color:var(--'+rcf.color+')" title="Daten-Konfidenz: '+rcf.data+' von '+rcf.total+' Dimensionen aus echten Daten">⚙️ '+rcf.data+'/'+rcf.total+' Daten</span></div></div>'+
       '<div style="font-size:12px;font-weight:700;color:var(--'+vd.color+');white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
       '<div style="text-align:right;min-width:46px"><div style="font-size:22px;font-weight:800;color:var(--'+vd.color+');line-height:1">'+(s>0?s:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score</div></div>'+
     '</div>';
   });
-  html+='</div></div>';
+  html+='</div>';
+  // Blätter-Leiste
+  if(rankPages>1){
+    function rkb(label,page,on,dis){
+      if(dis)return '<span style="padding:7px 12px;color:var(--tx3);font-size:12px">'+label+'</span>';
+      return '<button onclick="researchRankGoPage('+page+')" style="border:1.5px solid '+(on?'var(--ac)':'var(--bd)')+';background:'+(on?'var(--ac)':'var(--s1)')+';color:'+(on?'#fff':'var(--tx2)')+';font-weight:700;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;min-width:34px">'+label+'</button>';
+    }
+    html+='<div style="display:flex;gap:5px;justify-content:center;align-items:center;padding-top:14px;flex-wrap:wrap">'+rkb('‹',researchRankPage-1,false,researchRankPage===1);
+    for(var rp=1;rp<=rankPages;rp++)html+=rkb(rp,rp,rp===researchRankPage,false);
+    html+=rkb('›',researchRankPage+1,false,researchRankPage===rankPages)+'</div>';
+    html+='<div style="font-size:11px;color:var(--tx3);text-align:center;padding-top:6px">Seite '+researchRankPage+' von '+rankPages+' · Bild-Klick öffnet Amazon, Zeilen-Klick die Scorecard</div>';
+  }
+  html+='</div>';
 
   // Empfehlung
   var go1=ranked.filter(function(r){return r.vd.verdict==='go';});
