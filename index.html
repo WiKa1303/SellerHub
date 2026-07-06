@@ -6,6 +6,7 @@
 <title>AMZ SellerHub — Smarte Werkzeuge für E-Commerce-Profis</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/todo.css">
 </head>
 <body>
 
@@ -214,6 +215,7 @@
     <div class="nav-group" id="navgrp-mehr">
       <button class="nav-group-header" onclick="toggleNavGroup('mehr')"><span class="grp-ico">📚</span><span class="grp-label">Mehr</span><span class="grp-badge" style="display:none"></span><span class="grp-arrow">▸</span></button>
       <div class="nav-group-body">
+        <button class="nav-btn" onclick="go('todo')" title="Cloud-Aufgaben: Listen, Board, Kalender, Teilen & Erinnerungen — synchron auf allen Geräten"><span class="ico">☑️</span>To-Do <span style="margin-left:auto;background:var(--ac);color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:800;letter-spacing:.5px">NEU</span></button>
         <button class="nav-btn" onclick="go('tasks')"><span class="ico">✅</span>Aufgaben-Board <span id="tasksBadge" style="margin-left:auto;background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
         <button class="nav-btn" onclick="go('coaching')"><span class="ico">🎓</span>Lernzentrum <span id="coachingBadge" style="margin-left:auto;background:var(--gn);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span></button>
       </div>
@@ -1834,6 +1836,12 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: TO-DO (Cloud-Aufgaben: Listen/Board/Kalender, Teilen,    -->
+<!-- Erinnerungen, Echtzeit — komplettes Modul in js/todo.js)       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="p-todo"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- PAGE: AUFGABEN-BOARD (Kanban / Projektmanagement)              -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="p-tasks">
@@ -2418,6 +2426,7 @@
 <div class="toast" id="toast"></div>
 <input type="file" id="impFile" accept=".json" style="display:none" onchange="handleImp(event)">
 
+<script src="js/todo.js"></script>
 <script src="js/app.js"></script>
 <script src="js/sync.js"></script>
 </body>

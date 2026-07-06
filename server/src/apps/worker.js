@@ -9,6 +9,7 @@ import { config, validateConfig } from '../core/config.js';
 import { initDb, deleteExpiredSessions } from '../data/db.js';
 import { runCrawl } from '../services/crawler/run.js';
 import { runIntelligencePipeline } from '../services/intelligence/registry.js';
+import { fireDueReminders } from '../services/todo/index.js';
 import { aiEnabled } from '../core/ai-client.js';
 import { log } from '../core/logger.js';
 
@@ -27,7 +28,12 @@ export function startWorker() {
   cron.schedule(config.crawlCron, () => {
     crawlAndAnalyze().catch(e => log.error('Verarbeitungslauf fehlgeschlagen:', e.message));
   });
-  log.info(`Worker geplant: "${config.crawlCron}" · KI: ${aiEnabled() ? config.aiModel : 'AUS (Degradations-Modus)'}`);
+  // To-Do-Erinnerungen: minütlich fällige Reminder zustellen (Notification + SSE).
+  // Bewusst getrennt vom Crawl-Cron — Erinnerungen müssen pünktlich sein.
+  cron.schedule('* * * * *', () => {
+    fireDueReminders().catch(e => log.error('Erinnerungs-Lauf fehlgeschlagen:', e.message));
+  });
+  log.info(`Worker geplant: "${config.crawlCron}" (+ To-Do-Erinnerungen minütlich) · KI: ${aiEnabled() ? config.aiModel : 'AUS (Degradations-Modus)'}`);
   if (config.crawlOnBoot) {
     crawlAndAnalyze().catch(e => log.error('Boot-Lauf fehlgeschlagen:', e.message));
   }

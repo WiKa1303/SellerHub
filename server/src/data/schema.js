@@ -211,7 +211,174 @@ export async function initDb(poolOverride) {
       created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, import_cache, ai_calls)');
+  // ── To-Do-Modul (Owner: services/todo — Zenkit-To-Do-Funktionsumfang) ──
+  // Alle IDs werden in JS erzeugt (crypto.randomUUID, pg-mem-kompatibel).
+  // Rollen je Liste: owner | admin | editor | commenter | viewer.
+  // position = REAL (Einfügen zwischen zwei Nachbarn ohne Umnummerieren).
+
+  // Ordner gruppieren Listen (rein persönliche Struktur des Besitzers).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_folders (
+      id         UUID PRIMARY KEY,
+      owner_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name       TEXT NOT NULL,
+      color      TEXT,
+      position   REAL NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  // Listen: is_inbox=true = automatischer „Eingang" (1× je User, nicht löschbar/teilbar).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_lists (
+      id         UUID PRIMARY KEY,
+      owner_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      folder_id  UUID,
+      name       TEXT NOT NULL,
+      color      TEXT,
+      icon       TEXT,
+      is_inbox   BOOLEAN NOT NULL DEFAULT false,
+      position   REAL NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  // Mitgliedschaften = Zugriffsmodell. Der Besitzer steht IMMER auch hier (role='owner').
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_list_members (
+      list_id    UUID NOT NULL REFERENCES todo_lists(id) ON DELETE CASCADE,
+      user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role       TEXT NOT NULL DEFAULT 'editor',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (list_id, user_id)
+    )`);
+
+  // Aufgaben. parent_id = Subtask-Hierarchie (1 Ebene, wie Zenkit To Do).
+  // description = HTML (Whitelist-sanitisiert im Service). status = Board-Spalte.
+  // repeat_rule = JSON {mode:'none|fixed|after_done', every:N, unit:'day|week|month|year'}.
+  // deleted_at = Papierkorb (Soft-Delete, restore möglich).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_tasks (
+      id           UUID PRIMARY KEY,
+      list_id      UUID NOT NULL REFERENCES todo_lists(id) ON DELETE CASCADE,
+      parent_id    UUID,
+      title        TEXT NOT NULL,
+      description  TEXT,
+      status       TEXT NOT NULL DEFAULT 'offen',
+      priority     TEXT NOT NULL DEFAULT 'keine',
+      starred      BOOLEAN NOT NULL DEFAULT false,
+      completed    BOOLEAN NOT NULL DEFAULT false,
+      completed_at TIMESTAMPTZ,
+      completed_by UUID,
+      due_date     TEXT,
+      due_time     TEXT,
+      repeat_rule  TEXT,
+      assigned_to  UUID,
+      position     REAL NOT NULL DEFAULT 0,
+      created_by   UUID NOT NULL,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+      deleted_at   TIMESTAMPTZ
+    )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_tt_list ON todo_tasks (list_id, completed, position)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_tt_updated ON todo_tasks (updated_at)`);
+
+  // Checklisten INNERHALB einer Aufgabe (leichter als Subtasks, ohne eigene Detailseite).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_checklist_items (
+      id         UUID PRIMARY KEY,
+      task_id    UUID NOT NULL REFERENCES todo_tasks(id) ON DELETE CASCADE,
+      title      TEXT NOT NULL,
+      done       BOOLEAN NOT NULL DEFAULT false,
+      position   REAL NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  // Tags sind je Nutzer global (über Listen hinweg wiederverwendbar).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_tags (
+      id         UUID PRIMARY KEY,
+      owner_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name       TEXT NOT NULL,
+      color      TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_task_tags (
+      task_id UUID NOT NULL REFERENCES todo_tasks(id) ON DELETE CASCADE,
+      tag_id  UUID NOT NULL REFERENCES todo_tags(id) ON DELETE CASCADE,
+      PRIMARY KEY (task_id, tag_id)
+    )`);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_comments (
+      id         UUID PRIMARY KEY,
+      task_id    UUID NOT NULL REFERENCES todo_tasks(id) ON DELETE CASCADE,
+      user_id    UUID NOT NULL,
+      body       TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      edited_at  TIMESTAMPTZ
+    )`);
+
+  // Anhänge liegen als Base64-TEXT in der DB (Railway-Dateisystem ist flüchtig;
+  // Postgres ist hier die einzige persistente Ablage). Limits prüft der Service.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_attachments (
+      id         UUID PRIMARY KEY,
+      task_id    UUID NOT NULL REFERENCES todo_tasks(id) ON DELETE CASCADE,
+      user_id    UUID NOT NULL,
+      filename   TEXT NOT NULL,
+      mime       TEXT NOT NULL,
+      size_bytes INTEGER NOT NULL,
+      data       TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  // Erinnerungen: Worker feuert fällige (fired_at IS NULL, remind_at <= now)
+  // als Notification + SSE-Event. remind_at kommt als JS-Datum (pg-mem-Konvention).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_reminders (
+      id        UUID PRIMARY KEY,
+      task_id   UUID NOT NULL REFERENCES todo_tasks(id) ON DELETE CASCADE,
+      user_id   UUID NOT NULL,
+      remind_at TIMESTAMPTZ NOT NULL,
+      fired_at  TIMESTAMPTZ
+    )`);
+
+  // Activity-Log je Liste/Aufgabe (Erklärbarkeit + „Aktivität"-Tab).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_activity (
+      id         UUID PRIMARY KEY,
+      list_id    UUID NOT NULL,
+      task_id    UUID,
+      user_id    UUID NOT NULL,
+      action     TEXT NOT NULL,
+      detail     TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_ta_list ON todo_activity (list_id, created_at)`);
+
+  // Gespeicherte Filter (Smart-Filter des Nutzers, filter = JSON).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_saved_filters (
+      id         UUID PRIMARY KEY,
+      user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name       TEXT NOT NULL,
+      filter     TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  // Benachrichtigungen (Erinnerung fällig, Liste geteilt, Aufgabe zugewiesen, …).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_notifications (
+      id         UUID PRIMARY KEY,
+      user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type       TEXT NOT NULL,
+      payload    TEXT,
+      read_at    TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, import_cache, ai_calls, todo_*)');
   return pool;
 }
 

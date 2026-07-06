@@ -420,7 +420,7 @@ function go(name){
   var btns=document.querySelectorAll('.nav-btn');
   for(var i=0;i<btns.length;i++){if(btns[i].getAttribute('onclick')==="go('"+sidebarKey+"')")btns[i].classList.add('active');}
   // Nav-Gruppen (Accordion): Gruppe der aktiven Seite öffnen, übrige schließen
-  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',sourcing:'betrieb',tasks:'mehr',coaching:'mehr',admin:'admin'};
+  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',sourcing:'betrieb',todo:'mehr',tasks:'mehr',coaching:'mehr',admin:'admin'};
   var activeGrp=navGroupMap[sidebarKey]||navGroupMap[name];
   document.querySelectorAll('.nav-group').forEach(function(g){
     var on=g.id==='navgrp-'+activeGrp;
@@ -439,6 +439,7 @@ function go(name){
   if(name==='auswahl')renderAuswahl();
   if(name==='coaching')renderCoaching();
   if(name==='tasks')renderTasks();
+  if(name==='todo'&&typeof renderTodo==='function')renderTodo();
   if(name==='nischen')renderNischen();
   if(name==='pipeline'&&typeof renderPipeline==='function')renderPipeline();
   if(name==='listing')renderListing();

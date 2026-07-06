@@ -13,6 +13,8 @@ import { registerUser, loginUser, logoutSession, changePassword, authMiddleware,
 import { listSyncData, applySyncBatch } from '../services/sync/index.js';
 import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
 import { importProduct, proxyImage as proxyImportImage } from '../services/import/index.js';
+import * as todo from '../services/todo/index.js';
+import { subscribe as todoSubscribe } from '../services/todo/hub.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -33,7 +35,7 @@ export function buildApi() {
   app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Headers', 'Content-Type, X-Api-Key, X-Tenant-Id, Authorization');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     // Kontingent-Header des KI-Proxys muss im Browser lesbar sein (CORS versteckt ihn sonst)
     res.set('Access-Control-Expose-Headers', 'X-Quota-Remaining');
     if (req.method === 'OPTIONS') return res.sendStatus(204);
@@ -341,6 +343,192 @@ export function buildApi() {
       res.set('Cache-Control', 'private, max-age=3600');
       res.type(r.contentType).send(r.buffer);
     } catch (e) { fail(res, e); }
+  });
+
+  // ═══ To-Do-Modul (/api/todo/*) — alle Endpunkte Bearer-geschützt ═══
+  // Nur Delegation an services/todo; erwartbare Fehler kommen als {status, error}
+  // aus dem Service (400/403/404/409/413), alles Unerwartete über fail().
+
+  // Einheitlicher Sender: no-store (private Daten), Fehler → {error}, sonst Payload.
+  function sendTodo(res, r, okStatus = 200) {
+    res.set('Cache-Control', 'no-store');
+    if (r && r.error) {
+      const { status, ...rest } = r;
+      return res.status(status || 500).json(rest);
+    }
+    res.status(okStatus).json(r);
+  }
+
+  // GET /api/todo/bootstrap – Ordner, Listen (+Rolle/Zähler), Tags, Filter, Personen
+  app.get('/api/todo/bootstrap', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.bootstrap(req.user)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Ordner ──
+  app.post('/api/todo/folders', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.createFolder(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/folders/:id', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.renameFolder(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/folders/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeFolder(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Listen ──
+  app.post('/api/todo/lists', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.createList(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/lists/:id', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.editList(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/lists/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeList(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Mitglieder / Einladungen (Rollen: admin verwaltet, owner fest) ──
+  app.get('/api/todo/lists/:id/members', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.membersOf(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/lists/:id/members', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.inviteMember(req.user, req.params.id, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/lists/:id/members/:userId', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.changeMemberRole(req.user, req.params.id, req.params.userId, (req.body || {}).role)); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/lists/:id/members/:userId', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.kickMember(req.user, req.params.id, req.params.userId)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Aufgaben: Abfrage (Smart-Lists/Filter/Suche/Delta/Papierkorb), CRUD, Bulk ──
+  app.get('/api/todo/tasks', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.listTasks(req.user, req.query)); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/tasks', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.createTask(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/tasks/bulk', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.bulkTasks(req.user, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.get('/api/todo/tasks/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.taskDetail(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/tasks/:id', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.updateTask(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/tasks/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.trashTask(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/tasks/:id/restore', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.restoreTask(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/tasks/:id/purge', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.purgeTask(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Checkliste innerhalb einer Aufgabe ──
+  app.post('/api/todo/tasks/:id/checklist', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.addChecklistItem(req.user, req.params.id, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/checklist/:itemId', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.editChecklistItem(req.user, req.params.itemId, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/checklist/:itemId', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeChecklistItem(req.user, req.params.itemId)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Tags (je Nutzer) + Zuordnung zu Aufgaben ──
+  app.post('/api/todo/tags', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.createTagFor(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/tags/:id', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.editTag(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/tags/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeTag(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/tasks/:id/tags/:tagId', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.tagTask(req.user, req.params.id, req.params.tagId)); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/tasks/:id/tags/:tagId', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.untagTask(req.user, req.params.id, req.params.tagId)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Kommentare (commenter+; bearbeiten/löschen nur eigene) ──
+  app.post('/api/todo/tasks/:id/comments', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.addComment(req.user, req.params.id, (req.body || {}).body), 201); } catch (e) { fail(res, e); }
+  });
+  app.put('/api/todo/comments/:id', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.editComment(req.user, req.params.id, (req.body || {}).body)); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/comments/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeComment(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Anhänge: Base64 in Postgres (Railway-Disk ist flüchtig). Body-Limit 8 MB
+  // über dem 5-MB-Dateilimit des Services → 413 kommt aus UNSERER Prüfung.
+  app.post('/api/todo/tasks/:id/attachments', authMiddleware, express.json({ limit: '8mb' }), async (req, res) => {
+    try { sendTodo(res, await todo.addAttachment(req.user, req.params.id, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.get('/api/todo/attachments/:id', authMiddleware, async (req, res) => {
+    try {
+      const r = await todo.downloadAttachment(req.user, req.params.id);
+      if (r.error) { res.set('Cache-Control', 'no-store'); return res.status(r.status).json({ error: r.error }); }
+      res.set('Cache-Control', 'private, max-age=3600');
+      res.set('Content-Disposition', `attachment; filename="${encodeURIComponent(r.filename)}"`);
+      res.type(r.mime).send(r.buffer);
+    } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/attachments/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeAttachment(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Erinnerungen (persönlich; Worker feuert fällige als Notification + SSE) ──
+  app.post('/api/todo/tasks/:id/reminders', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.addReminder(req.user, req.params.id, (req.body || {}).remindAt), 201); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/reminders/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeReminder(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+
+  // ── Activity-Log, gespeicherte Filter, Benachrichtigungen ──
+  app.get('/api/todo/activity', authMiddleware, async (req, res) => {
+    try {
+      sendTodo(res, await todo.activityLog(req.user, {
+        listId: req.query.list, taskId: req.query.task,
+        limit: parseInt(req.query.limit || '50', 10),
+      }));
+    } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/filters', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await todo.saveFilter(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/todo/filters/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.removeSavedFilter(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  app.get('/api/todo/notifications', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.myNotifications(req.user, { unreadOnly: req.query.unread === 'true' })); } catch (e) { fail(res, e); }
+  });
+  app.post('/api/todo/notifications/read', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await todo.markNotificationsRead(req.user)); } catch (e) { fail(res, e); }
+  });
+
+  // GET /api/todo/events – SSE-Echtzeitkanal. EventSource kann keine Header setzen
+  // → Token zusätzlich als ?auth= erlaubt (wird VOR authMiddleware in den Header gespiegelt).
+  app.get('/api/todo/events', (req, res, next) => {
+    if (!req.get('Authorization') && req.query.auth) req.headers['authorization'] = 'Bearer ' + req.query.auth;
+    next();
+  }, authMiddleware, (req, res) => {
+    res.set({
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-store',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    res.flushHeaders();
+    res.write('data: {"module":"todo","type":"hello"}\n\n');
+    const unsubscribe = todoSubscribe(req.user.id, res);
+    req.on('close', unsubscribe);
   });
 
   // GET /api/health – Monitoring: alle Intelligence-Module aus der Registry
