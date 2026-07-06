@@ -67,6 +67,58 @@ const GET=p=>call('GET',p),POST=(p,b)=>call('POST',p,b),PUT=(p,b)=>call('PUT',p,
 function cacheWrite(){try{localStorage.setItem('td_cache_v1',JSON.stringify({inboxId:S.inboxId,folders:S.folders,lists:S.lists,tags:S.tags,savedFilters:S.savedFilters,people:S.people,tasks:Object.values(S.tasks).slice(0,500),ts:Date.now()}));}catch(e){}}
 function cacheRead(){try{return JSON.parse(localStorage.getItem('td_cache_v1')||'null');}catch(e){return null;}}
 
+// ═══ Modals & Popovers (eigene Dialoge statt prompt/confirm) ═══
+const PALETTE=['#d97706','#dc2626','#059669','#1d4ed8','#6d28d9','#0e7490','#be185d','#4d5568'];
+const EMOJIS=['📥','📌','🛒','🚀','💡','📊','🧾','📦','✈️','🏭','💶','📣','🎯','📝','🔑','🛠️','🧪','⭐','❤️','🧠'];
+const ACT={}; // Callback-Slots des gerade offenen Dialogs (es ist immer nur einer offen)
+function ovl(html){
+ closeOvl();
+ const o=document.createElement('div');o.id='tdOvl';o.className='td-ovl';
+ o.innerHTML='<div class="td-modal">'+html+'</div>';
+ o.addEventListener('mousedown',e=>{if(e.target===o)closeOvl();});
+ document.body.appendChild(o);
+ const f=o.querySelector('input:not([type=date]):not([type=time]),textarea');
+ if(f)setTimeout(()=>{f.focus();if(f.select)f.select();},40);
+ return o;
+}
+function closeOvl(){const o=$('tdOvl');if(o)o.remove();closePop();}
+function closePop(){const p=$('tdPop');if(p)p.remove();document.removeEventListener('mousedown',popOutside,true);}
+function popOutside(e){const p=$('tdPop');if(p&&!p.contains(e.target))closePop();}
+function popAt(x,y,html,w){
+ closePop();
+ const p=document.createElement('div');p.id='tdPop';p.className='td-pop';p.style.width=(w||280)+'px';
+ p.innerHTML=html;document.body.appendChild(p);
+ p.style.left=Math.max(8,Math.min(x,window.innerWidth-(w||280)-14))+'px';
+ p.style.top=y+'px';
+ requestAnimationFrame(()=>{const h=p.offsetHeight;if(y+h>window.innerHeight-8)p.style.top=Math.max(8,window.innerHeight-h-10)+'px';});
+ setTimeout(()=>document.addEventListener('mousedown',popOutside,true),0);
+ return p;
+}
+function popBelow(ev,html,w){const r=ev.currentTarget.getBoundingClientRect();return popAt(r.left,r.bottom+6,html,w);}
+function tdConfirm(title,text,okLabel,fn){
+ ACT.ok=()=>{closeOvl();fn();};
+ ovl('<h3>'+esc(title)+'</h3><p class="td-mtext">'+esc(text)+'</p>'
+  +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Abbrechen</button>'
+  +'<button class="btn btn-d" onclick="td.act(\'ok\')">'+esc(okLabel||'Löschen')+'</button></div>');
+}
+function tdInput(title,label,value,okLabel,fn){
+ ACT.ok=()=>{const v=$('tdMInput').value.trim();closeOvl();if(v)fn(v);};
+ ovl('<h3>'+esc(title)+'</h3><div style="margin:12px 0"><label class="td-mlabel">'+esc(label)+'</label>'
+  +'<input id="tdMInput" class="td-minput" value="'+esc(value||'')+'" onkeydown="if(event.key===\'Enter\')td.act(\'ok\')"></div>'
+  +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Abbrechen</button>'
+  +'<button class="btn btn-p" onclick="td.act(\'ok\')">'+esc(okLabel||'Speichern')+'</button></div>');
+}
+function avatar(name){
+ let hash=0;for(const ch of String(name))hash=(hash*31+ch.charCodeAt(0))>>>0;
+ const ini=String(name).split(/[\s@.]+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+ return'<span class="td-avatar" style="background:hsl('+(hash%360)+',52%,44%)">'+esc(ini)+'</span>';
+}
+const swatchRow=sel=>'<div class="td-swrow">'+PALETTE.map(c=>'<span class="td-swatch'+(sel===c?' on':'')+'" style="background:'+c+'" data-c="'+c+'" onclick="td.pickSwatch(this)"></span>').join('')+'</div>';
+const emojiRow=sel=>'<div class="td-emrow"><span class="td-emoji'+(!sel?' on':'')+'" data-e="" onclick="td.pickEmoji(this)" title="Kein Symbol">∅</span>'+EMOJIS.map(e=>'<span class="td-emoji'+(sel===e?' on':'')+'" data-e="'+e+'" onclick="td.pickEmoji(this)">'+e+'</span>').join('')+'</div>';
+const nextMondayStr=()=>{const d=new Date();return addDays(todayStr(),(1-d.getDay()+7)%7||7);};
+const saturdayStr=()=>{const d=new Date();return addDays(todayStr(),(6-d.getDay()+7)%7);};
+const fmtDow=ds=>new Date(ds+'T00:00:00').toLocaleDateString('de-DE',{weekday:'short'});
+
 // ═══ Boot & Realtime ═══
 async function boot(force){
  if(S.booted&&!force)return true;
@@ -291,8 +343,9 @@ function renderSidebar(){
   h+='<button class="td-nav td-folder'+(on?' on':'')+'" oncontextmenu="td.folderMenu(event,\''+f.id+'\')" onclick="td.setScope(\'folder\',\''+f.id+'\')">📁 '+esc(f.name)+'</button>';
   h+='<div class="td-indent">'+inside.map(listBtn).join('')+'</div>';
  });
+ h+='<div class="td-sec">TAGS <button class="td-mini" title="Tags verwalten" onclick="td.openTagManager()">⚙</button></div>';
  if(S.tags.length){
-  h+='<div class="td-sec">TAGS</div><div class="td-tagcloud">'+S.tags.map(t=>{
+  h+='<div class="td-tagcloud">'+S.tags.map(t=>{
    const on=S.scope.type==='tag'&&S.scope.id===t.id;
    return'<button class="td-tagchip'+(on?' on':'')+'" style="--tc:'+esc(t.color||'#7b8395')+'" oncontextmenu="td.tagMenu(event,\''+t.id+'\')" onclick="td.setScope(\'tag\',\''+t.id+'\')">#'+esc(t.name)+'</button>';
   }).join('')+'</div>';
@@ -486,7 +539,9 @@ function renderDetail(){
  h+='<label>Liste</label><select class="fsel"'+ro+' onchange="td.field(\''+t.id+'\',\'listId\',this.value)">'+S.lists.filter(l=>canEdit(l.id)||l.id===t.listId).map(l=>'<option value="'+l.id+'"'+(l.id===t.listId?' selected':'')+'>'+esc(l.name)+'</option>').join('')+'</select>';
  h+='<label>Status</label><select class="fsel"'+ro+' onchange="td.field(\''+t.id+'\',\'status\',this.value)">'+STATI.map(s=>'<option value="'+s.id+'"'+(s.id===t.status?' selected':'')+'>'+s.label+'</option>').join('')+'</select>';
  h+='<label>Priorität</label><select class="fsel"'+ro+' onchange="td.field(\''+t.id+'\',\'priority\',this.value)">'+PRIOS.map(p=>'<option value="'+p.id+'"'+(p.id===t.priority?' selected':'')+'>'+p.icon+' '+p.label+'</option>').join('')+'</select>';
- h+='<label>Fällig</label><div style="display:flex;gap:6px"><input type="date" class="fsel" value="'+esc(t.dueDate||'')+'"'+ro+' onchange="td.field(\''+t.id+'\',\'dueDate\',this.value||null)"><input type="time" class="fsel" value="'+esc(t.dueTime||'')+'"'+ro+' onchange="td.field(\''+t.id+'\',\'dueTime\',this.value||null)"></div>';
+ const over=t.dueDate&&!t.completed&&t.dueDate<todayStr();
+ h+='<label>Fällig</label><button class="td-fieldbtn'+(over?' over':'')+(t.dueDate?' set':'')+'"'+(editable?' onclick="td.duePop(event,\''+t.id+'\')"':' disabled')+'>'
+  +(t.dueDate?'📅 '+fmtDate(t.dueDate)+(t.dueTime?' · '+t.dueTime+' Uhr':''):'＋ Datum wählen…')+'</button>';
  h+='<label>Zugewiesen</label><select class="fsel"'+ro+' onchange="td.field(\''+t.id+'\',\'assignedTo\',this.value||null)"><option value="">— niemand —</option>'+S.members.map(m=>'<option value="'+m.userId+'"'+(m.userId===t.assignedTo?' selected':'')+'>'+esc(m.name)+'</option>').join('')+'</select>';
  h+='<label>Wiederholen</label><div style="display:flex;gap:6px;flex-wrap:wrap">'
   +'<select class="fsel" id="tdRepMode"'+ro+' onchange="td.repeatChange(\''+t.id+'\')">'
@@ -499,7 +554,7 @@ function renderDetail(){
  // Erinnerungen
  h+='<label>Erinnerung</label><div>';
  d.reminders.forEach(r=>{h+='<div class="td-remrow">⏰ '+fmtWhen(r.remindAt)+(r.firedAt?' <i>(zugestellt)</i>':'')+' <button class="td-mini" onclick="td.delReminder(\''+r.id+'\')">✕</button></div>';});
- h+='<div style="display:flex;gap:6px"><input type="datetime-local" id="tdRemAt" class="fsel"><button class="btn btn-sm" onclick="td.addReminder(\''+t.id+'\')">＋</button></div></div>';
+ h+='<button class="td-fieldbtn" onclick="td.remPop(event,\''+t.id+'\')">＋ Erinnerung hinzufügen…</button></div>';
  // Tags
  h+='<label>Tags</label><div class="td-dtags">'
   +(t.tags||[]).map(tg=>'<span class="td-tagchip" style="--tc:'+esc(tg.color||'#7b8395')+'">#'+esc(tg.name)+(editable?' <span onclick="td.untag(\''+t.id+'\',\''+tg.id+'\')" style="cursor:pointer">✕</span>':'')+'</span>').join('')
@@ -633,6 +688,11 @@ function clearSel(){S.sel.clear();renderAll();}
 // ═══ Shortcuts ═══
 document.addEventListener('keydown',function(ev){
  if(!isActive())return;
+ // Offene Dialoge/Popover: Esc schließt, alle übrigen Shortcuts pausieren
+ if($('tdOvl')||$('tdPop')){
+  if(ev.key==='Escape'){ev.preventDefault();closeOvl();}
+  return;
+ }
  const tag=(document.activeElement&&document.activeElement.tagName)||'';
  const editing=['INPUT','TEXTAREA','SELECT'].includes(tag)||(document.activeElement&&document.activeElement.isContentEditable);
  if(editing){if(ev.key==='Escape')document.activeElement.blur();return;}
@@ -662,79 +722,164 @@ document.addEventListener('keydown',function(ev){
  }
 });
 
-// ═══ Dialog-Helfer (schlicht mit prompt/confirm — konsistent zur restlichen App) ═══
+// ═══ Dialoge: Neue Aufgabe, Listen-Editor, Teilen, Tag-Manager, Kontextmenüs ═══
+function dueChips(sel){
+ const opts=[['','Kein Datum'],[todayStr(),'Heute'],[addDays(todayStr(),1),'Morgen'],[nextMondayStr(),'Nächste Woche']];
+ const custom=sel&&!opts.some(o=>o[0]===sel);
+ return opts.map(o=>'<button class="td-qchip'+((sel||'')===o[0]&&!custom?' on':'')+'" data-v="'+o[0]+'" onclick="td.pickDue(this)">'+o[1]+'</button>').join('')
+  +'<input type="date" id="tdNtDueCustom" class="fsel" style="font-size:11px" value="'+esc(custom?sel:'')+'" onchange="td.pickDueDate(this)">';
+}
 function newTaskDialog(dueDate){
- const title=prompt('Titel der neuen Aufgabe:');
- if(!title||!title.trim())return;
- let listId=S.scope.type==='list'?S.scope.id:S.inboxId;
- if(!canEdit(listId))listId=S.inboxId;
- mutate(async()=>{
-  const r=await POST('/api/todo/tasks',{listId,title:title.trim(),...(dueDate?{dueDate}:{})});
-  S.tasks[r.task.id]=r.task;S.order.unshift(r.task.id);renderAll();
-  openDetail(r.task.id);
- });
+ const lists=S.lists.filter(l=>canEdit(l.id));
+ const defList=S.scope.type==='list'&&canEdit(S.scope.id)?S.scope.id:S.inboxId;
+ ACT.create=()=>{
+  const title=$('tdNtTitle').value.trim();if(!title)return;
+  const listId=$('tdNtList').value,priority=$('tdNtPrio').value;
+  const chip=document.querySelector('#tdOvl .td-qchip.on');
+  const due=$('tdNtDueCustom').value||(chip?chip.dataset.v:'');
+  closeOvl();
+  mutate(async()=>{
+   const r=await POST('/api/todo/tasks',{listId,title,...(priority!=='keine'?{priority}:{}),...(due?{dueDate:due}:{})});
+   S.tasks[r.task.id]=r.task;S.order.unshift(r.task.id);renderAll();openDetail(r.task.id);
+  });
+ };
+ ovl('<h3>＋ Neue Aufgabe</h3>'
+  +'<input id="tdNtTitle" class="td-minput big" placeholder="Was ist zu tun?" onkeydown="if(event.key===\'Enter\')td.act(\'create\')">'
+  +'<div class="td-mgrid">'
+  +'<label>Liste</label><select id="tdNtList" class="fsel">'+lists.map(l=>'<option value="'+l.id+'"'+(l.id===defList?' selected':'')+'>'+(l.icon?l.icon+' ':'')+esc(l.name)+'</option>').join('')+'</select>'
+  +'<label>Priorität</label><select id="tdNtPrio" class="fsel">'+PRIOS.map(p=>'<option value="'+p.id+'">'+p.icon+' '+p.label+'</option>').join('')+'</select>'
+  +'<label>Fällig</label><div class="td-quickchips">'+dueChips(dueDate||'')+'</div>'
+  +'</div>'
+  +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Abbrechen</button><button class="btn btn-p" onclick="td.act(\'create\')">Erstellen</button></div>');
 }
-function newList(){
- const name=prompt('Name der neuen Liste:');if(!name||!name.trim())return;
- let folderId=null;
- if(S.scope.type==='folder')folderId=S.scope.id;
- mutate(async()=>{const r=await POST('/api/todo/lists',{name:name.trim(),folderId});S.booted=false;await boot(true);S.scope={type:'list',id:r.list.id};refresh();});
+// Listen-Editor: anlegen (listId=null) oder bearbeiten — Name, Symbol, Farbe, Ordner
+function openListModal(listId){
+ closePop();
+ const l=listId?listById(listId):null;
+ if(listId&&!l)return;
+ const isOwner=!l||l.role==='owner';
+ ACT.save=()=>{
+  const name=$('tdLName').value.trim();if(!name)return;
+  const em=document.querySelector('#tdOvl .td-emoji.on');
+  const sw=document.querySelector('#tdOvl .td-swatch.on');
+  const body={name,icon:em?(em.dataset.e||null):null,color:sw?sw.dataset.c:null,folderId:$('tdLFolder').value||null};
+  closeOvl();
+  mutate(async()=>{
+   let goTo=listId;
+   if(listId)await PUT('/api/todo/lists/'+listId,body);
+   else{const r=await POST('/api/todo/lists',body);goTo=r.list.id;}
+   S.booted=false;await boot(true);
+   S.scope={type:'list',id:goTo};refresh();
+  });
+ };
+ const folderSel=S.scope.type==='folder'&&!l?S.scope.id:(l?l.folderId:null);
+ ovl('<h3>'+(l?'✏️ Liste bearbeiten':'＋ Neue Liste')+'</h3>'
+  +'<input id="tdLName" class="td-minput big" placeholder="Name der Liste…" value="'+esc(l?l.name:'')+'" onkeydown="if(event.key===\'Enter\')td.act(\'save\')">'
+  +'<div class="td-mlabel">Symbol</div>'+emojiRow(l?l.icon:null)
+  +'<div class="td-mlabel">Farbe</div>'+swatchRow(l?l.color:PALETTE[0])
+  +'<div class="td-mlabel">Ordner</div><select id="tdLFolder" class="fsel" style="width:100%"><option value="">— kein Ordner —</option>'
+  +S.folders.map(f=>'<option value="'+f.id+'"'+(folderSel===f.id?' selected':'')+'>📁 '+esc(f.name)+'</option>').join('')+'</select>'
+  +'<div class="td-mbtns">'
+  +(l&&isOwner&&!l.isInbox?'<button class="btn btn-d btn-sm" style="margin-right:auto" onclick="td.listDelete(\''+listId+'\')">🗑 Löschen</button>':'')
+  +(l&&!isOwner?'<button class="btn btn-d btn-sm" style="margin-right:auto" onclick="td.listLeave(\''+listId+'\')">🚪 Verlassen</button>':'')
+  +'<button class="btn" onclick="td.closeDialogs()">Abbrechen</button>'
+  +'<button class="btn btn-p" onclick="td.act(\'save\')">'+(l?'Speichern':'Liste anlegen')+'</button></div>');
 }
+function newList(){openListModal(null);}
 function newFolder(){
- const name=prompt('Name des neuen Ordners:');if(!name||!name.trim())return;
- mutate(async()=>{await POST('/api/todo/folders',{name:name.trim()});S.booted=false;await boot(true);renderAll();});
+ tdInput('＋ Neuer Ordner','Name des Ordners','','Anlegen',name=>{
+  mutate(async()=>{await POST('/api/todo/folders',{name});S.booted=false;await boot(true);renderAll();});
+ });
 }
 function listMenu(ev,id){
  ev.preventDefault();
  const l=listById(id);if(!l)return;
- const isOwner=l.role==='owner',isAdmin=['admin','owner'].includes(l.role);
- const opts=['1 Umbenennen','2 Farbe/Symbol','3 In Ordner verschieben','4 Teilen/Mitglieder'].concat(isOwner&&!l.isInbox?['5 Liste löschen']:[]).concat(l.role!=='owner'?['6 Liste verlassen']:[]);
- const c=prompt('Liste „'+l.name+'":\n'+opts.join('\n')+'\n\nNummer eingeben:');
- if(c==='1'&&isAdmin){const n=prompt('Neuer Name:',l.name);if(n&&n.trim())mutate(async()=>{await PUT('/api/todo/lists/'+id,{name:n.trim()});S.booted=false;await boot(true);renderAll();});}
- if(c==='2'&&isAdmin){const icon=prompt('Symbol (Emoji, leer = keins):',l.icon||'');const color=prompt('Farbe (Hex, z. B. #d97706):',l.color||'#d97706');mutate(async()=>{await PUT('/api/todo/lists/'+id,{icon:icon||null,color:color||null});S.booted=false;await boot(true);renderAll();});}
- if(c==='3'&&isAdmin){const names=S.folders.map((f,i)=>(i+1)+' '+f.name).join('\n');const k=prompt('In welchen Ordner?\n0 (kein Ordner)\n'+names);const f=k==='0'?null:S.folders[parseInt(k,10)-1];if(k!==null)mutate(async()=>{await PUT('/api/todo/lists/'+id,{folderId:f?f.id:null});S.booted=false;await boot(true);renderAll();});}
- if(c==='4')shareDialog(id);
- if(c==='5'&&isOwner&&!l.isInbox){if(confirm('Liste „'+l.name+'" und ALLE Aufgaben darin löschen?'))mutate(async()=>{await DEL('/api/todo/lists/'+id);S.booted=false;await boot(true);S.scope={type:'smart',id:'inbox'};refresh();});}
- if(c==='6'&&l.role!=='owner'){if(confirm('Liste „'+l.name+'" verlassen?'))mutate(async()=>{await DEL('/api/todo/lists/'+id+'/members/'+me().id);S.booted=false;await boot(true);S.scope={type:'smart',id:'inbox'};refresh();});}
+ const isAdmin=['admin','owner'].includes(l.role);
+ let h='';
+ if(isAdmin)h+='<button class="td-menuitem" onclick="td.openListModal(\''+id+'\')">✏️ Bearbeiten…</button>';
+ if(!l.isInbox)h+='<button class="td-menuitem" onclick="td.closeDialogs();td.shareDialog(\''+id+'\')">👥 Teilen &amp; Mitglieder…</button>';
+ if(l.role==='owner'&&!l.isInbox)h+='<button class="td-menuitem danger" onclick="td.listDelete(\''+id+'\')">🗑 Liste löschen…</button>';
+ if(l.role!=='owner')h+='<button class="td-menuitem danger" onclick="td.listLeave(\''+id+'\')">🚪 Liste verlassen…</button>';
+ if(h)popAt(ev.clientX,ev.clientY,h,215);
 }
 function folderMenu(ev,id){
  ev.preventDefault();
  const f=S.folders.find(f=>f.id===id);if(!f)return;
- const c=prompt('Ordner „'+f.name+'":\n1 Umbenennen\n2 Ordner löschen (Listen bleiben)\n\nNummer eingeben:');
- if(c==='1'){const n=prompt('Neuer Name:',f.name);if(n&&n.trim())mutate(async()=>{await PUT('/api/todo/folders/'+id,{name:n.trim()});S.booted=false;await boot(true);renderAll();});}
- if(c==='2'){if(confirm('Ordner löschen? Die Listen bleiben erhalten.'))mutate(async()=>{await DEL('/api/todo/folders/'+id);S.booted=false;await boot(true);renderAll();});}
+ popAt(ev.clientX,ev.clientY,
+  '<button class="td-menuitem" onclick="td.folderRename(\''+id+'\')">✏️ Umbenennen…</button>'
+  +'<button class="td-menuitem danger" onclick="td.folderDelete(\''+id+'\')">🗑 Ordner löschen…</button>',215);
 }
-function tagMenu(ev,id){
- ev.preventDefault();
- const t=S.tags.find(t=>t.id===id);if(!t)return;
- const c=prompt('Tag „#'+t.name+'":\n1 Umbenennen\n2 Farbe ändern\n3 Tag löschen\n\nNummer eingeben:');
- if(c==='1'){const n=prompt('Neuer Name:',t.name);if(n&&n.trim())mutate(async()=>{await PUT('/api/todo/tags/'+id,{name:n.trim()});S.booted=false;await boot(true);refresh();});}
- if(c==='2'){const col=prompt('Farbe (Hex):',t.color||'#7b8395');if(col)mutate(async()=>{await PUT('/api/todo/tags/'+id,{color:col});S.booted=false;await boot(true);refresh();});}
- if(c==='3'){if(confirm('Tag „#'+t.name+'" löschen? Er wird von allen Aufgaben entfernt.'))mutate(async()=>{await DEL('/api/todo/tags/'+id);S.booted=false;await boot(true);if(S.scope.type==='tag'&&S.scope.id===id)S.scope={type:'smart',id:'inbox'};refresh();});}
-}
+function tagMenu(ev,id){ev.preventDefault();openTagManager();}
+// Teilen-Dialog: Mitgliederliste mit Avataren, Rollen-Dropdowns, Einladen per E-Mail
 async function shareDialog(listId){
  const l=listById(listId);if(!l)return;
  let mem=[];try{mem=(await GET('/api/todo/lists/'+listId+'/members')).members;}catch(e){return toast('⚠️ '+e.message);}
  const isAdmin=['admin','owner'].includes(l.role);
- const lines=mem.map((m,i)=>(i+1)+'. '+m.name+' <'+m.email+'> — '+(ROLLEN.find(r=>r.id===m.role)?ROLLEN.find(r=>r.id===m.role).label:m.role)).join('\n');
- const c=prompt('Mitglieder von „'+l.name+'":\n'+lines+'\n\n'+(isAdmin?'e = Einladen · r = Rolle ändern · x = Entfernen\n':'')+'(Abbrechen zum Schließen)');
- if(!c||!isAdmin)return;
- if(c.toLowerCase()==='e'){
-  const email=prompt('E-Mail des SellerHub-Kontos:');if(!email)return;
-  const rn=prompt('Rolle:\n1 Nur lesen\n2 Kommentieren\n3 Bearbeiten\n4 Verwalten','3');
-  const role=({1:'viewer',2:'commenter',3:'editor',4:'admin'})[rn]||'editor';
-  mutate(async()=>{await POST('/api/todo/lists/'+listId+'/members',{email:email.trim(),role});toast('✅ Eingeladen');});
+ const roleCell=m=>m.role==='owner'
+  ?'<span class="td-rolefix">👑 Besitzer</span>'
+  :(isAdmin
+   ?'<select class="fsel" style="font-size:11px;padding:4px 6px" onchange="td.shareRole(\''+listId+'\',\''+m.userId+'\',this.value)">'+ROLLEN.map(r=>'<option value="'+r.id+'"'+(m.role===r.id?' selected':'')+'>'+r.label+'</option>').join('')+'</select>'
+   :'<span class="td-rolefix">'+esc((ROLLEN.find(r=>r.id===m.role)||{label:m.role}).label)+'</span>');
+ ovl('<h3>👥 „'+esc(l.name)+'" teilen</h3>'
+  +'<div class="td-memlist">'+mem.map(m=>'<div class="td-memrow">'+avatar(m.name)
+   +'<div class="td-meminfo"><b>'+esc(m.name)+(m.userId===me().id?' (du)':'')+'</b><span>'+esc(m.email)+'</span></div>'
+   +roleCell(m)
+   +(isAdmin&&m.role!=='owner'?'<button class="td-mini" title="Entfernen" onclick="td.shareKick(\''+listId+'\',\''+m.userId+'\',\''+esc(m.name)+'\')">✕</button>':'')
+   +'</div>').join('')+'</div>'
+  +(isAdmin
+   ?'<div class="td-invrow"><input id="tdInvMail" class="td-minput" placeholder="E-Mail des SellerHub-Kontos…" onkeydown="if(event.key===\'Enter\')td.shareInvite(\''+listId+'\')">'
+    +'<select id="tdInvRole" class="fsel">'+ROLLEN.map(r=>'<option value="'+r.id+'"'+(r.id==='editor'?' selected':'')+'>'+r.label+'</option>').join('')+'</select>'
+    +'<button class="btn btn-p btn-sm" onclick="td.shareInvite(\''+listId+'\')">Einladen</button></div>'
+    +'<p class="td-mhint">Rollen: Nur lesen → Kommentieren → Bearbeiten → Verwalten (darf einladen). Eingeladen werden können nur bestehende SellerHub-Konten.</p>'
+   :'<p class="td-mhint">Nur Verwalter können Mitglieder einladen oder Rollen ändern.</p>')
+  +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Schließen</button></div>');
+}
+// Tag-Manager: umbenennen, Farbe per Klick, löschen, neu anlegen
+function openTagManager(){
+ closePop();
+ ovl('<h3>🏷 Tags verwalten</h3>'
+  +'<div class="td-memlist">'+(S.tags.length?S.tags.map(t=>'<div class="td-memrow">'
+   +'<input class="td-minput" style="flex:1;min-width:0" value="'+esc(t.name)+'" onchange="td.tagRename(\''+t.id+'\',this.value)">'
+   +'<div class="td-swrow sm">'+PALETTE.map(c=>'<span class="td-swatch'+(t.color===c?' on':'')+'" style="background:'+c+'" onclick="td.tagColor(\''+t.id+'\',\''+c+'\')"></span>').join('')+'</div>'
+   +'<button class="td-mini" title="Tag löschen" onclick="td.tagDelete(\''+t.id+'\')">🗑</button></div>').join('')
+  :'<p class="td-mtext">Noch keine Tags — lege unten den ersten an.</p>')+'</div>'
+  +'<div class="td-invrow"><input id="tdNewTag" class="td-minput" placeholder="Neuen Tag anlegen…" onkeydown="if(event.key===\'Enter\')td.tagCreate()"><button class="btn btn-p btn-sm" onclick="td.tagCreate()">Anlegen</button></div>'
+  +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Schließen</button></div>');
+}
+// ═══ Fälligkeits-Popover: Schnellwahl + Mini-Kalender + Uhrzeit ═══
+function miniCal(id){
+ const[y,m]=S.popMonth.split('-').map(Number);
+ const first=new Date(y,m-1,1);
+ const startDow=(first.getDay()+6)%7;
+ const daysIn=new Date(y,m,0).getDate();
+ const sel=S.tasks[id]?S.tasks[id].dueDate:null;
+ let h='<div class="td-mcal"><div class="td-mcalhead"><button onclick="td.dueShiftMonth(\''+id+'\',-1)">‹</button><b>'+first.toLocaleDateString('de-DE',{month:'long',year:'numeric'})+'</b><button onclick="td.dueShiftMonth(\''+id+'\',1)">›</button></div><div class="td-mcalgrid">';
+ ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(d=>h+='<span class="dw">'+d+'</span>');
+ for(let i=0;i<startDow;i++)h+='<span></span>';
+ for(let d=1;d<=daysIn;d++){
+  const ds=S.popMonth+'-'+String(d).padStart(2,'0');
+  h+='<button class="'+(ds===todayStr()?'today ':'')+(ds===sel?'sel':'')+'" onclick="td.duePick(\''+id+'\',\''+ds+'\')">'+d+'</button>';
  }
- if(c.toLowerCase()==='r'){
-  const k=parseInt(prompt('Nummer des Mitglieds:'),10)-1;const m=mem[k];if(!m)return;
-  const rn=prompt('Neue Rolle für '+m.name+':\n1 Nur lesen\n2 Kommentieren\n3 Bearbeiten\n4 Verwalten');
-  const role=({1:'viewer',2:'commenter',3:'editor',4:'admin'})[rn];if(!role)return;
-  mutate(async()=>{await PUT('/api/todo/lists/'+listId+'/members/'+m.userId,{role});toast('✅ Rolle geändert');});
- }
- if(c.toLowerCase()==='x'){
-  const k=parseInt(prompt('Nummer des Mitglieds:'),10)-1;const m=mem[k];if(!m)return;
-  if(confirm(m.name+' aus der Liste entfernen?'))mutate(async()=>{await DEL('/api/todo/lists/'+listId+'/members/'+m.userId);toast('✅ Entfernt');});
- }
+ return h+'</div></div>';
+}
+function duePopHtml(id){
+ const t=S.tasks[id]||{};
+ const q=[['📅 Heute',todayStr()],['➡️ Morgen',addDays(todayStr(),1)],['🛋 Wochenende',saturdayStr()],['🗓 Nächste Woche',nextMondayStr()]];
+ return'<div class="td-popquick">'+q.map(x=>'<button onclick="td.duePick(\''+id+'\',\''+x[1]+'\')">'+x[0]+'<span>'+fmtDow(x[1])+' '+x[1].slice(8,10)+'.'+x[1].slice(5,7)+'.</span></button>').join('')
+  +(t.dueDate?'<button class="clear" onclick="td.duePick(\''+id+'\',\'\')">✕ Kein Datum</button>':'')+'</div>'
+  +miniCal(id)
+  +'<div class="td-poptime"><span>🕐 Uhrzeit</span><input type="time" class="fsel" value="'+esc(t.dueTime||'')+'" onchange="td.field(\''+id+'\',\'dueTime\',this.value||null)"></div>';
+}
+// ═══ Erinnerungs-Popover: Schnellwahl + eigener Zeitpunkt ═══
+function remPopHtml(taskId){
+ const now=new Date();
+ const opts=[['In 1 Stunde',new Date(now.getTime()+3600e3)]];
+ const evening=new Date(now);evening.setHours(18,0,0,0);
+ if(evening>now)opts.push(['Heute Abend',evening]);
+ const morgen=new Date(now.getTime()+864e5);morgen.setHours(9,0,0,0);opts.push(['Morgen früh',morgen]);
+ const mon=new Date(now);mon.setDate(mon.getDate()+((1-mon.getDay()+7)%7||7));mon.setHours(9,0,0,0);opts.push(['Nächste Woche',mon]);
+ return'<div class="td-popquick">'+opts.map(o=>'<button onclick="td.remPick(\''+taskId+'\',\''+o[1].toISOString()+'\')">⏰ '+o[0]+'<span>'+fmtWhen(o[1].toISOString())+'</span></button>').join('')+'</div>'
+  +'<div class="td-poptime"><input type="datetime-local" id="tdRemCustom" class="fsel" style="flex:1"><button class="btn btn-p btn-sm" onclick="td.remPickCustom(\''+taskId+'\')">＋</button></div>';
 }
 
 // ═══ Öffentliche Aktionen (window.td) ═══
@@ -783,14 +928,30 @@ window.td={
  tag(taskId,tagId){mutate(async()=>{await POST('/api/todo/tasks/'+taskId+'/tags/'+tagId);openDetail(taskId,true);refresh(true);});},
  untag(taskId,tagId){mutate(async()=>{await DEL('/api/todo/tasks/'+taskId+'/tags/'+tagId);openDetail(taskId,true);refresh(true);});},
  newTagFor(taskId){
-  const name=prompt('Name des neuen Tags:');if(!name||!name.trim())return;
-  const color=prompt('Farbe (Hex, leer = grau):','#d97706');
-  mutate(async()=>{const r=await POST('/api/todo/tags',{name:name.trim(),color:color||null});S.tags.push(r.tag);if(taskId)await POST('/api/todo/tasks/'+taskId+'/tags/'+r.tag.id);if(taskId)openDetail(taskId,true);renderAll();});
+  ACT.create=()=>{
+   const name=$('tdTgName').value.trim();if(!name)return;
+   const sw=document.querySelector('#tdOvl .td-swatch.on');
+   const color=sw?sw.dataset.c:PALETTE[0];
+   closeOvl();
+   mutate(async()=>{const r=await POST('/api/todo/tags',{name,color});S.tags.push(r.tag);if(taskId)await POST('/api/todo/tasks/'+taskId+'/tags/'+r.tag.id);if(taskId)openDetail(taskId,true);renderAll();});
+  };
+  ovl('<h3>✚ Neuer Tag</h3>'
+   +'<input id="tdTgName" class="td-minput big" placeholder="Tag-Name…" onkeydown="if(event.key===\'Enter\')td.act(\'create\')">'
+   +'<div class="td-mlabel">Farbe</div>'+swatchRow(PALETTE[0])
+   +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Abbrechen</button><button class="btn btn-p" onclick="td.act(\'create\')">Anlegen</button></div>');
  },
  // Kommentare
  cAdd(taskId){const inp=$('tdCNew');const v=inp.value.trim();if(!v)return;inp.value='';mutate(async()=>{await POST('/api/todo/tasks/'+taskId+'/comments',{body:v});openDetail(taskId,true);});},
- cEdit(cid,taskId){const cur=$('tdC'+cid);const v=prompt('Kommentar bearbeiten:',cur?cur.textContent:'');if(v===null)return;mutate(async()=>{await PUT('/api/todo/comments/'+cid,{body:v});openDetail(taskId,true);});},
- cDel(cid,taskId){if(!confirm('Kommentar löschen?'))return;mutate(async()=>{await DEL('/api/todo/comments/'+cid);openDetail(taskId,true);});},
+ cEdit(cid,taskId){
+  const box=$('tdC'+cid);if(!box)return;
+  const cur=box.textContent;
+  box.innerHTML='<textarea id="tdCE'+cid+'" class="td-ctext">'+esc(cur)+'</textarea>'
+   +'<div class="td-mbtns" style="margin-top:4px"><button class="btn btn-sm" onclick="td.openDetail(\''+taskId+'\',true)">Abbrechen</button>'
+   +'<button class="btn btn-p btn-sm" onclick="td.cEditSave(\''+cid+'\',\''+taskId+'\')">Speichern</button></div>';
+  const ta=$('tdCE'+cid);ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+ },
+ cEditSave(cid,taskId){const ta=$('tdCE'+cid);const v=ta?ta.value.trim():'';if(!v)return;mutate(async()=>{await PUT('/api/todo/comments/'+cid,{body:v});openDetail(taskId,true);});},
+ cDel(cid,taskId){tdConfirm('Kommentar löschen','Der Kommentar wird endgültig entfernt.','Löschen',()=>mutate(async()=>{await DEL('/api/todo/comments/'+cid);openDetail(taskId,true);}));},
  // Anhänge
  attUpload(ev,taskId){
   const f=ev.target.files[0];if(!f)return;
@@ -811,23 +972,41 @@ window.td={
    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   }catch(e){toast('⚠️ '+e.message);}
  },
- attDel(attId){if(!confirm('Anhang löschen?'))return;mutate(async()=>{await DEL('/api/todo/attachments/'+attId);openDetail(S.detailId,true);});},
- // Erinnerungen
- addReminder(taskId){
-  const inp=$('tdRemAt');if(!inp||!inp.value)return toast('Bitte Zeitpunkt wählen');
+ attDel(attId){tdConfirm('Anhang löschen','Die Datei wird endgültig entfernt.','Löschen',()=>mutate(async()=>{await DEL('/api/todo/attachments/'+attId);openDetail(S.detailId,true);}));},
+ // Fälligkeit: Popover mit Schnellwahl + Mini-Kalender
+ duePop(ev,id){
+  const t=S.tasks[id];
+  S.popMonth=(t&&t.dueDate?t.dueDate:todayStr()).slice(0,7);
+  popBelow(ev,duePopHtml(id),300);
+ },
+ duePick(id,ds){td.field(id,'dueDate',ds||null);closePop();},
+ dueShiftMonth(id,n){
+  const[y,m]=S.popMonth.split('-').map(Number);
+  const d=new Date(y,m-1+n,1);
+  S.popMonth=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  const p=$('tdPop');if(p)p.innerHTML=duePopHtml(id);
+ },
+ // Erinnerungen: Popover mit Schnellwahl + eigenem Zeitpunkt
+ remPop(ev,taskId){popBelow(ev,remPopHtml(taskId),290);},
+ remPick(taskId,iso){
   if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
-  mutate(async()=>{await POST('/api/todo/tasks/'+taskId+'/reminders',{remindAt:new Date(inp.value).toISOString()});openDetail(taskId,true);});
+  closePop();
+  mutate(async()=>{await POST('/api/todo/tasks/'+taskId+'/reminders',{remindAt:iso});toast('⏰ Erinnerung gesetzt');openDetail(taskId,true);});
+ },
+ remPickCustom(taskId){
+  const inp=$('tdRemCustom');if(!inp||!inp.value)return toast('Bitte Zeitpunkt wählen');
+  td.remPick(taskId,new Date(inp.value).toISOString());
  },
  delReminder(rid){mutate(async()=>{await DEL('/api/todo/reminders/'+rid);openDetail(S.detailId,true);});},
  // Papierkorb
  restore(id){mutate(async()=>{await POST('/api/todo/tasks/'+id+'/restore');refresh();});},
- purge(id){if(!confirm('Endgültig löschen? Das kann nicht rückgängig gemacht werden.'))return;mutate(async()=>{await DEL('/api/todo/tasks/'+id+'/purge');delete S.tasks[id];S.order=S.order.filter(x=>x!==id);renderAll();});},
+ purge(id){tdConfirm('Endgültig löschen','Die Aufgabe wird unwiderruflich gelöscht — das kann nicht rückgängig gemacht werden.','Endgültig löschen',()=>mutate(async()=>{await DEL('/api/todo/tasks/'+id+'/purge');delete S.tasks[id];S.order=S.order.filter(x=>x!==id);renderAll();}));},
  // Bulk
  bulk(action){
   const ids=[...S.sel];if(!ids.length)return;
-  if(action==='delete'&&!confirm(ids.length+' Aufgabe(n) in den Papierkorb legen?'))return;
-  S.sel.clear();
-  mutate(async()=>{const r=await POST('/api/todo/tasks/bulk',{ids,action});if(r.failed&&r.failed.length)toast('⚠️ '+r.failed.length+' fehlgeschlagen (Rechte?)');refresh();});
+  const run=()=>{S.sel.clear();mutate(async()=>{const r=await POST('/api/todo/tasks/bulk',{ids,action});if(r.failed&&r.failed.length)toast('⚠️ '+r.failed.length+' fehlgeschlagen (Rechte?)');refresh();});};
+  if(action==='delete')tdConfirm('Aufgaben löschen',ids.length+' Aufgabe(n) in den Papierkorb legen?','In Papierkorb',run);
+  else run();
  },
  bulkPatch(patch){
   const ids=[...S.sel];if(!ids.length)return;S.sel.clear();
@@ -835,9 +1014,10 @@ window.td={
  },
  // Filter speichern/anwenden
  saveCurrentFilter(){
-  const name=prompt('Name für diesen Filter:');if(!name||!name.trim())return;
-  const filter={fPrio:S.fPrio,fTag:S.fTag,fStatus:S.fStatus,fDone:S.fDone,search:S.search,scope:S.scope};
-  mutate(async()=>{const r=await POST('/api/todo/filters',{name:name.trim(),filter});S.savedFilters.push(r.filter);renderAll();});
+  tdInput('💾 Filter speichern','Name für diesen Filter','','Speichern',name=>{
+   const filter={fPrio:S.fPrio,fTag:S.fTag,fStatus:S.fStatus,fDone:S.fDone,search:S.search,scope:S.scope};
+   mutate(async()=>{const r=await POST('/api/todo/filters',{name,filter});S.savedFilters.push(r.filter);renderAll();});
+  });
  },
  applySavedFilter(id){
   const f=S.savedFilters.find(f=>f.id===id);if(!f)return;
@@ -850,10 +1030,71 @@ window.td={
   const saved=S.scope;S.scope=orig;
   loadTasks().then(()=>{S.scope=saved;renderAll();});
  },
- deleteSavedFilter(id){if(!confirm('Gespeicherten Filter löschen?'))return;mutate(async()=>{await DEL('/api/todo/filters/'+id);S.savedFilters=S.savedFilters.filter(f=>f.id!==id);if(S.scope.type==='filter'&&S.scope.id===id)S.scope={type:'smart',id:'inbox'};renderAll();});},
+ deleteSavedFilter(id){tdConfirm('Filter löschen','Der gespeicherte Filter wird entfernt.','Löschen',()=>mutate(async()=>{await DEL('/api/todo/filters/'+id);S.savedFilters=S.savedFilters.filter(f=>f.id!==id);if(S.scope.type==='filter'&&S.scope.id===id)S.scope={type:'smart',id:'inbox'};renderAll();}));},
  // Rich-Text
  fmt(cmd){document.execCommand(cmd,false,null);const d=$('tdDesc');if(d)d.focus();},
- fmtLink(){const url=prompt('Link-Adresse (https://…):');if(url&&/^https?:\/\//i.test(url))document.execCommand('createLink',false,url);},
+ fmtLink(){
+  const s=document.getSelection();
+  const range=s&&s.rangeCount?s.getRangeAt(0).cloneRange():null;
+  ACT.ok=()=>{
+   const url=$('tdMInput').value.trim();closeOvl();
+   if(!/^https?:\/\//i.test(url))return toast('⚠️ Link muss mit http(s):// beginnen');
+   const d=$('tdDesc');
+   if(d){d.focus();if(range){const sel=document.getSelection();sel.removeAllRanges();sel.addRange(range);}document.execCommand('createLink',false,url);}
+  };
+  ovl('<h3>🔗 Link einfügen</h3><div style="margin:12px 0"><input id="tdMInput" class="td-minput" placeholder="https://…" onkeydown="if(event.key===\'Enter\')td.act(\'ok\')"></div>'
+   +'<div class="td-mbtns"><button class="btn" onclick="td.closeDialogs()">Abbrechen</button><button class="btn btn-p" onclick="td.act(\'ok\')">Einfügen</button></div>');
+ },
+ // ── Dialog-Infrastruktur & neue Aktionen (Polish-Pass) ──
+ act(k){if(ACT[k])ACT[k]();},
+ closeDialogs(){closeOvl();},
+ pickSwatch(el){el.parentElement.querySelectorAll('.td-swatch').forEach(x=>x.classList.remove('on'));el.classList.add('on');},
+ pickEmoji(el){el.parentElement.querySelectorAll('.td-emoji').forEach(x=>x.classList.remove('on'));el.classList.add('on');},
+ pickDue(el){el.parentElement.querySelectorAll('.td-qchip').forEach(x=>x.classList.remove('on'));el.classList.add('on');const di=$('tdNtDueCustom');if(di)di.value='';},
+ pickDueDate(el){if(el.value)el.parentElement.querySelectorAll('.td-qchip').forEach(x=>x.classList.remove('on'));},
+ openListModal,openTagManager,
+ listDelete(id){
+  const l=listById(id);if(!l)return;
+  tdConfirm('Liste löschen','„'+l.name+'" und ALLE Aufgaben darin werden endgültig gelöscht.','Liste löschen',
+   ()=>mutate(async()=>{await DEL('/api/todo/lists/'+id);S.booted=false;await boot(true);S.scope={type:'smart',id:'inbox'};refresh();}));
+ },
+ listLeave(id){
+  const l=listById(id);if(!l)return;
+  tdConfirm('Liste verlassen','Du verlierst den Zugriff auf „'+l.name+'". Ein Mitglied mit Verwalter-Rolle kann dich erneut einladen.','Verlassen',
+   ()=>mutate(async()=>{await DEL('/api/todo/lists/'+id+'/members/'+me().id);S.booted=false;await boot(true);S.scope={type:'smart',id:'inbox'};refresh();}));
+ },
+ folderRename(id){
+  closePop();
+  const f=S.folders.find(f=>f.id===id);if(!f)return;
+  tdInput('✏️ Ordner umbenennen','Name',f.name,'Speichern',name=>mutate(async()=>{await PUT('/api/todo/folders/'+id,{name});S.booted=false;await boot(true);renderAll();}));
+ },
+ folderDelete(id){
+  tdConfirm('Ordner löschen','Die Listen im Ordner bleiben erhalten und rutschen auf die oberste Ebene.','Ordner löschen',
+   ()=>mutate(async()=>{await DEL('/api/todo/folders/'+id);S.booted=false;await boot(true);if(S.scope.type==='folder'&&S.scope.id===id)S.scope={type:'smart',id:'inbox'};refresh();}));
+ },
+ // Teilen-Dialog-Aktionen (Dialog lädt sich nach jeder Aktion neu)
+ shareInvite(listId){
+  const mail=$('tdInvMail').value.trim(),role=$('tdInvRole').value;
+  if(!mail)return;
+  mutate(async()=>{await POST('/api/todo/lists/'+listId+'/members',{email:mail,role});toast('✅ '+mail+' eingeladen');shareDialog(listId);});
+ },
+ shareRole(listId,userId,role){mutate(async()=>{await PUT('/api/todo/lists/'+listId+'/members/'+userId,{role});toast('✅ Rolle geändert');});},
+ shareKick(listId,userId,name){
+  tdConfirm('Mitglied entfernen',name+' verliert den Zugriff auf diese Liste.','Entfernen',
+   ()=>mutate(async()=>{await DEL('/api/todo/lists/'+listId+'/members/'+userId);toast('✅ Entfernt');shareDialog(listId);}));
+ },
+ // Tag-Manager-Aktionen
+ tagRename(id,name){if(!name.trim())return;mutate(async()=>{await PUT('/api/todo/tags/'+id,{name:name.trim()});const t=S.tags.find(t=>t.id===id);if(t)t.name=name.trim();renderAll();});},
+ tagColor(id,c){mutate(async()=>{await PUT('/api/todo/tags/'+id,{color:c});const t=S.tags.find(t=>t.id===id);if(t)t.color=c;openTagManager();renderAll();});},
+ tagDelete(id){
+  tdConfirm('Tag löschen','Der Tag wird von allen Aufgaben entfernt.','Löschen',
+   ()=>mutate(async()=>{await DEL('/api/todo/tags/'+id);S.tags=S.tags.filter(t=>t.id!==id);if(S.scope.type==='tag'&&S.scope.id===id)S.scope={type:'smart',id:'inbox'};openTagManager();refresh();}));
+ },
+ tagCreate(){
+  const i=$('tdNewTag');const v=i?i.value.trim():'';if(!v)return;
+  const color=PALETTE[S.tags.length%PALETTE.length];
+  mutate(async()=>{const r=await POST('/api/todo/tags',{name:v,color});S.tags.push(r.tag);openTagManager();renderAll();});
+ },
 };
 
 // Einstieg aus app.js: go('todo') → renderTodo()
