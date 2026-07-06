@@ -42,7 +42,11 @@ createServer(async (req, res) => {
     if (!normalize(file).startsWith(ROOT)) { res.writeHead(403); return res.end('Verboten'); }
 
     const data = await readFile(file);
-    res.writeHead(200, { 'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream' });
+    res.writeHead(200, {
+      'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream',
+      // Vorschau-Server: NIE cachen — jede Code-Änderung soll beim normalen Neuladen sichtbar sein
+      'Cache-Control': 'no-store, must-revalidate',
+    });
     res.end(data);
   } catch {
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
