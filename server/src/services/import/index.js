@@ -112,7 +112,7 @@ function isNoiseBullet(text) {
  * bsr + bsrCategory, category (Breadcrumb), soldByAmazon — alles best effort.
  * @returns {{title,bullets:string[],description,brand,images:string[],price,
  *   reviews:number|null,rating:number|null,bsr:number|null,bsrCategory:string,
- *   category:string,soldByAmazon:boolean}|{error:string}}
+ *   category:string,soldByAmazon:boolean,offerCount:number|null}|{error:string}}
  */
 export function parseProduct(html, asin) {
   const src = String(html ?? '');
@@ -179,7 +179,14 @@ export function parseProduct(html, asin) {
   // Verkauft Amazon selbst? („Verkauf durch Amazon" — hartes Warnsignal in der Recherche)
   const soldByAmazon = /Verkauf(?:\s+und\s+Versand)?\s+durch\s+Amazon(?!\s+Marketplace)|sold by\s+Amazon\.(?:de|com)/i.test(src);
 
-  return { title, bullets, description, brand, images, price, reviews, rating, bsr, bsrCategory, category, soldByAmazon };
+  // Anzahl der Verkäufer/Angebote auf DIESEM Listing („Neu (7) ab 18,99 €" /
+  // „Alle Angebote anzeigen (7)" / "New (7) from") — ab ~4 Anbietern ist es ein
+  // Reseller-/Preiskampf-Listing, kein Private-Label-Markt → entscheidendes Signal.
+  const mOff = src.match(/(?:Neu|New)\s*\((\d+)\)\s*(?:ab|from)/i)
+    || src.match(/(?:Alle\s+Angebote(?:\s+anzeigen)?|See\s+All\s+Buying\s+Options)[^()<>]{0,40}\((\d+)\)/i);
+  const offerCount = mOff ? (parseInt(mOff[1], 10) || null) : null;
+
+  return { title, bullets, description, brand, images, price, reviews, rating, bsr, bsrCategory, category, soldByAmazon, offerCount };
 }
 
 /**

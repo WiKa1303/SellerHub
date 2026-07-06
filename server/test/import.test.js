@@ -43,6 +43,7 @@ var data = {"colorImages":{"initial":[
   `<div id="wayfinding-breadcrumbs_feature_div"><ul><li><a class="a-link-normal" href="/kueche">K&uuml;che, Haushalt &amp; Wohnen</a></li><li><a href="/tropf">Tr&ouml;pfler</a></li></ul></div>
 <div id="averageCustomerReviews"><span class="a-icon-alt">4,4 von 5 Sternen</span><span id="acrCustomerReviewText" class="a-size-base">1.234 Sternebewertungen</span></div>
 <div id="merchant-info">Verkauf durch Amazon</div>
+<div id="olp_feature_div"><span class="a-declarative"><a href="/gp/offer-listing/B0AAAAAA01">Neu (7) ab 18,99&nbsp;&euro;</a></span></div>
 <div id="detailBullets"><span class="a-text-bold">Amazon Bestseller-Rang:</span> Nr. 2.345 in K&uuml;che, Haushalt &amp; Wohnen (Siehe Top 100) <span>Nr. 12 in Tr&ouml;pfler</span></div>
 <div id="feature-bullets">`);
 
@@ -132,6 +133,7 @@ t('Roundtrip: rating aus „4,4 von 5"', p.rating === 4.4, p.rating);
 t('Roundtrip: BSR Haupt-Kategorie (erste Nennung)', p.bsr === 2345 && /K.che/.test(p.bsrCategory), p.bsr + ' in ' + p.bsrCategory);
 t('Roundtrip: category aus Breadcrumb', /K.che/.test(p.category), p.category);
 t('Roundtrip: soldByAmazon erkannt', p.soldByAmazon === true);
+t('Roundtrip: Verkäufer-Anzahl aus „Neu (7) ab"', p.offerCount === 7, p.offerCount);
 t('Roundtrip: 5 Bilder, hiRes zuerst, dedupliziert',
   p.images?.length === 5 && p.images[0].includes('71abc._AC_SL1500_') && p.images[1].includes('81def._AC_SL1500_')
   && p.images[4].includes('91ghi._AC_SL1000_'), JSON.stringify(p.images));

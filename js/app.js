@@ -716,19 +716,27 @@ function decisionMarge(c){
 // Auto-Schätzung einer Dimension aus den Kandidatendaten → {val:0-10|null, reason}
 function decisionAuto(c,key){
   if(key==='nachfrage'){
-    if(c.top10Umsatz!=null&&c.top10Umsatz>0){
-      var u=c.top10Umsatz;var v=u>=30000?10:u>=20000?9:u>=12000?8:u>=8000?7:u>=5000?6:u>=3000?4:2;
-      var reason=c.qcAutoUmsatz&&c.bsr
-        ?('~'+Math.round(u).toLocaleString('de-DE')+' €/M aus BSR Nr. '+Number(c.bsr).toLocaleString('de-DE')+' geschätzt ('+(c.qcSales||'?')+' Verkäufe/M)')
-        :('Top-Umsatz '+Math.round(u).toLocaleString('de-DE')+' €/M');
-      return {val:v,reason:reason};
+    // ENTSCHEIDEND ist die verkaufte MENGE (Stück/Monat) — Umsatz nur als Zusatzinfo.
+    if(c.qcSales!=null&&c.qcSales>0){
+      var s=c.qcSales;var v=s>=1000?10:s>=500?9:s>=300?8:s>=200?7:s>=120?6:s>=60?4:2;
+      return {val:v,reason:'~'+Math.round(s).toLocaleString('de-DE')+' Verkäufe/M'
+        +(c.bsr?' (aus BSR Nr. '+Number(c.bsr).toLocaleString('de-DE')+')':'')
+        +(c.top10Umsatz?' ≈ '+Math.round(c.top10Umsatz).toLocaleString('de-DE')+' €/M':'')};
     }
-    return {val:null,reason:'Kein Umsatz-/Nachfragewert erfasst (BSR nicht lesbar)'};
+    if(c.top10Umsatz!=null&&c.top10Umsatz>0){ // Fallback (z. B. Helium-Xray-Import ohne Stückzahl)
+      var u=c.top10Umsatz;var v2=u>=30000?10:u>=20000?9:u>=12000?8:u>=8000?7:u>=5000?6:u>=3000?4:2;
+      return {val:v2,reason:'Top-Umsatz '+Math.round(u).toLocaleString('de-DE')+' €/M'};
+    }
+    return {val:null,reason:'Keine Verkaufszahl erfasst (BSR nicht lesbar)'};
   }
   if(key==='wettbewerb'){
     if(c.avgReviews!=null){
       var r=c.avgReviews;var v=r<100?10:r<300?8:r<600?6:r<1000?4:r<2000?2:1;
-      return {val:v,reason:'⌀ '+Math.round(r).toLocaleString('de-DE')+' Reviews'+(c.rating!=null?' · '+c.rating.toLocaleString('de-DE')+' ★':'')};
+      var reason='⌀ '+Math.round(r).toLocaleString('de-DE')+' Reviews'+(c.rating!=null?' · '+c.rating.toLocaleString('de-DE')+' ★':'');
+      // Viele Verkäufer auf DEMSELBEN Listing = Preiskampf → drückt den Wettbewerbs-Score
+      if(c.sellerCount!=null&&c.sellerCount>=4){v=Math.max(1,v-2);reason+=' · '+c.sellerCount+' Verkäufer → Preiskampf';}
+      else if(c.sellerCount!=null)reason+=' · '+c.sellerCount+' Verkäufer';
+      return {val:v,reason:reason};
     }
     return {val:null,reason:'Keine Review-Zahl erfasst'};
   }
@@ -893,6 +901,10 @@ function quickCheckField(field,val){
   if(!qcState.c)return;
   var num=parseFloat(String(val).replace(',','.'));
   qcState.c[field]=isNaN(num)?null:num;
+  // Verkäufe/Monat ist der entscheidende Nachfrage-Wert — Umsatz nur abgeleitet (× VK)
+  if(field==='qcSales'||field==='vk'){
+    if(qcState.c.qcSales!=null&&qcState.c.vk!=null){qcState.c.top10Umsatz=Math.round(qcState.c.qcSales*qcState.c.vk);qcState.c.qcAutoUmsatz=true;}
+  }
   // onchange (nicht oninput): kein Fokus-Verlust beim Tippen; Neu-Rendern erst nach Verlassen
   if(qcState.step==='data')quickCheckRenderStep();
   if(qcState.step==='result')quickCheckRenderResult();
@@ -936,26 +948,33 @@ async function quickCheckRun(){
         if(d.rating!=null)qcState.c.rating=d.rating;
         if(d.soldByAmazon)qcState.c.soldByAmazon=true;
         if(d.brand)qcState.c.compBrand=d.brand;
+        // Verkäufer auf dem Listing: erkannter Wert; KEIN „weitere Angebote"-Block auf
+        // einer sauber geparsten Seite = 1 Verkäufer (typisches Private-Label-Listing).
+        if(d.offerCount!=null&&d.offerCount>0)qcState.c.sellerCount=d.offerCount;
+        else if(qcState.c.sellerCount==null)qcState.c.sellerCount=1;
         if(d.bsr!=null&&d.bsr>0){
           qcState.c.bsr=d.bsr;
           qcState.c.bsrCat=d.bsrCategory||d.category||'';
-          // Nachfrage SOFORT aus dem BSR schätzen (gleiche Logik wie der BSR-Schätzer
-          // in „Marge rechnen") — ehrlich als Schätzung gekennzeichnet, überschreibbar.
-          if(qcState.c.vk!=null&&qcState.c.top10Umsatz==null&&typeof estimateMonthlySalesBsr==='function'){
+          // Nachfrage SOFORT aus dem BSR schätzen: VERKÄUFE/Monat ist der entscheidende
+          // Wert (gleiche Logik wie der BSR-Schätzer in „Marge rechnen"); Umsatz nur abgeleitet.
+          if(typeof estimateMonthlySalesBsr==='function'){
             var _sales=estimateMonthlySalesBsr(qcBsrCatKey(qcState.c.bsrCat),d.bsr);
             if(_sales!=null&&_sales>0){
-              qcState.c.qcSales=Math.round(_sales);
-              qcState.c.top10Umsatz=Math.round(_sales*qcState.c.vk);
-              qcState.c.qcAutoUmsatz=true;
+              if(qcState.c.qcSales==null)qcState.c.qcSales=Math.round(_sales);
+              if(qcState.c.vk!=null&&qcState.c.top10Umsatz==null){
+                qcState.c.top10Umsatz=Math.round(qcState.c.qcSales*qcState.c.vk);
+                qcState.c.qcAutoUmsatz=true;
+              }
             }
           }
         }
         // Fund-Notiz: WAS wurde automatisch erkannt? (Transparenz für Schritt 2/3)
         var _found=[];
-        if(qcState.c.vk!=null)_found.push(qcState.c.vk.toLocaleString('de-DE')+' €');
+        if(qcState.c.qcSales!=null)_found.push('~'+qcState.c.qcSales.toLocaleString('de-DE')+' Verk./M');
         if(qcState.c.avgReviews!=null)_found.push(Math.round(qcState.c.avgReviews).toLocaleString('de-DE')+' Rev.');
+        if(qcState.c.sellerCount!=null)_found.push(qcState.c.sellerCount+' Verkäufer');
+        if(qcState.c.vk!=null)_found.push(qcState.c.vk.toLocaleString('de-DE')+' €');
         if(qcState.c.rating!=null)_found.push(qcState.c.rating.toLocaleString('de-DE')+' ★');
-        if(qcState.c.bsr!=null)_found.push('BSR '+qcState.c.bsr.toLocaleString('de-DE'));
         if(qcState.c.soldByAmazon)_found.push('⚠️ Amazon verkauft selbst');
         qcState.fetchNote='✓ Listing geladen'+(_found.length?' — erkannt: '+_found.join(' · '):'');
         qcSetProgress(78,'Listing gelesen: '+String(d.title||asin).substring(0,50)+' …');
@@ -989,8 +1008,9 @@ window.quickCheckRun=quickCheckRun;
 // EK/FBA sind bewusst KEINE Pflicht mehr: dafür gibt es die Faustregel-Schätzung
 // aus dem Preis; echte Zahlen verfeinern die Marge später (Feintuning).
 var QC_FIELDS=[
-  {f:'top10Umsatz',label:'Nachfrage: Umsatz / Monat',unit:'€',hint:'Kommt automatisch aus dem Bestseller-Rang (BSR) des Listings. Genauer: Helium 10 Xray ⌀ Revenue der Top-10.'},
-  {f:'avgReviews',label:'Wettbewerb: Reviews',unit:'Rev.',hint:'Kommt automatisch vom Listing. Eintrittsbarriere: &lt;300 gut · &gt;1.000 schwer · &gt;2.000 No-Go.'},
+  {f:'qcSales',label:'Nachfrage: Verkäufe / Monat',unit:'Stk',hint:'Kommt automatisch aus dem Bestseller-Rang (BSR). Entscheidend ist die MENGE, nicht der Umsatz: ≥150/M solide · ≥300/M gut.'},
+  {f:'avgReviews',label:'Wettbewerb: Bewertungen',unit:'Rev.',hint:'Kommt automatisch vom Listing. Eintrittsbarriere: &lt;300 gut · &gt;1.000 schwer · &gt;2.000 No-Go.'},
+  {f:'sellerCount',label:'Verkäufer auf dem Listing',unit:'Vk.',hint:'Kommt automatisch („Neu (N) ab …"). 1 = eigenes Listing (PL-Markt) · ab 4 = Preiskampf/Reseller-Produkt.'},
   {f:'vk',label:'Verkaufspreis',unit:'€',hint:'Kommt automatisch vom Listing. Unter 15 € = Margenfalle.'}
 ];
 // Optionales Feintuning (verfeinert nur die Wirtschaftlichkeits-Schätzung)
@@ -1167,7 +1187,7 @@ function renderQuickCheck(){
   // Eingabe-Karte (Schritt 1)
   h+='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:16px;padding:26px 28px;margin-bottom:16px;text-align:center">'+
     '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px">Lohnt sich dieses Produkt?</div>'+
-    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Link/ASIN einfügen → Preis, Reviews, Sterne &amp; BSR kommen automatisch von Amazon → sofortiges Urteil mit Begründung. Zahlen fehlen nur, wenn Amazon sie nicht liefert.</div>'+
+    '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Link/ASIN einfügen → die entscheidenden Werte kommen automatisch von Amazon: <b>Verkäufe/Monat</b> (aus dem BSR), <b>Bewertungen</b>, <b>Verkäufer-Anzahl</b> &amp; Preis → sofortiges Urteil mit Begründung.</div>'+
     '<div style="display:flex;gap:8px;max-width:560px;margin:0 auto">'+
       '<input id="qcInput" placeholder="https://www.amazon.de/dp/… oder B0XXXXXXXX" onkeydown="if(event.key===\'Enter\')quickCheckRun()" '+(qcState.step==='loading'?'disabled':'')+' style="flex:1;background:var(--s1);border:1.5px solid var(--bd2);border-radius:11px;padding:13px 16px;font-family:inherit;font-size:14px;color:var(--tx);outline:none" onfocus="this.style.borderColor=\'var(--ac)\'" onblur="this.style.borderColor=\'var(--bd2)\'">'+
       '<button class="btn btn-p" onclick="quickCheckRun()" style="font-weight:800;white-space:nowrap" '+(qcState.step==='loading'?'disabled':'')+'>'+(qcState.step==='loading'?'⏳ Prüfe …':'⚡ Prüfen')+'</button>'+
@@ -1275,6 +1295,9 @@ function decisionRedFlags(c){
   // Marge aus echten Zahlen < 15 % = hart. Reine Preis-Schätzung = weich (erst EK/FBA klären).
   if(_fm.val!=null&&_fm.val<15)f.push({hard:_fm.src!=='geschätzt',t:'Netto-Marge < 15 % → unwirtschaftlich'+(_fm.src==='auto'?' (auto berechnet)':_fm.src==='geschätzt'?' (grobe Preis-Schätzung — mit echten EK/FBA prüfen)':''),s:'Marge <15 %'});
   if(c.soldByAmazon)f.push({hard:true,t:'Amazon verkauft dieses Produkt selbst → Preisdruck, kaum Buy-Box-Chance',s:'Amazon selbst'});
+  // Verkäufer-Anzahl auf dem Listing: ab 4 = Reseller-/Preiskampf-Produkt (kein PL-Markt)
+  if(c.sellerCount!=null&&c.sellerCount>=4)f.push({hard:true,t:c.sellerCount+' Verkäufer auf dem Listing → Preiskampf/Reseller-Produkt, kein Private-Label-Markt',s:c.sellerCount+' Verkäufer'});
+  else if(c.sellerCount!=null&&c.sellerCount>=2)f.push({hard:false,t:c.sellerCount+' Verkäufer auf dem Listing → Buy-Box wird geteilt',s:c.sellerCount+' Verkäufer'});
   // Monopol-Risiko: eine Marke dominiert die Top-Plätze (Daten aus Xray-Paste/Nischen-Scan)
   var _ns=c.nischenScan;
   if(_ns&&_ns.domBrand&&_ns.count>0&&_ns.domCount>0){
