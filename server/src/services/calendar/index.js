@@ -9,6 +9,7 @@
 //  SellerHub → Google: /api/calendar/export/<token>/todo.ics liefert offene
 //    Aufgaben mit Fälligkeit als ICS; in Google als „Per URL hinzufügen" abonnieren.
 import crypto from 'node:crypto';
+import dns from 'node:dns';
 import {
   insertCalendarFeed, listCalendarFeeds, getCalendarFeed, deleteCalendarFeed,
   countCalendarFeeds, markCalendarFeedSync, replaceCalendarEvents, queryCalendarEvents,
@@ -34,19 +35,62 @@ export function setCalendarFetch(fn) { fetchImpl = fn || ((...a) => globalThis.f
 
 // ── SSRF-Schutz: nur https, keine internen/lokalen Ziele ──
 // (Der Server hängt bei Railway im selben Netz wie die DB — interne Ziele tabu.)
+// Zweistufig: (1) syntaktische Prüfung der URL/des Hostnamens, (2) DNS-Auflösung
+// mit Prüfung ALLER zurückgegebenen Adressen — vor jedem Abruf, auch je Redirect
+// (schließt DNS-Rebinding und numerische IP-Tricks wie 2130706433 / 0177.0.0.1).
+
+// Kanonische IPv4 (keine führenden Nullen → kein Oktal-Trick); alles andere
+// Numerische fällt in den DNS-Namen-Zweig und braucht dort einen Buchstaben.
+const V4_STRICT = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+
+function privateV4(ip) {
+  const p = String(ip).split('.').map(Number);
+  if (p.length !== 4 || p.some(n => !Number.isInteger(n) || n < 0 || n > 255)) return true; // unparsebar → ablehnen
+  const [a, b] = p;
+  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) // CGNAT 100.64/10
+    || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
+}
+
+function privateV6(ip) {
+  const s = String(ip).toLowerCase();
+  if (s === '::' || s === '::1') return true;
+  if (/^fe[89ab]/.test(s)) return true;        // Link-local fe80::/10
+  if (s.startsWith('fc') || s.startsWith('fd')) return true; // ULA fc00::/7
+  const m = s.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);        // v4-mapped
+  if (m) return privateV4(m[1]);
+  return false;
+}
+
 function validateFeedUrl(raw) {
   let u;
   try { u = new URL(String(raw).trim()); } catch (e) { return 'Keine gültige URL'; }
   if (u.protocol !== 'https:') return 'Nur https://-Adressen sind erlaubt';
   const host = u.hostname.toLowerCase();
   if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) return 'Interne Adressen sind nicht erlaubt';
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-    const [a, b] = host.split('.').map(Number);
-    if (a === 127 || a === 10 || a === 0 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 169 && b === 254))
-      return 'Interne Adressen sind nicht erlaubt';
-  }
-  if (host.includes(':') || host === '[::1]') return 'Interne Adressen sind nicht erlaubt';
+  if (host.includes(':') || host.includes('[')) return 'Interne Adressen sind nicht erlaubt'; // IPv6-Literale pauschal ablehnen
+  if (V4_STRICT.test(host)) return privateV4(host) ? 'Interne Adressen sind nicht erlaubt' : null;
+  // DNS-Name: nur [a-z0-9.-] und mindestens ein Buchstabe — verwirft Dezimal-/Hex-/Oktal-IPs
+  if (!/^[a-z0-9.-]+$/.test(host) || !/[a-z]/.test(host)) return 'Keine gültige Kalender-Adresse';
   return null;
+}
+
+// Für Tests austauschbarer DNS-Resolver (Muster: setCalendarFetch)
+let lookupImpl = (host) => dns.promises.lookup(host, { all: true, verbatim: true });
+export function setCalendarDnsLookup(fn) { lookupImpl = fn || ((host) => dns.promises.lookup(host, { all: true, verbatim: true })); }
+
+// DNS auflösen und JEDE Adresse prüfen (Rebinding-Schutz). Rest-Risiko TOCTOU
+// (Record flippt zwischen Lookup und Connect) ist bewusst akzeptiert — dafür
+// müsste der Angreifer die TTL im Millisekunden-Fenster drehen.
+async function assertPublicHost(url) {
+  const host = new URL(url).hostname.toLowerCase();
+  if (V4_STRICT.test(host)) return; // Literal-IP wurde schon syntaktisch geprüft
+  let addrs;
+  try { addrs = await lookupImpl(host); } catch (e) { throw new Error('Kalender-Adresse nicht auflösbar'); }
+  if (!addrs || !addrs.length) throw new Error('Kalender-Adresse nicht auflösbar');
+  for (const a of addrs) {
+    const bad = a.family === 6 ? privateV6(a.address) : privateV4(a.address);
+    if (bad) throw new Error('Interne Adressen sind nicht erlaubt');
+  }
 }
 
 // ── ICS holen (Timeout, Größenlimit, Redirects einzeln re-validiert) ──
@@ -55,6 +99,7 @@ async function fetchIcs(url) {
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     const bad = validateFeedUrl(current);
     if (bad) throw new Error(bad);
+    await assertPublicHost(current); // DNS-Rebinding-Schutz — je Hop
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     let res;
@@ -111,6 +156,7 @@ export async function feeds(user) {
 export async function addFeed(user, { url, name, color } = {}) {
   const bad = validateFeedUrl(url);
   if (bad) return err(400, bad);
+  try { await assertPublicHost(String(url).trim()); } catch (e) { return err(400, e.message); }
   if (await countCalendarFeeds(user.id) >= MAX_FEEDS_PER_USER)
     return err(400, `Maximal ${MAX_FEEDS_PER_USER} Kalender möglich`);
   // Google-Komfort: webcal:// hat der Validator schon abgelehnt; hier nichts umschreiben.

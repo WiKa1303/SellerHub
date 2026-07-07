@@ -6,7 +6,7 @@ import { initDb } from '../src/data/db.js';
 import { buildApi } from '../src/api/routes.js';
 import { config } from '../src/core/config.js';
 import { parseIcs, tasksToIcs } from '../src/services/calendar/ics.js';
-import { setCalendarFetch } from '../src/services/calendar/index.js';
+import { setCalendarFetch, setCalendarDnsLookup } from '../src/services/calendar/index.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -121,11 +121,25 @@ setCalendarFetch(async (url) => {
   if (String(url).includes('kaputt')) return new Response('nicht gefunden', { status: 404 });
   return new Response(SAMPLE_ICS, { status: 200, headers: { 'Content-Type': 'text/calendar' } });
 });
+// Gemockter DNS: Tests brauchen kein Internet; „rebind." löst auf interne IPs auf
+setCalendarDnsLookup(async (host) => {
+  if (host.startsWith('rebind4.')) return [{ address: '10.0.0.5', family: 4 }];
+  if (host.startsWith('rebind6.')) return [{ address: '::ffff:169.254.169.254', family: 6 }];
+  if (host.startsWith('rebind-mix.')) return [{ address: '142.250.185.78', family: 4 }, { address: '192.168.1.20', family: 4 }];
+  return [{ address: '142.250.185.78', family: 4 }];
+});
 
 // ── SSRF-Schutz ──
 t('Feeds: http:// wird abgelehnt', (await post('/api/calendar/feeds', { url: 'http://calendar.google.com/x.ics' }, tok)).status === 400);
 t('Feeds: localhost wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://localhost/x.ics' }, tok)).status === 400);
 t('Feeds: interne IP wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://192.168.1.1/x.ics' }, tok)).status === 400);
+t('Feeds: Dezimal-IP (2130706433=127.0.0.1) wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://2130706433/x.ics' }, tok)).status === 400);
+t('Feeds: Oktal-IP (0177.0.0.1) wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://0177.0.0.1/x.ics' }, tok)).status === 400);
+t('Feeds: CGNAT-Bereich (100.64/10) wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://100.64.0.1/x.ics' }, tok)).status === 400);
+t('Feeds: IPv6-Literal wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://[::ffff:169.254.169.254]/x.ics' }, tok)).status === 400);
+t('Feeds: DNS-Rebinding auf 10.0.0.5 wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://rebind4.example.com/x.ics' }, tok)).status === 400);
+t('Feeds: DNS-Rebinding auf v4-mapped-IPv6 (Metadaten-IP) wird abgelehnt', (await post('/api/calendar/feeds', { url: 'https://rebind6.example.com/x.ics' }, tok)).status === 400);
+t('Feeds: schon EINE private Adresse in der DNS-Antwort reicht zur Ablehnung', (await post('/api/calendar/feeds', { url: 'https://rebind-mix.example.com/x.ics' }, tok)).status === 400);
 t('Feeds: ohne Login 401', (await post('/api/calendar/feeds', { url: 'https://calendar.google.com/x.ics' })).status === 401);
 
 // ── Feed anlegen + Erst-Sync ──
@@ -197,6 +211,7 @@ const feedId = added.feed.id;
 }
 
 setCalendarFetch(null);
+setCalendarDnsLookup(null);
 srv.close();
 console.log(`\nKalender: ${pass} bestanden, ${fail} fehlgeschlagen`);
 process.exit(fail ? 1 : 0);
