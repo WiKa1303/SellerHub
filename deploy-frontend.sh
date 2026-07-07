@@ -8,8 +8,9 @@
 # Optional:
 #   WEBSPACE_DIR=…   Zielverzeichnis überschreiben (Standard: amzsellerhub.de/httpdocs)
 #
-# Die Zugangsdaten stehen im netcup CCP unter Webhosting → Zugangsdaten (SSH/SFTP).
-# Passwort wird interaktiv abgefragt (SSH-Key geht natürlich auch).
+# Auth: SSH-Key (seit 7.7.2026 installiert, ~/.ssh/id_ed25519) — läuft ohne Passwort.
+# Upload per tar-über-SSH: auf dem netcup-Webspace gibt es KEIN rsync.
+# Gelöschte lokale Dateien bleiben auf dem Server liegen (tar löscht nichts) — bei Bedarf per ssh aufräumen.
 set -euo pipefail
 
 HOST="${WEBSPACE_HOST:-a2fa9.netcup.net}"
@@ -18,12 +19,8 @@ DIR="${WEBSPACE_DIR:-amzsellerhub.de/httpdocs}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
 echo "→ Lade Frontend nach $USER@$HOST:$DIR …"
-rsync -avz --delete \
-  --include='index.html' \
-  --include='css/***' \
-  --include='js/***' \
-  --exclude='*' \
-  "$SRC/" "$USER@$HOST:$DIR/"
+tar czf - -C "$SRC" --exclude '.DS_Store' index.html css js \
+  | ssh "$USER@$HOST" "cd '$DIR' && tar xzf -"
 
 echo "✓ Fertig. Test: https://amzsellerhub.de aufrufen (ggf. Cache leeren)."
 echo "  Hinweis: App-Daten (localStorage) hängen an der Domain — einmalig per Export/Import migrieren."
