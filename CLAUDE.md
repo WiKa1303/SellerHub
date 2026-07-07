@@ -67,7 +67,8 @@ Die App speichert Login + eingegebene Daten im Browser **gebunden an den Dateipf
 Auf einem neuen Rechner ist die App daher zunächst „leer" (neuer Login nötig). Git/GitHub synct nur den **Code**, nicht die Browser-Daten.
 Echte Daten mitnehmen: in der App **Export** (`sellerhub-data.json`) → auf dem anderen Rechner **Import**.
 
-## Offene nächste Schritte (Stand 28.6.2026)
-- Hauptbild exakt 1:1 erzwingen; USP-Bilder optional ohne Text (Umschalter).
-- Retry-Härtung auf die restlichen ✨-Buttons ausrollen (nutzen noch direktes `igGenText` ohne Retry).
-- Gemini-Key live durchtesten.
+## Offene nächste Schritte (Stand 7.7.2026)
+Die Bildstudio-Punkte vom 28.6. sind ERLEDIGT (1:1-Crop `igCropSquare`, USP-ohne-Text-Umschalter, Retry via `igGenTextSafe` überall; Text/Bild laufen über den KI-Proxy des Backends). Offen:
+- Gemini-Key mit Billing einmal live durchtesten (Bild-zu-Bild; braucht echten Key im Browser).
+- Webspace-Deploy des aktuellen Frontends, sobald die Domain steht (`./deploy-frontend.sh`).
+- Website-Impressum: Platzhalter (§ 5 DDG) mit echten Angaben füllen — Pflicht vor Live-Gang.
