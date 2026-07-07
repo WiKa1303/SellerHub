@@ -41,6 +41,22 @@ function _doSave(){
   }catch(e){
     // QuotaExceededError (Speicher voll) oder anderer Schreibfehler
     var isQuota=e&&(e.name==='QuotaExceededError'||e.code===22||e.code===1014);
+    if(isQuota){
+      // Stufe 1: regenerierbare Caches opfern und EINMAL erneut versuchen —
+      // (News-/Radar-Cache und To-Do-Offline-Cache bauen sich selbst wieder auf)
+      var freed=false;
+      ['wika_radar_cache','wika_news_cache','td_cache_v1'].forEach(function(k){
+        try{if(localStorage.getItem(k)!==null){localStorage.removeItem(k);freed=true;}}catch(_){}
+      });
+      if(freed){
+        try{
+          localStorage.setItem(SK,JSON.stringify(D));
+          var el2=document.getElementById('lastSaved');
+          if(el2){el2.textContent='Gespeichert (Cache geräumt)';el2.style.color='';}
+          return;
+        }catch(_){}
+      }
+    }
     var el=document.getElementById('lastSaved');
     if(el)el.textContent=isQuota?'⚠️ Speicher voll!':'⚠️ Speichern fehlgeschlagen';
     if(el)el.style.color='var(--rd)';
@@ -67,6 +83,10 @@ function saveNow(){
 // Sicherheitsnetz: beim Schließen/Verlassen ausstehende Änderungen sofort schreiben
 window.addEventListener('beforeunload',function(){
   if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null;_doSave();}
+});
+// Safari feuert beforeunload nicht zuverlässig — Tab in den Hintergrund = sofort sichern
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'&&_saveTimer){clearTimeout(_saveTimer);_saveTimer=null;_doSave();}
 });
 
 // ─── Auto-Backup (Phase 1.3): tägliche Snapshots in IndexedDB ───
@@ -3473,6 +3493,10 @@ function helpBoxCollapsible(icon,title,text,opts){
 // ═══════════════ PRODUKTE ═══════════════
 var prodView=(function(){try{return localStorage.getItem('shub_prodView')||'table';}catch(e){return 'table';}})();
 function setProdView(v){prodView=v;try{localStorage.setItem('shub_prodView',v);}catch(e){}renderProds();}
+// Suche debounced: Voll-Render erst 250 ms nach dem letzten Tastenanschlag
+var _prodSearchT=null;
+function prodSearchInput(){clearTimeout(_prodSearchT);_prodSearchT=setTimeout(renderProds,250);}
+window.prodSearchInput=prodSearchInput;
 function renderProds(){
   var q=(document.getElementById('prodSearch').value||'').toLowerCase();
   var fs=document.getElementById('fStatus').value;

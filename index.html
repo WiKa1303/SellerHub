@@ -297,7 +297,7 @@
     </div>
     <div class="toolbar">
       <button class="btn btn-p" onclick="openProdModal()">＋ Neues Produkt</button>
-      <div class="search-wrap"><input class="sinput" placeholder="Suchen…" id="prodSearch" oninput="renderProds()"></div>
+      <div class="search-wrap"><input class="sinput" placeholder="Suchen…" id="prodSearch" oninput="prodSearchInput()"></div>
       <select class="fsel" id="fStatus" onchange="renderProds()"><option value="">Alle Status</option><option value="Idee">💡 Idee</option><option value="Recherche">🔍 Recherche</option><option value="Analyse">📊 Analyse</option><option value="Bestellt">✅ Bestellt</option><option value="Abgelehnt">❌ Abgelehnt</option></select>
       <select class="fsel" id="fKat" onchange="renderProds()"><option value="">Alle Kategorien</option></select>
       <button class="btn btn-g btn-sm" onclick="exportCSV()">📥 CSV</button>
