@@ -65,18 +65,28 @@ function syDropToken(){
 function syToast(m){if(typeof window.toast==='function')window.toast(m);}
 
 // ─── syFetch: fetch mit Bearer-Header; 401 → Token verwerfen + Status zurücksetzen ───
+// Mit 20-s-Timeout: ohne ihn bleibt der Sync-Status bei hängender Verbindung
+// endlos auf „pending" — so läuft er in den normalen error-Pfad (Retry inklusive).
 function syFetch(pfad,opts){
   opts=opts||{};
   var h={};for(var k in (opts.headers||{}))h[k]=opts.headers[k];
   var t=syToken();
   if(t)h['Authorization']='Bearer '+t;
   opts.headers=h;
+  var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+  var timer=null;
+  if(ctrl){opts.signal=ctrl.signal;timer=setTimeout(function(){ctrl.abort();},20000);}
   return fetch(syApi()+pfad,opts).then(function(res){
+    if(timer)clearTimeout(timer);
     if(res.status===401&&t){
       syDropToken();
       syToast('☁️ Cloud-Sitzung abgelaufen — bitte neu anmelden');
     }
     return res;
+  },function(err){
+    if(timer)clearTimeout(timer);
+    if(err&&err.name==='AbortError')throw new Error('Zeitüberschreitung — Server nicht erreichbar');
+    throw err;
   });
 }
 

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AMZ SellerHub — Smarte Werkzeuge für E-Commerce-Profis</title>
+<meta name="description" content="AMZ SellerHub: Produktrecherche, FBA-Kalkulation, Listing-Werkzeuge und KI-Bildstudio für Amazon-Seller im DACH-Raum — dein Entscheidungs-Cockpit von der Idee bis zum Launch.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AMZ SellerHub — Smarte Werkzeuge für E-Commerce-Profis">
+<meta property="og:description" content="Produktrecherche, FBA-Kalkulation, Listing-Werkzeuge und KI-Bildstudio für Amazon-Seller im DACH-Raum.">
+<meta property="og:url" content="https://amzsellerhub.de/app/">
+<meta property="og:locale" content="de_DE">
+<meta property="og:site_name" content="AMZ SellerHub">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/todo.css">
@@ -229,9 +236,9 @@
   </nav>
   <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:6px">
     <div style="display:flex;gap:4px;flex-wrap:wrap;font-size:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)">
-      <a href="/preise.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">💳 Preise</a>
-      <a href="/ueber-uns.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">Über uns</a>
-      <a href="/kontakt.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">✉️ Kontakt</a>
+      <a href="/preise.html" data-site-link="preise.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">💳 Preise</a>
+      <a href="/ueber-uns.html" data-site-link="ueber-uns.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">Über uns</a>
+      <a href="/kontakt.html" data-site-link="kontakt.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">✉️ Kontakt</a>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
       <span id="versionDisplay" style="font-weight:600;color:var(--ac);font-size:11px">v—</span>
@@ -393,7 +400,7 @@
             <option value="aktiv">🚀 Aktiv</option>
             <option value="abgelehnt">❌ Abgelehnt</option>
           </select>
-          <input type="text" id="researchSearch" placeholder="🔍 Suchen..." oninput="researchRenderTable()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px;width:180px">
+          <input type="text" id="researchSearch" placeholder="🔍 Suchen..." oninput="researchSearchInput()" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px;width:180px">
           <select id="researchSort" onchange="researchRenderTable()" title="Sortierung" style="padding:7px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s1);color:var(--tx);font-family:inherit;font-size:12px">
             <option value="score">⚖️ Score (beste zuerst)</option>
             <option value="reviews">💬 Wenigste Reviews</option>

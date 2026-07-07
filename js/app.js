@@ -2388,6 +2388,10 @@ function researchTableGoPage(p){
   var t=document.getElementById('researchMasterTable');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
 }
 window.researchTableGoPage=researchTableGoPage;
+// Suche debounced: Voll-Render erst 250 ms nach dem letzten Tastenanschlag
+var _resSearchT=null;
+function researchSearchInput(){clearTimeout(_resSearchT);_resSearchT=setTimeout(researchRenderTable,250);}
+window.researchSearchInput=researchSearchInput;
 function researchRenderTable(){
   researchInit();
   researchRenderStatsBar();
@@ -3951,7 +3955,9 @@ function importHeliumForProduct(){
 function handleHeliumProductFile(e,prodIdx){
   var f=e.target.files[0];if(!f)return;
   var r=new FileReader();
+  r.onerror=function(){toast('⚠️ Datei konnte nicht gelesen werden');};
   r.onload=function(ev){
+   try{
     var parsed=parseCSV(ev.target.result);
     if(!parsed.headers||parsed.headers.length===0){toast('Keine Daten in der Datei');return}
     var type=detectHeliumType(parsed.headers);
@@ -3965,6 +3971,7 @@ function handleHeliumProductFile(e,prodIdx){
     if(match){applyHeliumToProduct(prodIdx,match,type);}
     else if(rows.length===1){applyHeliumToProduct(prodIdx,rows[0],type);}
     else{heliumPickForProduct(prodIdx,rows,type);}
+   }catch(err){toast('⚠️ Datei konnte nicht verarbeitet werden: '+(err.message||err));}
   };
   r.readAsText(f,'UTF-8');
 }
@@ -12095,6 +12102,7 @@ function handleHeliumFile(e){
 }
 
 function parseHeliumFile(){
+ try{
   var parsed=parseCSV(heliumImportState.rawText);
   if(!parsed.headers||parsed.headers.length===0){toast('Keine Daten in der Datei');return}
 
@@ -12104,6 +12112,7 @@ function parseHeliumFile(){
 
   renderHeliumPreview();
   document.getElementById('heliumImportModal').classList.add('show');
+ }catch(err){toast('⚠️ Datei konnte nicht verarbeitet werden: '+(err.message||err));}
 }
 
 function renderHeliumPreview(){
@@ -12697,6 +12706,7 @@ function handleSellerFile(e){
 }
 
 function parseSellerFile(){
+ try{
   var parsed=parseCSV(sellerImportState.rawText);
   if(!parsed.headers||parsed.headers.length===0){
     toast('Keine Daten erkannt – ist die Datei korrekt?');
@@ -12725,6 +12735,7 @@ function parseSellerFile(){
   renderSellerPreview();
   document.getElementById('sellerReportType').value=sellerImportState.type;
   document.getElementById('sellerImportModal').classList.add('show');
+ }catch(err){toast('⚠️ Datei konnte nicht verarbeitet werden: '+(err.message||err));}
 }
 
 function renderSellerPreview(){
