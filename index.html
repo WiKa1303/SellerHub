@@ -1476,6 +1476,19 @@
       <table><thead><tr><th>Lieferant</th><th>Plattform</th><th class="nc">Stückpreis €</th><th class="nc">MOQ</th><th class="nc">Lieferzeit (Tage)</th><th class="nc">Musterkosten €</th><th class="nc">Score</th><th>Zertifikate</th><th>Notiz</th><th>Aktion</th></tr></thead><tbody id="srcBody"></tbody></table>
     </div>
     <div class="empty" id="srcEmpty"><div class="eico">🏭</div><h3>Lieferanten vergleichen</h3><p>Wähle ein Produkt und füge Lieferanten hinzu</p></div>
+
+    <!-- Landed-Cost-Rechner: echte Stückkosten inkl. Zoll (CIF) -->
+    <div class="card" style="margin-top:18px"><h3>🚢 Landed-Cost-Rechner <span class="wika-help" data-tooltip="Was kostet dich ein Stück WIRKLICH bis ins Amazon-Lager?&#10;&#10;Zollwert = Warenwert + Fracht (CIF-Basis!) — der Zoll wird auf Ware UND Fracht berechnet, ein häufiger Rechenfehler.&#10;EUSt (19 %) ist als Vorsteuer abziehbar → gehört NICHT in die Stückkosten, muss aber beim Import bezahlt werden (Cashflow!).&#10;Den Zollsatz deiner Ware findest du über die Zolltarifnummer (TARIC), z. B. auf auskunft.ezt-online.de.">ⓘ</span></h3>
+      <div class="fg" style="margin-bottom:12px">
+        <div class="fi"><label>Bestellmenge (Stk)</label><input type="number" id="lcMenge" value="500" oninput="lcCalc()"></div>
+        <div class="fi"><label>EK je Stück €</label><input type="number" step="0.01" id="lcEk" oninput="lcCalc()"></div>
+        <div class="fi"><label>Fracht gesamt €</label><input type="number" step="1" id="lcFracht" oninput="lcCalc()"></div>
+        <div class="fi"><label>Zollsatz % <span class="wika-help" data-tooltip="Je nach Zolltarifnummer (TARIC): viele Haushaltswaren 0–4,7 %, Textilien bis 12 %. Nachschlagen: auskunft.ezt-online.de (kostenlos).">ⓘ</span></label><input type="number" step="0.1" id="lcZollsatz" value="4.7" oninput="lcCalc()"></div>
+        <div class="fi"><label>Nebenkosten gesamt € (QC, Verzollung …)</label><input type="number" step="1" id="lcNeben" value="0" oninput="lcCalc()"></div>
+        <div class="fi"><label>Übernehmen in</label><select id="lcProd"><option value="">— Produkt wählen —</option></select></div>
+      </div>
+      <div id="lcOut" style="font-size:13px;color:var(--tx2)">Menge, EK und Fracht eintragen …</div>
+    </div>
   </div>
 </div>
 

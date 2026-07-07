@@ -3433,7 +3433,7 @@ function researchRenderPrompts(){
 }
 
 function fillProdSelects(){
-  ['wProd','kwProd','revProd','srcProd','laProd'].forEach(function(id){
+  ['wProd','kwProd','revProd','srcProd','laProd','lcProd'].forEach(function(id){
     var s=document.getElementById(id);if(!s)return;
     var v=s.value;s.innerHTML='<option value="">— Produkt wählen —</option>';
     D.products.forEach(function(p,i){var o=document.createElement('option');o.value=i;o.textContent=p.name;s.appendChild(o);});
@@ -15571,3 +15571,58 @@ function showPendingBanner(meta,type){
   });
   document.addEventListener('scroll',hidePz,true);
 })();
+
+// ═══════════════ LANDED-COST-RECHNER (Sourcing-Seite) ═══════════════
+// Echte Stückkosten bis ins Amazon-Lager: Zollwert = Ware + Fracht (CIF!),
+// EUSt (19 %) als Vorsteuer abziehbar → nicht in Stückkosten, aber Cash-relevant.
+function lcVals(){
+  var g=function(id){return parseFloat((document.getElementById(id)||{}).value)||0};
+  var menge=g('lcMenge'),ek=g('lcEk'),fracht=g('lcFracht'),satz=g('lcZollsatz'),neben=g('lcNeben');
+  if(menge<=0||ek<=0)return null;
+  var ware=menge*ek;
+  var zollwert=ware+fracht;
+  var zoll=zollwert*satz/100;
+  var eust=(zollwert+zoll)*0.19;
+  var gesamt=ware+fracht+zoll+neben;
+  return {menge:menge,ek:ek,fracht:fracht,zoll:zoll,eust:eust,neben:neben,ware:ware,
+          gesamt:gesamt,stueck:gesamt/menge,
+          frachtStk:fracht/menge,zollStk:zoll/menge,nebenStk:neben/menge};
+}
+function lcCalc(){
+  var out=document.getElementById('lcOut');if(!out)return;
+  var v=lcVals();
+  if(!v){out.textContent='Menge, EK und Fracht eintragen …';return;}
+  var f=function(n){return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'};
+  out.innerHTML=
+    '<div class="cg" style="margin-bottom:10px">'
+    +'<div class="ci"><span class="cl">Warenwert</span><span class="cv">'+f(v.ware)+'</span></div>'
+    +'<div class="ci"><span class="cl">Zoll ('+((document.getElementById('lcZollsatz')||{}).value||0)+' % auf Ware+Fracht)</span><span class="cv">'+f(v.zoll)+'</span></div>'
+    +'<div class="ci"><span class="cl">EUSt 19 % (Vorsteuer)</span><span class="cv" style="color:var(--tx3)">'+f(v.eust)+'</span></div>'
+    +'<div class="ci"><span class="cl">Landed Cost gesamt</span><span class="cv" style="color:var(--ac)">'+f(v.gesamt)+'</span></div>'
+    +'</div>'
+    +'<div style="background:var(--acd);border:1px solid var(--ac);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13.5px">'
+    +'<b>Landed Cost je Stück: '+f(v.stueck)+'</b> <span style="color:var(--tx2)">= EK '+f(v.ek)+' + Fracht '+f(v.frachtStk)+' + Zoll '+f(v.zollStk)+(v.neben>0?' + Neben '+f(v.nebenStk):'')+'</span></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button class="btn btn-sm" onclick="lcApply()">📦 In Produkt übernehmen (EK/Versand/Zoll je Stück)</button>'
+    +(typeof cfData==='function'?'<button class="btn btn-sm" onclick="lcEustCashflow()" title="Die EUSt musst du beim Import vorstrecken (Erstattung über die USt-Voranmeldung) — großer Cash-Posten!">🏛️ EUSt + Zoll in Cashflow einplanen</button>':'')
+    +'</div>';
+}
+function lcApply(){
+  var v=lcVals();if(!v)return toast('Erst Menge, EK und Fracht eintragen');
+  var pi=parseInt((document.getElementById('lcProd')||{}).value);
+  if(isNaN(pi)||!D.products[pi])return toast('Bitte oben ein Produkt wählen');
+  var p=D.products[pi];
+  p.einkaufspreis=Math.round(v.ek*100)/100;
+  p.versand=Math.round((v.frachtStk+v.nebenStk)*100)/100;
+  p.zoll=Math.round(v.zollStk*100)/100;
+  save();
+  toast('✅ Übernommen: „'+p.name+'" — Versand '+p.versand.toFixed(2)+' €/Stk, Zoll '+p.zoll.toFixed(2)+' €/Stk');
+}
+function lcEustCashflow(){
+  var v=lcVals();if(!v)return toast('Erst Menge, EK und Fracht eintragen');
+  if(typeof cfData!=='function')return toast('Cashflow-Modul nicht geladen');
+  var d=new Date();d.setDate(d.getDate()+60); // grobe Annahme: Import in ~2 Monaten
+  var ymd=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  cfData().events.push({id:'cf'+Date.now().toString(36),typ:'aus',label:'EUSt + Zoll bei Import (Vorsteuer: EUSt kommt zurück)',datum:ymd,betrag:Math.round(v.eust+v.zoll),kategorie:'ust'});
+  save();toast('✅ '+Math.round(v.eust+v.zoll).toLocaleString('de-DE')+' € am '+ymd.split('-').reverse().join('.')+' im Cashflow eingeplant');
+}
