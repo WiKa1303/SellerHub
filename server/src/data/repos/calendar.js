@@ -49,13 +49,23 @@ export async function markCalendarFeedSync(id, { ok, error, now }) {
 
 export async function replaceCalendarEvents(feedId, events) {
   await db().query(`DELETE FROM calendar_events WHERE feed_id = $1`, [feedId]);
-  for (const e of events) {
+  // Dubletten (gleiche uid) vorab entfernen, dann Batch-Insert in Blöcken:
+  // 500 Events = 501 Einzelqueries wären unnötige Roundtrips zur Managed-DB.
+  const seen = new Set();
+  const rows = events.filter(e => !seen.has(e.uid) && seen.add(e.uid));
+  const CHUNK = 100;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+    const params = [];
+    const values = chunk.map((e, j) => {
+      params.push(feedId, e.uid, e.title, e.location || null, e.startDay, e.endDay,
+        e.startTs || null, e.endTs || null, !!e.allDay);
+      const o = j * 9;
+      return `($${o + 1},$${o + 2},$${o + 3},$${o + 4},$${o + 5},$${o + 6},$${o + 7},$${o + 8},$${o + 9})`;
+    }).join(',');
     await db().query(
       `INSERT INTO calendar_events (feed_id, uid, title, location, start_day, end_day, start_ts, end_ts, all_day)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-       ON CONFLICT (feed_id, uid) DO NOTHING`,
-      [feedId, e.uid, e.title, e.location || null, e.startDay, e.endDay,
-       e.startTs || null, e.endTs || null, !!e.allDay]);
+       VALUES ${values}`, params);
   }
 }
 

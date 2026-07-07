@@ -31,6 +31,17 @@ export function buildApi() {
   const app = express();
   app.disable('x-powered-by');
 
+  // Security-Header (bewusst ohne Helmet-Dependency — nur was für eine JSON-API zählt):
+  // nosniff gegen MIME-Sniffing, DENY gegen Framing von /internal, HSTS (Railway = immer TLS),
+  // Referrer-Policy für die /internal-Links.
+  app.use((req, res, next) => {
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('X-Frame-Options', 'DENY');
+    res.set('Referrer-Policy', 'no-referrer');
+    res.set('Strict-Transport-Security', 'max-age=31536000');
+    next();
+  });
+
   // CORS: Inhalte sind öffentlich, das SellerHub-Frontend (file:// oder eigene Domain) darf lesen.
   // Authorization für Konten/Sync (Bearer-Token), PUT für den Batch-Upsert des Syncs.
   app.use((req, res, next) => {
@@ -195,7 +206,7 @@ export function buildApi() {
   });
 
   // POST /api/feedback – 👍/👎 zu einem Item ({id, vote: 1|-1}); Basis für Eval-/Fine-Tuning-Daten
-  app.post('/api/feedback', express.json(), async (req, res) => {
+  app.post('/api/feedback', express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const { id, vote } = req.body || {};
       if (!id || ![1, -1].includes(vote)) return res.status(400).json({ error: 'id und vote (1|-1) erforderlich' });
@@ -219,7 +230,7 @@ export function buildApi() {
   // Antworten mit Kontodaten sind privat → Cache-Control no-store (überschreibt den GET-Default).
 
   // POST /api/auth/register – {email, password, displayName, inviteCode}
-  app.post('/api/auth/register', express.json(), async (req, res) => {
+  app.post('/api/auth/register', express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const r = await registerUser(req.body || {});
       if (r.error) return res.status(r.status).json({ error: r.error });
@@ -228,7 +239,7 @@ export function buildApi() {
   });
 
   // POST /api/auth/login – {email, password} → {token, user}
-  app.post('/api/auth/login', express.json(), async (req, res) => {
+  app.post('/api/auth/login', express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const r = await loginUser(req.body || {});
       if (r.error) return res.status(r.status).json({ error: r.error });
@@ -251,7 +262,7 @@ export function buildApi() {
   });
 
   // POST /api/auth/change-password (Bearer) – {currentPassword, newPassword}
-  app.post('/api/auth/change-password', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/auth/change-password', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const { currentPassword, newPassword } = req.body || {};
       const r = await changePassword(req.user, currentPassword, newPassword);
@@ -296,7 +307,7 @@ export function buildApi() {
   }
 
   // POST /api/ai/text (Bearer) – {prompt} → {text}
-  app.post('/api/ai/text', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/ai/text', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const r = await proxyText({ prompt: (req.body || {}).prompt, userId: req.user.id });
       sendAiResult(res, r, x => ({ text: x.text }));
@@ -320,7 +331,7 @@ export function buildApi() {
   // aus dem Service (400/403/429/502), alles Unerwartete über fail().
 
   // POST /api/import/amazon (Bearer) – {urlOrAsin, marketplace?='de'} → geparstes Produkt
-  app.post('/api/import/amazon', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/import/amazon', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const { urlOrAsin, marketplace } = req.body || {};
       const r = await importProduct({ urlOrAsin, ...(marketplace !== undefined ? { marketplace } : {}), userId: req.user.id });
@@ -366,10 +377,10 @@ export function buildApi() {
   });
 
   // ── Ordner ──
-  app.post('/api/todo/folders', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/folders', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.createFolder(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/folders/:id', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/folders/:id', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.renameFolder(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/folders/:id', authMiddleware, async (req, res) => {
@@ -377,10 +388,10 @@ export function buildApi() {
   });
 
   // ── Listen ──
-  app.post('/api/todo/lists', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/lists', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.createList(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/lists/:id', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/lists/:id', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.editList(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/lists/:id', authMiddleware, async (req, res) => {
@@ -391,10 +402,10 @@ export function buildApi() {
   app.get('/api/todo/lists/:id/members', authMiddleware, async (req, res) => {
     try { sendTodo(res, await todo.membersOf(req.user, req.params.id)); } catch (e) { fail(res, e); }
   });
-  app.post('/api/todo/lists/:id/members', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/lists/:id/members', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.inviteMember(req.user, req.params.id, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/lists/:id/members/:userId', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/lists/:id/members/:userId', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.changeMemberRole(req.user, req.params.id, req.params.userId, (req.body || {}).role)); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/lists/:id/members/:userId', authMiddleware, async (req, res) => {
@@ -405,16 +416,16 @@ export function buildApi() {
   app.get('/api/todo/tasks', authMiddleware, async (req, res) => {
     try { sendTodo(res, await todo.listTasks(req.user, req.query)); } catch (e) { fail(res, e); }
   });
-  app.post('/api/todo/tasks', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tasks', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.createTask(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.post('/api/todo/tasks/bulk', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tasks/bulk', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.bulkTasks(req.user, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.get('/api/todo/tasks/:id', authMiddleware, async (req, res) => {
     try { sendTodo(res, await todo.taskDetail(req.user, req.params.id)); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/tasks/:id', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/tasks/:id', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.updateTask(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/tasks/:id', authMiddleware, async (req, res) => {
@@ -428,10 +439,10 @@ export function buildApi() {
   });
 
   // ── Checkliste innerhalb einer Aufgabe ──
-  app.post('/api/todo/tasks/:id/checklist', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tasks/:id/checklist', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.addChecklistItem(req.user, req.params.id, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/checklist/:itemId', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/checklist/:itemId', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.editChecklistItem(req.user, req.params.itemId, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/checklist/:itemId', authMiddleware, async (req, res) => {
@@ -439,10 +450,10 @@ export function buildApi() {
   });
 
   // ── Tags (je Nutzer) + Zuordnung zu Aufgaben ──
-  app.post('/api/todo/tags', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tags', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.createTagFor(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/tags/:id', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/tags/:id', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.editTag(req.user, req.params.id, req.body || {})); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/tags/:id', authMiddleware, async (req, res) => {
@@ -456,10 +467,10 @@ export function buildApi() {
   });
 
   // ── Kommentare (commenter+; bearbeiten/löschen nur eigene) ──
-  app.post('/api/todo/tasks/:id/comments', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tasks/:id/comments', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.addComment(req.user, req.params.id, (req.body || {}).body), 201); } catch (e) { fail(res, e); }
   });
-  app.put('/api/todo/comments/:id', authMiddleware, express.json(), async (req, res) => {
+  app.put('/api/todo/comments/:id', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.editComment(req.user, req.params.id, (req.body || {}).body)); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/comments/:id', authMiddleware, async (req, res) => {
@@ -485,7 +496,7 @@ export function buildApi() {
   });
 
   // ── Erinnerungen (persönlich; Worker feuert fällige als Notification + SSE) ──
-  app.post('/api/todo/tasks/:id/reminders', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/tasks/:id/reminders', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.addReminder(req.user, req.params.id, (req.body || {}).remindAt), 201); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/reminders/:id', authMiddleware, async (req, res) => {
@@ -501,7 +512,7 @@ export function buildApi() {
       }));
     } catch (e) { fail(res, e); }
   });
-  app.post('/api/todo/filters', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/todo/filters', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await todo.saveFilter(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
   app.delete('/api/todo/filters/:id', authMiddleware, async (req, res) => {
@@ -550,7 +561,7 @@ export function buildApi() {
     try { sendTodo(res, await calendar.feeds(req.user)); } catch (e) { fail(res, e); }
   });
   // POST /api/calendar/feeds – {url, name?, color?}; validiert + erst-synct sofort
-  app.post('/api/calendar/feeds', authMiddleware, express.json(), async (req, res) => {
+  app.post('/api/calendar/feeds', authMiddleware, express.json({ limit: '2mb' }), async (req, res) => {
     try { sendTodo(res, await calendar.addFeed(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
   });
   app.delete('/api/calendar/feeds/:id', authMiddleware, async (req, res) => {
@@ -616,7 +627,7 @@ export function buildApi() {
   });
 
   // POST /api/admin/users/:id/reset-password – {newPassword}; widerruft alle Sessions des Kontos
-  app.post('/api/admin/users/:id/reset-password', requireAdminKey, express.json(), async (req, res) => {
+  app.post('/api/admin/users/:id/reset-password', requireAdminKey, express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const r = await adminResetPassword(req.params.id, (req.body || {}).newPassword);
       if (r.error) return res.status(r.status).json({ error: r.error });
@@ -625,7 +636,7 @@ export function buildApi() {
   });
 
   // POST /api/admin/users/:id/role – {role: 'user' | 'admin'}
-  app.post('/api/admin/users/:id/role', requireAdminKey, express.json(), async (req, res) => {
+  app.post('/api/admin/users/:id/role', requireAdminKey, express.json({ limit: '2mb' }), async (req, res) => {
     try {
       const r = await adminSetRole(req.params.id, (req.body || {}).role);
       if (r.error) return res.status(r.status).json({ error: r.error });

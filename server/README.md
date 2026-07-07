@@ -87,6 +87,28 @@ localStorage.setItem('wika_radar_api', 'https://<deine-radar-api>');
 
 Danach zeigt der Login Top-5-News + Top-3-Events aus `GET /api/dashboard-feed`. Ohne gesetzte URL bleibt das Widget unsichtbar (kein Fehler, kein Rauschen).
 
+## Backup & Datensicherung
+
+Die Postgres auf Railway ist der **einzige persistente Datenbestand** (Konten, Sync-Daten,
+To-Dos inkl. Anhänge, Kalender-Feeds). Drei Ebenen:
+
+1. **Railway-Backups:** Railway erstellt für Datenbank-Services automatische Snapshots
+   (Restore über das Railway-Dashboard → Database → Backups). Vor größeren Migrationen
+   zusätzlich manuell einen Snapshot auslösen.
+2. **Manueller Dump (empfohlen: monatlich, vor Deploys mit Schema-Änderung):**
+   ```bash
+   railway connect   # oder DATABASE_URL aus Railway-Variablen kopieren
+   pg_dump "$DATABASE_URL" --no-owner -Fc -f sellerhub-$(date +%F).dump
+   # Restore: pg_restore -d "$DATABASE_URL" --clean sellerhub-YYYY-MM-DD.dump
+   ```
+3. **Nutzer-Ebene:** Jeder Nutzer kann seine App-Daten selbst exportieren
+   (App → ⬇ Export → `sellerhub-data.json`); die Sync-Daten sind zusätzlich
+   über `GET /api/sync` (Bearer-Token) maschinell abziehbar.
+
+Wachstums-Hinweis: To-Do-Anhänge liegen als Base64 in `todo_attachments`
+(5 MB/Datei, 50 MB/Nutzer) — bei vielen Nutzern langfristig zu S3/MinIO migrierbar,
+das Limit schützt bis dahin die DB-Größe.
+
 ## Skalierungs-Hinweise (wann was)
 
 | Auslöser | Maßnahme |

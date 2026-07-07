@@ -15,6 +15,12 @@ export async function initDb(poolOverride) {
       ? false : { rejectUnauthorized: false },
     max: 5,
   });
+  // Idle-Clients können bei DB-Neustarts/Netz-Blips einen Fehler werfen — ohne
+  // Handler crasht der ganze Prozess (uncaught). Der Pool ersetzt die Verbindung
+  // selbst; wir loggen nur.
+  if (typeof pool.on === 'function') {
+    pool.on('error', (e) => log.error('Postgres-Pool: Verbindungsfehler (Pool ersetzt Client selbst):', e.message));
+  }
 
   // ── Artikel/Events (Owner: crawler + intelligence) ──
   // MVP-Entscheidung: id = SHA-256 der kanonischen URL (PK = Dublettenschutz Ebene 1).
