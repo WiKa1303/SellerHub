@@ -13500,11 +13500,27 @@ function renderDash(){
   }
 
   // ─── Profil-Chip (Kopfleiste): Initiale des Cloud-Kontos ───
+  // Ersetzt angemeldet das ☁️-Symbol (gleiche Aktion), sonst ragt die Zeile über die Sidebar hinaus.
   var pc=document.getElementById('profileChip');
   if(pc){
     var pu=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
-    if(pu){pc.style.display='flex';pc.textContent=(pu.username||'?').charAt(0).toUpperCase();pc.title=pu.username+(pu.email?' · '+pu.email:'')+' — Konto öffnen';}
-    else pc.style.display='none';
+    var sb=document.getElementById('syBtn');
+    if(pu){
+      pc.style.display='flex';
+      pc.textContent='';
+      var pcIni=document.createElement('span');
+      pcIni.textContent=(pu.username||'?').charAt(0).toUpperCase();
+      var pcDot=document.createElement('span');
+      pcDot.id='pcDot';
+      pcDot.style.cssText='position:absolute;bottom:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#8a93ad;box-shadow:0 0 0 2px rgba(12,19,34,.85)';
+      pc.appendChild(pcIni);pc.appendChild(pcDot);
+      pc.title=pu.username+(pu.email?' · '+pu.email:'')+' — Konto öffnen';
+      if(sb)sb.style.display='none';
+      if(typeof sySetState==='function'&&typeof syState!=='undefined')sySetState(syState);
+    }else{
+      pc.style.display='none';
+      if(sb)sb.style.display='flex';
+    }
   }
 
   // ─── Quick action card meta ───

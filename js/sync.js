@@ -106,6 +106,9 @@ function sySetState(state,detail){
   dot.style.background=m.c;
   btn.style.opacity=m.o;
   btn.title=m.t;
+  // Angemeldet ersetzt der Profil-Chip das ☁️-Symbol — Status-Punkt dort mitführen
+  var pd=document.getElementById('pcDot');
+  if(pd)pd.style.background=m.c;
 }
 
 // ─── Push (debounced 3 s): geänderte Keys sammeln, dann PUT /api/sync ───

@@ -158,10 +158,9 @@
 
   <!-- Global Search Trigger + Notification Bell -->
   <div style="display:flex;gap:6px;margin:12px 12px 6px;align-items:stretch">
-  <button onclick="openGlobalSearch()" id="globalSearchBtn" style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:13px;text-align:left" onmouseover="this.style.borderColor='var(--ac)';this.style.background='rgba(217,119,6,.15)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.background='rgba(255,255,255,.06)';this.style.color='#a8b1cc'">
+  <button onclick="openGlobalSearch()" id="globalSearchBtn" title="Globale Suche (⌘K)" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:13px;text-align:left" onmouseover="this.style.borderColor='var(--ac)';this.style.background='rgba(217,119,6,.15)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.background='rgba(255,255,255,.06)';this.style.color='#a8b1cc'">
     <span style="font-size:14px">🔍</span>
-    <span style="flex:1">Suche…</span>
-    <kbd style="font-family:'DM Sans',sans-serif;font-size:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:2px 6px;color:#a8b1cc;font-weight:600">⌘K</kbd>
+    <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Suche…</span>
   </button>
   <button onclick="notifToggle()" id="notifBell" title="Benachrichtigungen" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.color='#a8b1cc'">
     🔔<span id="notifBellBadge" style="position:absolute;top:5px;right:5px;background:var(--rd);color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px">0</span>
@@ -169,7 +168,7 @@
   <button onclick="syBtnClick()" id="syBtn" title="Cloud-Konto: nicht angemeldet" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px;opacity:.55" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)'">
     ☁️<span id="syBtnDot" style="position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#8a93ad"></span>
   </button>
-  <button onclick="syBtnClick()" id="profileChip" title="Konto" style="display:none;align-items:center;justify-content:center;width:38px;padding:0;background:linear-gradient(135deg,#d97706,#a85a04);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:14px"></button>
+  <button onclick="syBtnClick()" id="profileChip" title="Konto" style="display:none;position:relative;flex:none;align-items:center;justify-content:center;width:38px;padding:0;background:linear-gradient(135deg,#d97706,#a85a04);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:14px"></button>
   </div>
   <!-- Cloud-Sync Mini-Menü (angemeldet) -->
   <div id="syMenu" style="display:none;position:fixed;top:64px;left:18px;width:260px;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column;padding:8px">
