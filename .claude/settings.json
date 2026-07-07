@@ -1,5 +1,31 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"git push\"*) cd \"${CLAUDE_PROJECT_DIR:-.}/server\" && npm test >/tmp/sellerhub-pretest.log 2>&1 || echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"npm test (server/) fehlgeschlagen — Push blockiert. Details: /tmp/sellerhub-pretest.log\"}}';; esac",
+            "statusMessage": "Pre-Push-Gate: npm test im server/…",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"railway up\"*) sleep 5; BODY=$(curl -s -m 15 https://radar-production-388a.up.railway.app/api/health); OK=$(printf '%s' \"$BODY\" | jq -r '.ok // \"?\"' 2>/dev/null || echo '?'); MSG=\"Post-Deploy-Healthcheck /api/health → ok=$OK\"; printf '{\"systemMessage\":%s,\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":%s}}\\n' \"$(printf '%s' \"$MSG\" | jq -Rs .)\" \"$(printf '%s' \"$MSG\" | jq -Rs .)\";; esac",
+            "statusMessage": "Post-Deploy-Healthcheck /api/health…",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
