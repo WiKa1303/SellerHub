@@ -21,4 +21,4 @@ sellerhub-data.json
 
 # Design-Screenshots & temporäre Hilfsskripte von Claude Code
 .claude/design-shots/
-.claude/tmp-shots.mjs
+.claude/tmp-*.mjs
