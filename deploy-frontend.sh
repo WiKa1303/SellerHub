@@ -1,7 +1,8 @@
 #!/bin/bash
-# ═══ SellerHub-Frontend auf den Webspace laden (amzsellerhub.de, netcup) ═══
-# Lädt NUR die App-Dateien hoch: index.html + css/ + js/
-# (nicht: backups/, server/, *.md, .claude/, node_modules/, .git/)
+# ═══ SellerHub auf den Webspace laden (amzsellerhub.de, netcup) ═══
+# Ziel-Layout:  Website (website/*) → httpdocs/          (amzsellerhub.de)
+#               App (index.html+css/+js/) → httpdocs/app/ (amzsellerhub.de/app/)
+# (nicht hochgeladen: backups/, server/, *.md, .claude/, node_modules/, .git/)
 #
 # Nutzung:
 #   ./deploy-frontend.sh          (Defaults: a2fa9.netcup.net, hosting120520, amzsellerhub.de/httpdocs)
@@ -18,9 +19,13 @@ USER="${WEBSPACE_USER:-hosting120520}"
 DIR="${WEBSPACE_DIR:-amzsellerhub.de/httpdocs}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
-echo "→ Lade Frontend nach $USER@$HOST:$DIR …"
-tar czf - -C "$SRC" --exclude '.DS_Store' index.html css js \
+echo "→ 1/2 Website nach $USER@$HOST:$DIR …"
+tar czf - -C "$SRC/website" --exclude '.DS_Store' --exclude 'README.md' . \
   | ssh "$USER@$HOST" "cd '$DIR' && tar xzf -"
 
-echo "✓ Fertig. Test: https://amzsellerhub.de aufrufen (ggf. Cache leeren)."
+echo "→ 2/2 App nach $USER@$HOST:$DIR/app …"
+tar czf - -C "$SRC" --exclude '.DS_Store' index.html css js \
+  | ssh "$USER@$HOST" "mkdir -p '$DIR/app' && cd '$DIR/app' && tar xzf -"
+
+echo "✓ Fertig. Test: https://amzsellerhub.de (Website) + https://amzsellerhub.de/app/ (App)."
 echo "  Hinweis: App-Daten (localStorage) hängen an der Domain — einmalig per Export/Import migrieren."
