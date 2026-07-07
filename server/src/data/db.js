@@ -15,3 +15,4 @@ export * from './repos/userData.js';
 export * from './repos/aiUsage.js';
 export * from './repos/importCache.js';
 export * from './repos/todo.js';
+export * from './repos/calendar.js';

@@ -15,6 +15,7 @@ import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
 import { importProduct, proxyImage as proxyImportImage } from '../services/import/index.js';
 import * as todo from '../services/todo/index.js';
 import { subscribe as todoSubscribe } from '../services/todo/hub.js';
+import * as calendar from '../services/calendar/index.js';
 
 // ═══ Error-Handling-Standard ═══
 // Interna (SQL-/Stack-Details) gehören ins Log, NIE in die HTTP-Antwort.
@@ -539,6 +540,43 @@ export function buildApi() {
     res.write('data: {"module":"todo","type":"hello"}\n\n');
     const unsubscribe = todoSubscribe(req.user.id, res);
     req.on('close', unsubscribe);
+  });
+
+  // ═══ Kalender-Sync (/api/calendar/*) — Google & Co. via iCal/ICS ═══
+  // Nur Delegation an services/calendar; gleiche Fehler-Konvention wie To-Do.
+
+  // GET /api/calendar/feeds – abonnierte Kalender (URLs nur maskiert)
+  app.get('/api/calendar/feeds', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await calendar.feeds(req.user)); } catch (e) { fail(res, e); }
+  });
+  // POST /api/calendar/feeds – {url, name?, color?}; validiert + erst-synct sofort
+  app.post('/api/calendar/feeds', authMiddleware, express.json(), async (req, res) => {
+    try { sendTodo(res, await calendar.addFeed(req.user, req.body || {}), 201); } catch (e) { fail(res, e); }
+  });
+  app.delete('/api/calendar/feeds/:id', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await calendar.removeFeed(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  // POST /api/calendar/feeds/:id/sync – manueller Sofort-Sync
+  app.post('/api/calendar/feeds/:id/sync', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await calendar.syncFeedNow(req.user, req.params.id)); } catch (e) { fail(res, e); }
+  });
+  // GET /api/calendar/events?from&to – Termine aller Feeds (lazy Re-Sync, TTL 10 min)
+  app.get('/api/calendar/events', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await calendar.events(req.user, req.query)); } catch (e) { fail(res, e); }
+  });
+  // GET /api/calendar/export – eigener Abo-Link (Token) für Google Kalender
+  app.get('/api/calendar/export', authMiddleware, async (req, res) => {
+    try { sendTodo(res, await calendar.exportInfo(req.user)); } catch (e) { fail(res, e); }
+  });
+  // GET /api/calendar/export/:token/todo.ics – öffentlicher ICS-Feed (Secret-Token statt Login,
+  // damit Google ihn abonnieren kann; Token ist 24 Zufalls-Bytes, nicht erratbar)
+  app.get('/api/calendar/export/:token/todo.ics', async (req, res) => {
+    try {
+      const r = await calendar.exportIcsByToken(req.params.token);
+      res.set('Cache-Control', 'no-store');
+      if (r && r.error) return res.status(r.status || 500).json({ error: r.error });
+      res.type('text/calendar; charset=utf-8').send(r.ics);
+    } catch (e) { fail(res, e); }
   });
 
   // GET /api/health – Monitoring: alle Intelligence-Module aus der Registry

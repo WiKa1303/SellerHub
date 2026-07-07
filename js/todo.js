@@ -52,6 +52,7 @@ const S={
  sel:new Set(),focus:-1,lastClick:null,
  detailId:null,detail:null,tab:'details',members:[],
  es:null,live:false,refreshT:null,pollT:null,searchT:null,
+ gcal:{month:null,events:[],feeds:[],loading:false},
 };
 const listById=id=>S.lists.find(l=>l.id===id);
 const personName=id=>{const p=S.people.find(p=>p.id===id);return p?p.name:'?';};
@@ -513,21 +514,132 @@ function renderCalView(body){
  const daysIn=new Date(y,m,0).getDate();
  const tasks=currentTasks().filter(t=>t.dueDate&&t.dueDate.slice(0,7)===S.calMonth);
  const byDay={};tasks.forEach(t=>{(byDay[t.dueDate]=byDay[t.dueDate]||[]).push(t);});
+ gcalEnsure(); // Google-Termine für den Monat nachladen (async, rendert dann neu)
+ // Google-Termine je Tag einsortieren (mehrtägige erscheinen an jedem Tag)
+ const gBy={};
+ if(S.gcal.month===S.calMonth)for(const e of S.gcal.events){
+  let d=e.startDay<S.calMonth+'-01'?S.calMonth+'-01':e.startDay;
+  const end=e.endDay>S.calMonth+'-31'?S.calMonth+'-31':e.endDay;
+  for(let i=0;i<45&&d<=end;i++){(gBy[d]=gBy[d]||[]).push(e);d=addDays(d,1);}
+ }
  const monthName=first.toLocaleDateString('de-DE',{month:'long',year:'numeric'});
- let h='<div class="td-calhead"><button class="btn btn-sm" onclick="td.calShift(-1)">‹</button><b>'+monthName+'</b><button class="btn btn-sm" onclick="td.calShift(1)">›</button><button class="btn btn-sm" onclick="td.calToday()">Heute</button></div>';
+ const gcalBtn='<button class="btn btn-sm" onclick="td.gcalDialog()" title="Google Kalender verbinden & verwalten">🗓 Google Kalender'+(S.gcal.feeds.length?' ('+S.gcal.feeds.length+')':'')+'</button>';
+ const gcalWarn=S.gcal.feeds.some(f=>f.lastError)?'<span class="td-gcalwarn" title="Ein Kalender lässt sich nicht abrufen — Details unter „Google Kalender"">⚠️</span>':'';
+ let h='<div class="td-calhead"><button class="btn btn-sm" onclick="td.calShift(-1)">‹</button><b>'+monthName+'</b><button class="btn btn-sm" onclick="td.calShift(1)">›</button><button class="btn btn-sm" onclick="td.calToday()">Heute</button><div style="flex:1"></div>'+gcalWarn+gcalBtn+'</div>';
  h+='<div class="td-cal">'+['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>'<div class="td-caldow">'+d+'</div>').join('');
  for(let i=0;i<startDow;i++)h+='<div class="td-calcell off"></div>';
  for(let d=1;d<=daysIn;d++){
   const ds=S.calMonth+'-'+String(d).padStart(2,'0');
   const items=byDay[ds]||[];
+  const gItems=gBy[ds]||[];
   h+='<div class="td-calcell'+(ds===todayStr()?' today':'')+'" ondragover="td.dragOver(event)" ondrop="td.dropOnDay(event,\''+ds+'\')" ondblclick="td.newTaskDialog(\''+ds+'\')">'
    +'<div class="td-calnum">'+d+'</div>'
+   +gItems.slice(0,3).map((e,i)=>{
+     const time=e.startTs?new Date(e.startTs).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' ':'';
+     return'<div class="td-calgc" style="--gc:'+esc(e.color)+'" onclick="td.gcalEventPop(event,\''+ds+'\','+i+')" title="'+esc(e.feedName+': '+e.title)+'">'+time+esc(e.title)+'</div>';
+    }).join('')
+   +(gItems.length>3?'<div class="td-calmore">+'+(gItems.length-3)+' Termine</div>':'')
    +items.slice(0,4).map(t=>'<div class="td-calitem'+(t.completed?' done':'')+'" draggable="true" ondragstart="td.dragStart(event,\''+t.id+'\')" onclick="td.openDetail(\''+t.id+'\')" title="'+esc(t.title)+'">'+esc(t.title)+'</div>').join('')
    +(items.length>4?'<div class="td-calmore">+'+(items.length-4)+' weitere</div>':'')
    +'</div>';
  }
  h+='</div>';
  body.innerHTML=h;
+}
+
+// ═══ Google-Kalender-Anbindung (iCal/ICS über das Backend) ═══
+// Google → SellerHub: abonnierte Feeds, Backend synct automatisch (TTL 10 min).
+// SellerHub → Google: Abo-URL der eigenen Aufgaben (siehe gcalDialog).
+async function gcalEnsure(force){
+ if(!token())return;
+ if(!force&&(S.gcal.loading||S.gcal.month===S.calMonth))return;
+ S.gcal.loading=true;
+ try{
+  const from=S.calMonth+'-01',to=addDays(S.calMonth+'-28',7).slice(0,10);
+  const r=await GET('/api/calendar/events?from='+from+'&to='+to);
+  S.gcal={month:S.calMonth,events:r.events||[],feeds:r.feeds||[],loading:false};
+  if(isActive()&&S.view==='calendar')renderAll();
+ }catch(e){S.gcal.loading=false;}
+}
+
+function gcalEventPop(ev,ds,idx){
+ ev.stopPropagation();
+ const e=(S.gcal.events.filter(x=>x.startDay<=ds&&x.endDay>=ds))[idx];if(!e)return;
+ const when=e.allDay?'Ganztägig':(e.startTs?new Date(e.startTs).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(e.endTs?' – '+new Date(e.endTs).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+' Uhr':'');
+ popAt(ev.clientX,ev.clientY+12,
+  '<div style="padding:12px 14px">'
+  +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="width:10px;height:10px;border-radius:50%;background:'+esc(e.color)+';flex:none"></span><b style="font-size:13.5px">'+esc(e.title)+'</b></div>'
+  +'<div style="font-size:12px;color:#4d5568;line-height:1.7">'
+  +'📅 '+fmtDate(ds)+(e.endDay>e.startDay?' – '+fmtDate(e.endDay):'')+'<br>'
+  +(when?'🕐 '+esc(when)+'<br>':'')
+  +(e.location?'📍 '+esc(e.location)+'<br>':'')
+  +'🗓 '+esc(e.feedName)+' <span style="color:#7b8395">(Google, nur lesen)</span></div></div>',300);
+}
+
+async function gcalDialog(){
+ let feeds=[],exp=null,err='';
+ try{feeds=(await GET('/api/calendar/feeds')).feeds;exp=await GET('/api/calendar/export');}
+ catch(e){err=e.message;}
+ const exportUrl=exp?api()+exp.path:'';
+ const feedRow=f=>'<div class="td-gcalrow">'
+  +'<span style="width:10px;height:10px;border-radius:50%;background:'+esc(f.color)+';flex:none"></span>'
+  +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+esc(f.name)+'</div>'
+  +'<div style="font-size:11px;color:'+(f.lastError?'#dc2626':'#7b8395')+'">'
+  +(f.lastError?'⚠️ '+esc(f.lastError):(f.lastSync?'Zuletzt synchronisiert: '+fmtWhen(f.lastSync):'Noch nicht synchronisiert'))+'</div></div>'
+  +'<button class="btn btn-sm" onclick="td.gcalSync(\''+f.id+'\')" title="Jetzt synchronisieren">🔄</button>'
+  +'<button class="btn btn-sm" onclick="td.gcalDel(\''+f.id+'\')" title="Kalender entfernen">🗑</button></div>';
+ ovl(
+  '<div class="mh"><h2>🗓 Google Kalender verbinden</h2><button class="mc" onclick="td.closeDialogs()">✕</button></div>'
+  +'<div class="mb" style="max-height:64vh;overflow-y:auto">'
+  +(err?'<div class="td-offline">⚠️ '+esc(err)+'</div>':'')
+  // ── Richtung 1: Google → SellerHub ──
+  +'<div class="fsec" style="margin-top:0">Google-Termine hier anzeigen</div>'
+  +(feeds.length?feeds.map(feedRow).join(''):'<div style="font-size:12.5px;color:#7b8395;margin-bottom:10px">Noch kein Kalender verbunden.</div>')
+  +'<div class="td-gcalhelp">So findest du deine Kalender-Adresse:<br>'
+  +'<b>1.</b> <a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">Google Kalender → Einstellungen</a> öffnen&nbsp;· <b>2.</b> links deinen Kalender anklicken&nbsp;· <b>3.</b> ganz unten bei „Kalender integrieren" die <b>„Privatadresse im iCal-Format"</b> kopieren und hier einfügen. Die Termine aktualisieren sich danach automatisch (ca. alle 10 Minuten).</div>'
+  +'<div style="display:flex;gap:8px;margin:10px 0 4px"><input id="gcalUrl" class="td-clinput" style="flex:1" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics">'
+  +'<input id="gcalName" class="td-clinput" style="width:130px" placeholder="Name (z. B. Privat)"></div>'
+  +'<button class="btn btn-p btn-sm" onclick="td.gcalAdd()">＋ Kalender verbinden</button>'
+  // ── Richtung 2: SellerHub → Google ──
+  +'<div class="fsec">Deine Aufgaben in Google Kalender anzeigen</div>'
+  +'<div class="td-gcalhelp">Abonniere deine SellerHub-Aufgaben (offene, mit Fälligkeit) in Google:<br>'
+  +'<b>1.</b> Link unten kopieren&nbsp;· <b>2.</b> In Google Kalender links bei „Weitere Kalender" auf <b>＋ → Per URL</b> gehen&nbsp;· <b>3.</b> Link einfügen. <span style="color:#7b8395">Hinweis: Google aktualisiert abonnierte Kalender in eigenem Rhythmus (bis zu ~24 h). Der Link ist geheim — nicht weitergeben.</span></div>'
+  +(exportUrl?'<div style="display:flex;gap:8px;margin-top:8px"><input id="gcalExpUrl" class="td-clinput" style="flex:1;font-size:11px" readonly value="'+esc(exportUrl)+'" onclick="this.select()">'
+  +'<button class="btn btn-sm" onclick="td.gcalCopy()">📋 Kopieren</button></div>':'')
+  +'</div>'
+  +'<div class="mf"><button class="btn btn-sm" onclick="td.closeDialogs()">Schließen</button></div>');
+}
+
+async function gcalAdd(){
+ const url=($('gcalUrl')||{}).value?String($('gcalUrl').value).trim():'';
+ const name=($('gcalName')||{}).value?String($('gcalName').value).trim():'';
+ if(!url)return toast('⚠️ Bitte die iCal-Adresse einfügen');
+ try{
+  const r=await POST('/api/calendar/feeds',{url,name:name||'Google Kalender'});
+  if(r.firstSync&&!r.firstSync.ok)toast('⚠️ Verbunden, aber Abruf scheitert: '+r.firstSync.error);
+  else toast('✅ Kalender verbunden — '+(r.firstSync.count||0)+' Termine geladen');
+  S.gcal.month=null;gcalDialog();gcalEnsure(true);
+ }catch(e){toast('⚠️ '+e.message);}
+}
+
+async function gcalDel(id){
+ try{await DEL('/api/calendar/feeds/'+id);toast('🗑 Kalender entfernt');S.gcal.month=null;gcalDialog();gcalEnsure(true);}
+ catch(e){toast('⚠️ '+e.message);}
+}
+
+async function gcalSync(id){
+ try{
+  const r=await POST('/api/calendar/feeds/'+id+'/sync');
+  toast(r.sync&&r.sync.ok?'✅ Synchronisiert — '+r.sync.count+' Termine':'⚠️ '+(r.sync&&r.sync.error||'Sync fehlgeschlagen'));
+  S.gcal.month=null;gcalDialog();gcalEnsure(true);
+ }catch(e){toast('⚠️ '+e.message);}
+}
+
+function gcalCopy(){
+ const inp=$('gcalExpUrl');if(!inp)return;
+ inp.select();
+ try{navigator.clipboard.writeText(inp.value).then(()=>toast('📋 Link kopiert'));}
+ catch(e){document.execCommand('copy');toast('📋 Link kopiert');}
 }
 
 // ═══ Bulk ═══
@@ -946,6 +1058,7 @@ window.td={
  dragStart,dragOver,dropOnRow,dropOnList,dropOnCol,dropOnDay,
  calShift(n){const[y,m]=S.calMonth.split('-').map(Number);const d=new Date(y,m-1+n,1);S.calMonth=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');refresh();},
  calToday(){S.calMonth=todayStr().slice(0,7);refresh();},
+ gcalDialog,gcalAdd,gcalDel,gcalSync,gcalCopy,gcalEventPop,
  inlineEdit(ev,id){
   ev.stopPropagation();
   const span=ev.target;const t=S.tasks[id];if(!t||!canEdit(t.listId))return;

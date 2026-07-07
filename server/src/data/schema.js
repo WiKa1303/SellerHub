@@ -378,7 +378,50 @@ export async function initDb(poolOverride) {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )`);
 
-  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, import_cache, ai_calls, todo_*)');
+  // ═══ Kalender-Sync (Google & Co. via iCal/ICS) ═══
+  // Abonnierte externe Kalender (z. B. Googles „Privatadresse im iCal-Format").
+  // Die URL ist ein Geheimnis des Nutzers → nie in Logs/Fehlermeldungen ausgeben.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS calendar_feeds (
+      id          UUID PRIMARY KEY,
+      user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      url         TEXT NOT NULL,
+      name        TEXT NOT NULL,
+      color       TEXT,
+      last_sync   TIMESTAMPTZ,
+      last_error  TEXT,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_cf_user ON calendar_feeds (user_id)`);
+
+  // Zwischengespeicherte Termine je Feed (bei jedem Sync komplett ersetzt).
+  // start_day/end_day = 'YYYY-MM-DD' für schnelle Monatsabfragen (pg-mem-tauglich),
+  // start_ts/end_ts = ISO-Zeitstempel ('' bei Ganztags-Terminen).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS calendar_events (
+      feed_id    UUID NOT NULL REFERENCES calendar_feeds(id) ON DELETE CASCADE,
+      uid        TEXT NOT NULL,
+      title      TEXT NOT NULL,
+      location   TEXT,
+      start_day  TEXT NOT NULL,
+      end_day    TEXT NOT NULL,
+      start_ts   TEXT,
+      end_ts     TEXT,
+      all_day    BOOLEAN NOT NULL DEFAULT false,
+      PRIMARY KEY (feed_id, uid)
+    )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_ce_day ON calendar_events (feed_id, start_day)`);
+
+  // Geheimer Export-Token je Nutzer: /api/calendar/export/<token>/todo.ics
+  // (zum Abonnieren der SellerHub-Aufgaben in Google Kalender — ohne Login abrufbar).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS calendar_settings (
+      user_id      UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      export_token TEXT NOT NULL UNIQUE,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`);
+
+  log.info('DB bereit (news_events, trend_topics, topic_daily, topic_forecast, alerts, strategy_briefs, feedback, users, sessions, user_data, ai_usage, import_cache, ai_calls, todo_*, calendar_*)');
   return pool;
 }
 

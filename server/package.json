@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "crawl": "node src/crawl-once.js",
-    "test": "node test/smoke.test.js && node test/html.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js && node test/forecast.test.js && node test/dispatch.test.js && node test/auth.test.js && node test/ai-proxy.test.js && node test/import.test.js && node test/todo.test.js",
+    "test": "node test/smoke.test.js && node test/html.test.js && node test/ai.test.js && node test/trends.test.js && node test/strategy.test.js && node test/platform.test.js && node test/forecast.test.js && node test/dispatch.test.js && node test/auth.test.js && node test/ai-proxy.test.js && node test/import.test.js && node test/todo.test.js && node test/calendar.test.js",
     "test:html": "node test/html.test.js",
     "test:ai": "node test/ai.test.js",
     "test:trends": "node test/trends.test.js",
@@ -20,7 +20,8 @@
     "test:auth": "node test/auth.test.js",
     "test:ai-proxy": "node test/ai-proxy.test.js",
     "test:import": "node test/import.test.js",
-    "test:todo": "node test/todo.test.js"
+    "test:todo": "node test/todo.test.js",
+    "test:calendar": "node test/calendar.test.js"
   },
   "engines": {
     "node": ">=18"
