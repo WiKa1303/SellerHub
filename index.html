@@ -1451,6 +1451,14 @@
       </div>
     </div>
     <button class="btn btn-p" onclick="erAnalyze()">🔍 Abgleichen &amp; offene Fälle finden</button>
+    <details class="help-box-collapsible" style="margin-top:12px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px 16px">
+      <summary>📖 Welche Spalten brauchen die Berichte?</summary>
+      <div style="font-size:12.5px;color:var(--tx2);line-height:1.7">
+        <b>Bestandsanpassungen</b> (Pflicht): Händler-SKU oder FNSKU · <b>Anpassungsgrund</b> (Buchstaben-Code: M/K = verloren, D/E = beschädigt, F = gefunden — andere Codes wie Transfers werden ignoriert) · <b>Menge</b> · Datum (für die Frist-Ampel) · Produktname (optional).<br>
+        <b>Erstattungen</b> (optional): SKU · erstattete Menge. Ohne diesen Bericht kann der Check bereits erstattete Einheiten nicht abziehen — die Kandidatenliste fällt dann zu groß aus.<br>
+        <span style="color:var(--tx3)">Beide Berichte: Seller Central → Berichte → Auftragsabwicklung. Deutsch- und englischsprachige Spaltenköpfe werden erkannt.</span>
+      </div>
+    </details>
     <div id="erResult"></div>
   </div>
 </div>

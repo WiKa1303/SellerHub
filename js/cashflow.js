@@ -58,6 +58,7 @@ function renderCashflow(){
       +'<td class="nc" style="font-weight:700;color:'+(e.typ==='ein'?'var(--gn)':'var(--rd)')+'">'+(e.typ==='ein'?'+':'−')+cfEur(e.betrag)+'</td>'
       +'<td><div class="row-act">'
       +'<button title="Erledigt (Geld ist geflossen — Posten verlässt die Vorschau, Kontostand oben anpassen)" onclick="cfDone(\''+e.id+'\')">✓</button>'
+      +'<button title="Bearbeiten" onclick="cfEditPosten(\''+e.id+'\')">✏️</button>'
       +(e.serie?'<button title="Ganze Serie löschen" onclick="cfDelSerie(\''+esc(e.serie)+'\')">🗑×</button>':'')
       +'<button class="del" title="Löschen" onclick="cfDel(\''+e.id+'\')">🗑️</button>'
       +'</div></td></tr>';
@@ -152,6 +153,28 @@ function cfAddPosten(){
     save();renderCashflow();
   });
   document.getElementById('cfD').value=cfYmd(new Date());
+}
+
+// ── Posten bearbeiten (statt löschen + neu anlegen) ──
+function cfEditPosten(id){
+  var e=cfData().events.find(function(x){return x.id===id});if(!e)return;
+  gmPrompt('✏️ Posten bearbeiten',[
+    {l:'Bezeichnung *',id:'cfL'},{l:'Betrag €*',id:'cfW',t:'number'},
+    {l:'Richtung',id:'cfT',tag:'select',opts:['Ausgabe','Einnahme']},
+    {l:'Datum',id:'cfD',t:'date'},
+  ],function(){
+    var W=parseFloat(document.getElementById('cfW').value)||0;if(W<=0)return toast('Betrag fehlt');
+    e.label=document.getElementById('cfL').value.trim()||e.label;
+    e.betrag=W;
+    e.typ=document.getElementById('cfT').value==='Einnahme'?'ein':'aus';
+    e.datum=document.getElementById('cfD').value||e.datum;
+    save();renderCashflow();toast('✓ Gespeichert');
+  });
+  // Vorbelegen (gmPrompt kennt keine Defaults)
+  document.getElementById('cfL').value=e.label;
+  document.getElementById('cfW').value=e.betrag;
+  document.getElementById('cfT').value=e.typ==='ein'?'Einnahme':'Ausgabe';
+  document.getElementById('cfD').value=e.datum;
 }
 
 // ── Synergie: gespeicherte PPC-Pläne (ppc.js) als monatliche Ausgaben übernehmen ──

@@ -13415,14 +13415,14 @@ window.renderNewsPage=renderNewsPage;
 
 // ═══ „WAS IST NEU?" — Modul-Updates sichtbar machen (ausblendbar, Stand je Version) ═══
 // Dismiss-Key nutzt das wika_info_dismissed_-Präfix → wird über Geräte gesynct.
-var WHATSNEW_KEY='wika_info_dismissed_wn20260706';
+var WHATSNEW_KEY='wika_info_dismissed_wn20260707';
 var WHATSNEW=[
-  {icon:'☁️',title:'Cloud-Konto & Login',desc:'Anmeldung läuft jetzt über dein Cloud-Konto (E-Mail). Passwort ändern & Sync: Wolke oben links.',cta:'Konto öffnen',act:"if(typeof syBtnClick==='function')syBtnClick()"},
-  {icon:'📈',title:'Trend-Prognose & Briefing',desc:'Der Radar liefert ein Tages-Briefing, Markt-Trends und eine 7-Tage-Prognose — direkt hier im Dashboard.',cta:'Zum Radar',act:"var r=document.getElementById('dashRadar');if(r)r.scrollIntoView({behavior:'smooth'})"},
-  {icon:'🧮',title:'Auto-Marge in der Scorecard',desc:'VK, EK und FBA-Gebühren eintragen — die Netto-Marge (und der Marge-Red-Flag) rechnet sich von selbst.',cta:'Zur Pipeline',act:"go('pipeline')"},
-  {icon:'🚩',title:'Monopol-Flag & rote Rahmen',desc:'Dominiert eine Marke die Top-10, warnt die Scorecard; Kandidaten mit hartem Red Flag sind rot umrandet.',cta:'Zur Pipeline',act:"go('pipeline')"},
-  {icon:'⚡',title:'Xray-Paste',desc:'Helium-10-Xray-Tabelle kopieren, einfügen — fertiger Nischen-Kandidat mit Score & Ampel in Sekunden.',cta:'Ausprobieren',act:"if(typeof xrayPasteOpen==='function')xrayPasteOpen()"},
-  {icon:'🛡️',title:'Cloud-Nutzer-Verwaltung',desc:'Als Admin verwaltest du die echten Server-Konten: Passwort-Reset, Rollen — Admin-Bereich, Sektion „Cloud-Konten".',cta:'Zum Admin',act:"go('admin')",adminOnly:true}
+  {icon:'📋',title:'Pflichten-Kalender',desc:'USt, OSS, LUCID, WEEE, Langzeitlager & Co. als wiederkehrende Aufgaben mit Erinnerung — nie wieder eine Frist verpassen.',cta:'Einrichten',act:"go('todo');setTimeout(function(){if(window.td&&td.pflichtenDialog)td.pflichtenDialog();},600)"},
+  {icon:'🎯',title:'PPC-Cockpit',desc:'Budget & Gebote VOR dem ersten Euro planen, danach den Suchbegriffs-Bericht auditieren: Geldverbrenner, Gewinner, Negativ-Liste.',cta:'Zum Cockpit',act:"go('keywords');if(typeof switchKwTab==='function')switchKwTab('planer')"},
+  {icon:'💶',title:'Cashflow-Planer',desc:'Reicht das Geld für die nächste Bestellung? Anzahlung, Restzahlung, Amazon-Auszahlungen auf dem 6-Monats-Zeitstrahl — mit Engpass-Warnung.',cta:'Planen',act:"go('cashflow')"},
+  {icon:'💸',title:'FBA-Erstattungs-Check',desc:'Verlorene & beschädigte Lagerware finden, die Amazon dir noch nicht erstattet hat — mit Frist-Ampel und fertigem Fall-Text.',cta:'Prüfen',act:"go('erstattung')"},
+  {icon:'🚢',title:'Landed-Cost-Rechner',desc:'Echte Stückkosten inkl. Zoll (auf Ware UND Fracht!) und EUSt — ein Klick übernimmt sie in deine Kalkulation.',cta:'Rechnen',act:"go('sourcing')"},
+  {icon:'🗓',title:'Google-Kalender-Sync',desc:'To-Do-Kalender in beide Richtungen mit Google verbinden: Termine hier sehen, Aufgaben aufs Handy bekommen.',cta:'Verbinden',act:"go('todo');setTimeout(function(){if(window.td&&td.setView){td.setView('calendar');if(td.gcalDialog)setTimeout(td.gcalDialog,400);}},600)"}
 ];
 function whatsNewDismiss(){
   try{localStorage.setItem(WHATSNEW_KEY,'1');}catch(e){}
@@ -13440,7 +13440,7 @@ function renderWhatsNew(){
   var items=WHATSNEW.filter(function(w){return !w.adminOnly||isAdmin;});
   var h='<div style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:14px;padding:18px 20px;margin-bottom:18px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 06.07.2026</span></div>'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 07.07.2026</span></div>'+
     '<button class="btn btn-sm" onclick="whatsNewDismiss()" style="font-size:11px">✕ Ausblenden</button></div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">';
   items.forEach(function(w){
