@@ -1323,6 +1323,8 @@
       <button class="kwTab" data-kwtab="tracking" onclick="switchKwTab('tracking')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">📍 Keyword-Tracking</button>
       <button class="kwTab" data-kwtab="cleaner" onclick="switchKwTab('cleaner')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🧹 Backend-Reiniger</button>
       <button class="kwTab" data-kwtab="scribbles" onclick="switchKwTab('scribbles')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📝 Listing-Abdeckung</button>
+      <button class="kwTab" data-kwtab="planer" onclick="switchKwTab('planer')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🎯 PPC-Planer</button>
+      <button class="kwTab" data-kwtab="audit" onclick="switchKwTab('audit')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🔍 PPC-Audit</button>
     </div>
 
     <!-- TAB 1: TRACKING -->
@@ -1343,6 +1345,7 @@
 
       <div class="toolbar">
         <select class="fsel" id="kwProd" onchange="renderKW()"><option value="">— Produkt wählen —</option></select>
+        <button class="btn" onclick="ppcCerebroOpen()" title="Helium-10-Keyword-Tabelle (Cerebro/Magnet) einfügen → Volumen, CPC-Schätzung und Wettbewerb landen direkt im Tracker">📋 Cerebro einfügen</button>
         <button class="btn btn-p btn-sm" onclick="addKW()">＋ Keyword</button>
       </div>
       <div style="overflow-x:auto">
@@ -1380,6 +1383,53 @@
       <div class="card" style="margin-top:16px"><h3>📊 Abdeckung</h3><div id="scOut" style="font-size:12px;color:var(--tx2)">Trag Keywords und Listing-Text ein …</div></div>
     </div>
 
+    <!-- TAB 4: PPC-PLANER (js/ppc.js) -->
+    <div id="kwTab-planer" style="display:none">
+      <div class="help-box gold"><div class="help-icon">🎯</div><div class="help-body">
+        <div class="help-title">Launch-PPC-Planer: Budget &amp; Gebote VOR dem ersten Euro</div>
+        <div class="help-text">Rechnet aus <b>deinem VK und deiner Marge</b> den Break-even-ACOS, Ziel-ACOS und je Keyword ein Max-Gebot — jede Zahl mit offener Formel (ⓘ). Kein Ads-Tool-Ersatz: Du setzt die Kampagnen in Seller Central auf, aber mit fertigen Zahlen statt Bauchgefühl.</div>
+      </div></div>
+      <div class="toolbar">
+        <select class="fsel" id="ppcPlanProd" onchange="ppcRenderPlaner()"><option value="">— Produkt/Kandidat wählen —</option></select>
+      </div>
+      <div id="ppcPlanerBody"></div>
+    </div>
+
+    <!-- TAB 5: PPC-AUDIT (js/ppc.js) -->
+    <div id="kwTab-audit" style="display:none">
+      <div class="help-box gold"><div class="help-icon">🔍</div><div class="help-body">
+        <div class="help-title">Suchbegriffs-Audit: Wo verbrennt dein PPC-Budget?</div>
+        <div class="help-text"><b>Seller Central → Berichte → Werbeberichte → Sponsored Products → „Suchbegriff"</b> als CSV laden und hier einfügen. Der Bericht wird <b>nur in deinem Browser</b> ausgewertet — nichts davon verlässt deinen Rechner. Ergebnis: Geldverbrenner (Negativ-Liste zum Kopieren), Begriffe über Break-even, Gewinner für Exact-Kampagnen.</div>
+      </div></div>
+      <div class="toolbar">
+        <select class="fsel" id="ppcAuditProd" onchange="ppcAuditAnalyze()" title="Für den Break-even-ACOS"><option value="">— Produkt für Break-even —</option></select>
+        <span style="font-size:12px;color:var(--tx2)">oder Marge</span>
+        <input class="fsel" type="number" id="ppcAuditMarge" placeholder="%" style="width:70px" onchange="ppcAuditAnalyze()">
+        <div style="flex:1"></div>
+        <label class="btn" style="cursor:pointer">📂 CSV-Datei laden<input type="file" accept=".csv,.txt,.tsv" style="display:none" onchange="ppcAuditFile(event)"></label>
+        <button class="btn btn-p" onclick="ppcAuditAnalyze()">🔍 Auswerten</button>
+      </div>
+      <textarea id="ppcAuditInput" rows="6" placeholder="Suchbegriffs-Bericht hier einfügen (Strg+V) — inklusive Kopfzeile …" style="width:100%;font-family:ui-monospace,monospace;font-size:11px;padding:12px;border:1.5px solid var(--bd2);border-radius:12px;resize:vertical;background:var(--s1);color:var(--tx)"></textarea>
+      <div id="ppcAuditResult"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MODAL: Cerebro/Magnet-Keyword-Paste (js/ppc.js) ═══ -->
+<div class="mo" id="ppcCerebroModal">
+  <div class="modal" style="width:820px">
+    <div class="mh"><h2>📋 Cerebro/Magnet-Keywords einfügen</h2><button class="mc" onclick="ppcCerebroClose()">✕</button></div>
+    <div class="mb">
+      <div style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin-bottom:10px">Helium 10 → Cerebro (oder Magnet) → Tabelle <b>inklusive Kopfzeile</b> markieren &amp; kopieren — oder den CSV-Export einfügen. Erkannt werden Keyword, Suchvolumen, CPC-Schätzung und Wettbewerber.</div>
+      <div class="toolbar" style="margin-bottom:10px">
+        <span style="font-size:12px;color:var(--tx2)">Ziel-Produkt:</span>
+        <select class="fsel" id="ppcCerebroProd"><option value="">— Produkt wählen —</option></select>
+      </div>
+      <textarea id="ppcCerebroInput" rows="7" placeholder="Cerebro-Tabelle hier einfügen (Strg+V) …" style="width:100%;font-family:ui-monospace,monospace;font-size:11px;padding:12px;border:1.5px solid var(--bd2);border-radius:12px;resize:vertical;background:var(--s1);color:var(--tx)"></textarea>
+      <div style="margin-top:10px"><button class="btn btn-p btn-sm" onclick="ppcCerebroAnalyze()">🔎 Analysieren</button></div>
+      <div id="ppcCerebroResult"></div>
+    </div>
   </div>
 </div>
 
@@ -2434,6 +2484,7 @@
 
 <script src="js/todo.js"></script>
 <script src="js/app.js"></script>
+<script src="js/ppc.js"></script>
 <script src="js/sync.js"></script>
 </body>
 </html>

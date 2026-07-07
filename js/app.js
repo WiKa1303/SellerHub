@@ -782,8 +782,11 @@ function decisionAuto(c,key){
     if(c.ek!=null&&c.ek>0){
       var menge=(c.startMenge!=null&&c.startMenge>0)?c.startMenge:500;
       var inv=c.ek*menge;
+      // PPC-Anlauf aus dem PPC-Planer einrechnen (Tagesbudget × 30 × Monate), falls geplant
+      var ppc=0;
+      if(c.ppcPlan&&c.ppcPlan.tagesbudget>0){ppc=c.ppcPlan.tagesbudget*30*(c.ppcPlan.monate||2);inv+=ppc;}
       var v=inv<2000?9:inv<4000?7:inv<7000?5:inv<12000?3:1;
-      return {val:v,reason:'~'+Math.round(inv).toLocaleString('de-DE')+' € Startbudget ('+menge+' Stk × EK)'};
+      return {val:v,reason:'~'+Math.round(inv).toLocaleString('de-DE')+' € Startbudget ('+menge+' Stk × EK'+(ppc?' + '+Math.round(ppc).toLocaleString('de-DE')+' € PPC-Anlauf':'')+')'};
     }
     return {val:null,reason:'Kein EK für Startbudget'};
   }
