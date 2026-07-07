@@ -11,9 +11,9 @@
 <body>
 
 <!-- ═══ LOGIN OVERLAY + USER MANAGEMENT ═══ -->
-<div id="wikaLoginOverlay" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f1729 0%,#1a2233 50%,#0f1729 100%);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;overflow-y:auto">
-  <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(217,119,6,.15),transparent 50%),radial-gradient(circle at 70% 80%,rgba(217,119,6,.10),transparent 50%);pointer-events:none"></div>
-  <div id="wikaLoginBox" style="position:relative;width:100%;max-width:420px;background:#fff;border-radius:18px;padding:42px 38px;box-shadow:0 25px 60px rgba(0,0,0,.4),0 10px 25px rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);margin:auto">
+<div id="wikaLoginOverlay" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#faf6ec 0%,#f6efdf 45%,#f1e7d0 100%);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;overflow-y:auto">
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 28% 18%,rgba(246,168,33,.18),transparent 48%),radial-gradient(circle at 74% 82%,rgba(15,157,108,.10),transparent 50%),radial-gradient(circle at 88% 25%,rgba(37,99,235,.07),transparent 45%);pointer-events:none"></div>
+  <div id="wikaLoginBox" style="position:relative;width:100%;max-width:420px;background:#fff;border-radius:24px;padding:42px 38px;box-shadow:0 30px 70px -20px rgba(120,84,20,.28),0 8px 24px rgba(120,84,20,.10);border:1px solid #efe8d8;margin:auto">
     <div style="text-align:center;margin-bottom:32px">
       <div style="width:72px;height:72px;margin:0 auto 18px;background:linear-gradient(135deg,#d97706,#a85a04);border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-size:34px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,.45)">S</div>
       <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;color:#0f1729;margin-bottom:4px">AMZ Seller<span style="color:#d97706">Hub</span></div>
@@ -21,7 +21,7 @@
     </div>
 
     <!-- TAB SWITCHER (Login / Register) -->
-    <div id="wikaAuthTabs" style="display:flex;gap:0;margin-bottom:24px;border-radius:10px;padding:4px;background:#f1f4f9;border:1px solid #e8ecf2">
+    <div id="wikaAuthTabs" style="display:flex;gap:0;margin-bottom:24px;border-radius:14px;padding:4px;background:#f4f0e6;border:1px solid #eae4d4">
       <button type="button" id="wikaTabLogin" onclick="wikaSwitchTab('login')"
         style="flex:1;padding:10px;border:none;border-radius:7px;background:#fff;color:#0f1729;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,41,.08);transition:all .15s">
         🔒 Anmelden
@@ -158,18 +158,18 @@
 
   <!-- Global Search Trigger + Notification Bell -->
   <div style="display:flex;gap:6px;margin:12px 12px 6px;align-items:stretch">
-  <button onclick="openGlobalSearch()" id="globalSearchBtn" style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:13px;text-align:left" onmouseover="this.style.borderColor='var(--ac)';this.style.background='rgba(217,119,6,.15)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.background='rgba(255,255,255,.06)';this.style.color='#a8b1cc'">
+  <button onclick="openGlobalSearch()" id="globalSearchBtn" style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f3efe3;border:1.5px solid #e6e0d0;border-radius:12px;cursor:pointer;font-family:inherit;color:#6d675a;transition:all .15s;font-size:13px;text-align:left" onmouseover="this.style.borderColor='var(--ac)';this.style.background='#fdeed3';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='#e6e0d0';this.style.background='#f3efe3';this.style.color='#6d675a'">
     <span style="font-size:14px">🔍</span>
     <span style="flex:1">Suche…</span>
-    <kbd style="font-family:'DM Sans',sans-serif;font-size:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:4px;padding:2px 6px;color:#a8b1cc;font-weight:600">⌘K</kbd>
+    <kbd style="font-family:'DM Sans',sans-serif;font-size:10px;background:#fff;border:1px solid #e0d9c8;border-radius:5px;padding:2px 6px;color:#948c77;font-weight:600">⌘K</kbd>
   </button>
-  <button onclick="notifToggle()" id="notifBell" title="Benachrichtigungen" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)';this.style.color='#a8b1cc'">
+  <button onclick="notifToggle()" id="notifBell" title="Benachrichtigungen" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:#f3efe3;border:1.5px solid #e6e0d0;border-radius:12px;cursor:pointer;font-family:inherit;color:#6d675a;transition:all .15s;font-size:16px" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac)'" onmouseout="this.style.borderColor='#e6e0d0';this.style.color='#6d675a'">
     🔔<span id="notifBellBadge" style="position:absolute;top:5px;right:5px;background:var(--rd);color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px">0</span>
   </button>
-  <button onclick="syBtnClick()" id="syBtn" title="Cloud-Konto: nicht angemeldet" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:9px;cursor:pointer;font-family:inherit;color:#a8b1cc;transition:all .15s;font-size:16px;opacity:.55" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(255,255,255,.10)'">
-    ☁️<span id="syBtnDot" style="position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#8a93ad"></span>
+  <button onclick="syBtnClick()" id="syBtn" title="Cloud-Konto: nicht angemeldet" style="position:relative;display:flex;align-items:center;justify-content:center;padding:0 13px;background:#f3efe3;border:1.5px solid #e6e0d0;border-radius:12px;cursor:pointer;font-family:inherit;color:#6d675a;transition:all .15s;font-size:16px;opacity:.55" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='#e6e0d0'">
+    ☁️<span id="syBtnDot" style="position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#c3bba8"></span>
   </button>
-  <button onclick="syBtnClick()" id="profileChip" title="Konto" style="display:none;align-items:center;justify-content:center;width:38px;padding:0;background:linear-gradient(135deg,#d97706,#a85a04);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:14px"></button>
+  <button onclick="syBtnClick()" id="profileChip" title="Konto" style="display:none;align-items:center;justify-content:center;width:38px;padding:0;background:linear-gradient(135deg,#f6a821,#d97706);border:1.5px solid rgba(217,119,6,.3);border-radius:12px;cursor:pointer;font-family:inherit;color:#fff;font-weight:800;font-size:14px"></button>
   </div>
   <!-- Cloud-Sync Mini-Menü (angemeldet) -->
   <div id="syMenu" style="display:none;position:fixed;top:64px;left:18px;width:260px;background:var(--s1);border:1px solid var(--bd2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:900;overflow:hidden;flex-direction:column;padding:8px">
@@ -230,9 +230,9 @@
   </nav>
   <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:6px">
     <div style="display:flex;gap:4px;flex-wrap:wrap;font-size:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)">
-      <a href="/preise.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">💳 Preise</a>
-      <a href="/ueber-uns.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">Über uns</a>
-      <a href="/kontakt.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">✉️ Kontakt</a>
+      <a href="/preise.html" style="color:#8a8270;text-decoration:none;padding:2px 6px;background:#f3efe3;border-radius:6px" onmouseover="this.style.color='#b45309'" onmouseout="this.style.color='#8a8270'">💳 Preise</a>
+      <a href="/ueber-uns.html" style="color:#8a8270;text-decoration:none;padding:2px 6px;background:#f3efe3;border-radius:6px" onmouseover="this.style.color='#b45309'" onmouseout="this.style.color='#8a8270'">Über uns</a>
+      <a href="/kontakt.html" style="color:#8a8270;text-decoration:none;padding:2px 6px;background:#f3efe3;border-radius:6px" onmouseover="this.style.color='#b45309'" onmouseout="this.style.color='#8a8270'">✉️ Kontakt</a>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
       <span id="versionDisplay" style="font-weight:600;color:var(--ac);font-size:11px">v—</span>
