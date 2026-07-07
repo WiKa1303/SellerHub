@@ -9,7 +9,7 @@ import { SOURCES } from '../data/sources.js';
 import { config } from '../core/config.js';
 import { log } from '../core/logger.js';
 import { renderInternal } from './internal.js';
-import { registerUser, loginUser, logoutSession, changePassword, authMiddleware, adminListUsers, adminResetPassword, adminSetRole } from '../services/auth/index.js';
+import { registerUser, loginUser, logoutSession, changePassword, authMiddleware, adminListUsers, adminResetPassword, adminSetRole, issueSseTicket, consumeSseTicket } from '../services/auth/index.js';
 import { listSyncData, applySyncBatch } from '../services/sync/index.js';
 import { proxyText, proxyImage } from '../services/ai-proxy/index.js';
 import { importProduct, proxyImage as proxyImportImage } from '../services/import/index.js';
@@ -513,12 +513,22 @@ export function buildApi() {
     try { sendTodo(res, await todo.markNotificationsRead(req.user)); } catch (e) { fail(res, e); }
   });
 
+  // POST /api/todo/sse-ticket (Bearer) – kurzlebiges Einmal-Ticket für den SSE-Connect.
+  // Der Client tauscht hier sein Token gegen ein Ticket, statt das Token in die Events-URL
+  // zu legen (Leak über Access-Logs/History, s. auth/index.js).
+  app.post('/api/todo/sse-ticket', authMiddleware, (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.json({ ticket: issueSseTicket(req.user.id) });
+  });
+
   // GET /api/todo/events – SSE-Echtzeitkanal. EventSource kann keine Header setzen
-  // → Token zusätzlich als ?auth= erlaubt (wird VOR authMiddleware in den Header gespiegelt).
+  // → Zugang über das Einmal-Ticket aus ?ticket= (nicht das Voll-Token!). Ohne gültiges
+  // Ticket fällt der Request auf die normale Bearer-Prüfung zurück (→ 401 ohne Header).
   app.get('/api/todo/events', (req, res, next) => {
-    if (!req.get('Authorization') && req.query.auth) req.headers['authorization'] = 'Bearer ' + req.query.auth;
-    next();
-  }, authMiddleware, (req, res) => {
+    const uid = req.query.ticket ? consumeSseTicket(req.query.ticket) : null;
+    if (uid) { req.user = { id: uid }; return next(); }
+    return authMiddleware(req, res, next);
+  }, (req, res) => {
     res.set({
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-store',

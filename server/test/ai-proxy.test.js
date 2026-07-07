@@ -4,7 +4,7 @@ import { newDb } from 'pg-mem';
 import { initDb, db, getUsage, incrementUsage, todayKey } from '../src/data/db.js';
 import { buildApi } from '../src/api/routes.js';
 import { config } from '../src/core/config.js';
-import { aiProxyFetch, validateParts, proxyImage, MAX_PARTS_BYTES } from '../src/services/ai-proxy/index.js';
+import { aiProxyFetch, validateParts, proxyImage, MAX_PARTS_BYTES, safeGenerationConfig } from '../src/services/ai-proxy/index.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -121,6 +121,19 @@ t('validateParts: fremdes Feld', validateParts([{ text: 'ok', extra: 1 }]) !== n
 t('validateParts: inlineData ohne mimeType', validateParts([{ inlineData: { data: 'AAA' } }]) !== null);
 t('validateParts: inlineData mit Fremdfeld', validateParts([{ inlineData: { mimeType: 'image/png', data: 'A', x: 1 } }]) !== null);
 t('validateParts: gültige Mischung ok', validateParts([{ text: 'p' }, { inlineData: { mimeType: 'image/png', data: 'AAA' } }]) === null);
+// ── generationConfig-Whitelist (Kostenbremse): candidateCount darf NICHT vervielfachen ──
+t('genCfg: candidateCount wird auf 1 fixiert (kein Kosten-Multiplikator)',
+  safeGenerationConfig({ candidateCount: 8 }).candidateCount === 1);
+t('genCfg: unbekannte Felder werden verworfen',
+  safeGenerationConfig({ candidateCount: 8, evil: 'x', responseMimeType: 'y' }).evil === undefined);
+t('genCfg: responseModalities IMAGE immer erzwungen',
+  JSON.stringify(safeGenerationConfig({ responseModalities: ['TEXT'] }).responseModalities) === '["IMAGE"]');
+t('genCfg: imageConfig.aspectRatio (legitim) bleibt erhalten',
+  safeGenerationConfig({ imageConfig: { aspectRatio: '1:1' } }).imageConfig?.aspectRatio === '1:1');
+t('genCfg: krude aspectRatio-Werte werden verworfen',
+  safeGenerationConfig({ imageConfig: { aspectRatio: 'javascript:1' } }).imageConfig === undefined);
+t('genCfg: maxOutputTokens wird gedeckelt',
+  safeGenerationConfig({ maxOutputTokens: 999999 }).maxOutputTokens === 8192);
 r = await post('/api/ai/image', { parts: { nicht: 'array' } }, token);
 t('Bild: parts kein Array → 400', r.status === 400, (await r.json()).error);
 r = await post('/api/ai/image', { parts: [{ text: 'p' }], generationConfig: 'kaputt' }, token);
@@ -155,7 +168,10 @@ t('Upstream: responseModalities IMAGE erzwungen + generationConfig gemerged',
 await post('/api/ai/image', { parts: [{ text: 'zwei' }] }, token);
 r = await post('/api/ai/image', { parts: [{ text: 'drei' }] }, token);
 t('Bild: 3. Call → 429 (Bild-Limit getrennt vom Text-Limit)', r.status === 429, (await r.json()).error);
-t('Bild-Zähler: image_calls = 2', (await getUsage(userId, todayKey())).image_calls === 2);
+// Kontrakt seit TOCTOU-Fix (increment-first): der am Limit abgelehnte Call zählt MIT
+// (Zähler 3 statt 2). Race-sicher gegen Parallel-Requests; konsistent mit „Upstream-Fehler
+// zählt trotzdem". Kein Upstream-Call, kein Kostenpfad — Reset täglich.
+t('Bild-Zähler: abgelehnter Call zählt mit → image_calls = 3', (await getUsage(userId, todayKey())).image_calls === 3);
 
 // ── incrementUsage: Rückgabe der NEUEN Zähler (Repo-Kontrakt) ──
 const inc = await incrementUsage(userId, '2000-01-01', 'image');

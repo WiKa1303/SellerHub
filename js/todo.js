@@ -140,12 +140,20 @@ async function boot(force){
   return false;
  }
 }
-function connectSSE(){
+async function connectSSE(){
  if(S.es)try{S.es.close();}catch(e){}
  try{
-  const es=new EventSource(api()+'/api/todo/events?auth='+encodeURIComponent(token()));
+  // EventSource kann keine Header setzen → erst ein kurzlebiges Einmal-Ticket holen
+  // (statt das Voll-Token in die URL zu legen; das landete sonst in Access-Logs/History).
+  const t=await POST('/api/todo/sse-ticket');
+  const es=new EventSource(api()+'/api/todo/events?ticket='+encodeURIComponent(t.ticket));
   es.onopen=()=>{S.live=true;paintLiveDot();};
-  es.onerror=()=>{S.live=false;paintLiveDot();};
+  es.onerror=()=>{
+   S.live=false;paintLiveDot();
+   // Einmal-Ticket ist verbraucht → der native EventSource-Reconnect (gleiche URL)
+   // würde 401 laufen. Deshalb selbst schließen und mit FRISCHEM Ticket neu verbinden.
+   if(S.es===es){try{es.close();}catch(x){}S.es=null;scheduleReconnect();}
+  };
   es.onmessage=ev=>{
    let e=null;try{e=JSON.parse(ev.data);}catch(x){return;}
    if(!e||e.module!=='todo')return;
@@ -160,7 +168,12 @@ function connectSSE(){
    scheduleRefresh();
   };
   S.es=es;
- }catch(e){/* SSE nicht verfügbar → Polling deckt ab */}
+ }catch(e){/* Ticket-Abruf/SSE nicht verfügbar → Polling deckt ab, später neu versuchen */ scheduleReconnect();}
+}
+// SSE-Reconnect mit frischem Ticket, entprellt (5 s). Polling überbrückt die Lücke.
+function scheduleReconnect(){
+ clearTimeout(S.sseReT);
+ S.sseReT=setTimeout(()=>{if(token()&&isActive())connectSSE();},5000);
 }
 function startPolling(){
  if(S.pollT)clearInterval(S.pollT);

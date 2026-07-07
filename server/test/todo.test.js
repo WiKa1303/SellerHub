@@ -20,6 +20,18 @@ t('Sanitizer: onclick-Attribut fällt weg', !sanitizeHtml('<b onclick="x()">fett
 t('Sanitizer: javascript:-Link wird entschärft', !sanitizeHtml('<a href="javascript:alert(1)">x</a>').includes('javascript:'));
 t('Sanitizer: https-Link bleibt (mit rel=noopener)', sanitizeHtml('<a href="https://amzsellerhub.de">x</a>').includes('href="https://amzsellerhub.de"'));
 t('Sanitizer: erlaubte Formatierung bleibt', sanitizeHtml('<ul><li><strong>a</strong></li></ul>') === '<ul><li><strong>a</strong></li></ul>');
+// ── Regression: XSS-Bypass über UNABGESCHLOSSENE Tags (Stored-XSS in geteilten Listen) ──
+// `<img src=x onerror=…//` ohne schließendes '>' rutschte am alten Regex-Sanitizer vorbei;
+// der Browser setzte es mit dem folgenden DOM (</div>) zu einem echten Tag zusammen → JS-Ausführung.
+{
+  const evil = sanitizeHtml('<img src=x onerror=alert(document.cookie)//');
+  t('Sanitizer: unabgeschlossenes Tag wird als Text escaped (kein onerror)',
+    !/<img/i.test(evil) && !/onerror\s*=/i.test(evil.replace(/&lt;[^&]*/g, '')) && evil.startsWith('&lt;'), evil);
+}
+t('Sanitizer: keine Reassembly zu <script> aus verschachteltem Müll',
+  !/<script/i.test(sanitizeHtml('<<script>script>alert(1)<</script>/script>')));
+t('Sanitizer: nacktes < im Text wird escaped', sanitizeHtml('Preis < 10 & > 5') === 'Preis &lt; 10 & &gt; 5');
+t('Sanitizer: SVG-Vektor entfernt', sanitizeHtml('<svg onload=alert(1)></svg>') === '');
 
 // ── API auf pg-mem booten ──
 const mem = newDb();
@@ -271,6 +283,15 @@ t('Liste löschen (owner) → 200', (await del(`/api/todo/lists/${list.id}`, nul
 r = await get('/api/todo/bootstrap', anna);
 t('Gelöschte Liste weg, Eingang bleibt', (await r.json()).lists.every(l => l.id !== list.id));
 t('Ordner löschen → 200', (await del(`/api/todo/folders/${folder.id}`, null, anna)).status === 200);
+
+// ── SSE-Zugang: Einmal-Ticket statt Voll-Token in der URL ──
+t('SSE-Ticket: ohne Bearer → 401', (await post('/api/todo/sse-ticket')).status === 401);
+r = await post('/api/todo/sse-ticket', undefined, anna);
+t('SSE-Ticket: mit Bearer → 200 + Ticket', r.status === 200 && /^[0-9a-f]{48}$/.test((await r.json()).ticket));
+// Events-Stream selbst hält offen → hier nur die ABLEHNUNG prüfen (schließt sofort):
+t('SSE-Events: altes ?auth=<token> wird nicht mehr akzeptiert → 401',
+  (await get('/api/todo/events?auth=' + encodeURIComponent(anna))).status === 401);
+t('SSE-Events: ungültiges Ticket → 401', (await get('/api/todo/events?ticket=deadbeef')).status === 401);
 
 srv.close();
 console.log(`\n${pass} bestanden, ${fail} fehlgeschlagen`);

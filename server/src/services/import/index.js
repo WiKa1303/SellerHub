@@ -9,7 +9,7 @@
 import { config } from '../../core/config.js';
 import { log } from '../../core/logger.js';
 import { decodeEntities, stripTags } from '../../core/html-text.js';
-import { getCached, saveCache, getUsage, incrementUsage, todayKey } from '../../data/db.js';
+import { getCached, saveCache, incrementUsage, todayKey } from '../../data/db.js';
 
 // Seiten-Fetch und Bild-Proxy sind interaktiv, aber Amazon/CDN können träge sein: 20 s.
 export const IMPORT_TIMEOUT_MS = 20_000;
@@ -206,17 +206,17 @@ export async function importProduct({ urlOrAsin, marketplace = 'de', userId }) {
   const hit = await getCached(asin, marketplace, new Date(Date.now() - CACHE_TTL_MS));
   if (hit && hit.data && hit.data.offerCount !== undefined) return { status: 200, ...hit.data, cached: true };
 
-  // Tageslimit (nur Frisch-Importe) — geprüft VOR dem Fetch
+  // Tageslimit (nur Frisch-Importe) — ATOMAR gegen Parallel-Requests: erst +1, dann prüfen.
+  // Der Increment ist atomar (ON CONFLICT +1); jeder nebenläufige Request sieht mindestens
+  // seinen eigenen Stand → keine Über-Admission (früher: getUsage+increment getrennt = TOCTOU).
+  // Der Zähler wird VOR dem Fetch erhöht (fehlgeschlagener Abruf zählt bewusst mit — sonst
+  // Retry-Sturm bei 502; gleiches Muster wie services/ai-proxy); ein am Limit abgelehnter
+  // Versuch zählt ebenfalls mit (kein Fetch, kein Kostenpfad, Reset täglich).
   const day = todayKey();
-  const usage = await getUsage(userId, day);
-  if (usage.import_calls >= config.importPerDay) {
+  const after = await incrementUsage(userId, day, 'import');
+  if (after.import_calls > config.importPerDay) {
     return { status: 429, error: `Tageslimit von ${config.importPerDay} Frisch-Importen erreicht — morgen wieder (Cache-Treffer zählen nicht)` };
   }
-
-  // Der Zähler wird VOR dem Fetch erhöht, nicht erst bei Erfolg: ein fehlgeschlagener
-  // Abruf zählt bewusst trotzdem — sonst könnte ein Client bei 502 unbegrenzt „gratis"
-  // retryen (Retry-Sturm = Last ohne Bremse; gleiches Muster wie services/ai-proxy).
-  await incrementUsage(userId, day, 'import');
 
   const startedAt = Date.now();
   const page = await fetchAmazonPage(asin);

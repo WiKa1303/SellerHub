@@ -7,7 +7,7 @@
 // Kein AI-Modul → NICHT in der Intelligence-Registry; Sichtbarkeit über /internal.
 import { config } from '../../core/config.js';
 import { log } from '../../core/logger.js';
-import { incrementUsage, getUsage, todayKey } from '../../data/db.js';
+import { incrementUsage, todayKey } from '../../data/db.js';
 
 // Upstream-Timeouts: Text ist interaktiv (30 s reicht), Bild-Generierung braucht länger (90 s).
 export const TEXT_TIMEOUT_MS = 30_000;
@@ -74,6 +74,27 @@ async function callGemini(model, body, timeoutMs) {
   return { data };
 }
 
+// generationConfig-Whitelist (Kostenbremse): nur harmlose Tuning-Felder durchreichen.
+// candidateCount wird IMMER auf 1 fixiert und maxOutputTokens gedeckelt — sonst könnte
+// ein Client mit candidateCount:8 das 8-fache erzeugen, das aber nur als 1 Call zählt.
+const GEN_CFG_NUM = { temperature: [0, 2], topP: [0, 1], topK: [1, 100], seed: [0, 2 ** 31 - 1], maxOutputTokens: [1, 8192] };
+export function safeGenerationConfig(input) {
+  const out = {};
+  if (input && typeof input === 'object' && !Array.isArray(input)) {
+    for (const [k, [min, max]] of Object.entries(GEN_CFG_NUM)) {
+      const v = input[k];
+      if (typeof v === 'number' && Number.isFinite(v)) out[k] = Math.min(max, Math.max(min, v));
+    }
+    // imageConfig: nur aspectRatio (Seitenverhältnis „B:H", z. B. 1:1 fürs Hauptbild) —
+    // kein Kosten-Multiplikator, deshalb durchgelassen; alles andere verworfen.
+    const ar = input.imageConfig && typeof input.imageConfig === 'object' && input.imageConfig.aspectRatio;
+    if (typeof ar === 'string' && /^\d{1,2}:\d{1,2}$/.test(ar)) out.imageConfig = { aspectRatio: ar };
+  }
+  out.candidateCount = 1;              // hart fixiert — kein Kosten-Multiplikator
+  out.responseModalities = ['IMAGE'];  // serverseitig erzwungen
+  return out;
+}
+
 /**
  * parts-Validierung: Array, jedes Element GENAU {text} oder {inlineData:{mimeType,data}}
  * (das Format ist der Gemini-Vertrag des Bildstudios — 1:1 durchgereicht, aber geprüft).
@@ -101,22 +122,26 @@ export function validateParts(parts) {
 }
 
 /**
- * Kontingent-Prüfung + Increment (gemeinsam für Text/Bild).
- * Der Zähler wird VOR dem Upstream-Call erhöht, nicht erst bei Erfolg: ein
- * fehlgeschlagener Upstream zählt bewusst trotzdem — sonst könnte ein Client
- * bei 502 unbegrenzt „gratis" retryen (Retry-Sturm = Kosten ohne Bremse).
+ * Kontingent-Prüfung + Increment (gemeinsam für Text/Bild) — ATOMAR gegen Parallel-Requests.
+ * Reihenfolge bewusst „erst +1, dann prüfen": Der Increment ist atomar (ON CONFLICT +1),
+ * jeder nebenläufige Request sieht mindestens SEINEN eigenen Zählerstand → eine
+ * Über-Admission (zwei Requests lesen denselben Stand < Limit vor dem Zählen) ist
+ * ausgeschlossen. Früher lasen getUsage() und incrementUsage() getrennt (TOCTOU):
+ * N Parallel-Requests kamen alle unter demselben Stand durch.
+ * Der Zähler wird VOR dem Upstream-Call erhöht (fehlgeschlagener Upstream zählt bewusst
+ * mit — sonst Retry-Sturm bei 502); ein am Limit abgelehnter Versuch zählt ebenfalls mit
+ * (kein Kostenpfad, Reset täglich).
  * @returns {{limited:{status:429,error,remaining:0}}} oder {{remaining:number}}
  */
 async function checkAndCount(userId, art, limit) {
   const day = todayKey();
-  const usage = await getUsage(userId, day);
-  const used = art === 'image' ? usage.image_calls : usage.text_calls;
-  if (used >= limit) {
+  const after = await incrementUsage(userId, day, art);
+  const used = art === 'image' ? after.image_calls : after.text_calls;
+  if (used > limit) {
     const was = art === 'image' ? 'Bild' : 'Text';
     return { limited: { status: 429, error: `Tageslimit von ${limit} ${was}-Anfragen erreicht — morgen wieder`, remaining: 0 } };
   }
-  const after = await incrementUsage(userId, day, art);
-  return { remaining: Math.max(0, limit - (art === 'image' ? after.image_calls : after.text_calls)) };
+  return { remaining: Math.max(0, limit - used) };
 }
 
 /**
@@ -172,7 +197,7 @@ export async function proxyImage({ parts, generationConfig, userId }) {
   const startedAt = Date.now();
   const body = {
     contents: [{ parts }],
-    generationConfig: { ...(generationConfig || {}), responseModalities: ['IMAGE'] },
+    generationConfig: safeGenerationConfig(generationConfig),
   };
   const r = await callGemini('gemini-2.5-flash-image', body, IMAGE_TIMEOUT_MS);
   if (r.error) {

@@ -198,7 +198,9 @@ r = await post('/api/import/amazon', { urlOrAsin: 'B0DDDDDD04' }, token);
 const lim = await r.json();
 t('6. Frisch-Import → 429 mit Limit + „morgen wieder"', r.status === 429 && lim.error.includes('5') && lim.error.includes('morgen wieder'), lim.error);
 t('429 wird VOR dem Upstream geprüft (kein Upstream-Call)', upstreamCalls.length === beforeLimit);
-t('429 erhöht den Zähler nicht (import_calls bleibt 5)', (await getUsage(userId, todayKey())).import_calls === 5);
+// Kontrakt seit TOCTOU-Fix (increment-first): der am Limit abgelehnte Frisch-Import zählt MIT
+// (6 statt 5). Race-sicher gegen Parallel-Requests; kein Upstream-Fetch, kein Kostenpfad.
+t('429: abgelehnter Frisch-Import zählt mit → import_calls = 6', (await getUsage(userId, todayKey())).import_calls === 6);
 r = await post('/api/import/amazon', { urlOrAsin: 'B0AAAAAA01' }, token);
 t('Cache-Treffer funktionieren trotz erreichtem Limit weiter', r.status === 200 && (await r.json()).cached === true);
 t('Text-/Bild-Kontingente (Modul 2) bleiben unberührt', (await getUsage(userId, todayKey())).text_calls === 0);
@@ -234,7 +236,7 @@ const bytes = new Uint8Array(await r.arrayBuffer());
 t('Bild-Proxy: 200 + Bytes durchgereicht', r.status === 200 && bytes.length === 4 && bytes[0] === 0xff, bytes.length);
 t('Bild-Proxy: Content-Type durchgereicht', (r.headers.get('content-type') || '').startsWith('image/jpeg'));
 t('Bild-Proxy: Cache-Control private, max-age=3600', r.headers.get('cache-control') === 'private, max-age=3600');
-t('Bild-Proxy zählt NICHT gegen das Import-Limit', (await getUsage(userId, todayKey())).import_calls === 5);
+t('Bild-Proxy zählt NICHT gegen das Import-Limit', (await getUsage(userId, todayKey())).import_calls === 6);
 
 // ── Bild-Proxy: 8-MB-Grenze (Content-Length + Lese-Grenze, direkt am Service) ──
 upstreamNext = { status: 200, contentType: 'image/jpeg', contentLength: String(9 * 1024 * 1024), bytes: new Uint8Array(4) };

@@ -41,10 +41,21 @@ const MAX_TITLE = 500, MAX_DESC = 100_000, MAX_COMMENT = 10_000;
 // ── HTML-Sanitizer für Rich-Text-Beschreibungen (Whitelist) ──
 const ALLOWED_TAGS = new Set(['p', 'br', 'div', 'b', 'strong', 'i', 'em', 'u', 's', 'strike',
   'ul', 'ol', 'li', 'a', 'h1', 'h2', 'h3', 'blockquote', 'code', 'pre', 'span', 'hr']);
+// Ein Match ist ENTWEDER ein vollständiges Tag (Name + Attribute + schließendes '>',
+// Attributwerte dürfen '<'/'>' in Anführungszeichen enthalten) ODER ein einzelnes '<'/'>'.
+// So bleibt kein „nacktes" '<' stehen: ein unabgeschlossenes `<img src=x onerror=…//`
+// (das der Browser sonst mit dem folgenden DOM zu einem echten Tag zusammensetzt) wird
+// zu &lt;… escaped statt durchgereicht — schließt den Regex-Sanitizer-Bypass.
+const TAG_OR_STRAY = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:[^<>"']|"[^"]*"|'[^']*')*>|[<>]/g;
 export function sanitizeHtml(html) {
   if (!html) return '';
-  return String(html).slice(0, MAX_DESC).replace(/<\/?([a-zA-Z0-9]+)([^>]*)>/g, (m, tag, attrs) => {
-    const t = tag.toLowerCase();
+  return String(html).slice(0, MAX_DESC).replace(TAG_OR_STRAY, (m) => {
+    // Streu-Klammern ohne gültiges Tag-Ende → als Text neutralisieren.
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    const tagM = /^<\/?([a-zA-Z][a-zA-Z0-9]*)([\s\S]*)>$/.exec(m);
+    const t = tagM[1].toLowerCase();
+    const attrs = tagM[2];
     if (!ALLOWED_TAGS.has(t)) return '';
     const close = m.startsWith('</');
     if (close) return `</${t}>`;

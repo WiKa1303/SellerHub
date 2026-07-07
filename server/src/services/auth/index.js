@@ -57,6 +57,34 @@ function noteLoginFail(email) {
 /** Nur für Tests: Limiter-Zustand zurücksetzen. */
 export function _resetLoginLimiter() { loginFails.clear(); }
 
+// ── SSE-Einmal-Tickets ──
+// EventSource kann keine Header setzen. Statt das 30-Tage-Bearer-Token in die URL zu
+// legen (?auth=… → landet in Railway-/Proxy-Access-Logs und der Browser-History), tauscht
+// der Client sein Token per POST gegen ein kurzlebiges Einmal-Ticket, das NUR für den
+// SSE-Connect gilt. In-memory (1 Prozess) wie der Login-Limiter — fail-soft, kein Redis.
+const SSE_TICKET_TTL_MS = 60 * 1000;
+const sseTickets = new Map(); // ticket → { userId, expiresAt }
+export function issueSseTicket(userId) {
+  // Gelegentlicher Sweep abgelaufener, nie eingelöster Tickets (verhindert Leak).
+  if (sseTickets.size > 1000) {
+    const now = Date.now();
+    for (const [k, v] of sseTickets) if (now > v.expiresAt) sseTickets.delete(k);
+  }
+  const ticket = crypto.randomBytes(24).toString('hex');
+  sseTickets.set(ticket, { userId, expiresAt: Date.now() + SSE_TICKET_TTL_MS });
+  return ticket;
+}
+/** Ticket → userId (oder null). Einmal-Nutzung: wird beim Einlösen sofort verbraucht. */
+export function consumeSseTicket(ticket) {
+  const e = sseTickets.get(String(ticket || ''));
+  if (!e) return null;
+  sseTickets.delete(String(ticket));
+  if (Date.now() > e.expiresAt) return null;
+  return e.userId;
+}
+/** Nur für Tests: Ticket-Store leeren. */
+export function _resetSseTickets() { sseTickets.clear(); }
+
 // ── Hilfen ──
 
 const normEmail = (e) => String(e || '').trim().toLowerCase();

@@ -4,7 +4,7 @@ import { newDb } from 'pg-mem';
 import { initDb, db, createSession, findValidSession, deleteExpiredSessions } from '../src/data/db.js';
 import { buildApi } from '../src/api/routes.js';
 import { config } from '../src/core/config.js';
-import { hashPassword, verifyPassword, sha256, _resetLoginLimiter } from '../src/services/auth/index.js';
+import { hashPassword, verifyPassword, sha256, _resetLoginLimiter, issueSseTicket, consumeSseTicket, _resetSseTickets } from '../src/services/auth/index.js';
 
 let pass = 0, fail = 0;
 function t(name, cond, extra) {
@@ -20,6 +20,15 @@ t('scrypt: falsches Passwort abgelehnt', await verifyPassword('falsch', stored) 
 t('scrypt: kaputter Hash abgelehnt (kein Crash)', await verifyPassword('x', 'kein-dollar') === false);
 t('scrypt: zwei Hashes desselben Passworts unterscheiden sich (Salt)',
   await hashPassword('geheim-passwort') !== stored);
+
+// ── SSE-Einmal-Tickets (Ersatz fürs Voll-Token in der Events-URL) ──
+_resetSseTickets();
+const tk = issueSseTicket('user-123');
+t('SSE-Ticket: 48 Hex-Zeichen', /^[0-9a-f]{48}$/.test(tk));
+t('SSE-Ticket: löst zum richtigen User auf', consumeSseTicket(tk) === 'user-123');
+t('SSE-Ticket: Einmal-Nutzung — zweites Einlösen scheitert', consumeSseTicket(tk) === null);
+t('SSE-Ticket: unbekanntes/leeres Ticket → null', consumeSseTicket('gibtsnicht') === null && consumeSseTicket('') === null && consumeSseTicket(undefined) === null);
+t('SSE-Ticket: zwei Tickets sind verschieden', issueSseTicket('u') !== issueSseTicket('u'));
 
 // ── API auf pg-mem booten ──
 const mem = newDb();
