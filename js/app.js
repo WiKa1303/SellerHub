@@ -1152,7 +1152,7 @@ function quickCheckRenderResult(){ // Schritt 3: Urteil + Begründung + Zahlen e
     '<div style="font-size:12px;color:var(--tx2);margin-top:4px">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'<span style="color:var(--'+cf.color+')" title="Wie viele der 6 Dimensionen auf echten Daten beruhen">⚙️ '+cf.data+' / '+cf.total+' Dimensionen mit Daten</span> · 🧾 '+comp.total+' DE-Pflichten erkannt</div>'+
     (vd.weakest&&vd.score>0?'<div style="font-size:12px;color:var(--tx2);margin-top:4px">Größter Schwachpunkt: <b>'+esc(vd.weakest.label)+'</b> ('+vd.weakest.val+' / 10)</div>':'')+
   '</div>';
-  h+='<div style="text-align:center;flex-shrink:0"><div style="font-size:44px;font-weight:800;color:var(--'+vd.color+');line-height:1;font-family:\'Playfair Display\',serif">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px">Score / 100</div></div>';
+  h+='<div style="text-align:center;flex-shrink:0"><div style="font-size:44px;font-weight:800;color:var(--'+vd.color+');line-height:1;font-family:\'Bricolage Grotesque\',sans-serif">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px">Score / 100</div></div>';
   h+='<div style="background:var(--'+vd.color+');color:#fff;font-weight:800;font-size:17px;padding:10px 20px;border-radius:12px;flex-shrink:0">'+emoji+' '+vd.label+'</div>';
   h+='</div></div>';
   // WARUM — Klartext je Dimension + Warnsignale
@@ -1186,7 +1186,7 @@ function renderQuickCheck(){
   h+='<div style="max-width:860px;margin:0 auto">';
   // Eingabe-Karte (Schritt 1)
   h+='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:16px;padding:26px 28px;margin-bottom:16px;text-align:center">'+
-    '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px">Lohnt sich dieses Produkt?</div>'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px">Lohnt sich dieses Produkt?</div>'+
     '<div style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Link/ASIN einfügen → die entscheidenden Werte kommen automatisch von Amazon: <b>Verkäufe/Monat</b> (aus dem BSR), <b>Bewertungen</b>, <b>Verkäufer-Anzahl</b> &amp; Preis → sofortiges Urteil mit Begründung.</div>'+
     '<div style="display:flex;gap:8px;max-width:560px;margin:0 auto">'+
       '<input id="qcInput" placeholder="https://www.amazon.de/dp/… oder B0XXXXXXXX" onkeydown="if(event.key===\'Enter\')quickCheckRun()" '+(qcState.step==='loading'?'disabled':'')+' style="flex:1;background:var(--s1);border:1.5px solid var(--bd2);border-radius:11px;padding:13px 16px;font-family:inherit;font-size:14px;color:var(--tx);outline:none" onfocus="this.style.borderColor=\'var(--ac)\'" onblur="this.style.borderColor=\'var(--bd2)\'">'+
@@ -2715,7 +2715,7 @@ function researchRenderWorkflow(){
     '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
       '<button class="btn btn-sm" onclick="researchSelectedCandidate=null;researchRenderWorkflow()" style="font-size:11px">← Andere Kandidaten</button>'+
       (himg?'<img src="'+esc(himg)+'" class="pzoom" style="width:46px;height:46px;object-fit:cover;border-radius:10px;border:1px solid var(--bd);background:#fff">':'')+
-      '<div style="flex:1;min-width:200px"><div style="font-family:\'Playfair Display\',serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'Score '+(vd.score>0?vd.score:'—')+' · '+vd.label+'</div></div>'+
+      '<div style="flex:1;min-width:200px"><div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'Score '+(vd.score>0?vd.score:'—')+' · '+vd.label+'</div></div>'+
       '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-size:11px">⚖️ Scorecard</button>'+
     '</div>'+
     '<div style="margin-top:14px"><div style="height:9px;background:var(--s3);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pp.pct+'%;background:linear-gradient(90deg,var(--pu),var(--gn));transition:width .3s"></div></div>'+
@@ -2835,7 +2835,7 @@ function researchRenderScore(){
     html+='<div style="background:linear-gradient(135deg,var(--'+col+'d),var(--s2));border:1.5px solid var(--'+col+');border-radius:12px;padding:18px 22px;margin-bottom:18px">';
     // Kopf: Name + großer Score + Urteil
     html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">'+
-      '<div style="min-width:0"><div style="font-family:\'Playfair Display\',serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(selected.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+vd.rated+'/'+vd.total+' Dimensionen bewertet</div></div>'+
+      '<div style="min-width:0"><div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(selected.name)+'</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">'+vd.rated+'/'+vd.total+' Dimensionen bewertet</div></div>'+
       '<div style="display:flex;align-items:center;gap:16px">'+
         '<div style="text-align:center"><div style="font-size:40px;font-weight:800;color:var(--'+col+');line-height:1">'+(vd.score>0?vd.score:'—')+'</div><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px">Score /100</div></div>'+
         '<div style="background:var(--'+col+');color:#fff;font-weight:800;font-size:15px;padding:8px 16px;border-radius:10px;white-space:nowrap">'+emoji+' '+vd.label+'</div>'+
@@ -3221,7 +3221,7 @@ function dossierHtml(c){
     '<div style="font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase">⚖️ Entscheidungs-Dossier</div>'+
     '<div style="font-size:11px;color:'+K.mut+'">AMZ SellerHub · '+now.toLocaleDateString('de-DE')+'</div>'+
   '</div>';
-  h+='<div style="font-family:\'Playfair Display\',serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:4px">'+esc(c.name)+'</div>';
+  h+='<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:4px">'+esc(c.name)+'</div>';
   var meta=[];
   if(c.kategorie)meta.push(esc(c.kategorie));
   if(c.hauptkeyword&&c.hauptkeyword!==c.name)meta.push('Keyword: '+esc(c.hauptkeyword));
@@ -8309,7 +8309,7 @@ function coachCelebratePhase(phaseIdx){
   var nextColor=next?'var(--'+next.color+')':'var(--gn)';
   ov.innerHTML='<div style="background:linear-gradient(135deg,var(--s1),var(--s2));border:2px solid var(--gn);border-radius:18px;padding:32px 36px;max-width:440px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)" onclick="event.stopPropagation()">'+
     '<div style="font-size:54px;margin-bottom:8px">'+(next?next.icon:'🏆')+'</div>'+
-    '<div style="font-size:20px;font-weight:800;color:var(--tx);font-family:\'Playfair Display\',serif;margin-bottom:10px;line-height:1.3">'+esc(msg)+'</div>'+
+    '<div style="font-size:20px;font-weight:800;color:var(--tx);font-family:\'Bricolage Grotesque\',sans-serif;margin-bottom:10px;line-height:1.3">'+esc(msg)+'</div>'+
     '<div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:22px">'+esc(sub)+'</div>'+
     (next?'<button onclick="this.closest(\'div[style*=fixed]\').remove();coachOpenCategory(\''+next.id+'\')" style="background:'+nextColor+';color:#fff;border:none;border-radius:10px;padding:12px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-right:8px">▶️ Weiter zu Phase '+next.phase+'</button>':'')+
     '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:var(--s3);color:var(--tx);border:none;border-radius:10px;padding:12px 22px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Schließen</button>'+
@@ -8502,7 +8502,7 @@ function coachRenderDashboard(){
         '<div style="display:flex;align-items:flex-start;gap:13px;position:relative">'+
           '<div style="width:50px;height:50px;border-radius:13px;background:'+col+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">'+m.icon+'</div>'+
           '<div style="flex:1;min-width:0">'+
-            '<div style="font-size:17px;font-weight:800;color:var(--tx);font-family:\'Playfair Display\',serif;line-height:1.2;margin-bottom:3px">'+esc(m.title)+'</div>'+
+            '<div style="font-size:17px;font-weight:800;color:var(--tx);font-family:\'Bricolage Grotesque\',sans-serif;line-height:1.2;margin-bottom:3px">'+esc(m.title)+'</div>'+
             '<div style="font-size:12px;color:var(--tx2);line-height:1.45">'+esc(m.desc||'')+'</div>'+
           '</div>'+
         '</div>'+
@@ -8532,7 +8532,7 @@ function coachStatCard(icon,label,val,sub,color){
       '<span style="font-size:18px">'+icon+'</span>'+
       '<span style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;font-weight:700">'+esc(label)+'</span>'+
     '</div>'+
-    '<div style="font-size:24px;font-weight:800;color:var(--tx);font-family:\'Playfair Display\',serif;line-height:1">'+esc(String(val))+'</div>'+
+    '<div style="font-size:24px;font-weight:800;color:var(--tx);font-family:\'Bricolage Grotesque\',sans-serif;line-height:1">'+esc(String(val))+'</div>'+
     '<div style="font-size:11px;color:var(--tx3);margin-top:3px">'+esc(sub)+'</div>'+
   '</div>';
 }
@@ -8668,7 +8668,7 @@ function coachRenderCategory(){
       '<div style="font-size:72px;position:relative;z-index:1">'+cat.icon+'</div>'+
       '<div style="position:relative;z-index:1">'+
         '<div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:6px">Lernbereich</div>'+
-        '<div style="font-size:32px;font-weight:800;font-family:\'Playfair Display\',serif;margin-bottom:8px">'+esc(cat.title)+'</div>'+
+        '<div style="font-size:32px;font-weight:800;font-family:\'Bricolage Grotesque\',sans-serif;margin-bottom:8px">'+esc(cat.title)+'</div>'+
         '<div style="font-size:15px;color:rgba(255,255,255,.8);margin-bottom:16px;max-width:560px;line-height:1.5">'+esc(cat.desc)+'</div>'+
         '<div style="display:flex;gap:24px;font-size:14px;color:rgba(255,255,255,.85)">'+
           '<div><b style="color:'+color+';font-size:18px">'+modules.length+'</b> Module</div>'+
@@ -8678,7 +8678,7 @@ function coachRenderCategory(){
         '</div>'+
       '</div>'+
       '<div style="position:relative;z-index:1;text-align:center">'+
-        '<div style="font-size:48px;font-weight:800;color:'+color+';font-family:\'Playfair Display\',serif;line-height:1">'+catPct+'%</div>'+
+        '<div style="font-size:48px;font-weight:800;color:'+color+';font-family:\'Bricolage Grotesque\',sans-serif;line-height:1">'+catPct+'%</div>'+
         '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-top:6px">Fortschritt</div>'+
         '<div style="margin-top:12px;width:140px;height:7px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden"><div style="height:100%;background:'+color+';width:'+catPct+'%;transition:width .5s"></div></div>'+
       '</div>'+
@@ -8755,7 +8755,7 @@ function coachRenderSingleModule(){
       '<div style="font-size:64px;position:relative;z-index:1">'+mod.icon+'</div>'+
       '<div style="position:relative;z-index:1">'+
         '<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:4px">Modul</div>'+
-        '<div style="font-size:26px;font-weight:800;font-family:\'Playfair Display\',serif;margin-bottom:6px">'+esc(mod.title)+'</div>'+
+        '<div style="font-size:26px;font-weight:800;font-family:\'Bricolage Grotesque\',sans-serif;margin-bottom:6px">'+esc(mod.title)+'</div>'+
         '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-bottom:14px;max-width:520px">'+esc(mod.desc||'')+'</div>'+
         '<div style="display:flex;gap:18px;font-size:12px;color:rgba(255,255,255,.85)">'+
           '<div><b style="color:'+color+'">'+modTotal+'</b> Lektionen</div>'+
@@ -8764,7 +8764,7 @@ function coachRenderSingleModule(){
         '</div>'+
       '</div>'+
       '<div style="position:relative;z-index:1;text-align:center">'+
-        '<div style="font-size:42px;font-weight:800;color:'+color+';font-family:\'Playfair Display\',serif;line-height:1">'+modPct+'%</div>'+
+        '<div style="font-size:42px;font-weight:800;color:'+color+';font-family:\'Bricolage Grotesque\',sans-serif;line-height:1">'+modPct+'%</div>'+
         '<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-top:4px">Fortschritt</div>'+
         '<div style="margin-top:10px;width:120px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden"><div style="height:100%;background:'+color+';width:'+modPct+'%;transition:width .5s"></div></div>'+
       '</div>'+
@@ -9123,13 +9123,13 @@ function renderLessonView(){
   }
 
   lesson.content.forEach(function(block){
-    if(block.h)contentHtml+='<h3 style="margin-top:34px;margin-bottom:14px;font-size:22px;color:'+color+';font-family:\'Playfair Display\',serif;padding-bottom:10px;border-bottom:2px solid '+color+'33;font-weight:700">'+esc(block.h)+'</h3>';
+    if(block.h)contentHtml+='<h3 style="margin-top:34px;margin-bottom:14px;font-size:22px;color:'+color+';font-family:\'Bricolage Grotesque\',sans-serif;padding-bottom:10px;border-bottom:2px solid '+color+'33;font-weight:700">'+esc(block.h)+'</h3>';
     if(block.h2)contentHtml+='<h4 style="margin-top:22px;margin-bottom:10px;font-size:17px;color:var(--tx);font-weight:700">'+esc(block.h2)+'</h4>';
     if(block.p)contentHtml+='<p style="line-height:1.8;color:var(--tx);margin-bottom:16px;font-size:16px;font-weight:400">'+block.p+'</p>';
     if(block.intro)contentHtml+='<div style="line-height:1.75;color:var(--tx);margin:0 0 24px 0;font-size:17px;font-style:italic;padding:18px 22px;background:var(--s2);border-radius:10px;border-left:4px solid '+color+'">'+block.intro+'</div>';
     if(block.section){
       // Clean visual separator with title
-      contentHtml+='<div style="margin:38px 0 16px 0;padding-top:20px;border-top:2px solid var(--bd);display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="background:'+color+';color:#fff;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px">'+esc(block.section.label||'Abschnitt')+'</span><span style="font-size:20px;font-weight:700;color:var(--tx);font-family:\'Playfair Display\',serif">'+esc(block.section.title||'')+'</span></div>';
+      contentHtml+='<div style="margin:38px 0 16px 0;padding-top:20px;border-top:2px solid var(--bd);display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="background:'+color+';color:#fff;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px">'+esc(block.section.label||'Abschnitt')+'</span><span style="font-size:20px;font-weight:700;color:var(--tx);font-family:\'Bricolage Grotesque\',sans-serif">'+esc(block.section.title||'')+'</span></div>';
       if(block.section.lead)contentHtml+='<p style="line-height:1.7;color:var(--tx2);margin-bottom:18px;font-size:15px;font-style:italic">'+block.section.lead+'</p>';
     }
     if(block.divider)contentHtml+='<hr style="margin:24px 0;border:none;border-top:1px dashed var(--bd2)">';
@@ -9194,7 +9194,7 @@ function renderLessonView(){
         inner='<div class="visual-grid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:24px;align-items:center">'+gfx+txt+'</div>';
       }
       contentHtml+='<div style="margin:22px 0;background:linear-gradient(135deg,var(--s2),var(--s1));border:1px solid var(--bd2);border-radius:14px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,.12)">'+
-        (v.title?'<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px;font-family:\'Playfair Display\',serif">'+esc(v.title)+'</div>':'')+
+        (v.title?'<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px;font-family:\'Bricolage Grotesque\',sans-serif">'+esc(v.title)+'</div>':'')+
         inner+
         (v.caption?'<div style="font-size:12px;color:var(--tx3);margin-top:14px;text-align:center;font-style:italic;border-top:1px solid var(--bd);padding-top:12px">'+esc(v.caption)+'</div>':'')+
         '</div>';
@@ -9218,7 +9218,7 @@ function renderLessonView(){
       contentHtml+='<div style="background:linear-gradient(135deg,'+color+'22,var(--s2));border:2px solid '+color+';border-radius:12px;padding:18px 22px;margin:24px 0">'+
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">'+
           '<span style="background:'+color+';color:#fff;padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Schritt '+esc(String(ws.number||'?'))+(ws.of?' / '+esc(String(ws.of)):'')+'</span>'+
-          '<span style="font-size:18px;font-weight:700;color:var(--tx);font-family:\'Playfair Display\',serif">'+esc(ws.title||'')+'</span>'+
+          '<span style="font-size:18px;font-weight:700;color:var(--tx);font-family:\'Bricolage Grotesque\',sans-serif">'+esc(ws.title||'')+'</span>'+
         '</div>'+
         (ws.goal?'<div style="margin:8px 0"><span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx2);font-weight:700">🎯 Ziel</span><div style="font-size:14px;color:var(--tx);line-height:1.6;margin-top:3px">'+ws.goal+'</div></div>':'')+
         (ws.tool?'<div style="margin:8px 0"><span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx2);font-weight:700">🛠 Tool</span><div style="font-size:14px;color:var(--tx);font-weight:600;margin-top:3px">'+ws.tool+'</div></div>':'')+
@@ -9292,7 +9292,7 @@ function renderLessonView(){
         '<span style="font-size:38px">'+mod.icon+'</span>'+
         '<div style="flex:1">'+
           '<div style="font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600">'+esc(mod.title)+' · Lektion '+(lessonIdx+1)+' von '+mod.lessons.length+'</div>'+
-          '<h2 style="font-size:30px;font-family:\'Playfair Display\',serif;color:var(--tx);margin:4px 0;font-weight:700;line-height:1.2">'+esc(lesson.title)+'</h2>'+
+          '<h2 style="font-size:30px;font-family:\'Bricolage Grotesque\',sans-serif;color:var(--tx);margin:4px 0;font-weight:700;line-height:1.2">'+esc(lesson.title)+'</h2>'+
           '<div style="font-size:13px;color:var(--tx3);margin-top:2px">⏱ '+esc(lesson.readTime)+' Lesezeit</div>'+
         '</div>'+
         '<button onclick="coachToggleBookmark(\''+lesson.id+'\')" title="'+(bookmarked?'Lesezeichen entfernen':'Als Lesezeichen speichern')+'" style="background:'+(bookmarked?'var(--acd)':'var(--s2)')+';border:1px solid '+(bookmarked?'var(--ac)':'var(--bd)')+';border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;color:'+(bookmarked?'var(--ac)':'var(--tx2)')+';font-size:15px;display:flex;align-items:center;gap:6px">'+
@@ -13004,7 +13004,7 @@ function renderResearchRoadmap(){
 
   var html='<div style="background:linear-gradient(135deg,var(--acd),var(--s1));border:1.5px solid var(--ac);border-radius:14px;padding:20px 22px">';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:2px">'+
-    '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:var(--tx)">🎯 So funktioniert Produktrecherche</div>'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:20px;font-weight:700;color:var(--tx)">🎯 So funktioniert Produktrecherche</div>'+
     '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--tx2);font-weight:700">'+(allDone?'Alle 5 Stufen aktiv 🎉':doneN+' / '+steps.length+' Stufen begonnen')+'</span>'+
     '<button class="btn btn-sm" onclick="roadmapToggle(true)" style="font-size:10.5px" title="Zur schlanken Leiste einklappen">Einklappen ▴</button></div>'+
   '</div>';
@@ -13282,7 +13282,7 @@ function renderNewsPage(force,fromCache){
     var h='';
     // ── Kopfband: Kennzahlen + Filter (Premium-Anmutung) ──
     h+='<div style="background:linear-gradient(135deg,#182238,#0f1729);border-radius:16px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:220px"><div style="font-family:\'Playfair Display\',serif;font-size:19px;font-weight:700;color:#fff">Marktüberblick <span style="font-size:12px;color:#fbb040;font-weight:600;letter-spacing:.5px">AMAZON &amp; E-COMMERCE · DACH</span></div>'+
+      '<div style="flex:1;min-width:220px"><div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:19px;font-weight:700;color:#fff">Marktüberblick <span style="font-size:12px;color:#fbb040;font-weight:600;letter-spacing:.5px">AMAZON &amp; E-COMMERCE · DACH</span></div>'+
       '<div style="font-size:12px;color:#aeb8d0;margin-top:3px">Aktuelle Branchen-Nachrichten und FBA-Termine — täglich aktualisiert, chronologisch sortiert.</div></div>'+
       '<div style="display:flex;gap:18px;flex-wrap:wrap">'+
         '<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#fff">'+unread+'</div><div style="font-size:10px;color:#aeb8d0;text-transform:uppercase;letter-spacing:.8px">Ungelesen</div></div>'+
@@ -13401,7 +13401,7 @@ function renderWhatsNew(){
   var items=WHATSNEW.filter(function(w){return !w.adminOnly||isAdmin;});
   var h='<div style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:14px;padding:18px 20px;margin-bottom:18px">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<div style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 06.07.2026</span></div>'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 06.07.2026</span></div>'+
     '<button class="btn btn-sm" onclick="whatsNewDismiss()" style="font-size:11px">✕ Ausblenden</button></div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">';
   items.forEach(function(w){

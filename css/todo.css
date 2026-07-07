@@ -31,7 +31,7 @@
 .td-toolbar{--sc:#d97706;display:flex;align-items:center;gap:12px;padding:18px 22px;background:linear-gradient(115deg,var(--sc),color-mix(in srgb,var(--sc) 82%,#000));color:#fff}
 .td-htitle{display:flex;align-items:center;gap:13px;min-width:0}
 .td-htxt{display:flex;flex-direction:column;line-height:1.25;min-width:0}
-.td-hname{font-size:22px;font-weight:800;color:#fff;font-family:'Playfair Display',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.12)}
+.td-hname{font-size:22px;font-weight:800;color:#fff;font-family:'Bricolage Grotesque',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.12)}
 .td-hsub{font-size:12px;color:rgba(255,255,255,.85);font-weight:600}
 #tdLiveDot{box-shadow:0 0 0 2px rgba(255,255,255,.4)}
 .td-search{width:210px;padding:9px 13px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;font-family:inherit;font-size:13px;background:rgba(255,255,255,.92);color:#1a2233;transition:all .15s}
@@ -111,7 +111,7 @@
 
 /* ── Kalender ── */
 .td-calhead{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
-.td-calhead b{font-size:16px;min-width:170px;text-align:center;font-family:'Playfair Display',serif;color:#1a2233}
+.td-calhead b{font-size:16px;min-width:170px;text-align:center;font-family:'Bricolage Grotesque',sans-serif;color:#1a2233}
 .td-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .td-caldow{text-align:center;font-size:10.5px;font-weight:800;color:#8b93a7;padding:3px}
 .td-calcell{min-height:96px;border:1px solid #e4e7ee;border-radius:11px;padding:6px;background:#fff;overflow:hidden;transition:box-shadow .14s}
@@ -168,7 +168,7 @@
 /* ═══ Modals & Popovers ═══ */
 .td-ovl{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:950;display:flex;align-items:flex-start;justify-content:center;padding:9vh 16px 16px;animation:tdFade .14s ease}
 .td-modal{background:#fff;border:1px solid #dfe3ea;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.32);padding:22px;width:100%;max-width:460px;max-height:82vh;overflow-y:auto;animation:tdRise .16s ease}
-.td-modal h3{margin:0 0 6px;font-size:17px;font-family:'Playfair Display',serif;color:#1a2233}
+.td-modal h3{margin:0 0 6px;font-size:17px;font-family:'Bricolage Grotesque',sans-serif;color:#1a2233}
 .td-mtext{font-size:13px;color:#3d4454;line-height:1.55;margin:8px 0 4px}
 .td-mhint{font-size:11px;color:#8b93a7;line-height:1.5;margin:8px 0 0}
 .td-mlabel{font-size:10.5px;font-weight:800;letter-spacing:.7px;color:#5b6478;text-transform:uppercase;margin:13px 0 6px}

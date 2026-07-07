@@ -18,3 +18,7 @@ sellerhub-data.json
 /node_modules/
 /package.json
 /package-lock.json
+
+# Design-Screenshots & temporäre Hilfsskripte von Claude Code
+.claude/design-shots/
+.claude/tmp-shots.mjs
