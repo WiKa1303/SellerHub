@@ -379,7 +379,9 @@ function renderSidebar(){
   h+='<div class="td-sec">GESPEICHERTE FILTER</div>';
   h+=S.savedFilters.map(f=>'<button class="td-nav'+(S.scope.type==='filter'&&S.scope.id===f.id?' on':'')+'" onclick="td.applySavedFilter(\''+f.id+'\')">💾 '+esc(f.name)+' <span class="td-mini" onclick="event.stopPropagation();td.deleteSavedFilter(\''+f.id+'\')" title="Filter löschen">✕</span></button>').join('');
  }
- h+='<div class="td-sec"></div><button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" style="--ic:#64748b" onclick="td.setScope(\'trash\')">'+icoTile('🗑','#64748b')+'<span class="td-navlbl">Papierkorb</span></button>';
+ h+='<div class="td-sec"></div>';
+ h+='<button class="td-nav" style="--ic:#dc2626" onclick="td.pflichtenDialog()" title="Deutsche Seller-Pflichten (USt, LUCID, WEEE, Langzeitlager …) als wiederkehrende Aufgaben einrichten">'+icoTile('📋','#dc2626')+'<span class="td-navlbl">Pflichten-Kalender…</span></button>';
+ h+='<button class="td-nav'+(S.scope.type==='trash'?' on':'')+'" style="--ic:#64748b" onclick="td.setScope(\'trash\')">'+icoTile('🗑','#64748b')+'<span class="td-navlbl">Papierkorb</span></button>';
  el.innerHTML=h;
 }
 
@@ -640,6 +642,105 @@ function gcalCopy(){
  inp.select();
  try{navigator.clipboard.writeText(inp.value).then(()=>toast('📋 Link kopiert'));}
  catch(e){document.execCommand('copy');toast('📋 Link kopiert');}
+}
+
+// ═══ Pflichten-Kalender: wiederkehrende DE-Seller-Fristen als Aufgaben-Vorlagen ═══
+// Positionierung „deutsches Pflichten-Cockpit": einmal einrichten → Aufgaben mit
+// Fälligkeit + Wiederholung + Erinnerung (3 Tage vorher); via Kalender-Sync auch in Google.
+const PF_LIST_NAME='Pflichten & Fristen';
+const pfYmd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function pfNextMonthly(day){const n=new Date();let d=new Date(n.getFullYear(),n.getMonth(),day);if(d<=n)d=new Date(n.getFullYear(),n.getMonth()+1,day);return pfYmd(d);}
+function pfNextYearly(mm,dd){const n=new Date();let d=new Date(n.getFullYear(),mm-1,dd);if(d<=n)d=new Date(n.getFullYear()+1,mm-1,dd);return pfYmd(d);}
+function pfNextOf(list){ // list=[[monat,tag],…] → nächster künftiger Termin
+ const n=new Date();let best=null;
+ for(const y of [n.getFullYear(),n.getFullYear()+1])for(const[mm,dd]of list){
+  const d=new Date(y,mm-1,dd);if(d>n&&(!best||d<best))best=d;
+ }
+ return pfYmd(best);
+}
+const PFLICHTEN=[
+ {key:'ustva',grp:'Steuern',t:'USt-Voranmeldung ans Finanzamt',def:true,
+  info:'Frist: 10. des Folgemonats (mit Dauerfristverlängerung ein Monat später). Bei Quartalszahlern Wiederholung nach dem Einrichten auf 3 Monate stellen.',
+  rule:{mode:'fixed',every:1,unit:'month'},next:()=>pfNextMonthly(10)},
+ {key:'oss',grp:'Steuern',t:'OSS-Quartalsmeldung (EU-Fernverkäufe)',def:false,
+  info:'Bis Monatsende nach Quartalsende (31.1., 30.4., 31.7., 31.10.) im BZSt-Portal — relevant ab EU-weiter Lieferschwelle 10.000 €.',
+  rule:{mode:'fixed',every:3,unit:'month'},next:()=>pfNextOf([[1,31],[4,30],[7,31],[10,31]])},
+ {key:'zm',grp:'Steuern',t:'Zusammenfassende Meldung (Pan-EU/Verbringungen)',def:false,
+  info:'Monatlich bis zum 25. — nur relevant, wenn Amazon deine Ware in andere EU-Läger verbringt (Pan-EU/CEE).',
+  rule:{mode:'fixed',every:1,unit:'month'},next:()=>pfNextMonthly(25)},
+ {key:'lucid_plan',grp:'Verpackung & Elektro',t:'LUCID: Planmengen fürs neue Jahr melden',def:true,
+  info:'Zum Jahresbeginn im Verpackungsregister LUCID und beim dualen System die Planmengen eintragen.',
+  rule:{mode:'fixed',every:1,unit:'year'},next:()=>pfNextYearly(1,15)},
+ {key:'lucid_ist',grp:'Verpackung & Elektro',t:'VerpackG: Jahresabschluss-Mengenmeldung',def:true,
+  info:'Ist-Mengen des Vorjahres in LUCID + dualem System melden; Vollständigkeitserklärung (falls über den Schwellen) bis 15.5.',
+  rule:{mode:'fixed',every:1,unit:'year'},next:()=>pfNextYearly(5,15)},
+ {key:'weee',grp:'Verpackung & Elektro',t:'WEEE: Mengenmitteilung an stiftung ear',def:false,
+  info:'Nur bei Elektrogeräten — Rhythmus laut Registrierungsbescheid (häufig monatlich).',
+  rule:{mode:'fixed',every:1,unit:'month'},next:()=>pfNextMonthly(15)},
+ {key:'ltsf',grp:'Amazon',t:'Langzeitlager-Check: Alt-Bestand bereinigen',def:true,
+  info:'Amazon erhebt am 15. jedes Monats Langzeitlagergebühren (Bestand >365 Tage, teils >271). Vorher: Abverkauf/Remission prüfen.',
+  rule:{mode:'fixed',every:1,unit:'month'},next:()=>pfNextMonthly(12)},
+ {key:'q4',grp:'Amazon',t:'Q4 vorbereiten: FBA-Kapazität & Anlieferfristen',def:false,
+  info:'Kapazitätslimits prüfen, Weihnachts-Bestand planen — Anlieferung fürs Weihnachtsgeschäft meist bis Anfang November.',
+  rule:{mode:'fixed',every:1,unit:'year'},next:()=>pfNextYearly(10,1)},
+ {key:'inventur',grp:'Organisation',t:'Inventur / Jahresabschluss vorbereiten',def:true,
+  info:'Bestände zum Stichtag dokumentieren — den FBA-Bestand (Inventory-Report) nicht vergessen.',
+  rule:{mode:'fixed',every:1,unit:'year'},next:()=>pfNextYearly(12,30)},
+ {key:'certs',grp:'Organisation',t:'Zertifikate & Testberichte auf Gültigkeit prüfen',def:false,
+  info:'GPSR-Doku, CE/LFGB/EN-71-Testberichte, Lieferantenerklärungen — Abläufe rechtzeitig erneuern (halbjährlicher Check).',
+  rule:{mode:'fixed',every:6,unit:'month'},next:()=>pfNextMonthly(1)},
+];
+
+function pflichtenDialog(){
+ let lastGrp='';
+ const rows=PFLICHTEN.map(p=>{
+  const grpHead=p.grp!==lastGrp?'<div class="fsec">'+esc(p.grp)+'</div>':'';lastGrp=p.grp;
+  return grpHead
+   +'<label class="td-gcalrow" style="cursor:pointer;align-items:flex-start">'
+   +'<input type="checkbox" class="pfCheck" value="'+p.key+'"'+(p.def?' checked':'')+' style="margin-top:3px;width:16px;height:16px;accent-color:#d97706;flex:none">'
+   +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+esc(p.t)+'</div>'
+   +'<div style="font-size:11.5px;color:#7b8395;line-height:1.5">'+esc(p.info)+'</div>'
+   +'<div style="font-size:11px;color:#d97706;font-weight:600;margin-top:2px">Nächste Frist: '+fmtDate(p.next())+' · '+(p.rule.unit==='year'?'jährlich':p.rule.every===3?'quartalsweise':p.rule.every===6?'halbjährlich':'monatlich')+'</div></div></label>';
+ }).join('');
+ ovl(
+  '<div class="mh"><h2>📋 Pflichten-Kalender einrichten</h2><button class="mc" onclick="td.closeDialogs()">✕</button></div>'
+  +'<div class="mb" style="max-height:62vh;overflow-y:auto">'
+  +'<div class="td-gcalhelp" style="margin:0 0 10px">Wähle die Pflichten, die auf dich zutreffen. Jede wird als <b>wiederkehrende Aufgabe</b> in der Liste „📋 '+esc(PF_LIST_NAME)+'" angelegt — mit Fälligkeit, automatischer Wiederholung und Erinnerung 3 Tage vorher. Über den Google-Kalender-Abo-Link (🗓) erscheinen die Fristen auch auf deinem Handy. <span style="color:#7b8395">Keine Rechtsberatung — Fristen im Zweifel mit dem Steuerberater abgleichen.</span></div>'
+  +rows
+  +'</div>'
+  +'<div class="mf"><button class="btn btn-sm" onclick="td.closeDialogs()">Abbrechen</button><button class="btn btn-p btn-sm" onclick="td.pflichtenSetup()">✓ Ausgewählte einrichten</button></div>');
+}
+
+async function pflichtenSetup(){
+ const keys=Array.from(document.querySelectorAll('.pfCheck:checked')).map(c=>c.value);
+ if(!keys.length)return toast('⚠️ Nichts ausgewählt');
+ try{
+  // Liste finden oder anlegen
+  let list=S.lists.find(l=>l.name&&l.name.indexOf(PF_LIST_NAME)>-1);
+  if(!list){
+   const r=await POST('/api/todo/lists',{name:'📋 '+PF_LIST_NAME,color:'#dc2626',icon:'📋'});
+   list=r.list;S.lists.push(list);
+  }
+  // Bereits vorhandene Titel überspringen (idempotent — Doppel-Klick erzeugt keine Dubletten)
+  const existing=await GET('/api/todo/tasks?listId='+list.id+'&limit=500&withSubtasks=1');
+  const have={};(existing.tasks||[]).forEach(t=>{have[t.title]=1;});
+  let created=0,skipped=0;
+  for(const key of keys){
+   const p=PFLICHTEN.find(x=>x.key===key);if(!p)continue;
+   if(have[p.t]){skipped++;continue;}
+   const due=p.next();
+   const r=await POST('/api/todo/tasks',{listId:list.id,title:p.t,dueDate:due,repeatRule:p.rule,priority:'hoch',description:p.info});
+   created++;
+   // Erinnerung 3 Tage vor Fälligkeit, 09:00 Uhr
+   try{
+    const rd=new Date(due+'T09:00:00');rd.setDate(rd.getDate()-3);
+    if(rd>new Date())await POST('/api/todo/tasks/'+r.task.id+'/reminders',{remindAt:rd.toISOString()});
+   }catch(e){}
+  }
+  closeOvl();
+  toast('✅ '+created+' Pflicht'+(created===1?'':'en')+' eingerichtet'+(skipped?' ('+skipped+' gab es schon)':''));
+  S.booted=false;await boot(true);td.setScope('list',list.id);
+ }catch(e){toast('⚠️ '+e.message);}
 }
 
 // ═══ Bulk ═══
@@ -1059,6 +1160,7 @@ window.td={
  calShift(n){const[y,m]=S.calMonth.split('-').map(Number);const d=new Date(y,m-1+n,1);S.calMonth=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');refresh();},
  calToday(){S.calMonth=todayStr().slice(0,7);refresh();},
  gcalDialog,gcalAdd,gcalDel,gcalSync,gcalCopy,gcalEventPop,
+ pflichtenDialog,pflichtenSetup,
  inlineEdit(ev,id){
   ev.stopPropagation();
   const span=ev.target;const t=S.tasks[id];if(!t||!canEdit(t.listId))return;
