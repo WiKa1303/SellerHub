@@ -98,7 +98,7 @@ body{font-family:'DM Sans',sans-serif;background:radial-gradient(1200px 560px at
 .help-box-collapsible[open] summary{margin-bottom:8px}
 
 /* ═══ MAIN ═══ */
-.main{margin-left:232px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.main{margin-left:232px;flex:1;min-width:0;min-height:100vh;display:flex;flex-direction:column}
 .page-header{padding:18px 34px;border-bottom:1px solid rgba(14,21,38,.07);background:rgba(255,255,255,.72);backdrop-filter:blur(18px) saturate(1.7);-webkit-backdrop-filter:blur(18px) saturate(1.7);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(15,23,42,.05)}
 .page-header h1{font-family:var(--font-display);font-size:21px;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:10px;color:var(--tx)}
 .page-header h1 .hico{font-size:24px}
@@ -404,6 +404,11 @@ img{max-width:100%}
   .fg,.fg4{grid-template-columns:1fr 1fr}
   .cg{grid-template-columns:1fr 1fr}
   .dash-grid,.scen-grid{grid-template-columns:1fr}
+  /* Breite Datentabellen: die umgebende Karte wird horizontal scrollbar */
+  .card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .page-body{overflow-x:hidden}
+  thead th{position:static}
+  .toolbar .sinput{min-width:140px}
 }
 @media(max-width:600px){.fg,.fg2,.fg4{grid-template-columns:1fr}.page-header{padding:16px 16px 16px 64px}}
 @media(max-width:760px){.visual-grid{grid-template-columns:1fr !important}}

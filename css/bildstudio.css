@@ -217,3 +217,10 @@
 #p-inhalt .ig-why h4{margin:0 0 10px;font-size:14px;color:var(--ac2);display:flex;align-items:center;gap:8px}
 #p-inhalt .ig-why ul{margin:0;padding-left:21px}
 #p-inhalt .ig-why li{font-size:12.5px;line-height:1.55;color:var(--tx);margin:6px 0}
+
+/* ── Responsive-Fix: MUSS nach der .ig-layout-Regel (Z. 165) stehen, sonst gewinnt sie ── */
+@media(max-width:1000px){#p-inhalt .ig-layout{grid-template-columns:1fr !important;gap:16px}}
+@media(max-width:600px){
+  #p-inhalt .ig-thumbs{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+  #p-inhalt .ig-resgrid{grid-template-columns:1fr !important}
+}
