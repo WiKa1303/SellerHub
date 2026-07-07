@@ -440,7 +440,7 @@ function go(name){
   var btns=document.querySelectorAll('.nav-btn');
   for(var i=0;i<btns.length;i++){if(btns[i].getAttribute('onclick')==="go('"+sidebarKey+"')")btns[i].classList.add('active');}
   // Nav-Gruppen (Accordion): Gruppe der aktiven Seite öffnen, übrige schließen
-  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',cashflow:'betrieb',erstattung:'betrieb',sourcing:'betrieb',todo:'mehr',tasks:'mehr',coaching:'mehr',admin:'admin'};
+  var navGroupMap={pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',cashflow:'betrieb',erstattung:'betrieb',sourcing:'betrieb',todo:'mehr',tasks:'mehr',coaching:'mehr',admin:'admin'};
   var activeGrp=navGroupMap[sidebarKey]||navGroupMap[name];
   document.querySelectorAll('.nav-group').forEach(function(g){
     var on=g.id==='navgrp-'+activeGrp;
@@ -453,7 +453,6 @@ function go(name){
   if(name==='dashboard')renderDash();
   if(name==='check'&&typeof renderQuickCheck==='function'){renderQuickCheck();setTimeout(function(){var i=document.getElementById('qcInput');if(i&&!qcState.c)i.focus();},120);}
   if(name==='news'&&typeof renderNewsPage==='function')renderNewsPage();
-  if(name==='findung')renderFindungHub();
   if(name==='ideen')renderIdeen();
   if(name==='research')renderResearch();
   if(name==='auswahl')renderAuswahl();
@@ -1586,181 +1585,6 @@ function renderAuswahl(){
   });
   html+='</div>';
   box.innerHTML=html;
-}
-
-// Sub-Navigation für Produktfindung-Bereiche
-// Wird unter dem page-header eines Sub-Bereichs eingeblendet
-function renderFindungSubNav(activeKey){
-  var tabs=[
-    {key:'ideen',   icon:'💡', label:'Ideen-Pool'},
-    {key:'research',icon:'⚔️', label:'Konkurrenz-Tabelle'},
-    {key:'auswahl', icon:'⭐', label:'Produkte'},
-    {key:'helium',  icon:'📥', label:'Helium 10 Import'}
-  ];
-  var html='<div class="findung-subnav" style="background:linear-gradient(180deg,var(--pud),transparent);border-bottom:1.5px solid var(--bd);padding:8px 18px 0 18px;margin-bottom:14px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">';
-  html+='<span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--pu);font-weight:700;margin-right:8px">🎯 Produktfindung</span>';
-  tabs.forEach(function(t){
-    var active=t.key===activeKey;
-    html+='<button onclick="go(\''+t.key+'\')" style="padding:8px 14px;background:'+(active?'var(--s1)':'transparent')+';border:1.5px solid '+(active?'var(--pu)':'transparent')+';border-bottom:'+(active?'1.5px solid var(--s1)':'2px solid transparent')+';border-radius:8px 8px 0 0;color:'+(active?'var(--pu)':'var(--tx2)')+';font-family:inherit;font-size:12px;font-weight:'+(active?'700':'600')+';cursor:pointer;white-space:nowrap;margin-bottom:-1.5px">'+t.icon+' '+t.label+'</button>';
-  });
-  html+='</div>';
-  return html;
-}
-
-// Injiziert die Sub-Nav in einen page-body am oberen Rand
-function injectFindungSubNav(pageId,activeKey){
-  var page=document.getElementById(pageId);
-  if(!page)return;
-  var existing=page.querySelector('.findung-subnav');
-  if(existing)existing.remove();
-  var pageBody=page.querySelector('.page-body');
-  if(!pageBody)return;
-  pageBody.insertAdjacentHTML('afterbegin',renderFindungSubNav(activeKey));
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PRODUKTFINDUNG HUB (Pipeline-Übersicht / Kanban)
-// ═══════════════════════════════════════════════════════════════
-
-function renderFindungHub(){
-  researchInit();
-  // Sammle alle Items aus den 3 Quellen mit normalisiertem Status
-  var items=[];
-  (D.ideen||[]).forEach(function(i){
-    items.push({
-      id:i.id||'idee_'+items.length,
-      type:'idee',
-      typeIcon:'💡',
-      typeLabel:'Idee',
-      typeColor:'pu',
-      name:i.title||i.name||'(Unbenannte Idee)',
-      status:normalizeStatus(i.status),
-      meta:i.kategorie||i.potenzial||'',
-      goAction:"go('ideen')",
-      ref:i
-    });
-  });
-  (D.research && D.research.candidates||[]).forEach(function(c){
-    items.push({
-      id:c.id,
-      type:'kandidat',
-      typeIcon:'🗂️',
-      typeLabel:'Kandidat',
-      typeColor:'pu',
-      name:c.name,
-      status:normalizeStatus(c.status),
-      meta:(c.kategorie||'')+(c.currentStep?' · Schritt '+c.currentStep+'/20':''),
-      goAction:"researchOpenWorkflow('"+c.id+"')",
-      ref:c
-    });
-  });
-  (D.products||[]).forEach(function(p){
-    items.push({
-      id:p.id||p.name,
-      type:'produkt',
-      typeIcon:'📦',
-      typeLabel:'Produkt',
-      typeColor:'ac',
-      name:p.name||'(Unbenannt)',
-      status:normalizeStatus(p.status||'aktiv'),
-      meta:p.kategorie||'',
-      goAction:"go('produkte')",
-      ref:p
-    });
-  });
-
-  // Gruppiere nach Status
-  var byStatus={};
-  PIPELINE_ORDER.forEach(function(s){byStatus[s]=[];});
-  items.forEach(function(it){
-    if(!byStatus[it.status])byStatus[it.status]=[];
-    byStatus[it.status].push(it);
-  });
-
-  // Hub-Karten-Counts updaten
-  var hubIdeen=document.getElementById('findungHubIdeen');
-  if(hubIdeen){
-    var iCount=(D.ideen||[]).length;
-    hubIdeen.textContent=iCount===0?'Noch keine Ideen':iCount+' Ideen · '+byStatus.idee.filter(function(x){return x.type==='idee'}).length+' offen';
-  }
-  var hubRes=document.getElementById('findungHubRecherche');
-  if(hubRes){
-    var cands=(D.research && D.research.candidates)||[];
-    var active=cands.filter(function(c){return normalizeStatus(c.status)!=='abgelehnt'}).length;
-    hubRes.textContent=cands.length===0?'Noch keine Kandidaten':active+' aktive · '+cands.length+' gesamt';
-  }
-
-  // Sidebar-Badge: Summe aller offenen Items in Produktfindung
-  var openCount=items.filter(function(it){return it.status!=='aktiv' && it.status!=='abgelehnt'}).length;
-  var fb=document.getElementById('findungBadge');
-  if(fb){
-    if(openCount>0){fb.style.display='inline-block';fb.textContent=openCount;}
-    else{fb.style.display='none';}
-  }
-
-  // Kanban-Spalten rendern (5 Spalten: idee, recherche, kandidat, muster, abgelehnt)
-  // "aktiv" zeigen wir nicht hier, weil das in der Produktliste ist
-  var columnKeys=['idee','recherche','kandidat','muster','abgelehnt'];
-  var pipeline=document.getElementById('findungPipeline');
-  if(!pipeline)return;
-  var html='';
-  columnKeys.forEach(function(key){
-    var cfg=PIPELINE_STATUS[key];
-    var colItems=byStatus[key]||[];
-    var aktivCount=byStatus.aktiv.length;
-    html+='<div style="background:var(--s2);border:1px solid var(--bd);border-top:3px solid var(--'+cfg.color+');border-radius:10px;padding:12px;min-height:200px;display:flex;flex-direction:column">'+
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--bd)">'+
-        '<div><span style="font-size:14px">'+cfg.icon+'</span> <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--'+cfg.color+')">'+cfg.label+'</span></div>'+
-        '<span style="font-size:18px;font-weight:800;color:var(--'+cfg.color+')">'+colItems.length+'</span>'+
-      '</div>'+
-      '<div style="display:flex;flex-direction:column;gap:6px;flex:1;max-height:480px;overflow-y:auto">';
-    if(colItems.length===0){
-      html+='<div style="text-align:center;color:var(--tx3);font-size:11px;padding:24px 8px;font-style:italic">'+(key==='abgelehnt'?'Keine aussortiert':'Leer')+'</div>';
-    }else{
-      colItems.slice(0,12).forEach(function(it){
-        var typeColor=it.type==='idee'?'pu':(it.type==='kandidat'?'ac':'cy');
-        html+='<div onclick="'+it.goAction+'" style="background:var(--s1);border:1px solid var(--bd);border-left:3px solid var(--'+typeColor+');border-radius:6px;padding:8px 10px;cursor:pointer;transition:all .12s" onmouseover="this.style.borderColor=\'var(--'+typeColor+')\';this.style.transform=\'translateX(2px)\'" onmouseout="this.style.borderColor=\'var(--bd)\';this.style.transform=\'\'" title="'+esc(it.name)+'">'+
-          '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="font-size:10px">'+it.typeIcon+'</span><span style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--'+typeColor+');font-weight:700">'+it.typeLabel+'</span></div>'+
-          '<div style="font-size:12px;font-weight:600;color:var(--tx);line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+esc(it.name)+'</div>'+
-          (it.meta?'<div style="font-size:10px;color:var(--tx3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(it.meta)+'</div>':'')+
-        '</div>';
-      });
-      if(colItems.length>12){
-        html+='<div style="text-align:center;padding:6px;font-size:10px;color:var(--tx3);font-style:italic">+ '+(colItems.length-12)+' weitere</div>';
-      }
-    }
-    html+='</div></div>';
-  });
-  pipeline.innerHTML=html;
-
-  // Aktiv-Banner falls Produkte da
-  if(byStatus.aktiv.length>0){
-    var bannerId='findungActivBanner';
-    var existing=document.getElementById(bannerId);
-    var bannerHtml='<div id="'+bannerId+'" style="background:var(--gnd);border:1.5px solid var(--gn);border-radius:10px;padding:12px 18px;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
-      '<div style="font-size:24px">🚀</div>'+
-      '<div style="flex:1;min-width:200px">'+
-        '<div style="font-weight:700;color:var(--gn);font-size:13px">'+byStatus.aktiv.length+' aktive Produkte im Verkauf</div>'+
-        '<div style="font-size:11px;color:var(--tx2);margin-top:1px">Diese findest du in der separaten Produktliste</div>'+
-      '</div>'+
-      '<button class="btn btn-sm" onclick="go(\'produkte\')" style="background:var(--gn);color:#fff;border:none;font-size:11px">📋 Zur Produktliste →</button>'+
-    '</div>';
-    if(existing){existing.outerHTML=bannerHtml;}
-    else{pipeline.insertAdjacentHTML('afterend',bannerHtml);}
-  }else{
-    var ex=document.getElementById('findungActivBanner');
-    if(ex)ex.remove();
-  }
-}
-
-// Quick-Action: Neue Idee aus dem Hub heraus
-function findungNewIdea(){
-  if(typeof openIdeeModal==='function'){
-    go('ideen');
-    setTimeout(function(){openIdeeModal();},80);
-  }else{
-    go('ideen');
-  }
 }
 
 function renderResearch(){
@@ -3433,7 +3257,7 @@ function researchRenderPrompts(){
 }
 
 function fillProdSelects(){
-  ['wProd','kwProd','revProd','srcProd','laProd','lcProd'].forEach(function(id){
+  ['kwProd','srcProd','laProd','lcProd'].forEach(function(id){
     var s=document.getElementById(id);if(!s)return;
     var v=s.value;s.innerHTML='<option value="">— Produkt wählen —</option>';
     D.products.forEach(function(p,i){var o=document.createElement('option');o.value=i;o.textContent=p.name;s.appendChild(o);});
@@ -5575,27 +5399,6 @@ function fbaCalcTax(){
   document.getElementById('fbTaxResult').innerHTML=html;
 }
 
-// ═══════════════ WETTBEWERB ═══════════════
-function renderComp(){
-  var pi=parseInt(document.getElementById('wProd').value);
-  var items=D.competitors.filter(function(c){return c.prodIdx===pi});
-  var tb=document.getElementById('compBody');tb.innerHTML='';
-  document.getElementById('compEmpty').style.display=isNaN(pi)||items.length===0?'block':'none';
-  items.forEach(function(c,ci){
-    var ri=D.competitors.indexOf(c);
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td style="font-weight:600">'+esc(c.name)+'</td><td>'+esc(c.asin||'')+'</td><td class="nc">'+fmt(c.preis)+'</td><td class="nc">'+(c.bewertungen||'—')+'</td><td class="nc">'+(c.bsr||'—')+'</td><td class="nc">'+(c.rating||'—')+'</td><td>'+esc(c.staerken||'')+'</td><td>'+esc(c.schwaechen||'')+'</td><td><div class="row-act"><button class="del" onclick="D.competitors.splice('+ri+',1);save();renderComp()">🗑️</button></div></td>';
-    tb.appendChild(tr);
-  });
-}
-function addComp(){
-  var pi=parseInt(document.getElementById('wProd').value);if(isNaN(pi))return toast('Erst Produkt wählen');
-  gmPrompt('Wettbewerber hinzufügen',[{l:'Name *',id:'cn'},{l:'ASIN',id:'ca'},{l:'Preis €',id:'cp',t:'number'},{l:'Bewertungen',id:'cb',t:'number'},{l:'BSR',id:'cbs',t:'number'},{l:'Rating ★',id:'cr',t:'number'},{l:'Stärken',id:'cs',tag:'textarea'},{l:'Schwächen',id:'cw',tag:'textarea'}],function(){
-    D.competitors.push({prodIdx:pi,name:document.getElementById('cn').value.trim(),asin:document.getElementById('ca').value.trim(),preis:pf('cp'),bewertungen:parseInt(document.getElementById('cb').value)||0,bsr:parseInt(document.getElementById('cbs').value)||0,rating:pf('cr'),staerken:document.getElementById('cs').value.trim(),schwaechen:document.getElementById('cw').value.trim()});
-    save();renderComp();toast('Hinzugefügt ✓');
-  });
-}
-
 // ═══════════════ KEYWORDS ═══════════════
 function renderKW(){
   var pi=parseInt(document.getElementById('kwProd').value);
@@ -5632,27 +5435,6 @@ function addKW(){
   gmPrompt('Keyword hinzufügen',[{l:'Keyword *',id:'kw'},{l:'Suchvolumen',id:'kv',t:'number'},{l:'Wettbewerb',id:'kwb',tag:'select',opts:['Niedrig','Mittel','Hoch']},{l:'Relevanz',id:'kr',tag:'select',opts:['Niedrig','Mittel','Hoch']},{l:'Im Listing?',id:'kl2',tag:'select',opts:['Nein','Ja']},{l:'Notiz',id:'kn'}],function(){
     D.keywords.push({prodIdx:pi,keyword:document.getElementById('kw').value.trim(),volume:parseInt(document.getElementById('kv').value)||0,wettbewerb:document.getElementById('kwb').value,relevanz:document.getElementById('kr').value,imListing:document.getElementById('kl2').value==='Ja',notiz:document.getElementById('kn').value.trim()});
     save();renderKW();toast('Hinzugefügt ✓');
-  });
-}
-
-// ═══════════════ REVIEWS ═══════════════
-function renderRev(){
-  var pi=parseInt(document.getElementById('revProd').value);
-  var items=D.reviews.filter(function(r){return r.prodIdx===pi});
-  var tb=document.getElementById('revBody');tb.innerHTML='';
-  document.getElementById('revEmpty').style.display=isNaN(pi)||items.length===0?'block':'none';
-  items.forEach(function(r){
-    var ri=D.reviews.indexOf(r);
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><span class="badge '+(r.kategorie==='Qualität'?'b-abgelehnt':r.kategorie==='Funktion'?'b-analyse':r.kategorie==='Verpackung'?'b-recherche':'b-idee')+'">'+esc(r.kategorie||'')+'</span></td><td>'+esc(r.text)+'</td><td class="nc">'+esc(r.haeufigkeit||'')+'</td><td>'+(r.chance?'✅ Ja':'—')+'</td><td>'+esc(r.notiz||'')+'</td><td><div class="row-act"><button class="del" onclick="D.reviews.splice('+ri+',1);save();renderRev()">🗑️</button></div></td>';
-    tb.appendChild(tr);
-  });
-}
-function addRev(){
-  var pi=parseInt(document.getElementById('revProd').value);if(isNaN(pi))return toast('Erst Produkt wählen');
-  gmPrompt('Review-Punkt',[{l:'Kategorie',id:'rc',tag:'select',opts:['Qualität','Funktion','Verpackung','Preis','Lieferung','Sonstiges']},{l:'Beschwerde / Wunsch *',id:'rt'},{l:'Häufigkeit',id:'rh',tag:'select',opts:['Selten','Gelegentlich','Häufig','Sehr häufig']},{l:'Chance für uns?',id:'ro',tag:'select',opts:['Nein','Ja']},{l:'Notiz',id:'rn'}],function(){
-    D.reviews.push({prodIdx:pi,kategorie:document.getElementById('rc').value,text:document.getElementById('rt').value.trim(),haeufigkeit:document.getElementById('rh').value,chance:document.getElementById('ro').value==='Ja',notiz:document.getElementById('rn').value.trim()});
-    save();renderRev();toast('Hinzugefügt ✓');
   });
 }
 
@@ -13573,20 +13355,7 @@ function renderDash(){
     qRes.textContent=allItems===0?'Pipeline: Ideen · Recherche · Helium 10':ideenCount+' Ideen · '+resCands.length+' Kandidaten';
   }
   if(typeof researchUpdateBadge==='function')researchUpdateBadge();
-  // Auch das Findung-Hub-Badge aktualisieren
-  if(typeof renderFindungHub==='function'){
-    var fb=document.getElementById('findungBadge');
-    if(fb){
-      var items=(D.ideen||[]).length;
-      var cands=(D.research&&D.research.candidates)?D.research.candidates.filter(function(c){return normalizeStatus(c.status)!=='abgelehnt'&&normalizeStatus(c.status)!=='aktiv'}).length:0;
-      var openCount=items+cands;
-      if(openCount>0){fb.style.display='inline-block';fb.textContent=openCount;}
-      else{fb.style.display='none';}
-    }
-  }
-  var qComp=document.getElementById('qcCompetitors');if(qComp)qComp.textContent=(D.competitors||[]).length+' Einträge';
   var qKeys=document.getElementById('qcKeywords');if(qKeys)qKeys.textContent=(D.keywords||[]).length+' Keywords';
-  var qRev=document.getElementById('qcReviews');if(qRev)qRev.textContent=(D.reviews||[]).length+' Analysen';
   var qLau=document.getElementById('qcLaunches');if(qLau)qLau.textContent=(D.launches||[]).length+' Launches';
   var qSel=document.getElementById('qcSeller');
   if(qSel){

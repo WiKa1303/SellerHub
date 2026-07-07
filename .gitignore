@@ -23,3 +23,6 @@ sellerhub-data.json
 .claude/design-shots/
 .claude/tmp-*.mjs
 server/.e2e-*.mjs
+
+# Alt-Backups: durch Git-Historie abgelöst (Wiederherstellung: git log -- backups/)
+backups/

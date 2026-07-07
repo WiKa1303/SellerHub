@@ -9,12 +9,18 @@ SellerHub/
 ├── index.html          ← HTML-Gerüst (alle Seiten/Modals), bindet css/ + js/ ein
 ├── css/
 │   ├── base.css        ← Haupt-Styles (Theme, Layout, Komponenten)
+│   ├── todo.css        ← Styles des To-Do-Moduls (#p-todo)
 │   └── bildstudio.css  ← Styles des KI-Bildstudios (#p-inhalt)
 ├── js/                 ← Reihenfolge der <script>-Tags in index.html ist WICHTIG:
-│   ├── auth.js         ← WikaAuth (Login/User-Store/Session/Lizenz)
+│   ├── auth.js         ← Cloud-Login-Gate (gegen /api/auth, WikaAuth = Kompat-Schicht)
 │   ├── bildstudio.js   ← KI-Bildstudio (ig…-Modul, IIFE)
 │   ├── admin.js        ← Admin-Bereich (User-Verwaltung)
-│   └── app.js          ← die eigentliche App (Data-Layer D, alle Seiten & Module, ~900 KB)
+│   ├── todo.js         ← To-Do-Modul inkl. Google-Kalender-Sync + Pflichten-Kalender (IIFE, window.td)
+│   ├── app.js          ← die eigentliche App (Data-Layer D, alle Seiten & Module, ~1 MB)
+│   ├── ppc.js          ← PPC-Cockpit (Keyword-Center-Tabs Planer/Audit + Cerebro-Paste)
+│   ├── cashflow.js     ← Cashflow-Planer (Seite p-cashflow)
+│   ├── erstattung.js   ← FBA-Erstattungs-Check (Seite p-erstattung)
+│   └── sync.js         ← Cloud-Sync (wrappt save(); MUSS als letztes laden)
 ├── server/             ← Seller-Radar-Backend (Crawler + KI + Trends + Alerts + Strategy)
 │                          eigene Doku: server/ARCHITEKTUR.md + server/CLAUDE.md + server/README.md
 ├── CLAUDE.md           ← diese Notiz
@@ -27,11 +33,10 @@ SellerHub/
 - Code-Bezeichner heißen intern teils `wika`/`Wika` (z. B. `WikaAuth`) — NICHT umbenennen, nur die sichtbare Marke ist „SellerHub".
 - ⚠️ App-DATEN hängen am Browser-Speicherpfad: Der Wechsel von `SellerHub.html` auf `index.html` ist ein neuer Pfad → einmalig Daten migrieren via Export (in `backups/SellerHub.BACKUP-vor-split.html` öffnen → ⬇ Export) und Import in `index.html`.
 
-## Backups (im Ordner `backups/`, nicht bearbeiten)
-- `SellerHub.BACKUP-keybanner.html` — Stand 28.6.2026 (Key-Banner / Überlast-Fix)
-- `SellerHub.BACKUP-bildstudio-prozent.html` — Stand 27.6.2026 abends
-- ältere: `-bildstudio`, `-nav`, `.BACKUP`
-- **Konvention:** Vor größeren Umbauten neue Kopie `backups/SellerHub.BACKUP-<thema>.html` anlegen.
+## Backups
+Alte Datei-Backups sind ABGESCHAFFT — jede Version steckt in der Git-Historie (`git log --oneline`).
+Wiederherstellen alter Einzeldateien: `git show <commit>:backups/<datei>` (Ordner wurde 7.7.2026 aus dem Arbeitsstand entfernt).
+
 
 ## Lokale Vorschau (solange die Domain hängt)
 `./start-lokal.sh` (oder `node lokaler-server.mjs`) → http://localhost:5173/ = Marketing-Website (`website/`), http://localhost:5173/app/ = die App. Bildet das Ziel-Layout der Domain ab; Cloud-Login/Sync laufen ganz normal gegen Railway.
