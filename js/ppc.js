@@ -129,7 +129,9 @@ function ppcRenderPlaner(){
   ppcFillSelect('ppcPlanProd',true);
   var sel=(document.getElementById('ppcPlanProd')||{}).value;
   var obj=ppcResolve(sel);
-  if(!obj){host.innerHTML='<div class="empty"><div class="eico">🎯</div><h3>Produkt wählen</h3>Wähle oben ein Produkt oder einen Kandidaten — der Planer rechnet mit dessen VK und Marge.</div>';return;}
+  if(!obj){host.innerHTML='<div class="empty"><div class="eico">🎯</div><h3>Produkt wählen</h3>Wähle oben ein Produkt oder einen Kandidaten — der Planer rechnet mit dessen VK und Marge.'
+    +(ppcSources().length?'':'<div style="margin-top:14px"><button class="btn btn-p btn-sm" onclick="go(\'produkte\')">📦 Erst ein Produkt anlegen</button> <button class="btn btn-sm" onclick="go(\'pipeline\')">🗂️ Oder zur Recherche-Zentrale</button></div>')
+    +'</div>';return;}
 
   var vk=obj.vk!=null?obj.vk:(obj.preis!=null?obj.preis:null);
   var m=ppcMarge(obj);
@@ -260,7 +262,7 @@ function ppcAuditAnalyze(){
     var profitZiel=be*0.7;
 
     var verbrenner=rows.filter(function(r){return r.clicks>=5&&r.orders===0&&r.spend>0}).sort(function(a,b){return b.spend-a.spend});
-    var teuer=rows.filter(function(r){return r.orders>0&&r.sales>0&&(r.spend/r.sales*100)>be}).sort(function(a,b){return (b.spend/b.sales)-(a.spend/a.sales)});
+    var teuer=rows.filter(function(r){return r.orders>0&&r.sales>0&&(r.spend/r.sales*100)>be}).sort(function(a,b){return (b.spend/Math.max(0.01,b.sales))-(a.spend/Math.max(0.01,a.sales))});
     var gewinner=rows.filter(function(r){return r.orders>=2&&r.sales>0&&(r.spend/r.sales*100)<profitZiel}).sort(function(a,b){return b.sales-a.sales});
     var sparPotenzial=verbrenner.reduce(function(s,r){return s+r.spend},0)
       +teuer.reduce(function(s,r){return s+Math.max(0,r.spend-r.sales*be/100)},0);

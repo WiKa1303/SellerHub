@@ -22,6 +22,7 @@ function erAnalyze(){
   function fail(msg){res.innerHTML='<div style="background:var(--rdd);border:1px solid var(--rd);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--rd);margin-top:10px">⚠️ '+msg+'</div>';}
   var rawA=(document.getElementById('erAdjInput')||{}).value||'';
   if(!rawA.trim())return toast('Bitte zuerst den Bestandsanpassungs-Bericht einfügen');
+  if(!Array.isArray(D.products))D.products=[]; // Guard: frische Installation ohne Produktliste
 
   try{
     // ── 1. Bestandsanpassungen ──

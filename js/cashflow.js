@@ -13,7 +13,8 @@ function cfData(){
 var cfId=function(){return 'cf'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);};
 var cfEur=function(n){return (n<0?'−':'')+Math.abs(Math.round(n)).toLocaleString('de-DE')+' €'};
 var cfYmd=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-var cfAddDays=function(ymd,n){var d=new Date(ymd+'T12:00:00');d.setDate(d.getDate()+n);return cfYmd(d)};
+// UTC-basiert: lokale Mitternachts-/Sommerzeit-Kanten können sonst an Monatsgrenzen ±1 Tag kippen
+var cfAddDays=function(ymd,n){var p=ymd.split('-');var d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 var CF_KAT={bestellung:'🏭',fracht:'🚢',ppc:'📣',amazon:'🟠',ust:'🏛️',sonst:'📌'};
 
 function renderCashflow(){

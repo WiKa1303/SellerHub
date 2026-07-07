@@ -650,7 +650,9 @@ function gcalCopy(){
 // Fälligkeit + Wiederholung + Erinnerung (3 Tage vorher); via Kalender-Sync auch in Google.
 const PF_LIST_NAME='Pflichten & Fristen';
 const pfYmd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-function pfNextMonthly(day){const n=new Date();let d=new Date(n.getFullYear(),n.getMonth(),day);if(d<=n)d=new Date(n.getFullYear(),n.getMonth()+1,day);return pfYmd(d);}
+// Tag ans Monatsende klemmen (31. im Februar → 28./29., kein stiller Monats-Überlauf)
+function pfClampDay(y,m,day){return Math.min(day,new Date(y,m+1,0).getDate());}
+function pfNextMonthly(day){const n=new Date();let d=new Date(n.getFullYear(),n.getMonth(),pfClampDay(n.getFullYear(),n.getMonth(),day));if(d<=n)d=new Date(n.getFullYear(),n.getMonth()+1,pfClampDay(n.getFullYear(),n.getMonth()+1,day));return pfYmd(d);}
 function pfNextYearly(mm,dd){const n=new Date();let d=new Date(n.getFullYear(),mm-1,dd);if(d<=n)d=new Date(n.getFullYear()+1,mm-1,dd);return pfYmd(d);}
 function pfNextOf(list){ // list=[[monat,tag],…] → nächster künftiger Termin
  const n=new Date();let best=null;
