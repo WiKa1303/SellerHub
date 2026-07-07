@@ -290,8 +290,9 @@ function ppcAuditAnalyze(){
 function ppcCopyNegatives(){
   var list=ppcAuditState.rows.filter(function(r){return r.clicks>=5&&r.orders===0&&r.spend>0})
     .sort(function(a,b){return b.spend-a.spend}).map(function(r){return r.term}).join('\n');
-  try{navigator.clipboard.writeText(list).then(function(){toast('📋 '+list.split('\n').length+' Negativ-Keywords kopiert');});}
-  catch(e){var ta=document.createElement('textarea');ta.value=list;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('📋 Negativ-Keywords kopiert');}
+  function fallback(){try{var ta=document.createElement('textarea');ta.value=list;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('📋 Negativ-Keywords kopiert');}catch(e2){toast('⚠️ Kopieren nicht möglich');}}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(list).then(function(){toast('📋 '+list.split('\n').length+' Negativ-Keywords kopiert');},fallback);
+  else fallback();
 }
 
 // Planer/Audit-Selects initial füllen, sobald die Seite besucht wird (go() ruft renderKW)

@@ -215,6 +215,7 @@
         <button class="nav-btn" onclick="go('launch')"><span class="ico">🚀</span>Launch-Planer</button>
         <button class="nav-btn" onclick="go('lager')"><span class="ico">📦</span>Lagerbestand</button>
         <button class="nav-btn" onclick="go('cashflow')" title="Liquiditäts-Vorschau: Lieferanten-Zahlungen, Amazon-Auszahlungen, Engpass-Warnung"><span class="ico">💶</span>Cashflow</button>
+        <button class="nav-btn" onclick="go('erstattung')" title="FBA-Erstattungs-Check: verlorene/beschädigte Ware finden, die Amazon dir noch nicht erstattet hat"><span class="ico">💸</span>Erstattungen</button>
       </div>
     </div>
 
@@ -1430,6 +1431,30 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: FBA-ERSTATTUNGS-CHECK (js/erstattung.js)                  -->
+<div class="page" id="p-erstattung">
+  <div class="page-header"><h1><span class="hico">💸</span>FBA-Erstattungs-Check<span class="wika-help" data-tooltip="Amazon verliert und beschädigt regelmäßig Lagerware — erstattet wird vieles nur auf Antrag.&#10;&#10;Dieser Check gleicht deine Bestandsanpassungen mit den Erstattungen ab und zeigt, wo dir vermutlich noch Geld zusteht — inklusive Frist-Ampel und fertigem Fall-Text.">ⓘ</span></h1></div>
+  <div class="page-body">
+    <div class="help-box gold"><div class="help-icon">💸</div><div class="help-body">
+      <div class="help-title">Wo steht dir noch Geld zu?</div>
+      <div class="help-text"><b>1.</b> Seller Central → Berichte → Auftragsabwicklung → <b>„Anpassungen des Bestands"</b> (Zeitraum z. B. 12 Monate) als CSV laden und links einfügen · <b>2.</b> Optional: Bericht <b>„Erstattungen"</b> rechts einfügen (sonst zählt der Check bereits Erstattetes nicht ab) · <b>3.</b> Auswerten. Beide Berichte werden <b>nur in deinem Browser</b> ausgewertet. ⏱ Wichtig: Lager-Fälle sind i. d. R. nur <b>60 Tage</b> ab Anpassung einreichbar.</div>
+    </div></div>
+    <div class="fg2" style="margin-bottom:12px">
+      <div class="fi">
+        <label>1 · Bestandsanpassungen (Pflicht) <label class="btn btn-sm" style="cursor:pointer;margin-left:8px">📂 CSV<input type="file" accept=".csv,.txt,.tsv" style="display:none" onchange="erFile(event,'erAdjInput')"></label></label>
+        <textarea id="erAdjInput" rows="6" placeholder="Bericht „Anpassungen des Bestands" hier einfügen — inklusive Kopfzeile …" style="font-family:ui-monospace,monospace;font-size:11px"></textarea>
+      </div>
+      <div class="fi">
+        <label>2 · Erstattungen (optional) <label class="btn btn-sm" style="cursor:pointer;margin-left:8px">📂 CSV<input type="file" accept=".csv,.txt,.tsv" style="display:none" onchange="erFile(event,'erReimInput')"></label></label>
+        <textarea id="erReimInput" rows="6" placeholder="Bericht „Erstattungen" hier einfügen (optional) …" style="font-family:ui-monospace,monospace;font-size:11px"></textarea>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="erAnalyze()">🔍 Abgleichen &amp; offene Fälle finden</button>
+    <div id="erResult"></div>
+  </div>
+</div>
+
 <!-- ═══ MODAL: Cerebro/Magnet-Keyword-Paste (js/ppc.js) ═══ -->
 <div class="mo" id="ppcCerebroModal">
   <div class="modal" style="width:820px">
@@ -2513,6 +2538,7 @@
 <script src="js/app.js"></script>
 <script src="js/ppc.js"></script>
 <script src="js/cashflow.js"></script>
+<script src="js/erstattung.js"></script>
 <script src="js/sync.js"></script>
 </body>
 </html>

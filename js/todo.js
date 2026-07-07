@@ -640,8 +640,9 @@ async function gcalSync(id){
 function gcalCopy(){
  const inp=$('gcalExpUrl');if(!inp)return;
  inp.select();
- try{navigator.clipboard.writeText(inp.value).then(()=>toast('📋 Link kopiert'));}
- catch(e){document.execCommand('copy');toast('📋 Link kopiert');}
+ const fallback=()=>{try{document.execCommand('copy');toast('📋 Link kopiert');}catch(e2){toast('⚠️ Bitte manuell kopieren (Strg+C)');}};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(inp.value).then(()=>toast('📋 Link kopiert'),fallback);
+ else fallback();
 }
 
 // ═══ Pflichten-Kalender: wiederkehrende DE-Seller-Fristen als Aufgaben-Vorlagen ═══
