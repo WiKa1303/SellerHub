@@ -440,7 +440,7 @@ function go(name){
   var btns=document.querySelectorAll('.nav-btn');
   for(var i=0;i<btns.length;i++){if(btns[i].getAttribute('onclick')==="go('"+sidebarKey+"')")btns[i].classList.add('active');}
   // Nav-Gruppen (Accordion): Gruppe der aktiven Seite öffnen, übrige schließen
-  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',sourcing:'betrieb',todo:'mehr',tasks:'mehr',coaching:'mehr',admin:'admin'};
+  var navGroupMap={findung:'recherche',pipeline:'recherche',ideen:'recherche',research:'recherche',auswahl:'recherche',nischen:'recherche',gebuehren:'recherche',kalkulation:'recherche',helium:'recherche',produkte:'betrieb',detail:'betrieb',keywords:'betrieb',keywordclean:'betrieb',listing:'betrieb',inhalt:'betrieb',launch:'betrieb',lager:'betrieb',cashflow:'betrieb',sourcing:'betrieb',todo:'mehr',tasks:'mehr',coaching:'mehr',admin:'admin'};
   var activeGrp=navGroupMap[sidebarKey]||navGroupMap[name];
   document.querySelectorAll('.nav-group').forEach(function(g){
     var on=g.id==='navgrp-'+activeGrp;
@@ -464,6 +464,7 @@ function go(name){
   if(name==='pipeline'&&typeof renderPipeline==='function')renderPipeline();
   if(name==='listing')renderListing();
   if(name==='keywords'){if(typeof renderKW==='function')renderKW();if(typeof renderKeywordClean==='function')renderKeywordClean();}
+  if(name==='cashflow'&&typeof renderCashflow==='function')renderCashflow();
   if(name==='keywordclean'){go('keywords');switchKwTab('cleaner');return;}
   if(name==='admin'&&typeof adminRenderUsers==='function')adminRenderUsers();
   if(name==='keywords'||name==='sourcing'||name==='launch')fillProdSelects();

@@ -214,6 +214,7 @@
         <button class="nav-btn" onclick="go('inhalt')"><span class="ico">✨</span>KI-Bildstudio</button>
         <button class="nav-btn" onclick="go('launch')"><span class="ico">🚀</span>Launch-Planer</button>
         <button class="nav-btn" onclick="go('lager')"><span class="ico">📦</span>Lagerbestand</button>
+        <button class="nav-btn" onclick="go('cashflow')" title="Liquiditäts-Vorschau: Lieferanten-Zahlungen, Amazon-Auszahlungen, Engpass-Warnung"><span class="ico">💶</span>Cashflow</button>
       </div>
     </div>
 
@@ -1416,6 +1417,19 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: CASHFLOW-PLANER (js/cashflow.js)                          -->
+<div class="page" id="p-cashflow">
+  <div class="page-header"><h1><span class="hico">💶</span>Cashflow-Planer<span class="wika-help" data-tooltip="Der FBA-Engpass ist selten die Marge, sondern die Liquidität: Anzahlung → Restzahlung → Fracht → und Amazon zahlt erst Wochen später aus.&#10;&#10;Hier planst du alle Zahlungsströme auf einem 6-Monats-Zeitstrahl — mit Engpass-Warnung, bevor es klemmt.">ⓘ</span></h1></div>
+  <div class="page-body">
+    <div class="help-box gold"><div class="help-icon">💶</div><div class="help-body">
+      <div class="help-title">Reicht das Geld für die nächste Bestellung?</div>
+      <div class="help-text"><b>1.</b> Kontostand eintragen · <b>2.</b> „🏭 Bestellung planen" (Assistent legt Anzahlung, Restzahlung und Fracht mit Terminen an) · <b>3.</b> „🟠 Amazon-Auszahlungen" als 14-Tage-Serie einplanen. Die Vorschau zeigt dir den Tiefpunkt — <b>bevor</b> er passiert. Reine Addition deiner Zahlen, keine Schätzung.</div>
+    </div></div>
+    <div id="cfBody"></div>
+  </div>
+</div>
+
 <!-- ═══ MODAL: Cerebro/Magnet-Keyword-Paste (js/ppc.js) ═══ -->
 <div class="mo" id="ppcCerebroModal">
   <div class="modal" style="width:820px">
@@ -2485,6 +2499,7 @@
 <script src="js/todo.js"></script>
 <script src="js/app.js"></script>
 <script src="js/ppc.js"></script>
+<script src="js/cashflow.js"></script>
 <script src="js/sync.js"></script>
 </body>
 </html>
