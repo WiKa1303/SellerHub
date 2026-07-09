@@ -6,9 +6,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"git push\"*) cd \"${CLAUDE_PROJECT_DIR:-.}/server\" && npm test >/tmp/sellerhub-pretest.log 2>&1 || echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"npm test (server/) fehlgeschlagen — Push blockiert. Details: /tmp/sellerhub-pretest.log\"}}';; esac",
-            "statusMessage": "Pre-Push-Gate: npm test im server/…",
+            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"git push\"*) cd \"${CLAUDE_PROJECT_DIR:-.}/server\" && npm test >/tmp/sellerhub-pretest.log 2>&1 || echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"npm test (server/) fehlgeschlagen \u2014 Push blockiert. Details: /tmp/sellerhub-pretest.log\"}}';; esac",
+            "statusMessage": "Pre-Push-Gate: npm test im server/\u2026",
             "timeout": 300
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/wk/.local/pipx/venvs/graphifyy/bin/graphify hook-guard search"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/wk/.local/pipx/venvs/graphifyy/bin/graphify hook-guard read"
           }
         ]
       }
@@ -19,8 +37,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"railway up\"*) sleep 5; BODY=$(curl -s -m 15 https://radar-production-388a.up.railway.app/api/health); OK=$(printf '%s' \"$BODY\" | jq -r '.ok // \"?\"' 2>/dev/null || echo '?'); MSG=\"Post-Deploy-Healthcheck /api/health → ok=$OK\"; printf '{\"systemMessage\":%s,\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":%s}}\\n' \"$(printf '%s' \"$MSG\" | jq -Rs .)\" \"$(printf '%s' \"$MSG\" | jq -Rs .)\";; esac",
-            "statusMessage": "Post-Deploy-Healthcheck /api/health…",
+            "command": "CMD=$(jq -r '.tool_input.command // \"\"'); case \"$CMD\" in *\"railway up\"*) sleep 5; BODY=$(curl -s -m 15 https://radar-production-388a.up.railway.app/api/health); OK=$(printf '%s' \"$BODY\" | jq -r '.ok // \"?\"' 2>/dev/null || echo '?'); MSG=\"Post-Deploy-Healthcheck /api/health \u2192 ok=$OK\"; printf '{\"systemMessage\":%s,\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":%s}}\\n' \"$(printf '%s' \"$MSG\" | jq -Rs .)\" \"$(printf '%s' \"$MSG\" | jq -Rs .)\";; esac",
+            "statusMessage": "Post-Deploy-Healthcheck /api/health\u2026",
             "timeout": 30
           }
         ]
@@ -32,7 +50,7 @@
           {
             "type": "command",
             "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && PATH=\"$HOME/.local/bin:$PATH\" git pull --no-rebase 2>&1 || true",
-            "statusMessage": "Hole neuesten Stand von GitHub (git pull)…",
+            "statusMessage": "Hole neuesten Stand von GitHub (git pull)\u2026",
             "timeout": 30
           }
         ]
@@ -44,7 +62,7 @@
           {
             "type": "command",
             "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && PATH=\"$HOME/.local/bin:$PATH\" sh -c 'git add -A; git diff --cached --quiet || git commit -q -m \"Auto-Sync beim Sitzungsende $(date \"+%Y-%m-%d %H:%M\")\"; git push -q' 2>&1 || true",
-            "statusMessage": "Sichere Änderungen zu GitHub (git commit & push)…",
+            "statusMessage": "Sichere \u00c4nderungen zu GitHub (git commit & push)\u2026",
             "timeout": 45
           }
         ]

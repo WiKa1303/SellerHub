@@ -1,5 +1,5 @@
 #!/bin/bash
-# ═══ SellerHub auf den Webspace laden (amzsellerhub.de, netcup) ═══
+# ═══ AMZ SellerHub auf den Webspace laden (amzsellerhub.de, netcup) ═══
 # Ziel-Layout:  Website (website/*) → httpdocs/          (amzsellerhub.de)
 #               App (index.html+css/+js/) → httpdocs/app/ (amzsellerhub.de/app/)
 # (nicht hochgeladen: backups/, server/, *.md, .claude/, node_modules/, .git/)

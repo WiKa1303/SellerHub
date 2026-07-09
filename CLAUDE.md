@@ -5,7 +5,7 @@ Zum Benutzen `index.html` im Browser öffnen (Doppelklick) — oder den ganzen O
 
 ## Struktur (seit 4.7.2026 gesplittet, vorher Single-File `SellerHub.html`)
 ```
-SellerHub/
+amzsellerhub/
 ├── index.html          ← HTML-Gerüst (alle Seiten/Modals), bindet css/ + js/ ein
 ├── css/
 │   ├── base.css        ← Haupt-Styles (Theme, Layout, Komponenten)
@@ -77,3 +77,13 @@ Die Bildstudio-Punkte vom 28.6. sind ERLEDIGT (1:1-Crop `igCropSquare`, USP-ohne
 - Gemini-Key mit Billing einmal live durchtesten (Bild-zu-Bild; braucht echten Key im Browser).
 - Webspace-Deploy des aktuellen Frontends, sobald die Domain steht (`./deploy-frontend.sh`).
 - Website-Impressum: Platzhalter (§ 5 DDG) mit echten Angaben füllen — Pflicht vor Live-Gang.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
