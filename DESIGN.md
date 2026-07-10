@@ -6,6 +6,7 @@ colors:
   accent-deep: "#b45309"
   accent-bright: "#f59e0b"
   accent-darkest: "#92400e"
+  accent-text: "#b45309"  # AA-sicheres Amber (4.83:1) für kleinen Text/Links auf Hell (var(--ac-text)); accent bleibt Marken-Amber für Fills/Borders/Buttons
   ink: "#0e1526"
   ink-soft: "#4a556b"
   ink-muted: "#7e879b"
@@ -123,7 +124,7 @@ This system explicitly rejects the interchangeable **generic SaaS dashboard** (b
 A warm, near-neutral workspace lit by a single amber accent, with a dark navy rail and a disciplined set of status hues for data.
 
 ### Primary
-- **Instrument Amber** (`#d97706`, hover `#b45309`, bright `#f59e0b`, deepest `#92400e`): The one voice of emphasis. Primary buttons, active navigation, focus rings, links, selected tabs, the logo mark. It carries a bright-to-deep gradient (`#f59e0b → #d97706 → #b45309`) on primary actions and glows softly behind focused inputs.
+- **Instrument Amber** (`#d97706`, hover `#b45309`, bright `#f59e0b`, deepest `#92400e`): The one voice of emphasis. Primary buttons, active navigation, focus rings, selected tabs, the logo mark. It carries a bright-to-deep gradient (`#f59e0b → #d97706 → #b45309`) on primary actions and glows softly behind focused inputs. **As small text/links on light** it uses the AA-safe deep amber `--ac-text` (`#b45309`, 4.83:1) — the bright `#d97706` (3.19:1) is reserved for fills, borders, and buttons only.
 
 ### Neutral
 - **Cockpit Ink** (`#0e1526`): Primary text and figures on light surfaces.
@@ -134,10 +135,12 @@ A warm, near-neutral workspace lit by a single amber accent, with a dark navy ra
 - **Navy Rail** (`#0c1322 → #152138`): The fixed sidebar housing. Dark, so the amber glow reads as light inside it.
 
 ### Tertiary — Status hues (data only)
-- **Green** (`#059669`), **Red** (`#dc2626`), **Blue** (`#1d4ed8`), **Purple** (`#6d28d9`), **Cyan** (`#0e7490`), **Pink** (`#be185d`): Reserved for badges, categories, and status meaning (e.g. idea/research/analysis/ordered/rejected). Each pairs with an ~9–11% tint background of its own hue for filled chips. These encode meaning; they are never decorative.
+- **Green** (`#047d5a`, AA-adjusted from `#059669` for ≥4.5:1 on white), **Red** (`#dc2626`), **Blue** (`#1d4ed8`), **Purple** (`#6d28d9`), **Cyan** (`#0e7490`), **Pink** (`#be185d`): Reserved for badges, categories, and status meaning (e.g. idea/research/analysis/ordered/rejected). Each pairs with an ~9–11% tint background of its own hue for filled chips. These encode meaning; they are never decorative.
 
 ### Named Rules
 **The One Voice Rule.** Amber is the only accent used for emphasis and action. If two things on a screen are both amber, one of them is wrong. Status hues carry *data* meaning, never UI emphasis — don't reach for blue or green to make a button "pop."
+
+**The AA Text Rule.** Colored text on a light surface must clear 4.5:1 (WCAG AA). Use `--ac-text` (`#b45309`) for amber text/links, not the brand `--ac`; green text uses the AA-adjusted `#047d5a`. Bright brand amber `#d97706` and `#f59e0b` are for fills/buttons (white text on them, or large/bold), never small text on white.
 
 **The Tinted Neutral Rule.** Colored text sits on a tint of its own hue (e.g. blue text on `rgba(29,78,216,.09)`), never gray text on a saturated background. Washed-out gray-on-color is forbidden.
 
