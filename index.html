@@ -243,7 +243,7 @@
       <a href="/kontakt.html" data-site-link="kontakt.html" style="color:#a8b1cc;text-decoration:none;padding:2px 6px;background:rgba(255,255,255,.06);border-radius:6px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a8b1cc'">✉️ Kontakt</a>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <span id="versionDisplay" style="font-weight:600;color:var(--ac);font-size:11px">v—</span>
+      <span id="versionDisplay" style="font-weight:600;color:var(--ac-text);font-size:11px">v—</span>
       <span id="buildDate" style="font-size:9px;color:var(--tx3)"></span>
     </div>
     <div id="lastSaved" style="font-size:10px;color:var(--tx3)">Bereit</div>
@@ -291,11 +291,11 @@
     </div>
 
     <div class="stat-row">
-      <div class="stat-c"><span class="sl">Gesamt</span><span class="sv" style="color:var(--ac)" id="stTotal">0</span></div>
+      <div class="stat-c"><span class="sl">Gesamt</span><span class="sv" style="color:var(--ac-text)" id="stTotal">0</span></div>
       <div class="stat-c"><span class="sl">Ideen</span><span class="sv" style="color:var(--bl)" id="stIdee">0</span></div>
       <div class="stat-c"><span class="sl">In Analyse</span><span class="sv" style="color:var(--pu)" id="stAna">0</span></div>
       <div class="stat-c"><span class="sl">Bestellt</span><span class="sv" style="color:var(--gn)" id="stBest">0</span></div>
-      <div class="stat-c"><span class="sl">Ø Marge</span><span class="sv" style="color:var(--ac)" id="stMarge">—</span></div>
+      <div class="stat-c"><span class="sl">Ø Marge</span><span class="sv" style="color:var(--ac-text)" id="stMarge">—</span></div>
     </div>
     <div class="toolbar">
       <button class="btn btn-p" onclick="openProdModal()">＋ Neues Produkt</button>
@@ -312,12 +312,12 @@
     </div>
     <div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:16px">💡</span>
-      <span><b style="color:var(--ac)">Tipp:</b> Klicke auf eine Produkt-Zeile um die Detail-Ansicht zu öffnen mit <b>4 Tabs</b>: 📊 Übersicht · 🔍 Recherche · 🧮 Kalkulation · 🏭 Hersteller</span>
+      <span><b style="color:var(--ac-text)">Tipp:</b> Klicke auf eine Produkt-Zeile um die Detail-Ansicht zu öffnen mit <b>4 Tabs</b>: 📊 Übersicht · 🔍 Recherche · 🧮 Kalkulation · 🏭 Hersteller</span>
     </div>
 
     <!-- Bulk action bar (hidden when no selection) -->
     <div id="prodBulkBar" style="display:none;background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:10px;padding:10px 16px;margin-bottom:14px;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="font-weight:700;color:var(--ac)" id="prodBulkCount">0 ausgewählt</span>
+      <span style="font-weight:700;color:var(--ac-text)" id="prodBulkCount">0 ausgewählt</span>
       <button class="btn btn-sm" onclick="prodBulkSetStatus('Recherche')" style="border-color:var(--bl);color:var(--bl)">🔍 Recherche</button>
       <button class="btn btn-sm" onclick="prodBulkSetStatus('Analyse')" style="border-color:var(--pu);color:var(--pu)">📊 Analyse</button>
       <button class="btn btn-sm" onclick="prodBulkSetStatus('Bestellt')" style="border-color:var(--gn);color:var(--gn)">✅ Bestellt</button>
@@ -328,7 +328,7 @@
 
     <div style="overflow-x:auto">
       <table id="prodTable"><thead><tr>
-        <th style="width:36px;text-align:center"><input type="checkbox" id="prodSelAll" onchange="prodToggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></th>
+        <th style="width:36px;text-align:center"><input type="checkbox" id="prodSelAll" onchange="prodToggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac-text)"></th>
         <th onclick="psort('name')">Produkt</th><th onclick="psort('kategorie')">Kat.</th><th onclick="psort('status')">Status</th>
         <th class="nc" onclick="psort('einkaufspreis')">EK</th><th class="nc" onclick="psort('verkaufspreis')">VK</th>
         <th class="nc" onclick="psort('marge')">Marge</th><th class="nc" onclick="psort('profit')">Gewinn</th><th class="nc" onclick="psort('roi')">ROI</th>
@@ -434,7 +434,7 @@
         <table id="researchMasterTable" style="margin:0;font-size:12px;width:100%;min-width:640px">
           <thead>
             <tr>
-              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:240px"><span style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" id="researchSelAllCb" onchange="researchSelAll(this.checked)" title="Alle (gefilterten) markieren / Auswahl aufheben" style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer">Produkt</span> <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Checkbox: markieren (Kopf-Checkbox = ALLE gefilterten, auch über Seiten hinweg). Hauptbild-Klick öffnet Amazon, Name-Klick den Editor.</span></span></th>
+              <th style="position:sticky;left:0;background:var(--s2);z-index:2;min-width:240px"><span style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" id="researchSelAllCb" onchange="researchSelAll(this.checked)" title="Alle (gefilterten) markieren / Auswahl aufheben" style="width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer">Produkt</span> <span class="wtip" tabindex="0" aria-label="Hilfe">ⓘ<span class="wtip-content below right">Checkbox: markieren (Kopf-Checkbox = ALLE gefilterten, auch über Seiten hinweg). Hauptbild-Klick öffnet Amazon, Name-Klick den Editor.</span></span></th>
               <th>Kategorie <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Amazon-Kategorie, z. B. „Bad", „Heimwerker". <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
               <th class="nc">VK € <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Verkaufspreis aus dem Konkurrenz-Listing. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
               <th class="nc">⌀ Reviews <span class="wtip" tabindex="0">ⓘ<span class="wtip-content below">Durchschnittliche Bewertungsanzahl. <b>Niedrig ist gut</b> für Newcomer. <b>Original-Amazon-Daten – nicht editierbar.</b></span></span></th>
@@ -516,7 +516,7 @@
     </div>
 
     <div class="stat-row">
-      <div class="stat-c"><span class="sl">Gesamt Ideen</span><span class="sv" style="color:var(--ac)" id="istTotal">0</span></div>
+      <div class="stat-c"><span class="sl">Gesamt Ideen</span><span class="sv" style="color:var(--ac-text)" id="istTotal">0</span></div>
       <div class="stat-c"><span class="sl">Hohes Potenzial</span><span class="sv" style="color:var(--gn)" id="istHoch">0</span></div>
       <div class="stat-c"><span class="sl">Zu prüfen</span><span class="sv" style="color:var(--bl)" id="istPruefen">0</span></div>
       <div class="stat-c"><span class="sl">Verworfen</span><span class="sv" style="color:var(--rd)" id="istVerworfen">0</span></div>
@@ -549,7 +549,7 @@
 
     <!-- Bulk action bar (hidden when no selection) -->
     <div id="bulkBar" style="display:none;background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:10px;padding:10px 16px;margin-bottom:14px;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="font-weight:700;color:var(--ac)" id="bulkCount">0 ausgewählt</span>
+      <span style="font-weight:700;color:var(--ac-text)" id="bulkCount">0 ausgewählt</span>
       <button class="btn btn-sm" onclick="bulkSetStatus('Hohes Potenzial')" style="border-color:var(--gn);color:var(--gn)">⭐ Hohes Potenzial</button>
       <button class="btn btn-sm" onclick="bulkSetStatus('Zu prüfen')" style="border-color:var(--bl);color:var(--bl)">🔍 Zu prüfen</button>
       <button class="btn btn-sm" onclick="bulkSetStatus('Verworfen')" style="border-color:var(--or);color:var(--or)">❌ Verworfen</button>
@@ -559,7 +559,7 @@
 
     <div style="overflow-x:auto">
       <table id="ideenTable"><thead><tr>
-        <th style="width:32px"><input type="checkbox" id="ideenSelAll" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></th>
+        <th style="width:32px"><input type="checkbox" id="ideenSelAll" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac-text)"></th>
         <th style="width:60px">Bild</th>
         <th onclick="isort('name')">Produktidee</th>
         <th onclick="isort('kategorie')">Kategorie</th>
@@ -752,7 +752,7 @@
             <div class="fi full"><label>PPC / Monat €</label><input type="number" step=".01" id="dfPPC" oninput="saveDetailField('ppcMonat',parseFloat(this.value)||0);recalcDetail()"></div>
           </div>
           <div style="margin-top:14px;padding:12px;background:var(--s2);border-radius:8px;font-size:12px;color:var(--tx2)">
-            💡 Bestellmenge × EK = <b style="color:var(--ac)" id="dInvest">—</b> Investment
+            💡 Bestellmenge × EK = <b style="color:var(--ac-text)" id="dInvest">—</b> Investment
           </div>
         </div>
       </div>
@@ -777,7 +777,7 @@
         <h3>📈 Szenario-Vergleich (pro Monat)</h3>
         <div class="scen-grid">
           <div class="scen"><div class="st" style="color:var(--rd)">🔻 Pessimistisch (−30%)</div><div class="sr"><span>Verkäufe</span><span id="dspS">—</span></div><div class="sr"><span>Umsatz</span><span id="dspU">—</span></div><div class="sr"><span>Gewinn</span><span id="dspG">—</span></div></div>
-          <div class="scen"><div class="st" style="color:var(--ac)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="dsrS">—</span></div><div class="sr"><span>Umsatz</span><span id="dsrU">—</span></div><div class="sr"><span>Gewinn</span><span id="dsrG">—</span></div></div>
+          <div class="scen"><div class="st" style="color:var(--ac-text)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="dsrS">—</span></div><div class="sr"><span>Umsatz</span><span id="dsrU">—</span></div><div class="sr"><span>Gewinn</span><span id="dsrG">—</span></div></div>
           <div class="scen"><div class="st" style="color:var(--gn)">🔺 Optimistisch (+30%)</div><div class="sr"><span>Verkäufe</span><span id="dsoS">—</span></div><div class="sr"><span>Umsatz</span><span id="dsoU">—</span></div><div class="sr"><span>Gewinn</span><span id="dsoG">—</span></div></div>
         </div>
       </div>
@@ -826,7 +826,7 @@
     <!-- Haupt-Tab-Leiste: Schnell vs. Voll -->
     <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
       <button class="calcTab" data-calctab="quick" onclick="switchCalcTab('quick')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">⚡ Schnell-Kalkulation</button>
-      <button class="calcTab" data-calctab="full" onclick="switchCalcTab('full')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">💶 FBA-Kalkulator (vollständig)</button>
+      <button class="calcTab" data-calctab="full" onclick="switchCalcTab('full')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac-text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">💶 FBA-Kalkulator (vollständig)</button>
       <button class="calcTab" data-calctab="bsr" onclick="switchCalcTab('bsr')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📈 BSR → Verkäufe</button>
     </div>
 
@@ -895,7 +895,7 @@
           <div class="meter-labels"><span>0%</span><span>15%</span><span>30%</span><span>50%+</span></div>
           <div class="scen-grid" id="qScen">
             <div class="scen"><div class="st" style="color:var(--rd)">🔻 Pessimistisch (−30%)</div><div class="sr"><span>Verkäufe</span><span id="spS">—</span></div><div class="sr"><span>Umsatz</span><span id="spU">—</span></div><div class="sr"><span>Gewinn</span><span id="spG">—</span></div></div>
-            <div class="scen"><div class="st" style="color:var(--ac)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="srS">—</span></div><div class="sr"><span>Umsatz</span><span id="srU">—</span></div><div class="sr"><span>Gewinn</span><span id="srG">—</span></div></div>
+            <div class="scen"><div class="st" style="color:var(--ac-text)">📊 Realistisch</div><div class="sr"><span>Verkäufe</span><span id="srS">—</span></div><div class="sr"><span>Umsatz</span><span id="srU">—</span></div><div class="sr"><span>Gewinn</span><span id="srG">—</span></div></div>
             <div class="scen"><div class="st" style="color:var(--gn)">🔺 Optimistisch (+30%)</div><div class="sr"><span>Verkäufe</span><span id="soS">—</span></div><div class="sr"><span>Umsatz</span><span id="soU">—</span></div><div class="sr"><span>Gewinn</span><span id="soG">—</span></div></div>
           </div>
           <div style="margin-top:14px;text-align:right"><button class="btn btn-p" onclick="q2List()">➕ In Produktliste</button></div>
@@ -912,8 +912,8 @@
       <div class="help-body">
         <div class="help-title">FBA-Kalkulator: dein vollständiger Profit-Check</div>
         <div class="help-text">
-          Berechnet <b>alle Amazon-FBA-Kosten und Profit-Kennzahlen</b> live: Referral Fee, FBA-Versandgebühr (echte Gewichtsstaffeln), Lagerkosten (saisonal), PPC, Selling-Plan-Anteil, Marge, ROI und Break-even. <b>✅ Versand- &amp; Lagergebühren sind 1:1 aus der offiziellen <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Amazon FBA-Tarifübersicht (gültig ab 1. Feb 2026)</a> übernommen.</b> Nur einzelne Verkaufsgebühren-Prozentsätze je Kategorie sind noch Annahmen (im ⚙️ als <b style="color:var(--or)">ANNAHME</b> markiert) — exakte Sätze in Seller Central prüfen.<br>
-          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Für 100% exakte Gebühren nutze immer den <a href="https://sellercentral.amazon.de/fba/profitabilitycalculator" target="_blank" rel="noopener" style="color:var(--ac)">Amazon Profitability Calculator</a> mit deiner echten ASIN.</span>
+          Berechnet <b>alle Amazon-FBA-Kosten und Profit-Kennzahlen</b> live: Referral Fee, FBA-Versandgebühr (echte Gewichtsstaffeln), Lagerkosten (saisonal), PPC, Selling-Plan-Anteil, Marge, ROI und Break-even. <b>✅ Versand- &amp; Lagergebühren sind 1:1 aus der offiziellen <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac-text);text-decoration:underline">Amazon FBA-Tarifübersicht (gültig ab 1. Feb 2026)</a> übernommen.</b> Nur einzelne Verkaufsgebühren-Prozentsätze je Kategorie sind noch Annahmen (im ⚙️ als <b style="color:var(--or)">ANNAHME</b> markiert) — exakte Sätze in Seller Central prüfen.<br>
+          <span style="color:var(--tx3);font-style:italic;font-size:11px;display:inline-block;margin-top:4px">💡 Für 100% exakte Gebühren nutze immer den <a href="https://sellercentral.amazon.de/fba/profitabilitycalculator" target="_blank" rel="noopener" style="color:var(--ac-text)">Amazon Profitability Calculator</a> mit deiner echten ASIN.</span>
         </div>
       </div>
     </div>
@@ -992,9 +992,9 @@
           <div class="fi"><label>Selling Plan <span class="wika-help" data-tooltip="Professional: 39 €/Monat (lohnt ab ~40 Verkäufen/Monat).&#10;Individual: 0,99 €/Artikel (für Gelegenheitsverkäufer).">ⓘ</span></label><select id="fbPlan" onchange="fbaCalc()"><option value="professional">Professional (39 €/Mon.)</option><option value="individual">Individual (0,99 €/Stk.)</option></select></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Sicherheitspuffer auf FBA-Gebühr <span class="wika-help" data-tooltip="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — Standard ist 0%. Optional kannst du im ⚙️ einen eigenen Prozent-Puffer auf die FBA-Gebühr legen (z.B. für künftige Erhöhungen).">ⓘ</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. AMZ SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbCep" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac)"> Ohne Zentraleuropa-Programm (+0,26 €/Einheit) <span class="wika-help" data-tooltip="Wenn dein Lager in DE liegt und du NICHT am Zentraleuropa-Programm (CEP) teilnimmst, berechnet Amazon +0,26 €/Einheit.">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbFuel" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac-text)"> Sicherheitspuffer auf FBA-Gebühr <span class="wika-help" data-tooltip="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — Standard ist 0%. Optional kannst du im ⚙️ einen eigenen Prozent-Puffer auf die FBA-Gebühr legen (z.B. für künftige Erhöhungen).">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbLowPrice" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac-text)"> Low-Price-FBA-Tarif (Preis ≤ 20 € inkl. MwSt) <span class="wika-help" data-tooltip="Günstigerer FBA-Versandtarif für kleine, leichte, schnelldrehende Produkte bis 20 € inkl. MwSt. AMZ SellerHub prüft die Berechtigung automatisch.">ⓘ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer"><input type="checkbox" id="fbCep" onchange="fbaCalc()" style="width:16px;height:16px;accent-color:var(--ac-text)"> Ohne Zentraleuropa-Programm (+0,26 €/Einheit) <span class="wika-help" data-tooltip="Wenn dein Lager in DE liegt und du NICHT am Zentraleuropa-Programm (CEP) teilnimmst, berechnet Amazon +0,26 €/Einheit.">ⓘ</span></label>
         </div>
         <div class="fg" style="margin-top:8px">
           <div class="fi"><label>Manuelle Zusatzgebühr €/Stk <span class="wika-help" data-tooltip="Freies Feld für sonstige Gebühren: z.B. Lithium-/Gefahrgut-Zuschlag (0,10 €), Etikettierung, Sonderverpackung.">ⓘ</span></label><input type="number" step=".01" id="fbExtra" placeholder="0.00" oninput="fbaCalc()"></div>
@@ -1022,7 +1022,7 @@
         <!-- KPI-Kacheln -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="fbKpis">
           <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Gewinn / Einheit</span><span class="cv" id="fbKpiProfit" style="color:var(--gn);font-size:24px">—</span></div>
-          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Netto-Marge</span><span class="cv" id="fbKpiMargin" style="color:var(--ac);font-size:24px">—</span></div>
+          <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Netto-Marge</span><span class="cv" id="fbKpiMargin" style="color:var(--ac-text);font-size:24px">—</span></div>
           <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">ROI</span><span class="cv" id="fbKpiRoi" style="color:var(--bl);font-size:24px">—</span></div>
           <div class="ci" style="background:var(--s2);border-radius:10px;padding:14px"><span class="cl">Gewinn / Monat</span><span class="cv" id="fbKpiMonthly" style="color:var(--pu);font-size:24px">—</span></div>
         </div>
@@ -1073,7 +1073,7 @@
     <!-- ════ STEUER / FINANZAMT BEREICH ════ -->
     <div style="margin-top:20px">
       <label style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(135deg,var(--s1),var(--s2));border:1.5px solid var(--bd2);border-radius:12px;cursor:pointer">
-        <input type="checkbox" id="fbTaxEnable" onchange="fbaToggleTax()" style="width:18px;height:18px;accent-color:var(--ac)">
+        <input type="checkbox" id="fbTaxEnable" onchange="fbaToggleTax()" style="width:18px;height:18px;accent-color:var(--ac-text)">
         <span style="font-size:15px;font-weight:700;color:var(--tx)">🏛️ Steuern / Finanzamt-Rücklage berechnen</span>
         <span class="wika-help" data-tooltip="Berechnet auf Basis deines hochgerechneten Jahresgewinns, wie viel du fürs Finanzamt zurücklegen solltest — damit keine böse Nachzahlung kommt.">ⓘ</span>
         <span style="margin-left:auto;font-size:12px;color:var(--tx3)">optional</span>
@@ -1254,7 +1254,7 @@
             <summary>⚙️ Gemini API-Key (für Bildgenerierung)</summary>
             <input type="password" id="igApikey" placeholder="AIza… (nur lokal gespeichert)">
             <div class="ig-keyok" id="igKeyOk">✓ Key gespeichert</div>
-            <div class="ig-hint">Benötigt aktiviertes Billing. Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ac)">aistudio.google.com/apikey</a> · Mit Cloud-Konto (☁️) läuft die KI über AMZ SellerHub — ein eigener Key ist optional.</div>
+            <div class="ig-hint">Benötigt aktiviertes Billing. Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ac-text)">aistudio.google.com/apikey</a> · Mit Cloud-Konto (☁️) läuft die KI über AMZ SellerHub — ein eigener Key ist optional.</div>
           </details>
         </div>
       </div>
@@ -1322,7 +1322,7 @@
 
     <!-- Tab-Leiste -->
     <div style="display:flex;gap:4px;border-bottom:2px solid var(--bd);margin-bottom:18px">
-      <button class="kwTab" data-kwtab="tracking" onclick="switchKwTab('tracking')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">📍 Keyword-Tracking</button>
+      <button class="kwTab" data-kwtab="tracking" onclick="switchKwTab('tracking')" style="padding:11px 20px;background:var(--s1);border:1.5px solid var(--ac);border-bottom:1.5px solid var(--s1);border-radius:10px 10px 0 0;color:var(--ac-text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:-2px">📍 Keyword-Tracking</button>
       <button class="kwTab" data-kwtab="cleaner" onclick="switchKwTab('cleaner')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🧹 Backend-Reiniger</button>
       <button class="kwTab" data-kwtab="scribbles" onclick="switchKwTab('scribbles')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">📝 Listing-Abdeckung</button>
       <button class="kwTab" data-kwtab="planer" onclick="switchKwTab('planer')" style="padding:11px 20px;background:transparent;border:1.5px solid transparent;color:var(--tx2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-2px">🎯 PPC-Planer</button>
@@ -1558,7 +1558,7 @@
       <h3>📊 Ergebnis</h3>
       <div class="fg4">
         <div class="ci"><span class="cl">Reichweite (Tage)</span><span class="cv" style="color:var(--bl)" id="lReich">—</span></div>
-        <div class="ci"><span class="cl">Nachbestellen am</span><span class="cv" style="color:var(--ac)" id="lDate">—</span></div>
+        <div class="ci"><span class="cl">Nachbestellen am</span><span class="cv" style="color:var(--ac-text)" id="lDate">—</span></div>
         <div class="ci"><span class="cl">Reorder-Point (Stk)</span><span class="cv" style="color:var(--or)" id="lROP">—</span></div>
         <div class="ci"><span class="cl">Investment</span><span class="cv" style="color:var(--pu)" id="lInv">—</span></div>
       </div>
@@ -1745,14 +1745,14 @@
         <b style="color:var(--tx)">Black Box (Produktrecherche):</b> Filter setzen → "Export" oben rechts → CSV<br>
         <b style="color:var(--tx)">Cerebro/Magnet (Keywords):</b> Tabelle filtern → "Export to CSV" Button<br>
         <b style="color:var(--tx)">Xray (Chrome-Extension):</b> Auf Amazon-Suchergebnisseite → Xray öffnen → "Export"<br>
-        <b style="color:var(--ac)">Ziel-Wahl beim Import:</b> Du entscheidest pro Datei ob die Treffer in den Ideen-Pool oder direkt in die Produktliste sollen.
+        <b style="color:var(--ac-text)">Ziel-Wahl beim Import:</b> Du entscheidest pro Datei ob die Treffer in den Ideen-Pool oder direkt in die Produktliste sollen.
       </div>
     </div>
 
     <!-- Drop-Zone -->
     <div id="heliumDropZone" style="border:2px dashed var(--bd2);border-radius:14px;padding:48px 24px;text-align:center;background:var(--s1);cursor:pointer;transition:all .2s" onclick="document.getElementById('heliumFileInput').click()">
       <div style="font-size:48px;margin-bottom:12px;opacity:.7">📥</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--ac)">Helium 10 CSV hier ablegen oder klicken</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--ac-text)">Helium 10 CSV hier ablegen oder klicken</div>
       <div style="font-size:12px;color:var(--tx2)">Auto-Erkennung von <b>Black Box</b>, <b>Cerebro</b>, <b>Magnet</b> und <b>Xray</b> Exporten<br>Formate: <b>.csv</b>, <b>.tsv</b>, <b>.txt</b></div>
       <input type="file" id="heliumFileInput" accept=".csv,.tsv,.txt" style="display:none" onchange="handleHeliumFile(event)">
     </div>
@@ -1830,7 +1830,7 @@
     <div style="padding:10px 18px;border-top:1px solid var(--bd);background:var(--s2);border-radius:0 0 14px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--tx3)">
       <span><kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">↑</kbd> <kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">↓</kbd> navigieren</span>
       <span><kbd style="font-family:inherit;background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:1px 6px">⏎</kbd> öffnen</span>
-      <span>Ergebnisse: <span id="globalSearchCount" style="color:var(--ac);font-weight:700">0</span></span>
+      <span>Ergebnisse: <span id="globalSearchCount" style="color:var(--ac-text);font-weight:700">0</span></span>
     </div>
   </div>
 </div>
@@ -2116,7 +2116,7 @@
     <div class="mh"><h2 id="adminPwModalTitle">Passwort ändern</h2><button class="mc" onclick="adminClosePwModal()">✕</button></div>
     <div class="mb">
       <div style="background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--tx2)">
-        Benutzer: <b id="adminPwTargetName" style="color:var(--ac)"></b>
+        Benutzer: <b id="adminPwTargetName" style="color:var(--ac-text)"></b>
       </div>
       <div class="fg" style="grid-template-columns:1fr">
         <div class="fi">
@@ -2149,7 +2149,7 @@
     <div class="mb">
       <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:18px">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">Benutzer</div>
-        <div style="font-size:18px;font-weight:700;color:var(--ac)" id="adminLicTargetName"></div>
+        <div style="font-size:18px;font-weight:700;color:var(--ac-text)" id="adminLicTargetName"></div>
         <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap">
           <div>
             <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px">Aktueller Lizenzkey</div>
@@ -2242,13 +2242,13 @@
     <div class="mh"><h2>🤖 KI-Import</h2><button class="mc" onclick="closeImportModal()">✕</button></div>
     <div class="mb">
       <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--bd)">
-        <button class="btn btn-sm" id="tabJSON" onclick="switchImpTab('json')" style="border-radius:8px 8px 0 0;border-bottom:2px solid var(--ac);color:var(--ac)">📦 JSON (strukturiert)</button>
+        <button class="btn btn-sm" id="tabJSON" onclick="switchImpTab('json')" style="border-radius:8px 8px 0 0;border-bottom:2px solid var(--ac);color:var(--ac-text)">📦 JSON (strukturiert)</button>
         <button class="btn btn-sm" id="tabText" onclick="switchImpTab('text')" style="border-radius:8px 8px 0 0;border-bottom:2px solid transparent">📝 Freitext (flexibel)</button>
       </div>
 
       <div id="impJSONTab">
         <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
-          <b style="color:var(--ac)">So geht's:</b> Klick auf <b>📋 Prompt-Vorlage</b>, kopiere den Prompt in Claude/Gemini, und füge die JSON-Antwort hier ein. AMZ SellerHub liest alle Ideen automatisch.
+          <b style="color:var(--ac-text)">So geht's:</b> Klick auf <b>📋 Prompt-Vorlage</b>, kopiere den Prompt in Claude/Gemini, und füge die JSON-Antwort hier ein. AMZ SellerHub liest alle Ideen automatisch.
         </div>
         <div class="fi full"><label>JSON von KI einfügen</label>
           <textarea id="impJSON" style="min-height:260px;font-family:monospace;font-size:11px" placeholder='[&#10;  {&#10;    "name": "Faltbare Wasserflasche",&#10;    "kategorie": "Outdoor",&#10;    "potenzial": "Hoch",&#10;    "vkPreis": 19.90,&#10;    "marktgroesse": "5.000 Suchanfragen/Monat",&#10;    "zielgruppe": "Outdoor-Fans 25-45",&#10;    "differenzierung": "Silikon mit Karabiner",&#10;    "warum": "Wachsendes Reisesegment",&#10;    "risiken": "Viel Konkurrenz"&#10;  }&#10;]'></textarea>
@@ -2257,7 +2257,7 @@
 
       <div id="impTextTab" style="display:none">
         <div style="background:var(--s3);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.6">
-          <b style="color:var(--ac)">So geht's:</b> Kopiere einfach die Antwort von Claude/Gemini rein – egal ob Listen, Tabellen oder Fließtext. AMZ SellerHub versucht die Produktideen automatisch zu erkennen.
+          <b style="color:var(--ac-text)">So geht's:</b> Kopiere einfach die Antwort von Claude/Gemini rein – egal ob Listen, Tabellen oder Fließtext. AMZ SellerHub versucht die Produktideen automatisch zu erkennen.
         </div>
         <div class="fi full"><label>KI-Antwort einfügen</label>
           <textarea id="impText" style="min-height:260px;font-size:12px" placeholder="1. Faltbare Wasserflasche – Outdoor-Segment, ca. 20€, Zielgruppe Reisende...&#10;2. Magnetische Messerhalter – Küchenbereich, hohe Marge..."></textarea>
@@ -2373,7 +2373,7 @@
     <div class="mh"><h2>✨ Antwort von Claude einfügen</h2><button class="mc" onclick="closeClaudeModal()">✕</button></div>
     <div class="mb">
       <div style="background:linear-gradient(135deg,var(--s3),var(--s2));border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12px;line-height:1.65;border:1px solid var(--bd)">
-        <div style="color:var(--ac);font-weight:700;margin-bottom:6px">📝 So geht's:</div>
+        <div style="color:var(--ac-text);font-weight:700;margin-bottom:6px">📝 So geht's:</div>
         <div>1. In Claude die komplette Antwort markieren (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘A</kbd> + <kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘C</kbd>)</div>
         <div>2. Hier einfügen (<kbd style="background:var(--s4);padding:2px 6px;border-radius:4px;font-family:monospace">⌘V</kbd>) – AMZ SellerHub findet das JSON automatisch</div>
         <div>3. Auf <b>📥 Ideen importieren</b> klicken</div>

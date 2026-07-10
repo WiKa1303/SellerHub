@@ -41,7 +41,7 @@ function renderLicensePanel(){
         '<div style="font-size:24px">🛡️</div>'+
         '<div style="flex:1;min-width:200px">'+
           '<div style="font-weight:700;color:var(--tx);margin-bottom:2px">Administrator-Lizenz</div>'+
-          '<div style="font-size:12px;color:var(--tx2)">Lizenzkey: <span style="font-family:monospace;color:var(--ac);font-weight:600">'+adminEscape(u.licenseKey||'—')+'</span> · Unbegrenzt gültig</div>'+
+          '<div style="font-size:12px;color:var(--tx2)">Lizenzkey: <span style="font-family:monospace;color:var(--ac-text);font-weight:600">'+adminEscape(u.licenseKey||'—')+'</span> · Unbegrenzt gültig</div>'+
         '</div>'+
         '<button class="btn btn-sm" onclick="go(\'admin\')">🛡️ Admin-Bereich</button>'+
       '</div>';
@@ -210,7 +210,7 @@ function adminRenderUsers(){
     var permanent=(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined');
 
     var roleBadge=isAdmin
-      ? '<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:var(--acd);color:var(--ac);font-weight:700;font-size:11px">🛡️ Admin</span>'
+      ? '<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:var(--acd);color:var(--ac-text);font-weight:700;font-size:11px">🛡️ Admin</span>'
       : '<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:var(--bld);color:var(--bl);font-weight:600;font-size:11px">👤 Standard</span>';
 
     // Status badge (combined)
@@ -232,7 +232,7 @@ function adminRenderUsers(){
     // License validity column
     var licText;
     if(permanent){
-      licText='<span style="color:var(--ac);font-weight:700">∞ permanent</span>';
+      licText='<span style="color:var(--ac-text);font-weight:700">∞ permanent</span>';
     }else if(licExp){
       licText='<span style="color:var(--rd);font-weight:700">abgelaufen</span>';
     }else{
@@ -275,7 +275,7 @@ function adminRenderUsers(){
     tr.style.borderBottom='1px solid var(--bd)';
     if(isCurrent)tr.style.background='rgba(217,119,6,.05)';
     tr.innerHTML=
-      '<td style="padding:12px;font-weight:600">'+adminEscape(u.username)+(isCurrent?' <span style="color:var(--ac);font-size:11px">●</span>':'')+'</td>'+
+      '<td style="padding:12px;font-weight:600">'+adminEscape(u.username)+(isCurrent?' <span style="color:var(--ac-text);font-size:11px">●</span>':'')+'</td>'+
       '<td style="padding:12px">'+roleBadge+'</td>'+
       '<td style="padding:12px">'+keyHtml+'</td>'+
       '<td style="padding:12px;font-size:12px">'+licText+'</td>'+
@@ -588,7 +588,7 @@ function adminOpenLicenseMenu(username){
   document.getElementById('adminLicCurrentKey').textContent=u.licenseKey||'—';
   var ex=document.getElementById('adminLicCurrentExpiry');
   if(u.licenseExpiresAt===null||typeof u.licenseExpiresAt==='undefined'){
-    ex.innerHTML='<span style="color:var(--ac)">∞ permanent</span>';
+    ex.innerHTML='<span style="color:var(--ac-text)">∞ permanent</span>';
   }else if(window.WikaAuth.isLicenseExpired(u)){
     ex.innerHTML='<span style="color:var(--rd)">'+adminFmtDate(u.licenseExpiresAt)+' (abgelaufen)</span>';
   }else{
@@ -627,7 +627,7 @@ function adminExtendLicense(mode,days){
   var refreshed=window.WikaAuth.findUser(_adminLicTarget);
   var ex=document.getElementById('adminLicCurrentExpiry');
   if(refreshed.licenseExpiresAt===null){
-    ex.innerHTML='<span style="color:var(--ac)">∞ permanent</span>';
+    ex.innerHTML='<span style="color:var(--ac-text)">∞ permanent</span>';
   }else{
     ex.innerHTML=adminFmtDate(refreshed.licenseExpiresAt)+' <span style="color:var(--gn);font-size:11px">('+window.WikaAuth.licenseDaysLeft(refreshed)+' Tage)</span>';
   }
@@ -744,7 +744,7 @@ function shCloudRender(){
     return '<tr style="border-bottom:1px solid var(--bd)">'+
       '<td style="padding:10px 12px;font-weight:600">'+adminEscape(u.email)+'</td>'+
       '<td style="padding:10px 12px">'+adminEscape(u.displayName||'—')+'</td>'+
-      '<td style="padding:10px 12px"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:'+(isAdmin?'rgba(217,119,6,.15);color:var(--ac)':'rgba(29,78,216,.10);color:#1d4ed8')+'">'+(isAdmin?'Admin':'Benutzer')+'</span></td>'+
+      '<td style="padding:10px 12px"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:'+(isAdmin?'rgba(217,119,6,.15);color:var(--ac-text)':'rgba(29,78,216,.10);color:#1d4ed8')+'">'+(isAdmin?'Admin':'Benutzer')+'</span></td>'+
       '<td style="padding:10px 12px;color:var(--tx2)">'+adminFmtDate(u.createdAt)+'</td>'+
       '<td style="padding:10px 12px;color:var(--tx2)">'+adminFmtDate(u.lastLoginAt)+'</td>'+
       '<td style="padding:10px 12px;text-align:right;white-space:nowrap">'+

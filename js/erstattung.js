@@ -96,7 +96,7 @@ function erAnalyze(){
       +faelle.map(function(e,i){
         return '<tr'+(e.fristAlt?' style="opacity:.6"':'')+'><td style="font-weight:600">'+esc(e.sku)+'</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(e.name)+'">'+esc(e.name||'—')+'</td>'
           +'<td class="nc">'+e.verloren+'</td><td class="nc">'+e.beschaedigt+'</td><td class="nc">'+e.gefunden+'</td><td class="nc">'+e.erstattet+'</td>'
-          +'<td class="nc" style="font-weight:700;color:var(--ac)">'+e.offen+'</td><td class="nc">'+eur(e.wert)+'</td>'
+          +'<td class="nc" style="font-weight:700;color:var(--ac-text)">'+e.offen+'</td><td class="nc">'+eur(e.wert)+'</td>'
           +'<td style="font-size:11px;white-space:nowrap">'+e.frist+'</td>'
           +'<td><button class="btn btn-sm" onclick="erCopyCase('+i+')" title="Vorformulierten Fall-Text für den Seller Support kopieren">📋 Fall-Text</button></td></tr>';
       }).join('')

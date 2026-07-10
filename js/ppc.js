@@ -155,7 +155,7 @@ function ppcRenderPlaner(){
     return '<tr><td style="font-weight:600">'+esc(k.keyword)+'</td>'
       +'<td class="nc">'+(k.volume?k.volume.toLocaleString('de-DE'):'—')+'</td>'
       +'<td class="nc">'+(k.cpc!=null?k.cpc.toFixed(2)+' €':'—')+'</td>'
-      +'<td class="nc" style="font-weight:700;color:var(--ac)">'+mb.toFixed(2)+' €</td>'
+      +'<td class="nc" style="font-weight:700;color:var(--ac-text)">'+mb.toFixed(2)+' €</td>'
       +'<td class="nc">~'+klicks+'</td></tr>';
   }).join('');
 

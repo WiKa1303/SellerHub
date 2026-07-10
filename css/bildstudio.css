@@ -2,17 +2,17 @@
 @media(max-width:1000px){#p-inhalt .ig-layout{grid-template-columns:1fr}}
 #p-inhalt .ig-right{position:sticky;top:90px}
 #p-inhalt label.ig-fld{display:block;font-size:13px;font-weight:600;color:var(--tx);margin:0 0 7px}
-#p-inhalt .ig-fld .req{color:var(--ac)}
+#p-inhalt .ig-fld .req{color:var(--ac-text)}
 #p-inhalt .ig-left input[type=text],#p-inhalt .ig-left input[type=url],#p-inhalt textarea,#p-inhalt select{width:100%;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;padding:11px 13px;font-size:13.5px;font-family:inherit;outline:none}
 #p-inhalt textarea{min-height:100px;resize:vertical;line-height:1.55}
-#p-inhalt input:focus,#p-inhalt textarea:focus,#p-inhalt select:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acd)}
+#p-inhalt input:focus,#p-inhalt textarea:focus,#p-inhalt select:focus{border-color:var(--ac-text);box-shadow:0 0 0 3px var(--acd)}
 #p-inhalt .ig-hint{font-size:11.5px;color:var(--tx3);margin-top:6px}
 #p-inhalt .ig-import{position:relative}
 #p-inhalt .ig-import input{width:100%;box-sizing:border-box;background:#fff;border:1.5px solid var(--bd);color:var(--tx);border-radius:9px;font-size:13.5px;font-family:inherit;outline:none;min-height:48px;padding:12px 128px 12px 38px;text-overflow:ellipsis}
 #p-inhalt .ig-import .ig-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%)}
 #p-inhalt .ig-import .ig-imp-btn{position:absolute;right:6px;top:6px;bottom:6px;display:flex;align-items:center;justify-content:center;white-space:nowrap;padding:0 18px;border:none;border-radius:7px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-weight:700;font-size:12.5px;line-height:1;cursor:pointer}
 #p-inhalt .ig-drop{border:1.5px dashed var(--bd2);border-radius:11px;padding:30px 18px;text-align:center;cursor:pointer;transition:.15s;background:var(--s2);display:flex;align-items:center;justify-content:center;gap:14px}
-#p-inhalt .ig-drop:hover,#p-inhalt .ig-drop.drag{border-color:var(--ac);background:var(--acd)}
+#p-inhalt .ig-drop:hover,#p-inhalt .ig-drop.drag{border-color:var(--ac-text);background:var(--acd)}
 #p-inhalt .ig-drop .ig-dic{font-size:28px}
 #p-inhalt .ig-drop .ig-dt{font-size:14px;font-weight:600;color:var(--tx)}
 #p-inhalt .ig-drop .ig-ds{font-size:12px;color:var(--tx3);margin-top:3px}
@@ -29,11 +29,11 @@
 #p-inhalt .ig-badge.opt{background:var(--s3);color:var(--tx3);margin-left:8px;font-weight:600}
 #p-inhalt .ig-seclabel{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:12px;color:var(--tx)}
 #p-inhalt .ig-usp{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-#p-inhalt .ig-usp .ig-num{width:24px;height:24px;border-radius:7px;background:var(--acd);color:var(--ac);display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0}
+#p-inhalt .ig-usp .ig-num{width:24px;height:24px;border-radius:7px;background:var(--acd);color:var(--ac-text);display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0}
 #p-inhalt .ig-usp input{flex:1}
 #p-inhalt .ig-usp .ig-del{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:16px;padding:4px}
 #p-inhalt .ig-addusp{background:none;border:1.5px dashed var(--bd2);color:var(--tx2);padding:9px 14px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px}
-#p-inhalt .ig-addusp:hover{border-color:var(--ac);color:var(--ac)}
+#p-inhalt .ig-addusp:hover{border-color:var(--ac-text);color:var(--ac-text)}
 #p-inhalt .ig-title-row{display:flex;gap:8px;align-items:stretch}
 #p-inhalt .ig-title-row input{flex:1}
 #p-inhalt .ig-ai-btn{flex-shrink:0;border:1.5px solid var(--pu);background:var(--pud);color:var(--pu);border-radius:9px;padding:0 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s}
@@ -89,8 +89,8 @@
 .ig-rescard .ig-ph img{width:100%;height:100%;object-fit:cover}
 .ig-rescard .ig-cap{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ig-rescard .ig-cap .nm{font-size:12.5px;font-weight:600;color:var(--tx)}
-.ig-rescard .ig-cap a{font-size:14px;color:var(--ac);text-decoration:none}
-.ig-spin{width:30px;height:30px;border:3px solid var(--s4);border-top-color:var(--ac);border-radius:50%;animation:ig-spin 1s linear infinite}
+.ig-rescard .ig-cap a{font-size:14px;color:var(--ac-text);text-decoration:none}
+.ig-spin{width:30px;height:30px;border:3px solid var(--s4);border-top-color:var(--ac-text);border-radius:50%;animation:ig-spin 1s linear infinite}
 .ig-reserr{font-size:11px;color:var(--rd);padding:0 10px 10px;text-align:center}
 @keyframes ig-spin{to{transform:rotate(360deg)}}
 #p-inhalt .ig-sec{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -103,18 +103,18 @@
 #p-inhalt .ig-count.over{color:var(--rd)}
 #p-inhalt .ig-visuals{display:flex;flex-direction:column;gap:7px;margin-bottom:4px}
 #p-inhalt .ig-vis{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--tx);cursor:pointer;padding:6px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--s2)}
-#p-inhalt .ig-vis:hover{border-color:var(--ac)}
-#p-inhalt .ig-vis input{width:15px;height:15px;accent-color:var(--ac);cursor:pointer}
+#p-inhalt .ig-vis:hover{border-color:var(--ac-text)}
+#p-inhalt .ig-vis input{width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer}
 #p-inhalt .ig-resstatus{font-size:12.5px;color:var(--tx2)}
 #p-inhalt #igResultsCard{margin-top:18px}
 #p-inhalt .ig-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 #p-inhalt .ig-toggle{border:1.5px solid var(--bd2);background:var(--s1);color:var(--tx2);border-radius:9px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.12s}
-#p-inhalt .ig-toggle:hover{border-color:var(--ac);color:var(--ac)}
+#p-inhalt .ig-toggle:hover{border-color:var(--ac-text);color:var(--ac-text)}
 #p-inhalt .ig-resgrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
 #p-inhalt .ig-rescard{position:relative}
 #p-inhalt .ig-res-actions{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--bd)}
 #p-inhalt .ig-res-btn{flex:1;border:1px solid var(--bd);background:var(--s1);color:var(--tx2);border-radius:7px;padding:7px 0;font-size:14px;cursor:pointer;transition:.12s}
-#p-inhalt .ig-res-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--acd)}
+#p-inhalt .ig-res-btn:hover{border-color:var(--ac-text);color:var(--ac-text);background:var(--acd)}
 .ig-lightbox{position:fixed;inset:0;background:rgba(15,23,41,.78);backdrop-filter:blur(4px);z-index:9500;display:none;align-items:center;justify-content:center;padding:24px}
 .ig-lightbox.show{display:flex}
 .ig-lb-inner{background:var(--s1);border-radius:16px;max-width:720px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.4)}

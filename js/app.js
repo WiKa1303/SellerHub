@@ -267,7 +267,7 @@ function backupOpen(){
       return '<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px">'+
         '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:12.5px;color:var(--tx)">📅 '+esc(s.id)+'</div><div style="font-size:10.5px;color:var(--tx3)">'+n.p+' Produkte · '+n.i+' Ideen · '+n.k+' Kandidaten · '+kb+' KB</div></div>'+
         '<button class="btn btn-sm" onclick="SHBackup.download(\''+esc(s.id)+'\')" title="Als JSON-Datei herunterladen" style="font-size:10.5px">⬇</button>'+
-        '<button class="btn btn-sm" onclick="SHBackup.restore(\''+esc(s.id)+'\')" title="Diesen Stand wiederherstellen" style="font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">↩ Wiederherstellen</button>'+
+        '<button class="btn btn-sm" onclick="SHBackup.restore(\''+esc(s.id)+'\')" title="Diesen Stand wiederherstellen" style="font-size:10.5px;background:var(--acd);color:var(--ac-text);border:1px solid var(--ac);font-weight:700">↩ Wiederherstellen</button>'+
       '</div>';
     }).join('');
   });
@@ -1063,7 +1063,7 @@ function qcBsrCatKey(t){
 function qcNumField(x,val){
   // Optionale Felder (Feintuning) schreien nicht „fehlt" — neutraler Rahmen
   var bd=val!=null?'var(--gn)':(x.opt?'var(--bd)':'var(--ac)');
-  var state=val!=null?'<span style="color:var(--gn)">✓</span>':(x.opt?'<span style="color:var(--tx3)">optional</span>':'<span style="color:var(--ac)">fehlt</span>');
+  var state=val!=null?'<span style="color:var(--gn)">✓</span>':(x.opt?'<span style="color:var(--tx3)">optional</span>':'<span style="color:var(--ac-text)">fehlt</span>');
   return '<div style="background:var(--s1);border:1.5px solid '+bd+';border-radius:10px;padding:10px 14px">'+
     '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);font-weight:700;margin-bottom:4px">'+x.label+' '+state+'</div>'+
     '<div style="display:flex;align-items:center;gap:6px"><input type="number" step="any" value="'+(val!=null?val:'')+'" placeholder="—" onchange="quickCheckField(\''+x.f+'\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" style="width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:15px;font-weight:700;color:var(--tx);text-align:right;outline:none"><span style="font-size:12px;color:var(--tx3);flex-shrink:0">'+x.unit+'</span></div>'+
@@ -1140,7 +1140,7 @@ function quickCheckRenderStep(){ // Schritt 2: fehlende Daten ERST abfragen
     (img?'<img src="'+esc(img)+'" class="pzoom" style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--bd);background:#fff">':'')+
     '<div style="flex:1;min-width:200px"><div style="font-weight:800;font-size:15px;color:var(--tx)">'+esc(c.name)+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx2);margin-top:2px">'+esc(qcState.fetchNote)+(have.length?' · Automatisch da: <b>'+have.map(function(x){return x.label;}).join(', ')+'</b>':'')+'</div></div>'+
-    '<span style="background:var(--acd);color:var(--ac);font-weight:800;font-size:11px;border-radius:10px;padding:4px 12px;flex-shrink:0">SCHRITT 2 / 3</span></div>';
+    '<span style="background:var(--acd);color:var(--ac-text);font-weight:800;font-size:11px;border-radius:10px;padding:4px 12px;flex-shrink:0">SCHRITT 2 / 3</span></div>';
   h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px">Es fehlen noch '+missing.length+' entscheidende Zahl'+(missing.length===1?'':'en')+' (Amazon hat sie nicht geliefert):</div>';
   h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">Nur diese Werte entscheiden über das Urteil — Einkaufspreis &amp; FBA-Gebühren sind bewusst NICHT nötig (dafür rechnet eine Faustregel-Schätzung; verfeinern kannst du sie nach dem Urteil).</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">';
@@ -1220,7 +1220,7 @@ function renderQuickCheck(){
   // Fortschritts-Karte (nur beim Laden)
   if(qcState.step==='loading'){
     h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:20px 24px;margin-bottom:16px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span id="qcProgLabel" style="font-size:13px;font-weight:700;color:var(--tx)">'+esc(qcState.progLabel||'Starte Prüfung …')+'</span><span id="qcProgPct" style="font-size:16px;font-weight:800;color:var(--ac)">'+Math.round(qcState.progress)+' %</span></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span id="qcProgLabel" style="font-size:13px;font-weight:700;color:var(--tx)">'+esc(qcState.progLabel||'Starte Prüfung …')+'</span><span id="qcProgPct" style="font-size:16px;font-weight:800;color:var(--ac-text)">'+Math.round(qcState.progress)+' %</span></div>'+
       '<div style="height:10px;background:var(--s2);border-radius:6px;overflow:hidden"><div id="qcProgBar" style="height:100%;width:'+qcState.progress+'%;background:linear-gradient(90deg,var(--ac),var(--gn));transition:width .3s ease"></div></div>'+
       '<div style="font-size:10.5px;color:var(--tx3);margin-top:8px">Listing laden → Daten lesen → DE-Pflichten prüfen → fehlende Zahlen abfragen → Urteil</div>'+
     '</div>';
@@ -1554,8 +1554,8 @@ function renderAuswahl(){
   // Auswahl-Leiste über den Karten
   var aSelCount=Object.keys(auswahlSel).filter(function(id){return list.some(function(x){return x.id===id;});}).length;
   var html='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;'+(aSelCount?'background:var(--acd);border:1.5px solid var(--ac);border-radius:10px;padding:9px 14px':'padding:2px')+'">'+
-    '<label style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2);cursor:pointer;font-weight:600"><input type="checkbox" onchange="auswahlSelAll(this.checked)" '+(aSelCount>0&&aSelCount===list.length?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer">Alle markieren</label>'+
-    (aSelCount?'<b style="font-size:13px;color:var(--ac)">'+aSelCount+' markiert</b>'+
+    '<label style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2);cursor:pointer;font-weight:600"><input type="checkbox" onchange="auswahlSelAll(this.checked)" '+(aSelCount>0&&aSelCount===list.length?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer">Alle markieren</label>'+
+    (aSelCount?'<b style="font-size:13px;color:var(--ac-text)">'+aSelCount+' markiert</b>'+
       '<button class="btn btn-sm" onclick="auswahlDeleteSelected()" style="background:var(--rd);color:#fff;border:none;font-weight:700;font-size:12px">🗑 Markierte entfernen</button>'+
       '<button class="btn btn-sm" onclick="auswahlSelAll(false)" style="font-size:12px">Auswahl aufheben</button>':'')+
   '</div>';
@@ -1566,7 +1566,7 @@ function renderAuswahl(){
     var imgs=(it.compImages||[]).slice(0,5).map(function(u){return '<img src="'+esc(u)+'" class="pzoom" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid var(--bd)" loading="lazy">';}).join('');
     var usps=(it.compUsps||[]).slice(0,4).map(function(u){return '<li>'+esc(u)+'</li>';}).join('');
     html+='<div style="background:var(--s1);border:1.5px solid '+(auswahlSel[it.id]?'var(--ac)':(it.decision==='abgelehnt'?'var(--bd)':'var(--'+d.color+')'))+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px'+(it.decision==='abgelehnt'?';opacity:.6':'')+'">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0"><input type="checkbox" onchange="auswahlToggleSel(\''+it.id+'\',this.checked)" '+(auswahlSel[it.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer;flex-shrink:0;margin-top:2px" title="Markieren"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+esc(it.name||'')+'</div></div><span style="flex-shrink:0;display:inline-block;padding:3px 9px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:12px">'+(sc>0?sc:'—')+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0"><input type="checkbox" onchange="auswahlToggleSel(\''+it.id+'\',this.checked)" '+(auswahlSel[it.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer;flex-shrink:0;margin-top:2px" title="Markieren"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+esc(it.name||'')+'</div></div><span style="flex-shrink:0;display:inline-block;padding:3px 9px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:12px">'+(sc>0?sc:'—')+'</span></div>';
     html+='<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--tx2)">'+(it.kategorie?'<span>🏷️ '+esc(it.kategorie)+'</span>':'')+(it.vk!=null?'<span>💶 '+esc(String(it.vk))+' €</span>':'')+(it.avgReviews!=null?'<span>⭐ '+esc(String(it.avgReviews))+' Rev.</span>':'')+(it.hasBeat?'<span style="color:var(--gn);font-weight:700">✨ KI-optimiert</span>':'')+'</div>';
     if(imgs)html+='<div style="display:flex;gap:5px;flex-wrap:wrap">'+imgs+'</div>';
     if(usps)html+='<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--tx2)">'+usps+'</ul>';
@@ -1574,12 +1574,12 @@ function renderAuswahl(){
     html+='<textarea placeholder="Notizen / Entscheidung …" onchange="auswahlSaveNote(\''+it.id+'\',this.value)" style="width:100%;box-sizing:border-box;min-height:50px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12px;color:var(--tx);resize:vertical">'+esc(it.notes||'')+'</textarea>';
     html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">';
     if(!it.movedToProducts)html+='<button class="btn btn-sm" onclick="auswahlAddToProduktliste(\''+it.id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">➕ Zur Produktliste</button>';
-    else html+='<span style="font-size:11px;color:var(--gn);font-weight:700;align-self:center">✓ in Produktliste · <a onclick="go(\'produkte\')" style="color:var(--ac);cursor:pointer">öffnen</a></span>';
+    else html+='<span style="font-size:11px;color:var(--gn);font-weight:700;align-self:center">✓ in Produktliste · <a onclick="go(\'produkte\')" style="color:var(--ac-text);cursor:pointer">öffnen</a></span>';
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'pruefen\')" title="weiter prüfen" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">🔍</button>';
     html+='<button class="btn btn-sm" onclick="auswahlOrderSample(\''+it.id+'\')" title="Muster bestellt (übernimmt auch in Produktliste)" style="background:var(--gnd);color:var(--gn);border:1px solid var(--gn)">📦</button>';
     html+='<button class="btn btn-sm" onclick="auswahlSetDecision(\''+it.id+'\',\'abgelehnt\')" title="ablehnen" style="background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">❌</button>';
     html+='<button class="btn btn-sm" onclick="sourcingOpen(\''+it.id+'\')" title="Lieferanten-Anfrage generieren (EN, inkl. Zertifikate)" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🏭</button>';
-    html+='<button class="btn btn-sm" onclick="go(\'inhalt\')" title="Im KI-Bildstudio Bilder erstellen" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">🎨</button>';
+    html+='<button class="btn btn-sm" onclick="go(\'inhalt\')" title="Im KI-Bildstudio Bilder erstellen" style="background:var(--acd);color:var(--ac-text);border:1px solid var(--ac)">🎨</button>';
     html+='<button class="btn btn-sm" onclick="auswahlDelete(\''+it.id+'\')" title="entfernen" style="background:var(--s2);color:var(--tx2);border:1px solid var(--bd)">🗑</button>';
     html+='</div></div>';
   });
@@ -1857,7 +1857,7 @@ function researchImportFromIdeen(){
     card+='<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;border-radius:6px" onmouseover="this.style.background=\'var(--s2)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<input type="checkbox" data-idea-idx="'+idx+'" style="width:18px;height:18px;accent-color:var(--pu);cursor:pointer">'+
       '<span style="flex:1;font-size:13px;color:var(--tx)">'+esc(title)+'</span>'+
-      (i.potenzial?'<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--acd);color:var(--ac);font-weight:600">'+esc(i.potenzial)+'</span>':'')+
+      (i.potenzial?'<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--acd);color:var(--ac-text);font-weight:600">'+esc(i.potenzial)+'</span>':'')+
     '</label>';
   });
   card+='</div>'+
@@ -2064,7 +2064,7 @@ function renderPipelineBoard(boardTarget){
       // Haupt-Pfad: bewerten → in die Engere Wahl (Amber = die eine primäre Aktion)
       '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">'+
         '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:11px;font-weight:700;flex:1" title="Scorecard: bewerten & Urteil sehen">⚖️ Bewerten</button>'+
-        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700;flex:1" title="In die Engere Wahl übernehmen">⭐ Shortlist →</button>'+
+        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:11px;background:var(--acd);color:var(--ac-text);border:1px solid var(--ac);font-weight:700;flex:1" title="In die Engere Wahl übernehmen">⭐ Shortlist →</button>'+
       '</div>'+
       // Utility-Cluster: konsistent beschriftet, ruhig
       '<div style="display:flex;gap:5px;align-items:center">'+
@@ -2106,7 +2106,7 @@ function renderPipelineBoard(boardTarget){
       '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:4px">'+pipeThumb(s,38)+
         '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;line-height:1.4">'+pipeLinkedName(s)+'</div>'+
         '<div style="font-size:10.5px;color:var(--tx2);margin-top:2px">'+(s.kategorie?esc(s.kategorie)+' · ':'')+(s.compUsps&&s.compUsps.length?s.compUsps.length+' USPs':'')+'</div></div>'+
-        (s.score?'<div style="font-weight:800;color:var(--ac);font-size:15px;line-height:1">'+s.score+'</div>':'')+
+        (s.score?'<div style="font-weight:800;color:var(--ac-text);font-size:15px;line-height:1">'+s.score+'</div>':'')+
       '</div>'+
       '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
         '<button class="btn btn-sm" onclick="pipelineDecide(\''+s.id+'\',\'muster\')" style="font-size:10.5px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">✅ GO →</button>'+
@@ -2314,7 +2314,7 @@ function researchRenderTable(){
     if(c.compAsin)mthumb='<a href="https://www.amazon.de/dp/'+esc(c.compAsin)+'" target="_blank" rel="noopener" title="Auf Amazon öffnen ('+esc(c.compAsin)+')" style="flex-shrink:0;line-height:0">'+mthumb+'</a>';
     html+='<tr data-cid="'+c.id+'">'+
       '<td style="position:sticky;left:0;background:var(--s1)"><div style="display:flex;align-items:center;gap:8px;min-width:240px">'+
-        '<input type="checkbox" onclick="event.stopPropagation()" onchange="researchToggleSel(\''+c.id+'\',this.checked)" '+(researchSel[c.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac);cursor:pointer;flex-shrink:0" title="Markieren">'+mthumb+
+        '<input type="checkbox" onclick="event.stopPropagation()" onchange="researchToggleSel(\''+c.id+'\',this.checked)" '+(researchSel[c.id]?'checked':'')+' style="width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer;flex-shrink:0" title="Markieren">'+mthumb+
         '<button onclick="researchOpenEdit(\''+c.id+'\')" title="Öffnen & bearbeiten" style="flex:1;min-width:0;text-align:left;background:transparent;border:none;padding:5px 6px;border-radius:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--pu);cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background=\'var(--pud)\'" onmouseout="this.style.background=\'transparent\'"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name||'(ohne Name)')+'</span><span style="opacity:.45;font-size:11px">✏️</span></button>'+
       '</div></td>'+
       '<td><span title="Original-Amazon-Daten – nicht editierbar" style="display:inline-block;padding:4px 6px;font-size:12px;color:var(--tx)">'+(c.kategorie?esc(c.kategorie):'<span style="color:var(--tx3)">—</span>')+'</span></td>'+
@@ -2341,7 +2341,7 @@ function researchRenderTable(){
   if(bulk){
     bulk.innerHTML=selCount>0
       ?'<div style="display:flex;gap:10px;align-items:center;background:var(--acd);border:1.5px solid var(--ac);border-radius:10px;padding:9px 14px;margin-bottom:10px;flex-wrap:wrap">'+
-        '<b style="font-size:13px;color:var(--ac)">'+selCount+' markiert</b>'+
+        '<b style="font-size:13px;color:var(--ac-text)">'+selCount+' markiert</b>'+
         '<button class="btn btn-sm" onclick="researchAddSelectedToShortlist()" style="background:var(--ac);color:#fff;border:none;font-weight:700;font-size:12px">⭐ Markierte → Engere Wahl</button>'+
         '<button class="btn btn-sm" onclick="researchDeleteSelected()" style="background:var(--rd);color:#fff;border:none;font-weight:700;font-size:12px">🗑 Markierte löschen</button>'+
         '<button class="btn btn-sm" onclick="researchSelAll(true)" style="font-size:12px">Alle '+researchTableAllIds.length+' markieren</button>'+
@@ -2415,7 +2415,7 @@ function researchOpenEdit(id){
   var statusOpts=[['recherche','🔍 In Recherche'],['kandidat','⭐ Kandidat'],['muster','📦 Muster bestellt'],['aktiv','🚀 Aktiv'],['abgelehnt','❌ Abgelehnt']];
   function badge(src){
     if(src==='auto')return ' <span style="background:var(--gnd);color:var(--gn);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">AUTO</span>';
-    if(src==='calc')return ' <span style="background:var(--acd);color:var(--ac);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">BERECHNET</span>';
+    if(src==='calc')return ' <span style="background:var(--acd);color:var(--ac-text);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">BERECHNET</span>';
     if(src==='self')return ' <span style="background:var(--s3);color:var(--tx2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;letter-spacing:0">DU</span>';
     return '';
   }
@@ -2433,7 +2433,7 @@ function researchOpenEdit(id){
   h+='<div style="display:flex;align-items:center;gap:10px"><span style="display:inline-block;padding:4px 11px;background:var(--'+scc+'d);color:var(--'+scc+');border-radius:10px;font-weight:700;font-size:13px">Score '+(score>0?score:'—')+'</span><button onclick="researchCloseEdit()" style="background:none;border:none;font-size:22px;color:var(--tx2);cursor:pointer;line-height:1">✕</button></div>';
   h+='</div>';
   h+='<div style="padding:20px 22px;max-height:68vh;overflow-y:auto">';
-  h+='<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--tx3);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--bd)"><span><b style="color:var(--gn)">AUTO</b> = aus dem Listing geladen</span><span><b style="color:var(--ac)">BERECHNET</b> = aus deinen Zahlen</span><span><b style="color:var(--tx2)">DU</b> = selbst eintragen (Helium 10 / Lieferant / Einschätzung)</span></div>';
+  h+='<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--tx3);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--bd)"><span><b style="color:var(--gn)">AUTO</b> = aus dem Listing geladen</span><span><b style="color:var(--ac-text)">BERECHNET</b> = aus deinen Zahlen</span><span><b style="color:var(--tx2)">DU</b> = selbst eintragen (Helium 10 / Lieferant / Einschätzung)</span></div>';
   h+=field('Produktname',inp('name',c.name,'text'),'Aus dem Konkurrenz-Listing.','auto');
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+field('Kategorie',inp('kategorie',c.kategorie,'text'),'Automatisch (oberste Amazon-Kategorie) – verfeinerbar.','auto')+field('Hauptkeyword',inp('hauptkeyword',c.hauptkeyword,'text'),'Aus Helium 10 Cerebro / Black Box.','self')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">'+field('VK €',inp('vk',c.vk,'number',';text-align:right'),'Konkurrenz-Preis, automatisch.','auto')+field('EK €',inp('ek',c.ek,'number',';text-align:right'),'Einkaufspreis beim Lieferanten.','self')+field('FBA-Geb. €',inp('fbaGebuehren',c.fbaGebuehren,'number',';text-align:right'),'Je Stück – aus dem Gebühren-Center.','self')+field('Marge %',inp('nettoMarge',c.nettoMarge,'number',';text-align:right'),'Leer = auto: (VK − EK − FBA) / VK.','calc')+'</div>';
@@ -2458,7 +2458,7 @@ function researchOpenEdit(id){
   h+='</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bd)">';
   h+='<button class="btn btn-sm" onclick="sourcingOpen(\''+id+'\')" style="background:var(--s2);color:var(--tx);border:1px solid var(--bd)" title="Fertige englische Lieferanten-Anfrage (inkl. Zertifikat-Liste) generieren">🏭 Lieferanten-Anfrage</button>';
-  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️ Scorecard</button>';
+  h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenScore(\''+id+'\')" style="background:var(--acd);color:var(--ac-text);border:1px solid var(--ac)">⚖️ Scorecard</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchOpenWorkflow(\''+id+'\')" style="background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋 Workflow</button>';
   h+='<button class="btn btn-sm" onclick="researchCloseEdit();researchPromoteToProduct(\''+id+'\')" style="background:var(--gn);color:#fff;border:none;font-weight:700">★ Als Produkt übernehmen</button>';
   h+='<button class="btn btn-p" onclick="researchCloseEdit()">✓ Fertig</button>';
@@ -2572,7 +2572,7 @@ function researchRenderWorkflow(){
       '<button class="btn btn-sm" onclick="researchSelectedCandidate=null;researchRenderWorkflow()" style="font-size:11px">← Andere Kandidaten</button>'+
       (himg?'<img src="'+esc(himg)+'" class="pzoom" style="width:46px;height:46px;object-fit:cover;border-radius:10px;border:1px solid var(--bd);background:#fff">':'')+
       '<div style="flex:1;min-width:200px"><div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:20px;color:var(--tx);font-weight:700">'+esc(c.name)+'</div><div style="font-size:12px;color:var(--tx2)">'+(c.kategorie?esc(c.kategorie)+' · ':'')+'Score '+(vd.score>0?vd.score:'—')+' · '+vd.label+'</div></div>'+
-      '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" style="background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-size:11px">⚖️ Scorecard</button>'+
+      '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" style="background:var(--acd);color:var(--ac-text);border:1px solid var(--ac);font-size:11px">⚖️ Scorecard</button>'+
     '</div>'+
     '<div style="margin-top:14px"><div style="height:9px;background:var(--s3);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pp.pct+'%;background:linear-gradient(90deg,var(--pu),var(--gn));transition:width .3s"></div></div>'+
     '<div style="font-size:12px;color:var(--tx2);margin-top:5px;font-weight:600">'+pp.done+' von '+pp.total+' Prüf-Punkten erfüllt'+(pp.done===pp.total?' — Entscheidung ist belastbar 🎉':' — offene Punkte unten direkt erledigen')+'</div></div>'+
@@ -2734,12 +2734,12 @@ function researchRenderScore(){
         '<div style="font-size:10px;color:var(--tx3);margin-bottom:8px;line-height:1.3">'+esc(d.desc)+'</div>'+
         '<div style="height:8px;background:var(--s2);border-radius:5px;overflow:hidden;margin-bottom:8px"><div id="sc_bar_'+d.key+'" style="height:100%;width:'+(dv*10)+'%;background:var(--'+dcol+')"></div></div>'+
         '<div style="display:flex;align-items:center;gap:10px">'+
-          '<input type="range" min="0" max="10" step="1" value="'+(manual?ov:0)+'" oninput="researchUpdateScoreCriterion(\''+selected.id+'\',\''+d.key+'\',this.value)" title="0 = Auto-Wert nutzen, 1–10 = manuell setzen" style="flex:1;accent-color:var(--ac)">'+
+          '<input type="range" min="0" max="10" step="1" value="'+(manual?ov:0)+'" oninput="researchUpdateScoreCriterion(\''+selected.id+'\',\''+d.key+'\',this.value)" title="0 = Auto-Wert nutzen, 1–10 = manuell setzen" style="flex:1;accent-color:var(--ac-text)">'+
           '<span id="sc_val_'+d.key+'" style="font-weight:700;color:var(--'+dcol+');min-width:38px;text-align:right;font-size:14px">'+(eff==null?'–':dv)+' / 10</span>'+
         '</div>'+
         '<div style="font-size:10px;color:var(--tx3);margin-top:5px">'+esc(reason)+'</div>'+
         (d.key==='differenz'?'<button class="btn btn-sm" onclick="reviewMiningOpen(\''+selected.id+'\')" style="margin-top:8px;width:100%;font-size:10.5px;background:var(--pud);color:var(--pu);border:1px solid var(--pu);font-weight:700">🔬 Reviews analysieren'+(selected.reviewMining?' ✓':'')+'</button>':'')+
-        (d.key==='wettbewerb'?'<button class="btn btn-sm" onclick="nischenScanOpen(\''+selected.id+'\')" style="margin-top:8px;width:100%;font-size:10.5px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">🔍 Nischen-Scan'+(selected.nischenScan?' ✓':'')+'</button>':'')+
+        (d.key==='wettbewerb'?'<button class="btn btn-sm" onclick="nischenScanOpen(\''+selected.id+'\')" style="margin-top:8px;width:100%;font-size:10.5px;background:var(--acd);color:var(--ac-text);border:1px solid var(--ac);font-weight:700">🔍 Nischen-Scan'+(selected.nischenScan?' ✓':'')+'</button>':'')+
       '</div>';
     });
     html+='</div>';
@@ -3363,7 +3363,7 @@ function renderProds(){
     };
     var isSelected=selectedProds.indexOf(i)>-1;
     if(isSelected)tr.style.background='var(--acd)';
-    tr.innerHTML='<td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="prod-check" data-idx="'+i+'" '+(isSelected?'checked':'')+' onchange="prodToggleSelect('+i+',this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></td>'
+    tr.innerHTML='<td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="prod-check" data-idx="'+i+'" '+(isSelected?'checked':'')+' onchange="prodToggleSelect('+i+',this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac-text)"></td>'
       +'<td class="pn"><div style="display:flex;align-items:center">'+(p.bild?'<img class="prodrow-thumb" src="'+esc(p.bild)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'<div>'+(p.name?esc(p.name):'<span style="color:var(--rd);font-style:italic">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</div></div></td>'
       +'<td>'+esc(p.kategorie||'—')+'</td>'
       +'<td><span class="badge '+sc+'">'+esc(p.status)+'</span></td>'
@@ -3387,7 +3387,7 @@ function renderProds(){
     var mcol=(c.m!==null)?(c.m>=25?'gn':c.m>=10?'ac':'rd'):'tx3';
     var imgBlock=p.bild
       ? '<div class="prodcard-imgwrap"><img class="prodcard-img" src="'+esc(p.bild)+'" alt="" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.innerHTML=\'<span class=&quot;prodcard-noimg&quot;>📦</span>\'"></div>'
-      : '<div class="prodcard-imgwrap" onclick="event.stopPropagation();productFetchImage('+i+')" title="Bild von Amazon holen (per ASIN) oder URL eintragen" style="cursor:pointer;flex-direction:column;gap:6px"><span class="prodcard-noimg">📦</span><span style="font-size:11px;color:var(--ac);font-weight:700">🖼️ Bild laden</span></div>';
+      : '<div class="prodcard-imgwrap" onclick="event.stopPropagation();productFetchImage('+i+')" title="Bild von Amazon holen (per ASIN) oder URL eintragen" style="cursor:pointer;flex-direction:column;gap:6px"><span class="prodcard-noimg">📦</span><span style="font-size:11px;color:var(--ac-text);font-weight:700">🖼️ Bild laden</span></div>';
     cardsHtml+='<div onclick="openProductDetail('+i+')" style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s" onmouseover="this.style.borderColor=\'var(--ac)\'" onmouseout="this.style.borderColor=\'var(--bd)\'">'
       +imgBlock
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-weight:700;color:var(--tx);font-size:14px;line-height:1.3">'+(p.name?esc(p.name):'<span style="color:var(--rd)">⚠️ Ohne Namen</span>')+(p.asin?'<br><span style="font-size:10px;color:var(--tx2);font-weight:400">'+esc(p.asin)+'</span>':'')+'</div><span class="badge '+sc+'" style="flex-shrink:0">'+esc(p.status)+'</span></div>'
@@ -3729,7 +3729,7 @@ function renderDetailSales(){
   // ── Leerzustand: noch keine Helium-Marktdaten → handlungsfähiger CTA ──
   if(!productHasHeliumData(p)){
     var asinHint=p.asin
-      ? 'Wird automatisch der Zeile mit ASIN <b style="font-family:monospace;color:var(--ac)">'+esc(p.asin)+'</b> zugeordnet.'
+      ? 'Wird automatisch der Zeile mit ASIN <b style="font-family:monospace;color:var(--ac-text)">'+esc(p.asin)+'</b> zugeordnet.'
       : 'Tipp: Hinterlege oben unter <b>Übersicht</b> die ASIN – dann wird die passende Zeile automatisch erkannt.';
     container.innerHTML='<div class="card"><div style="text-align:center;padding:40px 24px">'+
       '<div style="font-size:48px;margin-bottom:14px;opacity:.55">📈</div>'+
@@ -3775,7 +3775,7 @@ function renderDetailSales(){
   html+='<div class="card"><h3>🏆 Markt-Position</h3>';
   html+='<div class="cg" style="grid-template-columns:1fr 1fr">';
   html+='<div class="ci"><span class="cl">BSR</span><span class="cv" style="color:var(--bl)">'+(p.helBsr!=null?'#'+num(p.helBsr):'—')+'</span></div>';
-  html+='<div class="ci"><span class="cl">Rating</span><span class="cv" style="color:var(--ac)">'+(p.helRating!=null?p.helRating.toFixed(1)+' ⭐':'—')+'</span></div>';
+  html+='<div class="ci"><span class="cl">Rating</span><span class="cv" style="color:var(--ac-text)">'+(p.helRating!=null?p.helRating.toFixed(1)+' ⭐':'—')+'</span></div>';
   html+='<div class="ci"><span class="cl">Reviews</span><span class="cv" style="color:var(--pu)">'+num(p.helReviews)+'</span></div>';
   html+='<div class="ci"><span class="cl">Verkäufer</span><span class="cv" style="color:var(--or)">'+(p.helSellers!=null?p.helSellers:'—')+'</span></div>';
   html+='</div></div>';
@@ -4295,7 +4295,7 @@ function renderDetailHerstellerLinks(){
     html+='<a href="'+s.url+'" target="_blank" rel="noopener" style="text-decoration:none;font-size:11px;background:'+s.color+';color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:5px">'+s.flag+' '+s.label+'</a>';
   });
   if(keywordsEN&&keywordsEN!==name.toLowerCase()){
-    html+='<div style="width:100%;font-size:10px;color:var(--tx3);margin-top:8px;font-style:italic">EN-Keywords: <b style="color:var(--ac)">'+esc(keywordsEN)+'</b></div>';
+    html+='<div style="width:100%;font-size:10px;color:var(--tx3);margin-top:8px;font-style:italic">EN-Keywords: <b style="color:var(--ac-text)">'+esc(keywordsEN)+'</b></div>';
   }
   wrap.innerHTML=html;
 }
@@ -4326,7 +4326,7 @@ function renderDetailSuppliers(){
       +'<td class="nc" style="font-weight:700;color:'+scoreColor+'">'+score+'</td>'
       +'<td class="note-c" title="'+esc(s.zertifikate||'')+'">'+esc(s.zertifikate||'—')+'</td>'
       +'<td class="note-c" title="'+esc(s.notiz||'')+'">'+esc(s.notiz||'—')+'</td>'
-      +'<td>'+(s.link?'<a href="'+esc(s.link)+'" target="_blank" rel="noopener" style="color:var(--ac)">🔗</a>':'—')+'</td>'
+      +'<td>'+(s.link?'<a href="'+esc(s.link)+'" target="_blank" rel="noopener" style="color:var(--ac-text)">🔗</a>':'—')+'</td>'
       +'<td><div class="row-act">'
         +'<button onclick="editDetailSupplier('+idx+')" title="Bearbeiten">✏️</button>'
         +'<button class="del" onclick="delDetailSupplier('+idx+')" title="Löschen">🗑️</button>'
@@ -4872,7 +4872,7 @@ function fbaCalc(){
   // Size info
   var sizeInfo=document.getElementById('fbSizeInfo');
   if(input.sizeTierId==='auto' && m.tier){
-    sizeInfo.innerHTML='⚙️ Ermittelt: <b style="color:var(--ac)">'+esc(m.tier.name)+'</b> · Versandgewicht: '+Math.round(m.shipWeight)+' g'+(m.volWeight>input.weight?' (Volumengewicht maßgeblich)':'');
+    sizeInfo.innerHTML='⚙️ Ermittelt: <b style="color:var(--ac-text)">'+esc(m.tier.name)+'</b> · Versandgewicht: '+Math.round(m.shipWeight)+' g'+(m.volWeight>input.weight?' (Volumengewicht maßgeblich)':'');
   }else{sizeInfo.textContent='';}
 
   // Warnungen
@@ -4928,7 +4928,7 @@ function fbaRenderScenario(input){
     ['Gewinn / Monat', fbaFmt(mA.monthlyProfit), fbaFmt(mB.monthlyProfit)]
   ];
   var diff=mB.profit-mA.profit;
-  var html='<tr style="border-bottom:2px solid var(--bd2)"><th style="text-align:left;padding:6px 4px;font-size:11px;color:var(--tx3)">Kennzahl</th><th class="nc" style="padding:6px 4px;font-size:11px;color:var(--ac)">Szenario A</th><th class="nc" style="padding:6px 4px;font-size:11px;color:var(--cy)">Szenario B</th></tr>';
+  var html='<tr style="border-bottom:2px solid var(--bd2)"><th style="text-align:left;padding:6px 4px;font-size:11px;color:var(--tx3)">Kennzahl</th><th class="nc" style="padding:6px 4px;font-size:11px;color:var(--ac-text)">Szenario A</th><th class="nc" style="padding:6px 4px;font-size:11px;color:var(--cy)">Szenario B</th></tr>';
   rows.forEach(function(r){
     var isProfit=r[0].indexOf('Gewinn / Einheit')>-1;
     html+='<tr'+(isProfit?' style="font-weight:700"':'')+'><td style="padding:5px 4px;font-size:13px;color:var(--tx2)">'+esc(r[0])+'</td><td class="nc" style="padding:5px 4px;text-align:right;font-size:13px;color:var(--tx)">'+r[1]+'</td><td class="nc" style="padding:5px 4px;text-align:right;font-size:13px;color:var(--tx)">'+r[2]+'</td></tr>';
@@ -4952,7 +4952,7 @@ function fbaRenderTarget(input){
   var curPrice=input.price||0;
   var diff=res.price-curPrice;
   document.getElementById('fbTargetContent').innerHTML=
-    'Um eine Netto-Marge von <b style="color:var(--ac)">'+target+'%</b> zu erreichen, brauchst du einen Verkaufspreis von:'+
+    'Um eine Netto-Marge von <b style="color:var(--ac-text)">'+target+'%</b> zu erreichen, brauchst du einen Verkaufspreis von:'+
     '<div style="font-size:32px;font-weight:800;color:var(--gn);margin:10px 0">'+fbaFmt(res.price)+'</div>'+
     (curPrice>0?'<div style="font-size:13px;color:var(--tx2)">Aktueller Preis: '+fbaFmt(curPrice)+' ('+(cur.margin!=null?cur.margin.toFixed(1)+'% Marge':'—')+')<br>'+
       (diff>0?'<span style="color:var(--or)">→ Du müsstest den Preis um '+fbaFmt(diff)+' erhöhen.</span>':'<span style="color:var(--gn)">→ Dein aktueller Preis übertrifft das Ziel bereits! 🎉</span>')+'</div>':'');
@@ -5072,7 +5072,7 @@ function fbaOpenConfig(){
   var inpStyle='width:80px;background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:4px 6px;color:var(--tx);font-family:inherit';
   var html='<div style="max-height:60vh;overflow-y:auto">'+
     '<p style="font-size:13px;color:var(--tx2);line-height:1.6;margin-top:0">Alle FBA-Versand- und Lagergebühren stammen 1:1 aus der offiziellen <b>Amazon FBA-Tarifübersicht (gültig ab 1.2.2026)</b>. Werte mit <b style="color:var(--or)">ANNAHME</b> sind nicht offiziell verifiziert — passe sie hier an.</p>'+
-    '<h4 style="color:var(--ac);margin:14px 0 8px">FBA-Versandgebühren (€/Einheit, Gewichtsstaffeln)</h4>'+
+    '<h4 style="color:var(--ac-text);margin:14px 0 8px">FBA-Versandgebühren (€/Einheit, Gewichtsstaffeln)</h4>'+
     '<table style="width:100%;font-size:12px"><tbody>';
   feeConfig.fbaFees.tiers.forEach(function(t,i){
     var isAnnahme=t.note.indexOf('ANNAHME')>-1;
@@ -5084,20 +5084,20 @@ function fbaOpenConfig(){
     if(t.overage)html+='<tr><td style="padding:2px 4px 2px 18px;color:var(--tx3);font-size:11px">darüber je kg</td><td style="padding:2px 4px"><input type="number" step="0.01" value="'+t.overage.perKg+'" onchange="feeConfig.fbaFees.tiers['+i+'].overage.perKg=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>';
   });
   html+='</tbody></table>'+
-    '<h4 style="color:var(--ac);margin:14px 0 8px">Lagergebühren (€/m³/Monat) <span style="color:var(--gn);font-size:10px">RATE CARD 2026</span></h4>'+
+    '<h4 style="color:var(--ac-text);margin:14px 0 8px">Lagergebühren (€/m³/Monat) <span style="color:var(--gn);font-size:10px">RATE CARD 2026</span></h4>'+
     '<table style="width:100%;font-size:12px"><tbody>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Standardgröße Jan–Sep</td><td style="padding:4px;width:90px"><input type="number" step="0.01" value="'+feeConfig.storageFees.standardJanSep+'" onchange="feeConfig.storageFees.standardJanSep=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Standardgröße Okt–Dez</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.standardOktDez+'" onchange="feeConfig.storageFees.standardOktDez=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Übergröße Jan–Sep</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.oversizeJanSep+'" onchange="feeConfig.storageFees.oversizeJanSep=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Übergröße Okt–Dez</td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.storageFees.oversizeOktDez+'" onchange="feeConfig.storageFees.oversizeOktDez=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '</tbody></table>'+
-    '<h4 style="color:var(--ac);margin:14px 0 8px">Zuschläge</h4>'+
+    '<h4 style="color:var(--ac-text);margin:14px 0 8px">Zuschläge</h4>'+
     '<table style="width:100%;font-size:12px"><tbody>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Eigener Puffer % auf FBA-Gebühr <span style="color:var(--tx3);font-size:10px" title="Die Rate Card 2026 kennt keinen separaten Treibstoffzuschlag mehr — 0 ist korrekt. Optional als Sicherheitspuffer nutzbar.">(2026: 0)</span></td><td style="padding:4px;width:90px"><input type="number" step="0.1" value="'+feeConfig.surcharges.fuelLogisticsPct+'" onchange="feeConfig.surcharges.fuelLogisticsPct=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Nicht-CEP-Zuschlag €/Stk <span style="color:var(--gn);font-size:10px">VERIFIZIERT</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.surcharges.cepPerUnit+'" onchange="feeConfig.surcharges.cepPerUnit=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '<tr><td style="padding:4px;color:var(--tx2)">Peak-Zuschlag €/Stk (15.10.–14.1.) <span style="color:var(--tx3);font-size:10px" title="Peak-Tarife 2026 gibt Amazon am 15.9.2026 bekannt">offen</span></td><td style="padding:4px"><input type="number" step="0.01" value="'+feeConfig.fbaFees.peakSurcharge+'" onchange="feeConfig.fbaFees.peakSurcharge=parseFloat(this.value)||0;fbaCalc()" style="'+inpStyle+'"></td></tr>'+
     '</tbody></table>'+
-    '<p style="font-size:11px;color:var(--tx3);margin-top:14px;font-style:italic">💡 Änderungen gelten nur für diese Sitzung. Für dauerhafte Werte: im Code das <code>feeConfig</code>-Objekt anpassen. Quelle: <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac)">FBA-Tarifübersicht DE (PDF)</a>.</p>'+
+    '<p style="font-size:11px;color:var(--tx3);margin-top:14px;font-style:italic">💡 Änderungen gelten nur für diese Sitzung. Für dauerhafte Werte: im Code das <code>feeConfig</code>-Objekt anpassen. Quelle: <a href="https://m.media-amazon.com/images/G/02/sell/images/260114-FBA-Rate-Card-DE.pdf" target="_blank" rel="noopener" style="color:var(--ac-text)">FBA-Tarifübersicht DE (PDF)</a>.</p>'+
   '</div>';
   if(document.getElementById('genModal')){
     document.getElementById('gmTitle').textContent='⚙️ Gebühren anpassen';
@@ -5343,7 +5343,7 @@ function fbaCalcTax(){
   // Monatliche Rücklage-Empfehlung
   html+='<div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1px solid var(--ac);border-radius:10px;padding:14px 18px;margin-bottom:16px;text-align:center">'+
     '<div style="font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">💡 Monatlich zurücklegen</div>'+
-    '<div style="font-size:28px;font-weight:800;color:var(--ac)">'+fmt(t.steuerlastMitPuffer/12)+'</div>'+
+    '<div style="font-size:28px;font-weight:800;color:var(--ac-text)">'+fmt(t.steuerlastMitPuffer/12)+'</div>'+
     '<div style="font-size:11px;color:var(--tx3)">pro Monat aufs Steuer-Unterkonto (inkl. '+(pf('fbTaxSafety')||10)+'% Puffer)</div>'+
   '</div>';
 
@@ -5391,7 +5391,7 @@ function fbaCalcTax(){
   var totalReserve=t.empfohleneRuecklage+t.ustRuecklage;
   html+='<div style="background:var(--s1);border:2px solid var(--ac);border-radius:12px;padding:16px 20px;margin-bottom:14px;text-align:center">'+
     '<div style="font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;font-weight:700">📥 Gesamte Finanzamt-Rücklage / Jahr</div>'+
-    '<div style="font-size:30px;font-weight:800;color:var(--ac);margin:6px 0">'+fmt(totalReserve)+'</div>'+
+    '<div style="font-size:30px;font-weight:800;color:var(--ac-text);margin:6px 0">'+fmt(totalReserve)+'</div>'+
     '<div style="font-size:12px;color:var(--tx3)">= '+fmt(t.empfohleneRuecklage)+' Ertragsteuern'+(t.ustRuecklage>0?' + '+fmt(t.ustRuecklage)+' USt':'')+' · ≈ '+fmt(totalReserve/12)+'/Monat</div>'+
   '</div>';
 
@@ -5569,7 +5569,7 @@ function highlightMatch(text,query){
   var safe=escapeHtml(text);
   var safeQ=escapeHtml(query);
   var re=new RegExp('('+safeQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-  return safe.replace(re,'<mark style="background:var(--acd);color:var(--ac);font-weight:700;padding:1px 3px;border-radius:3px">$1</mark>');
+  return safe.replace(re,'<mark style="background:var(--acd);color:var(--ac-text);font-weight:700;padding:1px 3px;border-radius:3px">$1</mark>');
 }
 
 function runGlobalSearch(query){
@@ -7537,7 +7537,7 @@ var COACHING_MODULES=[
             right:'• Video → höchste CTR, wenn Video vorhanden<br>• Produktkollektion → flexibler Standard<br>• Store-Spotlight → bei ausgebautem Brand Store'
           }},
 
-          {p:'<b>Offizielle Quelle:</b> Den vollständigen Amazon-Leitfaden zur SB-Einrichtung findest du unter <a href="https://advertising.amazon.de/help/GF86HBCNDJUAC5WN" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">advertising.amazon.de – Sponsored Brands erstellen</a> sowie den Lernpfad unter <a href="https://advertising.amazon.com/de-de/solutions/products/sponsored-brands" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Sponsored Brands – Markenbewusstsein fördern</a>.'},
+          {p:'<b>Offizielle Quelle:</b> Den vollständigen Amazon-Leitfaden zur SB-Einrichtung findest du unter <a href="https://advertising.amazon.de/help/GF86HBCNDJUAC5WN" target="_blank" rel="noopener" style="color:var(--ac-text);text-decoration:underline">advertising.amazon.de – Sponsored Brands erstellen</a> sowie den Lernpfad unter <a href="https://advertising.amazon.com/de-de/solutions/products/sponsored-brands" target="_blank" rel="noopener" style="color:var(--ac-text);text-decoration:underline">Sponsored Brands – Markenbewusstsein fördern</a>.'},
 
           {warning:'Hinweis zu Videos: AMZ SellerHub ist eine Offline-App und kann keine YouTube-Videos automatisch aktuell halten. Für aktuelle Video-Anleitungen suche auf YouTube nach „Amazon Sponsored Brands Tutorial deutsch" oder nutze den offiziellen Amazon-Ads-Lernpfad oben – dort sind die Anleitungen immer auf dem neuesten Stand der Benutzeroberfläche.'}
         ]
@@ -7605,7 +7605,7 @@ var COACHING_MODULES=[
 
           {tip:'Budget-Mix-Erinnerung aus Lektion 8: Für etablierte Marken hat sich grob 70% Sponsored Products / 20% Sponsored Brands / 10% Sponsored Display bewährt. SD ist der kleinste Posten, aber holt gezielt die Unentschlossenen ab.'},
 
-          {p:'<b>Offizielle Quellen:</b> <a href="https://advertising.amazon.com/de-de/library/guides/sponsored-display-guide" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Alles über Sponsored Display</a> · <a href="https://advertising.amazon.com/de-de/solutions/products/sponsored-display" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Sponsored Display / Displayanzeigen</a>'},
+          {p:'<b>Offizielle Quellen:</b> <a href="https://advertising.amazon.com/de-de/library/guides/sponsored-display-guide" target="_blank" rel="noopener" style="color:var(--ac-text);text-decoration:underline">Alles über Sponsored Display</a> · <a href="https://advertising.amazon.com/de-de/solutions/products/sponsored-display" target="_blank" rel="noopener" style="color:var(--ac-text);text-decoration:underline">Sponsored Display / Displayanzeigen</a>'},
 
           {success:'Damit kennst du alle drei Amazon-Anzeigenformate im Detail: Sponsored Products (das Arbeitspferd), Sponsored Brands (der Marken-Aufbau) und Sponsored Display (das Retargeting). Du hast jetzt das komplette PPC-Werkzeug, um deinen Werbe-Mix strategisch aufzubauen.'}
         ]
@@ -8599,7 +8599,7 @@ function coachRenderSingleModule(){
     lessonsHtml+='<button onclick="go_lesson(\''+mod.id+'\',\''+l.id+'\')" style="display:flex;align-items:center;gap:14px;background:'+(done?'var(--gnd)':'var(--s1)')+';border:1.5px solid '+(done?'var(--gn)':'var(--bd)')+';border-radius:10px;padding:14px 18px;cursor:pointer;font-family:inherit;color:var(--tx);text-align:left;transition:all .15s" onmouseover="this.style.borderColor=\''+color+'\';this.style.transform=\'translateX(4px)\'" onmouseout="this.style.borderColor=\''+(done?'var(--gn)':'var(--bd)')+'\';this.style.transform=\'none\'">'+
       '<div style="width:36px;height:36px;border-radius:50%;background:'+(done?'var(--gn)':color)+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">'+(done?'✓':(i+1))+'</div>'+
       '<div style="flex:1;min-width:0">'+
-        '<div style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:2px">'+esc(l.title)+(bm?' <span style="color:var(--ac)" title="Lesezeichen">⭐</span>':'')+'</div>'+
+        '<div style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:2px">'+esc(l.title)+(bm?' <span style="color:var(--ac-text)" title="Lesezeichen">⭐</span>':'')+'</div>'+
         '<div style="font-size:11px;color:var(--tx2)">⏱ '+esc(l.readTime||'')+(l.videoTitle?' · 📺 Video inklusive':'')+'</div>'+
       '</div>'+
       '<div style="font-size:18px;color:var(--tx3)">'+(done?'↻':'▶️')+'</div>'+
@@ -8977,7 +8977,7 @@ function renderLessonView(){
       contentHtml+='</tbody></table></div>';
     }
     if(block.tip){
-      contentHtml+='<div style="background:var(--acd);border-left:4px solid var(--ac);border-radius:8px;padding:14px 18px;margin:16px 0;font-size:15px;line-height:1.65;color:var(--tx)">💡 <b style="color:var(--ac)">Tipp:</b> '+block.tip+'</div>';
+      contentHtml+='<div style="background:var(--acd);border-left:4px solid var(--ac);border-radius:8px;padding:14px 18px;margin:16px 0;font-size:15px;line-height:1.65;color:var(--tx)">💡 <b style="color:var(--ac-text)">Tipp:</b> '+block.tip+'</div>';
     }
     if(block.warning){
       contentHtml+='<div style="background:var(--rdd);border-left:4px solid var(--rd);border-radius:8px;padding:14px 18px;margin:16px 0;font-size:15px;line-height:1.65;color:var(--tx)">⚠️ <b style="color:var(--rd)">Achtung:</b> '+block.warning+'</div>';
@@ -8989,7 +8989,7 @@ function renderLessonView(){
       contentHtml+='<div style="background:var(--gnd);border-left:4px solid var(--gn);border-radius:8px;padding:14px 18px;margin:16px 0;font-size:15px;line-height:1.65;color:var(--tx)">✅ <b style="color:var(--gn)">Best Practice:</b> '+block.success+'</div>';
     }
     if(block.formula){
-      contentHtml+='<div style="background:linear-gradient(135deg,var(--s2),var(--s1));border:2px solid var(--ac);border-radius:10px;padding:20px 24px;margin:20px 0;text-align:center;font-family:\'SF Mono\',Menlo,Consolas,monospace;font-size:18px;color:var(--tx);font-weight:600;box-shadow:0 2px 8px rgba(15,23,41,.06)">'+(block.formulaTitle?'<div style="font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac);font-weight:700;margin-bottom:10px;font-family:\'DM Sans\',sans-serif">📐 '+esc(block.formulaTitle)+'</div>':'')+block.formula+'</div>';
+      contentHtml+='<div style="background:linear-gradient(135deg,var(--s2),var(--s1));border:2px solid var(--ac);border-radius:10px;padding:20px 24px;margin:20px 0;text-align:center;font-family:\'SF Mono\',Menlo,Consolas,monospace;font-size:18px;color:var(--tx);font-weight:600;box-shadow:0 2px 8px rgba(15,23,41,.06)">'+(block.formulaTitle?'<div style="font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac-text);font-weight:700;margin-bottom:10px;font-family:\'DM Sans\',sans-serif">📐 '+esc(block.formulaTitle)+'</div>':'')+block.formula+'</div>';
     }
     if(block.image){
       contentHtml+='<div style="margin:22px 0"><div style="background:linear-gradient(135deg,var(--s2),var(--s1));border:1px solid var(--bd2);border-radius:14px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,.12)">'+
@@ -9721,7 +9721,7 @@ function pmRenderDashboard(){
     html+='<div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1.5px solid var(--ac);border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">'+
       '<div style="font-size:36px">🎯</div>'+
       '<div style="flex:1;min-width:200px">'+
-        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac);font-weight:700;margin-bottom:3px">Nächste beste Aktion</div>'+
+        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac-text);font-weight:700;margin-bottom:3px">Nächste beste Aktion</div>'+
         '<div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:2px">'+esc(nextAction.task.title)+'</div>'+
         '<div style="font-size:12px;color:var(--tx2)">'+nextAction.reason+' · Board: '+esc(pmBoard(nextAction.task.boardId).title)+'</div>'+
       '</div>'+
@@ -10436,14 +10436,14 @@ function renderNischen(){
 
   // ── EXECUTIVE SUMMARY (Top 3) ──
   html+='<div style="background:linear-gradient(135deg,var(--acd),var(--s2));border:1.5px solid var(--ac);border-radius:14px;padding:20px 22px;margin-bottom:20px">'+
-    '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac);font-weight:700;margin-bottom:12px">📋 Executive Summary — Top '+Math.min(3,ranking.length)+'</div>'+
+    '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac-text);font-weight:700;margin-bottom:12px">📋 Executive Summary — Top '+Math.min(3,ranking.length)+'</div>'+
     '<div style="display:flex;flex-direction:column;gap:10px">';
   ranking.slice(0,3).forEach(function(r,i){
     var medal=['🥇','🥈','🥉'][i];
     html+='<div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:22px">'+medal+'</span>'+
       '<div style="flex:1"><span style="font-size:15px;font-weight:700;color:var(--tx)">'+esc(r.n.name||'Unbenannt')+'</span>'+
       '<span style="font-size:12px;color:var(--tx3);margin-left:8px">'+esc(r.n.kategorie||'')+'</span>'+
-      '<div style="font-size:12.5px;color:var(--tx2);margin-top:3px;line-height:1.5">Attraktivität <b style="color:var(--ac)">'+r.attr+'/10</b>, Einstiegsbarriere <b style="color:'+(r.barr<=4?'var(--gn)':r.barr<=6.5?'var(--or)':'var(--rd)')+'">'+r.barr+'/10</b>. Geschätzter Profit <b style="color:var(--gn)">'+r.profit.toLocaleString('de-DE')+' €/Jahr</b> ('+r.krit.passed+'/'+r.krit.total+' Kriterien erfüllt).</div></div></div>';
+      '<div style="font-size:12.5px;color:var(--tx2);margin-top:3px;line-height:1.5">Attraktivität <b style="color:var(--ac-text)">'+r.attr+'/10</b>, Einstiegsbarriere <b style="color:'+(r.barr<=4?'var(--gn)':r.barr<=6.5?'var(--or)':'var(--rd)')+'">'+r.barr+'/10</b>. Geschätzter Profit <b style="color:var(--gn)">'+r.profit.toLocaleString('de-DE')+' €/Jahr</b> ('+r.krit.passed+'/'+r.krit.total+' Kriterien erfüllt).</div></div></div>';
   });
   html+='</div></div>';
 
@@ -10664,7 +10664,7 @@ function nischenDetailDialog(id){
   body+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
     '<div style="background:var(--s2);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--tx3)">Profit-Potenzial</div><div style="font-size:18px;font-weight:800;color:var(--gn)">'+nischenProfitPotenzial(n).toLocaleString('de-DE')+' €/J</div></div>'+
     '<div style="background:var(--s2);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--tx3)">ROI Jahr 1*</div><div style="font-size:18px;font-weight:800;color:var(--cy)">'+nischenROI(n)+'%</div></div>'+
-    '<div style="background:var(--s2);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--tx3)">Gesch. Absatz/Monat</div><div style="font-size:18px;font-weight:800;color:var(--ac)">'+nischenMonatsAbsatz(n)+' Stk</div></div>'+
+    '<div style="background:var(--s2);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--tx3)">Gesch. Absatz/Monat</div><div style="font-size:18px;font-weight:800;color:var(--ac-text)">'+nischenMonatsAbsatz(n)+' Stk</div></div>'+
     '<div style="background:var(--s2);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--tx3)">Quick-Win-Faktor</div><div style="font-size:18px;font-weight:800;color:var(--pu)">'+nischenQuickWin(n)+'/10</div></div>'+
   '</div>';
   if(n.schwaechen)body+='<div style="background:var(--gnd);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--gn);font-weight:700;text-transform:uppercase;letter-spacing:1px">Differenzierungs-Chance</div><div style="font-size:12.5px;color:var(--tx);margin-top:4px;line-height:1.5">'+esc(n.schwaechen)+'</div></div>';
@@ -11118,7 +11118,7 @@ function lgHtml(){
     h+='<div style="border-top:1px dashed var(--bd2);margin-top:14px;padding-top:10px"><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">💾 Gespeicherte KI-Listings ('+saved.length+')</div>';
     saved.forEach(function(l){
       h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12.5px">'+
-        '<a href="#" onclick="lgLoad(\''+l.id+'\');return false" title="In die Felder laden" style="color:var(--ac);font-weight:600;text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.name)+'</a>'+
+        '<a href="#" onclick="lgLoad(\''+l.id+'\');return false" title="In die Felder laden" style="color:var(--ac-text);font-weight:600;text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.name)+'</a>'+
         '<span style="color:var(--tx3);font-size:11px">'+new Date(l.ts).toLocaleDateString('de-DE')+'</span>'+
         '<button onclick="lgDelete(\''+l.id+'\')" title="Löschen" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button></div>';
     });
@@ -11456,7 +11456,7 @@ function renderKeywordClean(){
   ruleDefs.forEach(function(rd){
     var active=r[rd[0]];
     html+='<label style="display:flex;align-items:flex-start;gap:8px;padding:9px 11px;background:var(--s2);border:1px solid '+(active?'var(--ac)':'var(--bd)')+';border-radius:8px;cursor:pointer">'+
-      '<input type="checkbox" '+(active?'checked':'')+' onchange="kwToggleRule(\''+rd[0]+'\',this.checked)" style="margin-top:2px;width:15px;height:15px;accent-color:var(--ac);cursor:pointer">'+
+      '<input type="checkbox" '+(active?'checked':'')+' onchange="kwToggleRule(\''+rd[0]+'\',this.checked)" style="margin-top:2px;width:15px;height:15px;accent-color:var(--ac-text);cursor:pointer">'+
       '<span><span style="font-size:12.5px;font-weight:600;color:var(--tx);display:block">'+rd[1]+'</span><span style="font-size:10.5px;color:var(--tx3)">'+rd[2]+'</span></span>'+
     '</label>';
   });
@@ -11937,7 +11937,7 @@ function renderHeliumPreview(){
   var validRows=s.rows.filter(function(r){return r.asin||r.keyword});
   document.getElementById('heliumImportSummary').innerHTML=
     '<div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center">'+
-      '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Datei</div><div style="font-weight:700;color:var(--ac);font-size:13px">'+esc(s.fileName)+'</div></div>'+
+      '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Datei</div><div style="font-weight:700;color:var(--ac-text);font-size:13px">'+esc(s.fileName)+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Erkanntes Format</div><div style="font-weight:700;font-size:13px">'+typeLabel+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Zeilen</div><div style="font-weight:700;color:var(--bl);font-size:13px">'+s.rows.length+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Verwertbar</div><div style="font-weight:700;color:var(--gn);font-size:13px">'+validRows.length+'</div></div>'+
@@ -12289,7 +12289,7 @@ function xrayPasteResultHtml(agg){
   h+=stat('⌀ Rating',agg.avgRating!=null?'⭐'+agg.avgRating.toFixed(1):'—');
   h+=stat('Zeilen erkannt',agg.n);
   h+='</div>';
-  if(agg.domBrand)h+='<div style="background:var(--acd);border:1px solid var(--ac);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--ac);margin-bottom:10px">⚠️ <b>Marken-Dominanz:</b> „'+esc(agg.domBrand)+'" hält '+agg.domCount+' der Top-'+agg.topN+' Plätze – schwerer angreifbar.</div>';
+  if(agg.domBrand)h+='<div style="background:var(--acd);border:1px solid var(--ac);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--ac-text);margin-bottom:10px">⚠️ <b>Marken-Dominanz:</b> „'+esc(agg.domBrand)+'" hält '+agg.domCount+' der Top-'+agg.topN+' Plätze – schwerer angreifbar.</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap">'+
     '<button class="btn btn-p" onclick="xrayPasteConfirm()" style="font-weight:700">✓ Als Nischen-Kandidat übernehmen</button>'+
     '<button class="btn btn-sm" onclick="xrayPasteAsRows()" title="Klassischer Import: jede Zeile einzeln (Ziel wählbar)" style="align-self:center">▸ Zeilen einzeln importieren …</button>'+
@@ -12558,7 +12558,7 @@ function renderSellerPreview(){
 
   document.getElementById('sellerImportSummary').innerHTML=
     '<div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center">'+
-      '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Datei</div><div style="font-weight:700;color:var(--ac);font-size:13px">'+esc(s.fileName)+'</div></div>'+
+      '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Datei</div><div style="font-weight:700;color:var(--ac-text);font-size:13px">'+esc(s.fileName)+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Typ</div><div style="font-weight:700;font-size:13px">'+typeLabel+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Zeilen</div><div style="font-weight:700;color:var(--bl);font-size:13px">'+s.parsed.rows.length+'</div></div>'+
       '<div><div style="font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Erkannt</div><div style="font-weight:700;color:var(--gn);font-size:13px">'+s.matches.length+' Treffer</div></div>'+
@@ -12724,7 +12724,7 @@ function renderSellerPage(){
       var d=D.salesData[p.asin].current;
       var idx=D.products.indexOf(p);
       return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;cursor:pointer;display:grid;grid-template-columns:1fr repeat(5,auto);gap:18px;align-items:center;font-size:12px" onclick="openProductDetail('+idx+');setTimeout(function(){goSub(\'sales\')},100)">'+
-        '<div><div style="font-weight:700;color:var(--ac)">'+esc(p.name||'(Ohne Namen)')+'</div><div style="font-size:10px;color:var(--tx3);font-family:monospace">'+esc(p.asin)+'</div></div>'+
+        '<div><div style="font-weight:700;color:var(--ac-text)">'+esc(p.name||'(Ohne Namen)')+'</div><div style="font-size:10px;color:var(--tx3);font-family:monospace">'+esc(p.asin)+'</div></div>'+
         '<div style="text-align:center"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Sessions</div><div style="font-weight:700">'+(d.sessions!==undefined?Math.round(d.sessions).toLocaleString('de-DE'):'—')+'</div></div>'+
         '<div style="text-align:center"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Verkäufe</div><div style="font-weight:700;color:var(--gn)">'+(d.unitsOrdered!==undefined?d.unitsOrdered:'—')+'</div></div>'+
         '<div style="text-align:center"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px">Umsatz</div><div style="font-weight:700;color:var(--gn)">'+(d.orderedRevenue!==undefined?fmt(d.orderedRevenue)+'€':'—')+'</div></div>'+
@@ -12833,7 +12833,7 @@ function renderResearchRoadmap(){
     '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--tx2);font-weight:700">'+(allDone?'Alle 5 Stufen aktiv 🎉':doneN+' / '+steps.length+' Stufen begonnen')+'</span>'+
     '<button class="btn btn-sm" onclick="roadmapToggle(true)" style="font-size:10.5px" title="Zur schlanken Leiste einklappen">Einklappen ▴</button></div>'+
   '</div>';
-  html+='<div style="font-size:11.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45">Die <b>5-Stufen-Methode</b> – du recherchierst <b>beliebig viele Produkte gleichzeitig</b>. Jedes ist eine eigene gespeicherte Recherche und wandert eigenständig durch die <button onclick="go(\'pipeline\')" style="background:none;border:none;color:var(--ac);font-weight:700;cursor:pointer;padding:0;font-size:11.5px">Pipeline →</button>. Du musst nichts „abschließen", um Neues zu starten.</div>';
+  html+='<div style="font-size:11.5px;color:var(--tx2);margin-bottom:10px;line-height:1.45">Die <b>5-Stufen-Methode</b> – du recherchierst <b>beliebig viele Produkte gleichzeitig</b>. Jedes ist eine eigene gespeicherte Recherche und wandert eigenständig durch die <button onclick="go(\'pipeline\')" style="background:none;border:none;color:var(--ac-text);font-weight:700;cursor:pointer;padding:0;font-size:11.5px">Pipeline →</button>. Du musst nichts „abschließen", um Neues zu starten.</div>';
   html+='<div style="height:8px;background:var(--s2);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+pct+'%;background:var(--ac);transition:width .3s"></div></div>';
   if(!allDone){
     html+='<div style="font-size:12.5px;color:var(--tx);margin-bottom:16px">👉 <b>Noch nicht begonnen:</b> '+esc(steps[current].title)+' <button class="btn btn-p btn-sm" onclick="'+steps[current].go+'" style="margin-left:6px">Starten →</button></div>';
@@ -12857,7 +12857,7 @@ function renderResearchRoadmap(){
     var circleC=state==='done'?'✓':(idx+1);
     var border=state==='active'?'1.5px solid var(--ac)':'1px solid var(--bd)';
     var bg=state==='active'?'var(--s1)':'var(--s2)';
-    var statusTxt=state==='done'?'<span style="color:var(--gn);font-weight:700">✅ erledigt</span> · '+esc(s.info):state==='active'?'<span style="color:var(--ac);font-weight:700">▶ jetzt dran</span> · '+esc(s.info):'<span style="color:var(--tx3)">🔒 als nächstes</span>';
+    var statusTxt=state==='done'?'<span style="color:var(--gn);font-weight:700">✅ erledigt</span> · '+esc(s.info):state==='active'?'<span style="color:var(--ac-text);font-weight:700">▶ jetzt dran</span> · '+esc(s.info):'<span style="color:var(--tx3)">🔒 als nächstes</span>';
     var op=state==='locked'?'opacity:.62':'';
     html+='<div style="display:flex;gap:12px;align-items:flex-start;padding:11px 14px;background:'+bg+';border:'+border+';border-radius:10px;'+op+'">'+
       '<div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:'+circleBg+';color:'+circleTx+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+circleC+'</div>'+
@@ -12882,7 +12882,7 @@ function renderDashTopCands(){
   researchInit();
   var el=document.getElementById('dashTopCands');if(!el)return;
   var cands=(D.research.candidates||[]).slice();
-  if(!cands.length){el.innerHTML='<div style="padding:26px;text-align:center;color:var(--tx2);font-size:13px"><div style="font-size:32px;margin-bottom:8px;opacity:.6">🌱</div>Noch keine Kandidaten.<br><a onclick="go(\'pipeline\')" style="color:var(--ac);cursor:pointer">Starte in der Pipeline →</a></div>';return;}
+  if(!cands.length){el.innerHTML='<div style="padding:26px;text-align:center;color:var(--tx2);font-size:13px"><div style="font-size:32px;margin-bottom:8px;opacity:.6">🌱</div>Noch keine Kandidaten.<br><a onclick="go(\'pipeline\')" style="color:var(--ac-text);cursor:pointer">Starte in der Pipeline →</a></div>';return;}
   var ranked=cands.map(function(c){return {c:c,vd:decisionVerdict(c)};}).sort(function(a,b){return b.vd.score-a.vd.score;}).slice(0,6);
   var h='<div style="display:flex;flex-direction:column;gap:7px">';
   ranked.forEach(function(it){
@@ -12924,7 +12924,7 @@ function renderDashSearches(){
     '<button class="btn btn-p btn-sm" onclick="startNewProductSearch()">➕ Neue Produktsuche</button>'+
   '</div>';
   if(!cands.length){
-    html+='<div style="font-size:12.5px;color:var(--tx2)">Noch keine. Starte beliebig viele parallel – jede durchläuft dieselben 5 Schritte. Oder importiere mehrere auf einmal über <button onclick="go(\'helium\')" style="background:none;border:none;color:var(--ac);font-weight:700;cursor:pointer;padding:0;font-size:12.5px">📥 Helium-Import →</button></div>';
+    html+='<div style="font-size:12.5px;color:var(--tx2)">Noch keine. Starte beliebig viele parallel – jede durchläuft dieselben 5 Schritte. Oder importiere mehrere auf einmal über <button onclick="go(\'helium\')" style="background:none;border:none;color:var(--ac-text);font-weight:700;cursor:pointer;padding:0;font-size:12.5px">📥 Helium-Import →</button></div>';
   }else{
     html+='<div style="display:flex;flex-direction:column;gap:8px">';
     cands.slice(0,12).forEach(function(c){
@@ -13137,7 +13137,7 @@ function renderNewsPage(force,fromCache){
         h+='<div style="background:var(--s1);border:1px solid var(--bd);border-left:3px solid '+accent+';border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:box-shadow .15s'+(st.read?';opacity:.55':'')+'" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(15,23,41,.08)\'" onmouseout="this.style.boxShadow=\'none\'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'+
             '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10.5px">'+
-              (st.fav?'<span style="color:var(--ac);font-weight:800">⭐</span>':'')+
+              (st.fav?'<span style="color:var(--ac-text);font-weight:800">⭐</span>':'')+
               (cat?'<span style="background:var(--'+cat[0]+(cat[0]==='tx3'?'':'d')+');color:var(--'+cat[0]+');border-radius:7px;padding:2px 8px;font-weight:700">'+cat[1]+'</span>':'')+
               (n.ai_urgency==='hoch'?'<span style="background:var(--rdd);color:var(--rd);border-radius:7px;padding:2px 8px;font-weight:700">⚠️ dringend</span>':'')+
               '<span style="color:var(--tx3)">'+esc(n.source)+' · '+radarRelTime(n.publish_date)+' · '+(n.ai_score!=null?'🤖':'🔥')+' '+score+'</span>'+
@@ -13449,7 +13449,7 @@ function renderDash(){
 
   var actHtml='';
   if(activities.length===0){
-    actHtml='<div style="padding:24px;text-align:center;color:var(--tx2);font-size:12px"><div style="font-size:32px;margin-bottom:8px;opacity:.5">🌱</div>Noch keine Aktivität.<br><a onclick="go(\'ideen\')" style="color:var(--ac);cursor:pointer">Lege deine erste Idee an →</a></div>';
+    actHtml='<div style="padding:24px;text-align:center;color:var(--tx2);font-size:12px"><div style="font-size:32px;margin-bottom:8px;opacity:.5">🌱</div>Noch keine Aktivität.<br><a onclick="go(\'ideen\')" style="color:var(--ac-text);cursor:pointer">Lege deine erste Idee an →</a></div>';
   }else{
     activities.slice(0,12).forEach(function(a){
       var color='var(--'+a.color+')';
@@ -13665,7 +13665,7 @@ function renderIdeen(){
     }else{
       // No image at all – show search icon to fetch from Google Images
       bildCell='<div class="bild-wrap" style="width:48px;height:48px">'+
-        '<div style="width:48px;height:48px;background:var(--s3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ac);cursor:pointer;border:1px dashed var(--bd)" '+
+        '<div style="width:48px;height:48px;background:var(--s3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ac-text);cursor:pointer;border:1px dashed var(--bd)" '+
         'onclick="event.stopPropagation();searchImageOnGoogle('+idx+')" title="Amazon öffnen → Produktbild kopieren">🔍</div>'+
       '</div>';
     }
@@ -13675,7 +13675,7 @@ function renderIdeen(){
     if(i.amazonLink){
       var shortUrl=i.amazonLink.replace(/^https?:\/\/(www\.)?/,'').substring(0,28);
       if(i.amazonLink.length>30)shortUrl+='…';
-      amazonCell='<a href="'+esc(i.amazonLink)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--ac);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--acd);padding:4px 8px;border-radius:5px;border:1px solid var(--ac)" title="'+esc(i.amazonLink)+'">🔗 '+esc(shortUrl)+'</a><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:none;color:var(--tx3);padding:2px 4px;font-size:10px;cursor:pointer;margin-left:4px" title="Link bearbeiten">✏️</button>';
+      amazonCell='<a href="'+esc(i.amazonLink)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--ac-text);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--acd);padding:4px 8px;border-radius:5px;border:1px solid var(--ac)" title="'+esc(i.amazonLink)+'">🔗 '+esc(shortUrl)+'</a><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:none;color:var(--tx3);padding:2px 4px;font-size:10px;cursor:pointer;margin-left:4px" title="Link bearbeiten">✏️</button>';
     }else{
       // "Produkt finden" resolves the real top Amazon product on click and opens it directly
       amazonCell='<button onclick="event.stopPropagation();ideenOpenProduct('+idx+')" style="color:var(--bl);text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;background:var(--bld);padding:4px 8px;border-radius:5px;border:1px solid var(--bl);cursor:pointer;font-family:inherit" title="Öffnet eine präzise Amazon-Suche – die obersten Treffer sind die echten Produkte für: '+esc(i.name)+'">🔍 Produkt finden</button><button onclick="event.stopPropagation();addAmazonLink('+idx+')" style="background:none;border:1px dashed var(--bd);color:var(--tx3);padding:3px 6px;border-radius:5px;font-size:10px;cursor:pointer;margin-left:4px" title="Echten /dp/-Link einfügen → öffnet danach direkt das Produkt">+</button>';
@@ -13695,7 +13695,7 @@ function renderIdeen(){
     var tr=document.createElement('tr');
     if(isSelected)tr.style.background='var(--acd)';
     tr.style.cursor='pointer';
-    tr.innerHTML='<td onclick="event.stopPropagation()"><input type="checkbox" class="idee-check" data-idx="'+idx+'" '+(isSelected?'checked':'')+' onchange="toggleSelect('+idx+',this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac)"></td>'
+    tr.innerHTML='<td onclick="event.stopPropagation()"><input type="checkbox" class="idee-check" data-idx="'+idx+'" '+(isSelected?'checked':'')+' onchange="toggleSelect('+idx+',this.checked)" style="cursor:pointer;width:16px;height:16px;accent-color:var(--ac-text)"></td>'
       +'<td>'+bildCell+'</td>'
       +'<td class="pn" style="cursor:pointer" title="Klicken zum Bearbeiten">'+esc(i.name)+'</td>'
       +'<td>'+esc(i.kategorie||'—')+'</td>'
@@ -14055,7 +14055,7 @@ function showHerstellerMenu(idx,evt){
   ];
 
   var html='<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--tx2);padding:6px 12px 4px;font-weight:600">Hersteller suchen für:</div>';
-  html+='<div style="font-size:11px;color:var(--ac);padding:0 12px 4px;font-weight:600">'+esc(name.substring(0,50))+(name.length>50?'…':'')+'</div>';
+  html+='<div style="font-size:11px;color:var(--ac-text);padding:0 12px 4px;font-weight:600">'+esc(name.substring(0,50))+(name.length>50?'…':'')+'</div>';
   if(keywordsEN&&keywordsEN!==name.toLowerCase()){
     html+='<div style="font-size:10px;color:var(--tx2);padding:0 12px 8px;font-style:italic">EN-Keywords: '+esc(keywordsEN)+'</div>';
   }
@@ -14946,7 +14946,7 @@ function previewParse(){
       var html='<div style="color:var(--gn);font-weight:700;margin-bottom:8px">✓ '+valid.length+' Ideen erkannt</div>';
       html+='<div style="font-size:11px;color:var(--tx2);max-height:140px;overflow-y:auto">';
       valid.slice(0,5).forEach(function(o,i){
-        html+='<div style="padding:4px 0;border-bottom:1px solid var(--bd)">'+(i+1)+'. <b style="color:var(--ac)">'+esc((o.name||o.produkt||o.title||'').substring(0,60))+'</b>';
+        html+='<div style="padding:4px 0;border-bottom:1px solid var(--bd)">'+(i+1)+'. <b style="color:var(--ac-text)">'+esc((o.name||o.produkt||o.title||'').substring(0,60))+'</b>';
         if(o.kategorie)html+=' – '+esc(o.kategorie);
         if(o.vkPreis||o.preis)html+=' – '+fmt(o.vkPreis||o.preis)+'€';
         html+='</div>';
@@ -15099,7 +15099,7 @@ function previewParsePerplexity(){
       html+='</div>';
       html+='<div style="font-size:11px;color:var(--tx2);max-height:140px;overflow-y:auto">';
       valid.slice(0,5).forEach(function(o,i){
-        html+='<div style="padding:4px 0;border-bottom:1px solid var(--bd)">'+(i+1)+'. <b style="color:var(--ac)">'+esc((o.name||o.produkt||o.title||'').substring(0,60))+'</b>';
+        html+='<div style="padding:4px 0;border-bottom:1px solid var(--bd)">'+(i+1)+'. <b style="color:var(--ac-text)">'+esc((o.name||o.produkt||o.title||'').substring(0,60))+'</b>';
         if(o.kategorie)html+=' – '+esc(o.kategorie);
         if(o.vkPreis||o.preis)html+=' – '+fmt(o.vkPreis||o.preis)+'€';
         if(o.potenzial)html+=' <span style="color:'+(o.potenzial==='Hoch'?'var(--gn)':o.potenzial==='Niedrig'?'var(--rd)':'var(--ac)')+'">['+esc(o.potenzial)+']</span>';
@@ -15421,7 +15421,7 @@ function lcCalc(){
     +'<div class="ci"><span class="cl">Warenwert</span><span class="cv">'+f(v.ware)+'</span></div>'
     +'<div class="ci"><span class="cl">Zoll ('+((document.getElementById('lcZollsatz')||{}).value||0)+' % auf Ware+Fracht)</span><span class="cv">'+f(v.zoll)+'</span></div>'
     +'<div class="ci"><span class="cl">EUSt 19 % (Vorsteuer)</span><span class="cv" style="color:var(--tx3)">'+f(v.eust)+'</span></div>'
-    +'<div class="ci"><span class="cl">Landed Cost gesamt</span><span class="cv" style="color:var(--ac)">'+f(v.gesamt)+'</span></div>'
+    +'<div class="ci"><span class="cl">Landed Cost gesamt</span><span class="cv" style="color:var(--ac-text)">'+f(v.gesamt)+'</span></div>'
     +'</div>'
     +'<div style="background:var(--acd);border:1px solid var(--ac);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13.5px">'
     +'<b>Landed Cost je Stück: '+f(v.stueck)+'</b> <span style="color:var(--tx2)">= EK '+f(v.ek)+' + Fracht '+f(v.frachtStk)+' + Zoll '+f(v.zollStk)+(v.neben>0?' + Neben '+f(v.nebenStk):'')+'</span></div>'
