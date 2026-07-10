@@ -19,6 +19,14 @@ USER="${WEBSPACE_USER:-hosting120520}"
 DIR="${WEBSPACE_DIR:-amzsellerhub.de/httpdocs}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
+# Sicherheit: kein Dev-only-Script (impeccable-live → localhost:8400) in die Produktion.
+# Ein lokaler Prozess auf dem Loopback-Port könnte sonst beliebiges JS einschleusen.
+if grep -qE 'impeccable-live-start|localhost:8400/live\.js' "$SRC/index.html"; then
+  echo "✗ Abbruch: index.html enthält den impeccable-live Dev-Script-Block (localhost:8400)." >&2
+  echo "  Entferne den <!-- impeccable-live-start --> … <!-- impeccable-live-end --> Block vor dem Deploy." >&2
+  exit 1
+fi
+
 echo "→ 1/2 Website nach $USER@$HOST:$DIR …"
 tar czf - -C "$SRC/website" --exclude '.DS_Store' --exclude 'README.md' . \
   | ssh "$USER@$HOST" "cd '$DIR' && tar xzf -"

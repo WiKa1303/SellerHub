@@ -1862,17 +1862,18 @@
   </div>
   <div class="page-body">
 
-    <!-- ─── WAS IST NEU? (Modul-Updates, ausblendbar) ─── -->
-    <div id="dashWhatsNew"></div>
     <div id="dashBackupHint"></div>
 
-    <!-- ─── DEINE NÄCHSTE ENTSCHEIDUNG (Decision over data) ─── -->
+    <!-- ─── DEINE NÄCHSTE ENTSCHEIDUNG (Decision over data) — das Cockpit führt ─── -->
     <div id="dashDecision"></div>
 
     <!-- ─── HERZSTÜCK: RECHERCHE-FUNNEL (Cockpit-Kennzahlen) ─── -->
     <div id="dashHeroStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
       <!-- populated by renderDash() -->
     </div>
+
+    <!-- ─── WAS IST NEU? (Modul-Updates, ausblendbar) — nach dem Cockpit, sekundär ─── -->
+    <div id="dashWhatsNew"></div>
 
     <!-- ─── QUICK ACTIONS: die 4 häufigsten Handgriffe ─── -->
     <div id="dashQuickActions" style="margin-bottom:26px"></div>

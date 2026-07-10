@@ -2061,14 +2061,17 @@ function renderPipelineBoard(boardTarget){
         '<div style="font-weight:800;color:var(--'+vd.color+');font-size:15px;line-height:1">'+(vd.score>0?vd.score:'—')+'</div>'+
       '</div>'+
       pipeFlagChips(vd.flags)+
-      '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+
-        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:11px;font-weight:700" title="Scorecard: bewerten & Urteil sehen">⚖️ Bewerten</button>'+
-        '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:11px" title="Daten eintragen (VK, EK, FBA, Reviews …)">✏️ Daten</button>'+
-        '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬</button>'+
-        '<button class="btn btn-sm" onclick="dossierOpen(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px" title="Entscheidungs-Dossier (druckfertiger One-Pager)">📄</button>'+
-        '<span style="flex:1"></span>'+
-        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700">⭐ Shortlist →</button>'+
-        '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px;padding-left:8px;padding-right:8px" title="Kandidat löschen">🗑</button>'+
+      // Haupt-Pfad: bewerten → in die Engere Wahl (Amber = die eine primäre Aktion)
+      '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">'+
+        '<button class="btn btn-sm" onclick="go(\'research\');researchOpenScore(\''+c.id+'\')" style="font-size:11px;font-weight:700;flex:1" title="Scorecard: bewerten & Urteil sehen">⚖️ Bewerten</button>'+
+        '<button class="btn btn-sm" onclick="pipelineToShortlist(\''+c.id+'\')" style="font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac);font-weight:700;flex:1" title="In die Engere Wahl übernehmen">⭐ Shortlist →</button>'+
+      '</div>'+
+      // Utility-Cluster: konsistent beschriftet, ruhig
+      '<div style="display:flex;gap:5px;align-items:center">'+
+        '<button class="btn btn-sm" onclick="pipelineEditCand(\''+c.id+'\')" style="font-size:10.5px;flex:1" title="Daten eintragen (VK, EK, FBA, Reviews …)">✏️ Daten</button>'+
+        '<button class="btn btn-sm" onclick="reviewMiningOpen(\''+c.id+'\')" style="font-size:10.5px;flex:1'+(c.reviewMining?';background:var(--gnd);color:var(--gn);border:1px solid var(--gn)':'')+'" title="Review-Mining: Konkurrenz-Reviews analysieren">🔬 Mining</button>'+
+        '<button class="btn btn-sm" onclick="dossierOpen(\''+c.id+'\')" style="font-size:10.5px;flex:1" title="Entscheidungs-Dossier (druckfertiger One-Pager)">📄 Dossier</button>'+
+        '<button class="btn btn-sm del" onclick="pipelineDelCand(\''+c.id+'\')" style="font-size:10.5px" title="Kandidat löschen">🗑</button>'+
       '</div>'+
     '</div>';
   });
@@ -2321,9 +2324,10 @@ function researchRenderTable(){
       '<td style="white-space:nowrap;text-align:right">'+
         '<button class="btn btn-sm" onclick="researchOpenEdit(\''+c.id+'\')" title="Bearbeiten" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx);border:1px solid var(--bd)">✏️</button> '+
         '<button class="btn btn-sm" onclick="researchPromoteToProduct(\''+c.id+'\')" title="In den Bereich Produkte übernehmen" style="padding:4px 9px;font-size:11px;background:var(--gnd);color:var(--gn);border:1px solid var(--gn);font-weight:700">★ Produkt</button> '+
-        '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" title="Score-Matrix" style="padding:4px 8px;font-size:11px;background:var(--acd);color:var(--ac);border:1px solid var(--ac)">⚖️</button> '+
-        '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+c.id+'\')" title="20-Schritte-Workflow" style="padding:4px 8px;font-size:11px;background:var(--pud);color:var(--pu);border:1px solid var(--pu)">📋</button> '+
-        '<button class="btn btn-sm" onclick="researchDeleteCandidate(\''+c.id+'\')" title="Löschen" style="padding:4px 8px;font-size:11px;background:var(--rdd);color:var(--rd);border:1px solid var(--rd)">🗑</button>'+
+        // Utility-Icons neutral (Farbe kodiert hier keine Daten) — nur „★ Produkt" trägt die eine Emphase
+        '<button class="btn btn-sm" onclick="researchOpenScore(\''+c.id+'\')" title="Score-Matrix" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx);border:1px solid var(--bd)">⚖️</button> '+
+        '<button class="btn btn-sm" onclick="researchOpenWorkflow(\''+c.id+'\')" title="20-Schritte-Workflow" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx);border:1px solid var(--bd)">📋</button> '+
+        '<button class="btn btn-sm" onclick="researchDeleteCandidate(\''+c.id+'\')" title="Löschen" style="padding:4px 8px;font-size:11px;background:var(--s2);color:var(--tx2);border:1px solid var(--bd)" onmouseover="this.style.color=\'var(--rd)\';this.style.borderColor=\'var(--rd)\';this.style.background=\'var(--rdd)\'" onmouseout="this.style.color=\'var(--tx2)\';this.style.borderColor=\'var(--bd)\';this.style.background=\'var(--s2)\'">🗑</button>'+
       '</td>'+
     '</tr>';
   });
@@ -12977,22 +12981,26 @@ function renderDashHub(){
   if(!el)return;
   var u=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
   var isAdmin=!!(u&&u.role==='admin');
-  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:22px">';
-  DASH_HUB.forEach(function(g){
+  // Wayfinding-Farbe je Gruppe — Amber bleibt für Aktionen/CTAs reserviert (One Voice)
+  var HUES=['pu','cy','gn','bl'];
+  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px 18px;margin-bottom:26px">';
+  DASH_HUB.forEach(function(g,gi){
     var tiles=g.tiles.filter(function(t){return !t.adminOnly||isAdmin;});
     if(!tiles.length)return;
-    h+='<div class="card" style="padding:16px 16px 12px">';
-    h+='<div style="font-weight:800;font-size:14px;color:var(--tx);margin-bottom:10px">'+g.title+'</div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    var hue=HUES[gi%HUES.length];
+    h+='<section>';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px">'+
+       '<span style="width:8px;height:8px;border-radius:50%;background:var(--'+hue+');flex-shrink:0"></span>'+
+       '<span style="font-weight:800;font-size:13px;color:var(--tx)">'+g.title+'</span></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
     tiles.forEach(function(t){
-      h+='<button onclick="'+t.act.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:10px;text-align:left;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor=\'var(--ac)\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--bd)\';this.style.transform=\'none\'">'+
-        '<span style="flex-shrink:0;width:34px;height:34px;border-radius:9px;background:var(--acd);display:flex;align-items:center;justify-content:center;font-size:17px">'+t.icon+'</span>'+
-        '<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:12px;color:var(--tx)">'+t.t+(t.neu?' <span style="background:var(--ac);color:#fff;border-radius:8px;padding:0 6px;font-size:8.5px;font-weight:800;vertical-align:1px">NEU</span>':'')+'</span>'+
-        '<span style="display:block;font-size:10.5px;color:var(--tx2);line-height:1.35">'+t.d+'</span></span>'+
-        '<span style="color:var(--tx3);font-size:13px">›</span>'+
+      h+='<button class="hub-tile" onclick="'+t.act.replace(/"/g,'&quot;')+'" style="--tile-hue:var(--'+hue+')">'+
+        '<span class="hub-ico" style="background:var(--'+hue+'d);color:var(--'+hue+')">'+t.icon+'</span>'+
+        '<span class="hub-txt"><span class="hub-t">'+t.t+(t.neu?' <span class="hub-neu">NEU</span>':'')+'</span>'+
+        '<span class="hub-d">'+t.d+'</span></span>'+
       '</button>';
     });
-    h+='</div></div>';
+    h+='</div></section>';
   });
   h+='</div>';
   el.innerHTML=h;
@@ -13220,9 +13228,9 @@ function renderWhatsNew(){
   var u=(window.WikaAuth&&WikaAuth.currentUser&&WikaAuth.currentUser())||null;
   var isAdmin=!!(u&&u.role==='admin');
   var items=WHATSNEW.filter(function(w){return !w.adminOnly||isAdmin;});
-  var h='<div style="background:linear-gradient(135deg,var(--pud),var(--s1));border:1.5px solid var(--pu);border-radius:14px;padding:18px 20px;margin-bottom:18px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:18px;font-weight:700;color:var(--tx)">✨ Was ist neu in AMZ SellerHub <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 07.07.2026</span></div>'+
+  var h='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:14px 18px;margin-bottom:18px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:15px;font-weight:700;color:var(--tx)">✨ Was ist neu <span style="font-size:11px;color:var(--tx3);font-weight:400">· Stand 07.07.2026</span></div>'+
     '<button class="btn btn-sm" onclick="whatsNewDismiss()" style="font-size:11px">✕ Ausblenden</button></div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">';
   items.forEach(function(w){
@@ -13290,11 +13298,14 @@ function renderDash(){
   ];
   var heroHtml='';
   heroStats.forEach(function(s){
-    var color='var(--'+s.color+')';
-    heroHtml+='<div class="hero-stat" onclick="'+s.go+'" style="border-left:3px solid '+color+';cursor:pointer">'+
-      '<span class="hs-bg-icon">'+s.icon+'</span>'+
-      '<div class="hs-label">'+s.label+'</div>'+
-      '<div class="hs-val" style="color:'+color+'">'+esc(String(s.val))+'</div>'+
+    var hue='var(--'+s.color+')';
+    var tint=s.color==='tx3'?'var(--s2)':'var(--'+s.color+'d)';
+    // Zahl bleibt Ink (One Voice) — nur die Marge trägt eine semantische Ampelfarbe.
+    var valStyle=s.semantic?(' style="color:'+hue+'"'):'';
+    heroHtml+='<div class="hero-stat" onclick="'+s.go+'" style="cursor:pointer">'+
+      '<div class="hs-head"><span class="hs-ico" style="color:'+hue+';background:'+tint+'">'+s.icon+'</span>'+
+        '<div class="hs-label">'+s.label+'</div></div>'+
+      '<div class="hs-val"'+valStyle+'>'+esc(String(s.val))+'</div>'+
       '<div class="hs-trend">'+esc(s.sub)+'</div>'+
     '</div>';
   });

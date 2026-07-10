@@ -265,10 +265,22 @@ td{padding:12px 12px;font-size:13px;border-bottom:1px solid var(--bd);vertical-a
 .hero-stat::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#f59e0b,var(--ac) 45%,transparent 85%);opacity:.5;transition:opacity .2s;border-radius:16px 16px 0 0}
 .hero-stat:hover{transform:translateY(-2px);border-color:rgba(217,119,6,.45);box-shadow:0 12px 28px -8px rgba(15,23,42,.14),0 4px 10px rgba(217,119,6,.12)}
 .hero-stat:hover::before{opacity:1}
+.hero-stat .hs-head{display:flex;align-items:center;gap:9px}
+.hero-stat .hs-ico{width:30px;height:30px;flex:0 0 auto;display:grid;place-items:center;font-size:15px;line-height:1;border-radius:9px}
 .hero-stat .hs-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx2);font-weight:700}
-.hero-stat .hs-val{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:-1px;font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.hero-stat .hs-val{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:-1px;font-family:var(--font-display);font-variant-numeric:tabular-nums;color:var(--tx)}
 .hero-stat .hs-trend{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:4px}
 .hero-stat .hs-bg-icon{position:absolute;right:-10px;bottom:-12px;font-size:64px;opacity:.07;pointer-events:none}
+/* Tool-Hub: Kacheln schweben als eigene Karten auf dem Workspace (keine Karte-in-Karte) */
+.hub-tile{display:flex;align-items:center;gap:10px;text-align:left;width:100%;background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;cursor:pointer;font-family:inherit;box-shadow:0 1px 2px rgba(15,23,42,.04),0 6px 16px -10px rgba(15,23,42,.10);transition:transform .15s,border-color .15s,box-shadow .2s}
+.hub-tile:hover{transform:translateY(-2px);border-color:var(--tile-hue,var(--ac));box-shadow:0 10px 22px -10px rgba(15,23,42,.16)}
+.hub-tile:active{transform:translateY(0) scale(.99)}
+.hub-tile .hub-ico{flex-shrink:0;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:17px;line-height:1}
+.hub-tile .hub-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.hub-tile .hub-t{font-weight:700;font-size:12px;color:var(--tx)}
+.hub-tile .hub-d{font-size:10.5px;color:var(--tx2);line-height:1.35}
+.hub-tile .hub-neu{background:var(--ac);color:#fff;border-radius:8px;padding:0 6px;font-size:8.5px;font-weight:800;vertical-align:1px}
+@media (prefers-reduced-motion:reduce){.hub-tile,.hub-tile:hover,.hub-tile:active{transition:border-color .15s;transform:none}}
 
 /* ═══ DECISION BAR (Dashboard: „Deine nächste Entscheidung") ═══ */
 .dash-decision{display:flex;align-items:center;gap:18px;background:linear-gradient(120deg,#0c1322,#152138 70%);border-radius:18px;padding:20px 24px;margin-bottom:16px;box-shadow:0 14px 36px -12px rgba(15,23,42,.28);position:relative;overflow:hidden}
