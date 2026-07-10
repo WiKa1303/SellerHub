@@ -1,0 +1,23 @@
+# ═══ AMZ SellerHub — Entwicklungsmodus: Zugangsschutz (Basic Auth) ═══
+# Schützt die GANZE Domain (Marketing-Website + App unter /app/) mit einem
+# Entwickler-Passwort, solange die Seite noch nicht öffentlich fertig ist.
+# Die Passwort-Maske erscheint SERVER-SEITIG, bevor überhaupt Inhalt lädt.
+#
+# ENTFERNEN (wenn die Seite live gehen soll):
+#   1) diese Datei + .htpasswd aus website/ löschen
+#   2) auf dem Server löschen:  ssh <user>@<host> 'rm amzsellerhub.de/httpdocs/.htaccess amzsellerhub.de/httpdocs/.htpasswd'
+#   3) neu deployen (./deploy-frontend.sh)
+#
+# Benutzer verwalten:  htpasswd website/.htpasswd <name>   (dann neu deployen)
+
+AuthType Basic
+AuthName "AMZ SellerHub — Entwicklungsmodus (Zugang nur fuer Tester)"
+AuthUserFile "/var/www/vhosts/hosting120520.a2fa9.netcup.net/amzsellerhub.de/httpdocs/.htpasswd"
+Require valid-user
+
+# Passwort-/Konfigdateien niemals ausliefern
+<FilesMatch "^\.(htaccess|htpasswd)$">
+  Require all denied
+</FilesMatch>
+
+ErrorDocument 401 "AMZ SellerHub ist noch im Aufbau - Zugang nur mit Entwickler-Login."
