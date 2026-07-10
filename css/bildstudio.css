@@ -142,7 +142,7 @@
 .ig-prog-step.active .ig-ps-ic::after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--pu);animation:ig-pulse 1s ease-in-out infinite}
 .ig-prog-step.done{color:var(--tx2)}
 .ig-prog-step.done .ig-ps-ic{background:var(--gn);border-color:var(--gn);color:#fff}
-.ig-prog-step.fail .ig-ps-ic{background:#dc2626;border-color:#dc2626;color:#fff}
+.ig-prog-step.fail .ig-ps-ic{background:var(--rd);border-color:var(--rd);color:#fff}
 .ig-prog-step.fail .ig-ps-ic::before{content:"!"}
 @keyframes ig-pulse{0%,100%{opacity:.35;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
 .ig-prog-hint{font-size:11px;color:var(--tx3);margin-top:16px}
