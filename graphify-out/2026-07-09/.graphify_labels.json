@@ -60,7 +60,7 @@
   "58": "cp",
   "59": "notifUpdateBell",
   "60": "researchBeatCandidate",
-  "61": "field",
+  "61": "engine.js",
   "62": "1. Systemarchitektur",
   "63": "renderDetailSuppliers",
   "64": "calculateTaxReserve",
@@ -79,5 +79,6 @@
   "77": "buildAmazonSearchUrl",
   "78": "deploy-frontend.sh",
   "79": "start-lokal.sh",
-  "80": "site.js"
+  "80": "site.js",
+  "81": "lgGenerate"
 }

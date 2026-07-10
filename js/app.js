@@ -13300,6 +13300,39 @@ function renderDash(){
   });
   document.getElementById('dashHeroStats').innerHTML=heroHtml;
 
+  // ─── Deine nächste Entscheidung (Decision over data) ───
+  var decEl=document.getElementById('dashDecision');
+  if(decEl){
+    var decHtml='';
+    if(goCands>0){
+      var mTxt=avgCandM!=null?('Ø Netto-Marge <b>'+avgCandM+' %</b> · '):'';
+      decHtml='<div class="dash-decision"><div class="dd-txt">'+
+        '<span class="dd-badge">Nächste Entscheidung</span>'+
+        '<h2>'+goCands+' GO-Kandidat'+(goCands===1?'':'en')+' bereit für deine Shortlist</h2>'+
+        '<p>'+mTxt+'jetzt vergleichen und die engere Wahl treffen.</p>'+
+        '</div><button class="dd-cta" onclick="go(\'research\');researchShowTab(\'score\')">Kandidaten vergleichen →</button></div>';
+    }else if(activeCands.length>0){
+      decHtml='<div class="dash-decision"><div class="dd-txt">'+
+        '<span class="dd-badge">Nächste Entscheidung</span>'+
+        '<h2>'+activeCands.length+' Kandidat'+(activeCands.length===1?'':'en')+' in Validierung</h2>'+
+        '<p>Bewertung vervollständigen — VK/EK/FBA eintragen, damit ein GO-Urteil möglich wird.</p>'+
+        '</div><button class="dd-cta" onclick="go(\'pipeline\')">Zur Pipeline →</button></div>';
+    }else if(ideen.length>0){
+      decHtml='<div class="dash-decision"><div class="dd-txt">'+
+        '<span class="dd-badge">Nächster Schritt</span>'+
+        '<h2>'+ideen.length+' Idee'+(ideen.length===1?'':'n')+' warten auf Validierung</h2>'+
+        '<p>Wandle die vielversprechendsten Ideen in Kandidaten und prüfe die Nische.</p>'+
+        '</div><button class="dd-cta" onclick="go(\'ideen\')">Ideen sichten →</button></div>';
+    }else{
+      decHtml='<div class="dash-decision"><div class="dd-txt">'+
+        '<span class="dd-badge">Los geht\'s</span>'+
+        '<h2>Starte deine erste Produktrecherche</h2>'+
+        '<p>Finde eine Nische, prüfe die Marge und triff eine fundierte GO-Entscheidung.</p>'+
+        '</div><button class="dd-cta" onclick="go(\'research\')">Recherche starten →</button></div>';
+    }
+    decEl.innerHTML=decHtml;
+  }
+
   // ─── Quick Actions: die 4 häufigsten Handgriffe, groß und eindeutig ───
   var qa=document.getElementById('dashQuickActions');
   if(qa){
@@ -13310,11 +13343,21 @@ function renderDash(){
       {icon:'📝',t:'Listing optimieren',d:'Titel, Bullets, Backend',act:"go('listing')"}
     ];
     var qh='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">';
-    QA.forEach(function(q){
-      qh+='<button onclick="'+q.act.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:12px;text-align:left;background:linear-gradient(135deg,var(--ac),#b45309);border:none;border-radius:13px;padding:14px 16px;cursor:pointer;font-family:inherit;color:#fff;box-shadow:0 4px 14px rgba(217,119,6,.28);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 22px rgba(217,119,6,.4)\'" onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'0 4px 14px rgba(217,119,6,.28)\'">'+
-        '<span style="font-size:24px">'+q.icon+'</span>'+
-        '<span><span style="display:block;font-weight:800;font-size:13.5px">'+q.t+'</span><span style="display:block;font-size:11px;opacity:.85">'+q.d+'</span></span>'+
-      '</button>';
+    QA.forEach(function(q,i){
+      var oc=q.act.replace(/"/g,'&quot;');
+      if(i===0){
+        // Primäre Aktion — One-Voice: nur eine trägt das Amber (dunkles Ende für AA-Kontrast auf Weiß)
+        qh+='<button onclick="'+oc+'" style="display:flex;align-items:center;gap:12px;text-align:left;background:linear-gradient(135deg,var(--ac2),#92400e);border:1.5px solid #92400e;border-radius:14px;padding:15px 16px;cursor:pointer;font-family:inherit;color:#fff;box-shadow:0 6px 18px rgba(146,64,14,.36);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'none\'">'+
+          '<span style="font-size:20px;width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,.2)">'+q.icon+'</span>'+
+          '<span><span style="display:block;font-weight:700;font-size:13px">'+q.t+'</span><span style="display:block;font-size:12px;color:rgba(255,255,255,.9)">'+q.d+'</span></span>'+
+        '</button>';
+      }else{
+        // Sekundäre Aktionen — ruhig, Weiß mit Amber-Icon-Chip
+        qh+='<button onclick="'+oc+'" style="display:flex;align-items:center;gap:12px;text-align:left;background:var(--s1);border:1.5px solid var(--bd);border-radius:14px;padding:15px 16px;cursor:pointer;font-family:inherit;color:var(--tx);box-shadow:0 1px 2px rgba(15,23,42,.05);transition:transform .15s,box-shadow .15s,border-color .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.borderColor=\'var(--ac)\';this.style.boxShadow=\'0 10px 24px -8px rgba(15,23,42,.16)\'" onmouseout="this.style.transform=\'none\';this.style.borderColor=\'var(--bd)\';this.style.boxShadow=\'0 1px 2px rgba(15,23,42,.05)\'">'+
+          '<span style="font-size:20px;width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--acd);color:var(--ac2)">'+q.icon+'</span>'+
+          '<span><span style="display:block;font-weight:700;font-size:13px">'+q.t+'</span><span style="display:block;font-size:12px;color:var(--tx2)">'+q.d+'</span></span>'+
+        '</button>';
+      }
     });
     qh+='</div>';
     qa.innerHTML=qh;

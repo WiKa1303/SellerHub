@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-10T11:14:47Z",
+  "title": "Design System: SellerHub",
+  "extensions": {
+    "colorMeta": {
+      "accent": { "role": "primary", "displayName": "Instrument Amber", "canonical": "#d97706", "tonalRamp": ["#3d2402", "#5c3604", "#7c4906", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fcd9a3"] },
+      "ink": { "role": "neutral", "displayName": "Cockpit Ink", "canonical": "#0e1526", "tonalRamp": ["#0e1526", "#1f2a41", "#33405c", "#4a556b", "#6b7488", "#7e879b", "#aab2c2", "#dfe4ec"] },
+      "bg": { "role": "neutral", "displayName": "Workspace", "canonical": "#eef0f5", "tonalRamp": ["#0c1322", "#d8dee8", "#eaeef4", "#eef0f5", "#f6f8fb", "#ffffff", "#ffffff", "#ffffff"] },
+      "rail": { "role": "neutral", "displayName": "Navy Rail", "canonical": "#0c1322", "tonalRamp": ["#080d16", "#0c1322", "#111a2e", "#152138", "#1f2f4d", "#2c4066", "#3d5580", "#5a75a3"] },
+      "green": { "role": "tertiary", "displayName": "Status Green", "canonical": "#059669", "tonalRamp": ["#022c22", "#04463a", "#066a52", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"] },
+      "red": { "role": "tertiary", "displayName": "Status Red", "canonical": "#dc2626", "tonalRamp": ["#450a0a", "#7f1d1d", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"] },
+      "blue": { "role": "tertiary", "displayName": "Status Blue", "canonical": "#1d4ed8", "tonalRamp": ["#132a63", "#1a3a8c", "#1e40af", "#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"] },
+      "purple": { "role": "tertiary", "displayName": "Status Purple", "canonical": "#6d28d9", "tonalRamp": ["#2e1065", "#4c1d95", "#5b21b6", "#6d28d9", "#7c3aed", "#a78bfa", "#c4b5fd", "#ddd6fe"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Big stat values and key figures on cards; Bricolage Grotesque, tabular numerals." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles in the sticky header." },
+      "title": { "displayName": "Title", "purpose": "Card and section titles." },
+      "body": { "displayName": "Body", "purpose": "Default reading text; keep measure 65–75ch." },
+      "label": { "displayName": "Label", "purpose": "Uppercase field labels, stat captions, table headers; 0.8px tracking." }
+    },
+    "shadows": [
+      { "name": "card-rest", "value": "0 1px 2px rgba(15,23,42,.04), 0 14px 36px -12px rgba(15,23,42,.09)", "purpose": "Default float for cards." },
+      { "name": "stat-rest", "value": "0 1px 2px rgba(15,23,42,.04), 0 8px 22px -8px rgba(15,23,42,.08)", "purpose": "Lighter float for compact stat tiles." },
+      { "name": "stat-hover", "value": "0 12px 28px -8px rgba(15,23,42,.12)", "purpose": "Interactive lift on stat tiles, paired with translateY(-2px)." },
+      { "name": "button-primary", "value": "0 6px 18px rgba(217,119,6,.38), inset 0 1px 0 rgba(255,255,255,.32)", "purpose": "Warm amber cast + inner top highlight on primary buttons — the only colored shadow." },
+      { "name": "focus-glow", "value": "0 0 0 4px rgba(217,119,6,.12)", "purpose": "Soft amber ring on focused inputs." }
+    ],
+    "motion": [
+      { "name": "state", "value": "all .15s", "purpose": "Default fast easing for hover/focus state changes." },
+      { "name": "lift", "value": "transform .18s, box-shadow .18s, border-color .18s", "purpose": "Card and tile hover lift." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "860px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default action button: white with amber-on-hover.",
+      "html": "<button class=\"ds-btn\">Speichern</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; gap:7px; min-height:42px; padding:11px 20px; border-radius:12px; border:1.5px solid #d3dae4; background:#fff; color:#0e1526; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,.06); transition:border-color .18s, background .18s, color .18s, transform .18s, box-shadow .18s; } .ds-btn:hover { border-color:#d97706; background:#fffaf2; color:#d97706; transform:translateY(-1px); box-shadow:0 6px 16px rgba(217,119,6,.16); } .ds-btn:active { transform:translateY(0) scale(.99); }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action: amber gradient with warm shadow.",
+      "html": "<button class=\"ds-btn-p\">Weiter</button>",
+      "css": ".ds-btn-p { display:inline-flex; align-items:center; gap:7px; min-height:42px; padding:11px 20px; border-radius:12px; border:1.5px solid #b45309; background:linear-gradient(135deg,#f59e0b,#d97706 55%,#b45309); color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(217,119,6,.38), inset 0 1px 0 rgba(255,255,255,.32); transition:background .18s, box-shadow .18s, transform .18s; } .ds-btn-p:hover { background:linear-gradient(135deg,#d97706,#b45309 60%,#92400e); border-color:#92400e; box-shadow:0 9px 24px rgba(217,119,6,.44), inset 0 1px 0 rgba(255,255,255,.2); transform:translateY(-1px); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled field with amber focus glow.",
+      "html": "<label class=\"ds-fi\"><span>Produktname</span><input type=\"text\" placeholder=\"z. B. Edelstahl-Trinkflasche\"></label>",
+      "css": ".ds-fi { display:flex; flex-direction:column; gap:6px; font-family:'DM Sans',sans-serif; } .ds-fi span { font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:#4a556b; font-weight:600; } .ds-fi input { padding:11px 14px; min-height:42px; border-radius:11px; border:1.5px solid #d3dae4; background:#fbfcfe; color:#0e1526; font-family:inherit; font-size:13px; outline:none; transition:border-color .18s, box-shadow .18s, background .18s; } .ds-fi input:hover { border-color:#b6c0cf; } .ds-fi input:focus { border-color:#d97706; background:#fff; box-shadow:0 0 0 4px rgba(217,119,6,.12); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Floating white container with soft layered shadow.",
+      "html": "<div class=\"ds-card\"><h3>Deckungsbeitrag</h3><div class=\"ds-card-body\">Der Rohgewinn nach Amazon-Gebühren und Wareneinsatz.</div></div>",
+      "css": ".ds-card { background:#fff; border:1px solid #e6eaf1; border-radius:18px; padding:22px; box-shadow:0 1px 2px rgba(15,23,42,.04), 0 14px 36px -12px rgba(15,23,42,.09); font-family:'DM Sans',sans-serif; } .ds-card h3 { font-size:15px; font-weight:700; margin:0 0 16px; color:#0e1526; } .ds-card-body { font-size:14px; line-height:1.6; color:#4a556b; }"
+    },
+    {
+      "name": "Stat Tile",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Compact metric tile with tabular figure; lifts on hover.",
+      "html": "<div class=\"ds-stat\"><div class=\"sl\">Marge</div><div class=\"sv\">28,4 %</div></div>",
+      "css": ".ds-stat { display:flex; flex-direction:column; gap:2px; min-width:140px; padding:14px 20px; background:#fff; border:1px solid #e6eaf1; border-radius:16px; box-shadow:0 1px 2px rgba(15,23,42,.04), 0 8px 22px -8px rgba(15,23,42,.08); transition:transform .18s, box-shadow .18s, border-color .18s; } .ds-stat:hover { transform:translateY(-2px); border-color:#d8dee8; box-shadow:0 12px 28px -8px rgba(15,23,42,.12); } .ds-stat .sl { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#4a556b; font-weight:600; } .ds-stat .sv { font-family:'Bricolage Grotesque','DM Sans',sans-serif; font-size:24px; font-weight:800; letter-spacing:-.5px; font-variant-numeric:tabular-nums; color:#0e1526; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Sidebar rail item, active (amber) state shown.",
+      "html": "<div class=\"ds-rail\"><button class=\"ds-nav active\"><span class=\"ico\">📊</span> Dashboard</button><button class=\"ds-nav\"><span class=\"ico\">🔍</span> Produktrecherche</button></div>",
+      "css": ".ds-rail { display:flex; flex-direction:column; gap:3px; padding:14px 12px; width:232px; background:linear-gradient(180deg,#0c1322 0%,#111a2e 55%,#152138 100%); } .ds-nav { display:flex; align-items:center; gap:10px; width:100%; padding:9px 12px; border:none; border-radius:12px; background:none; color:#a7b1cd; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; text-align:left; cursor:pointer; transition:background .18s, color .18s; } .ds-nav .ico { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; font-size:16px; background:rgba(255,255,255,.06); border-radius:10px; } .ds-nav:hover { background:rgba(255,255,255,.06); color:#f4f6ff; } .ds-nav.active { background:linear-gradient(135deg,rgba(245,158,11,.26),rgba(217,119,6,.08)); color:#fcb64a; font-weight:700; box-shadow:inset 0 0 0 1px rgba(245,158,11,.32), 0 4px 14px rgba(0,0,0,.28); } .ds-nav.active .ico { background:rgba(245,158,11,.20); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Category/status pill on a tint of its own hue.",
+      "html": "<span class=\"ds-badge ds-badge-research\">Recherche</span>",
+      "css": ".ds-badge { display:inline-block; padding:4px 11px; border-radius:16px; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; white-space:nowrap; } .ds-badge-research { background:rgba(109,40,217,.09); color:#6d28d9; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Warm Cockpit",
+    "overview": "SellerHub is a calm, warm-lit control room for German Amazon sellers. A dark navy navigation rail runs down the left like an instrument housing, lit from within by a single amber glow; to its right sits a bright, airy workspace where every readout, table, and form earns its place. The system's job is to turn a wall of marketplace data into a confident decision, so the interface stays legible and unhurried: generous rounding, soft layered shadows that lift on interaction, and one warm accent that appears exactly where attention should go. The palette is deliberately restrained on the surface so that numbers, not chrome, carry the screen. Typography pairs a confident display grotesque (Bricolage) for headlines and figures against a clean humanist sans (DM Sans) for everything else. It rejects the generic SaaS dashboard, the cluttered enterprise tool, the playful consumer app, and the cheap hustle/dropship tool.",
+    "keyCharacteristics": [
+      "Dark navy rail + bright workspace; amber is the only voice of emphasis",
+      "Soft, layered shadows that lift on hover — depth as a response to state, never decoration",
+      "Bricolage Grotesque for display/figures, DM Sans for body; tabular numerals for money",
+      "Warm amber focus glow (0 0 0 4px rgba(217,119,6,.12)), never a hard black outline",
+      "Generous rounding (10–18px) and calm, legible density"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Amber is the only accent used for emphasis and action. If two things on a screen are both amber, one of them is wrong. Status hues carry data meaning, never UI emphasis.", "section": "colors" },
+      { "name": "The Tinted Neutral Rule", "body": "Colored text sits on a tint of its own hue, never gray text on a saturated background. Washed-out gray-on-color is forbidden.", "section": "colors" },
+      { "name": "The Tabular Money Rule", "body": "Any number a seller compares — price, margin, ACoS, cashflow — uses font-variant-numeric: tabular-nums so digits align vertically.", "section": "typography" },
+      { "name": "The Two-Family Rule", "body": "Bricolage for display and figures, DM Sans for everything else. No third font.", "section": "typography" },
+      { "name": "The Quiet Lift Rule", "body": "Shadows are soft and wide, never hard and dark. Lift on hover by 1–2px, no more.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep amber (#d97706) as the single voice of emphasis — primary actions, active nav, focus rings, links. Rare by design.",
+      "Do use tabular-nums for every comparable figure (price, margin, ACoS, cashflow).",
+      "Do signal focus with the soft amber glow (0 0 0 4px rgba(217,119,6,.12)), and body-text contrast at ≥4.5:1.",
+      "Do lift cards and tiles 1–2px on hover with a wider, softer shadow — depth as a response to state.",
+      "Do put colored text on a tint of its own hue; reserve the status hues for data meaning.",
+      "Do offer guidance in place (.wika-help, .help-box) for newcomers without slowing pros down."
+    ],
+    "donts": [
+      "Don't ship a generic SaaS dashboard look — no interchangeable blue-gradient admin template, no point-of-view-free chrome.",
+      "Don't build a cluttered enterprise tool — no Seller-Central walls of cryptic tables without hierarchy.",
+      "Don't go playful consumer app — no cartoonish illustration, emoji-first UI, or gamification around money and compliance.",
+      "Don't slide into cheap hustle/dropship aesthetics — no loud neon, hype badges, or get-rich-quick urgency.",
+      "Don't use a second accent to make something pop. If two elements are both amber, one is wrong.",
+      "Don't use hard black focus outlines or tight, dark 2014-style drop-shadows. Soft and wide, or nothing.",
+      "Don't set muted gray (#7e879b) as body text on a tinted near-white — bump toward ink."
+    ]
+  }
+}

@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "deploy-frontend.sh": {
-    "mtime": 1783448500.6922343,
-    "ast_hash": "9a600d2737144359c9d99a9600835f46",
+    "mtime": 1783617902.7725456,
+    "ast_hash": "04b63cdeef17012b19820342575b4f8c",
     "semantic_hash": ""
   },
   "js/admin.js": {
@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "js/app.js": {
-    "mtime": 1783449443.556323,
-    "ast_hash": "d549ff83ff9b4f0f405ef8ca99eed944",
+    "mtime": 1783685216.1550932,
+    "ast_hash": "f779d1e52032c5e90163f375ef64a6d8",
     "semantic_hash": ""
   },
   "js/auth.js": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1783617148.2968242,
-    "ast_hash": "8e156744f3bef5e4c417cef30bb0bd6d",
+    "mtime": 1783617918.1687453,
+    "ast_hash": "2e6ab65a2c3189a487fb4e5c43834b83",
     "semantic_hash": ""
   },
   "KONZEPT-Import-Listing.md": {
@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1783448001.569428,
-    "ast_hash": "511be481649856401cd397a39260bb99",
+    "mtime": 1783685044.276103,
+    "ast_hash": "185cd273cad632de66aa0ffd1bd4493c",
     "semantic_hash": ""
   },
   "server/ARCHITEKTUR.md": {
@@ -517,6 +517,31 @@
   "website/og-bild.png": {
     "mtime": 1783448344.7683578,
     "ast_hash": "ac8b442b7fd102943c5cfedc8bb4f987",
+    "semantic_hash": ""
+  },
+  ".impeccable/design.json": {
+    "mtime": 1783682167.4397142,
+    "ast_hash": "f2b48ce33c0ea87ede11d6ca362420dd",
+    "semantic_hash": ""
+  },
+  ".impeccable/hook.cache.json": {
+    "mtime": 1783685216.328421,
+    "ast_hash": "4e3c8b1eed81708e1d72e7d5757c7b50",
+    "semantic_hash": ""
+  },
+  ".impeccable/live/config.json": {
+    "mtime": 1783682247.0952282,
+    "ast_hash": "db3f47aa64932b4c922bce752e0e6e0c",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1783682053.8656154,
+    "ast_hash": "8ddadb8f513779bfb990e44a8ad658ad",
+    "semantic_hash": ""
+  },
+  "PRODUCT.md": {
+    "mtime": 1783681855.8985548,
+    "ast_hash": "7dfdaf61cd31246ffce6bed8b7885ffa",
     "semantic_hash": ""
   }
 }
