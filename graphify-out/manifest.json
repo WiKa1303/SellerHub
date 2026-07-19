@@ -5,18 +5,18 @@
     "semantic_hash": ""
   },
   "deploy-frontend.sh": {
-    "mtime": 1783617902.7725456,
-    "ast_hash": "04b63cdeef17012b19820342575b4f8c",
+    "mtime": 1783693096.3161986,
+    "ast_hash": "2d6247f0d41276173ed5e3a20a67be1b",
     "semantic_hash": ""
   },
   "js/admin.js": {
-    "mtime": 1783323061.194139,
-    "ast_hash": "1bb888b1088b5c18c4165cea41576d07",
+    "mtime": 1783706538.0913777,
+    "ast_hash": "6e2187dd50321d508f53d94a9235ad91",
     "semantic_hash": ""
   },
   "js/app.js": {
-    "mtime": 1783685216.1550932,
-    "ast_hash": "f779d1e52032c5e90163f375ef64a6d8",
+    "mtime": 1783706538.0880919,
+    "ast_hash": "43e00e091b4008ca567a9e1e20d2ddfe",
     "semantic_hash": ""
   },
   "js/auth.js": {
@@ -35,13 +35,13 @@
     "semantic_hash": ""
   },
   "js/erstattung.js": {
-    "mtime": 1783446661.7068527,
-    "ast_hash": "462bd82586dd0b405a4d766b01bf8b53",
+    "mtime": 1783706538.0976713,
+    "ast_hash": "ba34555cd078c4a8711894681e5b4cc1",
     "semantic_hash": ""
   },
   "js/ppc.js": {
-    "mtime": 1783446665.9463813,
-    "ast_hash": "2ef235bcd991db2f021019d4184cb1f5",
+    "mtime": 1783706538.0947876,
+    "ast_hash": "b3606ff6adc33bc8b9d73ed2ee1815dd",
     "semantic_hash": ""
   },
   "js/sync.js": {
@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1783685044.276103,
-    "ast_hash": "185cd273cad632de66aa0ffd1bd4493c",
+    "mtime": 1783706538.0710363,
+    "ast_hash": "c8e6376dba9d7f344d0cbefa658a9e46",
     "semantic_hash": ""
   },
   "server/ARCHITEKTUR.md": {
@@ -525,8 +525,8 @@
     "semantic_hash": ""
   },
   ".impeccable/hook.cache.json": {
-    "mtime": 1783685216.328421,
-    "ast_hash": "4e3c8b1eed81708e1d72e7d5757c7b50",
+    "mtime": 1783706399.0112312,
+    "ast_hash": "33c8bb9bed3869bde59e1df69eb51418",
     "semantic_hash": ""
   },
   ".impeccable/live/config.json": {
@@ -535,13 +535,28 @@
     "semantic_hash": ""
   },
   "DESIGN.md": {
-    "mtime": 1783682053.8656154,
-    "ast_hash": "8ddadb8f513779bfb990e44a8ad658ad",
+    "mtime": 1783708004.1533992,
+    "ast_hash": "92f0452bedcd67cd904842453f301ebe",
     "semantic_hash": ""
   },
   "PRODUCT.md": {
     "mtime": 1783681855.8985548,
     "ast_hash": "7dfdaf61cd31246ffce6bed8b7885ffa",
+    "semantic_hash": ""
+  },
+  ".impeccable/live/server.json": {
+    "mtime": 1783686629.4303384,
+    "ast_hash": "115c18c3d05fcf075fe09514df5804a2",
+    "semantic_hash": ""
+  },
+  "skills-lock.json": {
+    "mtime": 1783687505.4775016,
+    "ast_hash": "d8bf81f05fd8d3433537f92def6e7964",
+    "semantic_hash": ""
+  },
+  ".agents/skills/design-taste-frontend/SKILL.md": {
+    "mtime": 1783687505.4753149,
+    "ast_hash": "6f73606d20cd948b471b1ce1767aab50",
     "semantic_hash": ""
   }
 }
