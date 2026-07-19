@@ -1,16 +1,16 @@
-# Graph Report - amzsellerhub  (2026-07-19)
+# Graph Report - amzsellerhub  (2026-07-10)
 
 ## Corpus Check
-- 98 files · ~189,731 words
+- 99 files · ~189,732 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1865 nodes · 4749 edges · 93 communities (90 shown, 3 thin omitted)
+- 1758 nodes · 4643 edges · 79 communities (76 shown, 3 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 37 edges (avg confidence: 0.64)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5b748321`
+- Built from commit: `36905946`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -88,25 +88,11 @@
 - Product Modal Editing
 - FBA Category Selects
 - Landed Cost Calculator
-- bsrCalc
 - JSON Repair Utilities
 - Local Dev Server
 - Marketing Website Docs
-- 9. AI TELLS (Forbidden Patterns)
 - Frontend Deploy Script
 - Local Start Script
-- APPENDICES - Real Source-Backed Reference Material
-- 11. REDESIGN PROTOCOL
-- 3. DEFAULT ARCHITECTURE & CONVENTIONS
-- 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
-- 12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)
-- 5. CONTEXT-AWARE PROACTIVITY
-- 8. DARK MODE PROTOCOL
-- renderDetailSuppliers
-- 1. THE THREE DIALS (Core Configuration)
-- 7. DIAL DEFINITIONS (Technical Reference)
-- buildAmazonSearchUrl
-- lgGenerate
 
 ## God Nodes (most connected - your core abstractions)
 1. `db()` - 147 edges
@@ -135,11 +121,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (93 total, 3 thin omitted)
+## Communities (79 total, 3 thin omitted)
 
 ### Community 0 - "To-Do Database Layer"
-Cohesion: 0.06
-Nodes (124): activityFor(), addTaskTag(), attachmentBytesForUser(), attachmentsForTask(), buildSet(), checklistForTasks(), commentsForTask(), deleteAttachment() (+116 more)
+Cohesion: 0.05
+Nodes (129): activityFor(), addTaskTag(), attachmentBytesForUser(), attachmentsForTask(), buildSet(), checklistForTasks(), commentsForTask(), deleteAttachment() (+121 more)
 
 ### Community 1 - "AI Image Studio"
 Cohesion: 0.07
@@ -150,40 +136,40 @@ Cohesion: 0.06
 Nodes (55): decodeEntities(), NAMED_ENTITIES, stripTags(), EMPTY_USAGE, getUsage(), incrementUsage(), todayKey(), USAGE_COLS (+47 more)
 
 ### Community 3 - "Calendar Feeds & ICS Export"
-Cohesion: 0.07
-Nodes (53): RFC-5545, countCalendarFeeds(), deleteCalendarFeed(), getCalendarExportToken(), getCalendarFeed(), insertCalendarExportToken(), insertCalendarFeed(), listCalendarFeeds() (+45 more)
+Cohesion: 0.06
+Nodes (54): RFC-5545, countCalendarFeeds(), deleteCalendarFeed(), getCalendarExportToken(), getCalendarFeed(), insertCalendarExportToken(), insertCalendarFeed(), listCalendarFeeds() (+46 more)
 
 ### Community 4 - "Product Research Selection"
-Cohesion: 0.06
-Nodes (79): auswahlAddToProduktliste(), auswahlDelete(), auswahlDeleteSelected(), auswahlOrderSample(), auswahlSelAll(), auswahlSetDecision(), auswahlStatCard(), auswahlToggleSel() (+71 more)
+Cohesion: 0.05
+Nodes (100): auswahlAddToProduktliste(), auswahlDelete(), auswahlDeleteSelected(), auswahlOrderSample(), auswahlSaveNote(), auswahlSelAll(), auswahlSetDecision(), auswahlStatCard() (+92 more)
 
 ### Community 5 - "News Deduplication & Sources"
 Cohesion: 0.06
-Nodes (47): isDuplicateTitle(), titleSimilarity(), trigrams(), urlHash(), recentTitleNorms(), SOURCES, canonicalUrl(), cleanSummary() (+39 more)
+Nodes (50): KEYWORDS, KEYWORDS_NEGATIVE, isDuplicateTitle(), titleSimilarity(), trigrams(), urlHash(), recentTitleNorms(), SOURCES (+42 more)
 
 ### Community 6 - "Task Boards & Reminders"
-Cohesion: 0.06
-Nodes (61): calculateBoardProgress(), createTask(), deleteBoard(), filterTasks(), fmt(), getDueTasks(), moveTask(), notifBrowserPush() (+53 more)
+Cohesion: 0.07
+Nodes (55): calculateBoardProgress(), deleteBoard(), filterTasks(), getDueTasks(), moveTask(), notifBrowserPush(), notifClearAll(), notifClickItem() (+47 more)
 
 ### Community 7 - "Sessions & User Accounts"
 Cohesion: 0.07
-Nodes (44): countActiveSessions(), createSession(), deleteSession(), deleteSessionsForUser(), findValidSession(), touchSession(), createUser(), findById() (+36 more)
+Nodes (45): countActiveSessions(), createSession(), deleteSession(), deleteSessionsForUser(), findValidSession(), touchSession(), createUser(), findByEmail() (+37 more)
 
 ### Community 8 - "Main App Core"
 Cohesion: 0.06
-Nodes (23): calculateCorporateTaxEstimate(), calculateIncomeTaxEstimate(), calculateTaxReserve(), calculateTradeTaxEstimate(), calculateVatReserve(), clearSelection(), closeLesson(), coachBackFromLesson() (+15 more)
+Nodes (15): amazonSearchTerms(), buildAmazonSearchUrl(), closeLesson(), coachBackFromLesson(), deleteTask(), generatePrompt(), ideenOpenProduct(), lgBuildPrompt() (+7 more)
 
 ### Community 9 - "Trend Alerts & Item Tracking"
 Cohesion: 0.08
-Nodes (37): insertItem(), parseAiSummary(), analyzedItemsSince(), unanalyzedItemsSince(), upsertTopicDaily(), upsertTrendTopic(), computeMetrics(), dailyBuckets() (+29 more)
+Nodes (31): insertAlert(), itemsWithoutAlertCheck(), insertItem(), saveAiResult(), alertState, classifyAlert(), generateAlerts(), seedAlert() (+23 more)
 
 ### Community 10 - "BSR & Decision Scoring"
-Cohesion: 0.12
-Nodes (28): complianceFor(), complianceHtml(), complianceToggle(), decisionAuto(), decisionConfidence(), decisionEff(), decisionMarge(), decisionRedFlags() (+20 more)
+Cohesion: 0.22
+Nodes (11): qcBsrCatKey(), qcMissing(), qcNumField(), qcProgDrift(), qcSetProgress(), quickCheckCompute(), quickCheckField(), quickCheckRenderStep() (+3 more)
 
 ### Community 11 - "Seller Coach Learning"
 Cohesion: 0.07
-Nodes (46): backupOpen(), coachBuildLessonNav(), coachBuildMainNav(), coachBuildModuleCard(), coachCalculateStreak(), coachCelebratePhase(), coachContinueLearning(), coachFindNextLesson() (+38 more)
+Nodes (42): backupOpen(), coachBuildLessonNav(), coachBuildMainNav(), coachBuildModuleCard(), coachCalculateStreak(), coachCelebratePhase(), coachContinueLearning(), coachFindNextLesson() (+34 more)
 
 ### Community 12 - "To-Do UI Interactions"
 Cohesion: 0.08
@@ -194,12 +180,12 @@ Cohesion: 0.11
 Nodes (32): adminChangePw(), adminClosePwModal(), adminCloseUserModal(), adminDeleteUser(), adminEscape(), adminExtendLicense(), adminFmtDate(), adminGeneratePassword() (+24 more)
 
 ### Community 14 - "Navigation & Product Editing"
-Cohesion: 0.22
-Nodes (11): closeGlobalSearch(), editIdee(), escapeHtml(), executeSearchResult(), handleSearchKey(), highlightMatch(), lgHtml(), openGlobalSearch() (+3 more)
+Cohesion: 0.11
+Nodes (22): addDetailSupplier(), calcSupplierScore(), clearProductSalesData(), closeGlobalSearch(), delDetailSupplier(), editDetailSupplier(), editIdee(), editTitleInline() (+14 more)
 
 ### Community 15 - "Internal Admin Dashboard"
-Cohesion: 0.12
-Nodes (31): dt(), esc(), num(), PROFILES, renderInternal(), buildApi(), fail(), aiCallStats() (+23 more)
+Cohesion: 0.15
+Nodes (28): dt(), esc(), num(), PROFILES, renderInternal(), buildApi(), fail(), aiCallStats() (+20 more)
 
 ### Community 16 - "Backend Package Dependencies"
 Cohesion: 0.06
@@ -211,59 +197,59 @@ Nodes (32): syApi(), syApplyMode(), syBtnClick(), syClose(), syDropToken(), syFe
 
 ### Community 18 - "AI Analysis Pipeline"
 Cohesion: 0.09
-Nodes (22): pendingAiItems(), saveAiFailure(), saveAiResult(), aiState, drainQueue(), app, fb, health (+14 more)
+Nodes (21): pendingAiItems(), saveAiFailure(), aiState, drainQueue(), app, fb, health, itemX (+13 more)
 
 ### Community 19 - "API Server & Crawler Worker"
-Cohesion: 0.20
-Nodes (15): startApi(), crawlAndAnalyze(), startWorker(), aiEnabled(), config, KEYWORDS, KEYWORDS_NEGATIVE, validateConfig() (+7 more)
+Cohesion: 0.29
+Nodes (11): startApi(), crawlAndAnalyze(), startWorker(), aiEnabled(), config, validateConfig(), emit(), log (+3 more)
 
 ### Community 20 - "Listing Generator"
-Cohesion: 0.10
-Nodes (26): lgApply(), lgBytes(), lgCount(), lgDelete(), lgLoad(), lgSave(), listingActive(), listingBtn() (+18 more)
+Cohesion: 0.06
+Nodes (40): lgApply(), lgBytes(), lgCount(), lgDelete(), lgImportAmazon(), lgLoad(), lgSave(), lgSyToken() (+32 more)
 
 ### Community 21 - "Task Rendering & Drag-Drop"
 Cohesion: 0.10
 Nodes (29): clearSel(), closeDetail(), currentTasks(), dropOnCol(), dropOnDay(), dropOnList(), dropOnRow(), inlineEdit() (+21 more)
 
 ### Community 22 - "Niche Sources & Prompts"
-Cohesion: 0.11
-Nodes (26): addSrc(), calcSrcScore(), closeGM(), fbaOpenConfig(), gmPrompt(), listingPromptGen(), nischenAdd(), nischenAddDialog() (+18 more)
+Cohesion: 0.12
+Nodes (24): closeGM(), fbaOpenConfig(), gmPrompt(), listingPromptGen(), nischenAdd(), nischenAddDialog(), nischenAssumptionsDialog(), nischenBar() (+16 more)
 
 ### Community 23 - "FBA Profit Calculations"
-Cohesion: 0.08
-Nodes (42): addKW(), bsrPopulateCats(), calculateBreakEvenMetrics(), calculateFbaFee(), calculateFuelSurcharge(), calculateNetAfterTaxReserve(), calculatePlanCostPerUnit(), calculatePpcCost() (+34 more)
+Cohesion: 0.07
+Nodes (45): addKW(), bsrPopulateCats(), calculateBreakEvenMetrics(), calculateFbaFee(), calculateFuelSurcharge(), calculateNetAfterTaxReserve(), calculatePlanCostPerUnit(), calculatePpcCost() (+37 more)
 
 ### Community 24 - "Helium & Seller Report Import"
-Cohesion: 0.10
-Nodes (26): closeSellerModal(), confirmSellerImport(), detectHeliumType(), detectReportType(), extractASIN(), extractSKU(), getFieldFromRow(), getHelField() (+18 more)
+Cohesion: 0.06
+Nodes (45): addSrc(), applyHeliumPick(), applyHeliumToProduct(), bsrCalc(), bsrCalibrate(), bsrGetCalib(), bsrResetCalib(), bsrScaleFor() (+37 more)
 
 ### Community 25 - "Topic Forecasting"
 Cohesion: 0.08
-Nodes (35): aiClient(), PROMPTS, logAiCall(), queryAlerts(), upsertTopicForecast(), getStrategyBrief(), saveStrategyBrief(), queryTrends() (+27 more)
+Nodes (31): aiClient(), PROMPTS, logAiCall(), upsertTopicForecast(), topicHistory(), AI_CATEGORIES, ANALYSIS_SCHEMA, analyzeItem() (+23 more)
 
 ### Community 26 - "To-Do Filters & Cache"
 Cohesion: 0.12
 Nodes (23): applySavedFilter(), boot(), bulk(), bulkPatch(), cacheRead(), cacheWrite(), calShift(), calToday() (+15 more)
 
 ### Community 27 - "AI Strategy Brief"
-Cohesion: 0.11
-Nodes (15): api, app, callKeys, down, duenn, flat, gpsr, health (+7 more)
+Cohesion: 0.12
+Nodes (19): getStrategyBrief(), saveStrategyBrief(), trendState, forecastState, runIntelligencePipeline(), BRIEF_SCHEMA, fallbackBrief(), strategyState (+11 more)
 
 ### Community 28 - "Hub State & To-Do Tests"
 Cohesion: 0.09
 Nodes (19): hubState, subscribe(), subscribers, app, bigFile, cutoff, del, fakeRes (+11 more)
 
 ### Community 29 - "Amazon Link & JSON Extraction"
-Cohesion: 0.11
-Nodes (23): asinHasImage(), asinOf(), bestAmazonLinkFor(), cleanAmazonUrl(), closePerplexityModal(), collectAmazonProductLinks(), extractJSON(), extractPerplexitySources() (+15 more)
+Cohesion: 0.15
+Nodes (14): asinHasImage(), asinOf(), bestAmazonLinkFor(), cleanAmazonUrl(), closePerplexityModal(), collectAmazonProductLinks(), extractPerplexitySources(), ideaTokens() (+6 more)
 
 ### Community 30 - "Task Detail Mutations"
 Cohesion: 0.17
 Nodes (21): attDel(), attUpload(), cAdd(), cDel(), cEditSave(), clAdd(), clDel(), clEdit() (+13 more)
 
 ### Community 31 - "Alert Dispatching"
-Cohesion: 0.11
-Nodes (27): bumpAlertAttempts(), insertAlert(), itemsWithoutAlertCheck(), markAlertDelivered(), pendingAlerts(), dispatchAlerts(), dispatchFetch(), dispatchState (+19 more)
+Cohesion: 0.17
+Nodes (16): bumpAlertAttempts(), markAlertDelivered(), pendingAlerts(), dispatchAlerts(), dispatchFetch(), dispatchState, doFetch(), sendNtfy() (+8 more)
 
 ### Community 32 - "Login & Auth Gate"
 Cohesion: 0.14
@@ -278,12 +264,12 @@ Cohesion: 0.16
 Nodes (18): closeDialogs(), closeOvl(), closePop(), fmtLink(), folderMenu(), folderRename(), gcalEventPop(), listMenu() (+10 more)
 
 ### Community 35 - "Idea Pool Management"
-Cohesion: 0.11
-Nodes (25): addAmazonLink(), addBildUrl(), auswahlSaveNote(), bulkChangeStatus(), bulkDelete(), bulkSetStatus(), closeClaudeModal(), closeIdeeModal() (+17 more)
+Cohesion: 0.14
+Nodes (14): addAmazonLink(), addBildUrl(), bulkChangeStatus(), bulkDelete(), bulkSetStatus(), closeIdeeModal(), delIdee(), handleImp() (+6 more)
 
 ### Community 36 - "Clipboard & Templates"
 Cohesion: 0.13
-Nodes (19): addLaunchItem(), closePromptModal(), copyPrompt(), deleteTask(), fallbackCopy(), kwCopy(), lgCopy(), listingCopyHtml() (+11 more)
+Nodes (19): addLaunchItem(), closePromptModal(), copyPrompt(), fallbackCopy(), kwCopy(), lgCopy(), listingCopyHtml(), listingCopyPlain() (+11 more)
 
 ### Community 37 - "Backend Architecture Docs"
 Cohesion: 0.13
@@ -314,8 +300,8 @@ Cohesion: 0.17
 Nodes (11): Aufbau (Kurz), Automatischer Sync über Claude-Code-Hooks (`.claude/settings.json`), Backups, graphify, Hosting (vorbereitet — Ziel: amzsellerhub.de auf netcup-Webspace), Lokale Vorschau (solange die Domain hängt), Offene nächste Schritte (Stand 7.7.2026), SellerHub (+3 more)
 
 ### Community 44 - "Product List Management"
-Cohesion: 0.15
-Nodes (13): closePM(), deleteCurrentProd(), delProd(), duplicateCurrentProd(), dupProd(), handleImp(), prodBulkDelete(), prodBulkSetStatus() (+5 more)
+Cohesion: 0.14
+Nodes (14): closePM(), deleteCurrentProd(), delProd(), duplicateCurrentProd(), dupProd(), prodBulkDelete(), prodBulkSetStatus(), prodSearchInput() (+6 more)
 
 ### Community 45 - "Product Research Concept Doc"
 Cohesion: 0.17
@@ -358,12 +344,12 @@ Cohesion: 0.25
 Nodes (8): Alert-Regeln (Risk Monitoring, bewusst OHNE KI-Entscheidung — reproduzierbar), Architektur, Clustering-Strategie (und warum keine Embeddings in v1), Dashboard-Datenstruktur — `GET /api/market-intelligence`, Phase 4: Trend-Engine, Opportunity Detection & Risk Monitoring, Skalierung auf > 50.000 Artikel, Trend-Score (deterministisch, jede Komponente erklärbar), Vorbereitung Predictive Forecasting (Phase 5)
 
 ### Community 55 - "User Data Sync Storage"
-Cohesion: 0.13
-Nodes (15): Appendix B - Canonical Sources (read these before reinventing), Apple Liquid Glass (Apple platforms only), Atlassian, Bootstrap, Carbon, Fluent UI, GOV.UK, Material Web (+7 more)
+Cohesion: 0.17
+Nodes (15): parseAiSummary(), queryEvents(), analyzedItemsSince(), unanalyzedItemsSince(), upsertTopicDaily(), upsertTrendTopic(), computeMetrics(), dailyBuckets() (+7 more)
 
 ### Community 56 - "Global Search"
-Cohesion: 0.18
-Nodes (14): lgImportAmazon(), lgSyToken(), newsAct(), newsResetDeleted(), newsSetFilter(), newsSetPage(), newsSetState(), newsState() (+6 more)
+Cohesion: 0.40
+Nodes (5): calculateCorporateTaxEstimate(), calculateIncomeTaxEstimate(), calculateTaxReserve(), calculateTradeTaxEstimate(), calculateVatReserve()
 
 ### Community 57 - "AI Proxy Concept Doc"
 Cohesion: 0.29
@@ -378,20 +364,20 @@ Cohesion: 0.18
 Nodes (10): Accessibility & Inclusion, Anti-references, Brand Personality, Design Principles, Platform, Positioning, Product, Product Purpose (+2 more)
 
 ### Community 60 - "Research Progress Indicator"
-Cohesion: 0.17
-Nodes (13): applyHeliumPick(), applyHeliumToProduct(), clearProductSalesData(), editTitleInline(), goSub(), heliumSourceLabel(), openProductDetail(), productHasHeliumData() (+5 more)
+Cohesion: 0.53
+Nodes (6): researchBeatCandidate(), researchBeatProgDone(), researchBeatProgHide(), researchBeatProgPaint(), researchBeatProgShow(), researchBeatProgStep()
 
 ### Community 61 - "Freitext Import"
-Cohesion: 0.32
-Nodes (8): createBoard(), createList(), pmAddList(), pmCreateBoardFromTemplate(), pmCreateEmptyBoard(), pmCreateFromTemplate(), pmNewBoardDialog(), pmOpenBoard()
+Cohesion: 0.24
+Nodes (10): createBoard(), createList(), createTask(), pmAddList(), pmCreateBoardFromTemplate(), pmCreateEmptyBoard(), pmCreateFromTemplate(), pmNewBoardDialog() (+2 more)
 
 ### Community 62 - "Crawler Pipeline Architecture"
 Cohesion: 0.33
 Nodes (6): 1.1 Überblick (eine Pipeline, drei Bausteine), 1.2 Crawler-Logik (3 Quellen-Stufen, bewusst in dieser Reihenfolge), 1.3 Datenbankstruktur (2 Tabellen reichen für v1), 1.4 API-Endpunkte (REST, readonly, minimal), 1.5 Event-Update-Mechanismus, 1. Systemarchitektur
 
 ### Community 63 - "Supplier Management"
-Cohesion: 0.17
-Nodes (12): 4.10 Quotes & Testimonials, 4.11 Page Theme Lock (Light / Dark Mode Consistency), 4.1 Typography, 4.2 Color Calibration, 4.3 Layout Diversification, 4.4 Materiality, Shadows, Cards, 4.5 Interactive UI States, 4.6 Data & Form Patterns (+4 more)
+Cohesion: 0.50
+Nodes (4): prodClearSelection(), prodToggleSelect(), prodToggleSelectAll(), updateProdBulkBar()
 
 ### Community 65 - "External AI Prompt Handoff"
 Cohesion: 0.33
@@ -406,8 +392,8 @@ Cohesion: 0.40
 Nodes (5): openTagManager(), tagColor(), tagCreate(), tagDelete(), tagMenu()
 
 ### Community 68 - "Bulk Selection UI"
-Cohesion: 0.18
-Nodes (11): 0.A Read these signals first, 0.B Output a one-line "Design Read" before generating, 0. BRIEF INFERENCE (Read the Room Before Anything Else), 0.C If the brief is ambiguous, ask one question, do not guess, 0.D Anti-Default Discipline, 13. OUT OF SCOPE, 14. FINAL PRE-FLIGHT CHECK, 2.A When to reach for a real design system (use official packages) (+3 more)
+Cohesion: 0.50
+Nodes (4): clearSelection(), toggleSelect(), toggleSelectAll(), updateBulkBar()
 
 ### Community 69 - "Save & Backup Export"
 Cohesion: 0.50
@@ -422,16 +408,12 @@ Cohesion: 0.50
 Nodes (4): fbaCatLabel(), fbaPopulateSelects(), fbaPopulateSelectsRefresh(), fbaTierLabel()
 
 ### Community 72 - "Landed Cost Calculator"
-Cohesion: 0.20
-Nodes (10): 10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know), Animation Library Choice, Cards & Containers, Galleries & Media, Hero Paradigms, Layout & Grids, Micro-Interactions & Effects, Navigation & Menus (+2 more)
-
-### Community 73 - "bsrCalc"
-Cohesion: 0.29
-Nodes (10): bsrCalc(), bsrCalibrate(), bsrGetCalib(), bsrResetCalib(), bsrScaleFor(), bsrSetCalib(), estApply(), estimateHeliumForProduct() (+2 more)
+Cohesion: 0.50
+Nodes (4): lcApply(), lcCalc(), lcEustCashflow(), lcVals()
 
 ### Community 74 - "JSON Repair Utilities"
-Cohesion: 0.67
-Nodes (3): closeImportModal(), parseFreitext(), runImport()
+Cohesion: 0.14
+Nodes (15): closeClaudeModal(), closeImportModal(), extractJSON(), findJSONArrayBounds(), fixEnc(), importClaudeResponse(), normalizeIdee(), parseFreitext() (+7 more)
 
 ### Community 75 - "Local Dev Server"
 Cohesion: 0.50
@@ -441,60 +423,8 @@ Nodes (3): MIME, PORT, ROOT
 Cohesion: 0.50
 Nodes (3): SellerHub Marketing-Website, Vor Veröffentlichung ausfüllen (Suche nach `TODO` / `[`), Ziel-Layout auf dem Webspace (amzsellerhub.de)
 
-### Community 77 - "9. AI TELLS (Forbidden Patterns)"
-Cohesion: 0.25
-Nodes (8): 9.A Visual & CSS, 9. AI TELLS (Forbidden Patterns), 9.B Typography, 9.C Layout & Spacing, 9.D Content & Data ("Jane Doe" Effect), 9.E External Resources & Components, 9.F Production-Test Tells (banned outright), 9.G EM-DASH BAN (the single most-violated Tell)
-
-### Community 81 - "APPENDICES - Real Source-Backed Reference Material"
-Cohesion: 0.29
-Nodes (6): APPENDICES - Real Source-Backed Reference Material, Appendix A - Install Commands per Design System, Appendix C - Apple Liquid Glass: Honest Web Approximation, Safer web approximation skeleton, What is NOT official, What is official
-
-### Community 82 - "11. REDESIGN PROTOCOL"
-Cohesion: 0.29
-Nodes (7): 11.A Detect the Mode (first action), 11.B Audit Before Touching, 11.C Preservation Rules, 11.D Modernisation Levers (priority order), 11.E Decision Tree: Targeted Evolution vs Full Redesign, 11.F What Never Changes Silently, 11. REDESIGN PROTOCOL
-
-### Community 83 - "3. DEFAULT ARCHITECTURE & CONVENTIONS"
-Cohesion: 0.29
-Nodes (7): 3.A Stack, 3.B State, 3.C Icons, 3.D Emoji Policy, 3. DEFAULT ARCHITECTURE & CONVENTIONS, 3.E Responsiveness & Layout Mechanics, 3.F Dependency Verification (mandatory)
-
-### Community 84 - "6. PERFORMANCE & ACCESSIBILITY GUARDRAILS"
-Cohesion: 0.29
-Nodes (7): 6.A Hardware Acceleration, 6.B Reduced Motion (mandatory), 6.C Dark Mode (mandatory for any consumer-facing page), 6.D Core Web Vitals Targets, 6.E DOM Cost, 6.F Z-Index Restraint, 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
-
-### Community 85 - "12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)"
-Cohesion: 0.40
-Nodes (5): 12.A File Location, 12.B Required Frontmatter, 12.C Required Body Sections, 12.D Block-Library Discipline, 12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)
-
-### Community 86 - "5. CONTEXT-AWARE PROACTIVITY"
-Cohesion: 0.40
-Nodes (5): 5.A Sticky-Stack - Canonical Skeleton, 5.B Horizontal-Pan - Canonical Skeleton, 5.C Scroll-Reveal Stagger - Canonical Skeleton (lighter alternative), 5. CONTEXT-AWARE PROACTIVITY, 5.D Forbidden Animation Patterns
-
-### Community 87 - "8. DARK MODE PROTOCOL"
-Cohesion: 0.40
-Nodes (5): 8.A Token Strategy (pick one, stick to it), 8.B Do Not Prescribe Specific Colors Here, 8.C Default Mode, 8.D Test in Both Modes Before Finishing, 8. DARK MODE PROTOCOL
-
-### Community 88 - "renderDetailSuppliers"
-Cohesion: 0.50
-Nodes (5): addDetailSupplier(), calcSupplierScore(), delDetailSupplier(), editDetailSupplier(), renderDetailSuppliers()
-
-### Community 89 - "1. THE THREE DIALS (Core Configuration)"
-Cohesion: 0.50
-Nodes (4): 1.A Dial Inference (design read → dial values), 1.B Use-Case Presets, 1.C How the Dials Drive Output, 1. THE THREE DIALS (Core Configuration)
-
-### Community 90 - "7. DIAL DEFINITIONS (Technical Reference)"
-Cohesion: 0.50
-Nodes (4): 7. DIAL DEFINITIONS (Technical Reference), DESIGN_VARIANCE (Level 1-10), MOTION_INTENSITY (Level 1-10), VISUAL_DENSITY (Level 1-10)
-
-### Community 91 - "buildAmazonSearchUrl"
-Cohesion: 0.50
-Nodes (4): amazonSearchTerms(), buildAmazonSearchUrl(), ideenOpenProduct(), searchImageOnGoogle()
-
-### Community 92 - "lgGenerate"
-Cohesion: 0.67
-Nodes (3): lgBuildPrompt(), lgGenerate(), lgParse()
-
 ## Knowledge Gaps
-- **426 isolated node(s):** `0.A Read these signals first`, `0.B Output a one-line "Design Read" before generating`, `0.C If the brief is ambiguous, ask one question, do not guess`, `0.D Anti-Default Discipline`, `1.A Dial Inference (design read → dial values)` (+421 more)
+- **337 isolated node(s):** `1. Overview`, `Primary`, `Neutral`, `Tertiary — Status hues (data only)`, `Named Rules` (+332 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -502,16 +432,16 @@ Nodes (3): lgBuildPrompt(), lgGenerate(), lgParse()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `v()` connect `Platform Integration Tests` to `To-Do Database Layer`, `AI Image Studio`, `To-Do Dialogs & Menus`, `Calendar Feeds & ICS Export`, `Internal Admin Dashboard`, `Cloud Sync Client`, `API Server & Crawler Worker`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+  _High betweenness centrality (0.088) - this node is a cross-community bridge._
 - **Why does `tdInput()` connect `To-Do Dialogs & Menus` to `To-Do UI Interactions`, `Platform Integration Tests`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `db()` connect `To-Do Database Layer` to `Text Utilities & AI Usage Tracking`, `Calendar Feeds & ICS Export`, `News Deduplication & Sources`, `Sessions & User Accounts`, `Trend Alerts & Item Tracking`, `Internal Admin Dashboard`, `Platform Integration Tests`, `AI Analysis Pipeline`, `API Server & Crawler Worker`, `Topic Forecasting`, `AI Strategy Brief`, `Alert Dispatching`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **What connects `0.A Read these signals first`, `0.B Output a one-line "Design Read" before generating`, `0.C If the brief is ambiguous, ask one question, do not guess` to the rest of the system?**
-  _426 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Why does `db()` connect `To-Do Database Layer` to `Text Utilities & AI Usage Tracking`, `Calendar Feeds & ICS Export`, `News Deduplication & Sources`, `Sessions & User Accounts`, `Trend Alerts & Item Tracking`, `Internal Admin Dashboard`, `Platform Integration Tests`, `AI Analysis Pipeline`, `API Server & Crawler Worker`, `User Data Sync Storage`, `Topic Forecasting`, `AI Strategy Brief`, `Alert Dispatching`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **What connects `1. Overview`, `Primary`, `Neutral` to the rest of the system?**
+  _337 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `To-Do Database Layer` be split into smaller, more focused modules?**
-  _Cohesion score 0.05828571428571429 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05411255411255411 - nodes in this community are weakly interconnected._
 - **Should `AI Image Studio` be split into smaller, more focused modules?**
   _Cohesion score 0.06829488919041157 - nodes in this community are weakly interconnected._
 - **Should `Text Utilities & AI Usage Tracking` be split into smaller, more focused modules?**
-  _Cohesion score 0.05575065847234416 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.056535504296698326 - nodes in this community are weakly interconnected._

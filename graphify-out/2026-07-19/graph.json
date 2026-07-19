@@ -4,1084 +4,14 @@
   "graph": {},
   "nodes": [
     {
-      "label": "SKILL.md",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill",
-      "community": 81,
-      "norm_label": "skill.md"
-    },
-    {
-      "label": "tasteskill: Anti-Slop Frontend Skill",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L6",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "community": 68,
-      "norm_label": "tasteskill: anti-slop frontend skill"
-    },
-    {
-      "label": "0. BRIEF INFERENCE (Read the Room Before Anything Else)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L13",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "community": 68,
-      "norm_label": "0. brief inference (read the room before anything else)"
-    },
-    {
-      "label": "0.A Read these signals first",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L17",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_0_a_read_these_signals_first",
-      "community": 68,
-      "norm_label": "0.a read these signals first"
-    },
-    {
-      "label": "0.B Output a one-line \"Design Read\" before generating",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L25",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_0_b_output_a_one_line_design_read_before_generating",
-      "community": 68,
-      "norm_label": "0.b output a one-line \"design read\" before generating"
-    },
-    {
-      "label": "0.C If the brief is ambiguous, ask one question, do not guess",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L33",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_0_c_if_the_brief_is_ambiguous_ask_one_question_do_not_guess",
-      "community": 68,
-      "norm_label": "0.c if the brief is ambiguous, ask one question, do not guess"
-    },
-    {
-      "label": "0.D Anti-Default Discipline",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L38",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_0_d_anti_default_discipline",
-      "community": 68,
-      "norm_label": "0.d anti-default discipline"
-    },
-    {
-      "label": "1. THE THREE DIALS (Core Configuration)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L43",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_1_the_three_dials_core_configuration",
-      "community": 89,
-      "norm_label": "1. the three dials (core configuration)"
-    },
-    {
-      "label": "1.A Dial Inference (design read \u2192 dial values)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L53",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_1_a_dial_inference_design_read_dial_values",
-      "community": 89,
-      "norm_label": "1.a dial inference (design read \u2192 dial values)"
-    },
-    {
-      "label": "1.B Use-Case Presets",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L64",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_1_b_use_case_presets",
-      "community": 89,
-      "norm_label": "1.b use-case presets"
-    },
-    {
-      "label": "1.C How the Dials Drive Output",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L77",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_1_c_how_the_dials_drive_output",
-      "community": 89,
-      "norm_label": "1.c how the dials drive output"
-    },
-    {
-      "label": "2. BRIEF \u2192 DESIGN SYSTEM MAP",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L82",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_2_brief_design_system_map",
-      "community": 68,
-      "norm_label": "2. brief \u2192 design system map"
-    },
-    {
-      "label": "2.A When to reach for a real design system (use official packages)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L86",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_2_a_when_to_reach_for_a_real_design_system_use_official_packages",
-      "community": 68,
-      "norm_label": "2.a when to reach for a real design system (use official packages)"
-    },
-    {
-      "label": "2.B When the brief is an aesthetic, not a system",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L106",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_2_b_when_the_brief_is_an_aesthetic_not_a_system",
-      "community": 68,
-      "norm_label": "2.b when the brief is an aesthetic, not a system"
-    },
-    {
-      "label": "3. DEFAULT ARCHITECTURE & CONVENTIONS",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L122",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "community": 83,
-      "norm_label": "3. default architecture & conventions"
-    },
-    {
-      "label": "3.A Stack",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L126",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_a_stack",
-      "community": 83,
-      "norm_label": "3.a stack"
-    },
-    {
-      "label": "3.B State",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L135",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_b_state",
-      "community": 83,
-      "norm_label": "3.b state"
-    },
-    {
-      "label": "3.C Icons",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L140",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_c_icons",
-      "community": 83,
-      "norm_label": "3.c icons"
-    },
-    {
-      "label": "3.D Emoji Policy",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L147",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_d_emoji_policy",
-      "community": 83,
-      "norm_label": "3.d emoji policy"
-    },
-    {
-      "label": "3.E Responsiveness & Layout Mechanics",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L150",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_e_responsiveness_layout_mechanics",
-      "community": 83,
-      "norm_label": "3.e responsiveness & layout mechanics"
-    },
-    {
-      "label": "3.F Dependency Verification (mandatory)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L156",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_3_f_dependency_verification_mandatory",
-      "community": 83,
-      "norm_label": "3.f dependency verification (mandatory)"
-    },
-    {
-      "label": "4. DESIGN ENGINEERING DIRECTIVES (Bias Correction)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L161",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "community": 63,
-      "norm_label": "4. design engineering directives (bias correction)"
-    },
-    {
-      "label": "4.1 Typography",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L165",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_1_typography",
-      "community": 63,
-      "norm_label": "4.1 typography"
-    },
-    {
-      "label": "4.2 Color Calibration",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L185",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_2_color_calibration",
-      "community": 63,
-      "norm_label": "4.2 color calibration"
-    },
-    {
-      "label": "4.3 Layout Diversification",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L209",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_3_layout_diversification",
-      "community": 63,
-      "norm_label": "4.3 layout diversification"
-    },
-    {
-      "label": "4.4 Materiality, Shadows, Cards",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L213",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_4_materiality_shadows_cards",
-      "community": 63,
-      "norm_label": "4.4 materiality, shadows, cards"
-    },
-    {
-      "label": "4.5 Interactive UI States",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L219",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_5_interactive_ui_states",
-      "community": 63,
-      "norm_label": "4.5 interactive ui states"
-    },
-    {
-      "label": "4.6 Data & Form Patterns",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L230",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_6_data_form_patterns",
-      "community": 63,
-      "norm_label": "4.6 data & form patterns"
-    },
-    {
-      "label": "4.7 Layout Discipline (Hard Rules. Failing any of these is shipping broken work)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L234",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_7_layout_discipline_hard_rules_failing_any_of_these_is_shipping_broken_work",
-      "community": 63,
-      "norm_label": "4.7 layout discipline (hard rules. failing any of these is shipping broken work)"
-    },
-    {
-      "label": "4.8 Image & Visual Asset Strategy",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L262",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_8_image_visual_asset_strategy",
-      "community": 63,
-      "norm_label": "4.8 image & visual asset strategy"
-    },
-    {
-      "label": "4.9 Content Density",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L298",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_9_content_density",
-      "community": 63,
-      "norm_label": "4.9 content density"
-    },
-    {
-      "label": "4.10 Quotes & Testimonials",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L333",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_10_quotes_testimonials",
-      "community": 63,
-      "norm_label": "4.10 quotes & testimonials"
-    },
-    {
-      "label": "4.11 Page Theme Lock (Light / Dark Mode Consistency)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L341",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_4_11_page_theme_lock_light_dark_mode_consistency",
-      "community": 63,
-      "norm_label": "4.11 page theme lock (light / dark mode consistency)"
-    },
-    {
-      "label": "5. CONTEXT-AWARE PROACTIVITY",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L352",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "community": 86,
-      "norm_label": "5. context-aware proactivity"
-    },
-    {
-      "label": "5.A Sticky-Stack - Canonical Skeleton",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L365",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_5_a_sticky_stack_canonical_skeleton",
-      "community": 86,
-      "norm_label": "5.a sticky-stack - canonical skeleton"
-    },
-    {
-      "label": "5.B Horizontal-Pan - Canonical Skeleton",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L427",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_5_b_horizontal_pan_canonical_skeleton",
-      "community": 86,
-      "norm_label": "5.b horizontal-pan - canonical skeleton"
-    },
-    {
-      "label": "5.C Scroll-Reveal Stagger - Canonical Skeleton (lighter alternative)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L475",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_5_c_scroll_reveal_stagger_canonical_skeleton_lighter_alternative",
-      "community": 86,
-      "norm_label": "5.c scroll-reveal stagger - canonical skeleton (lighter alternative)"
-    },
-    {
-      "label": "5.D Forbidden Animation Patterns",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L509",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_5_d_forbidden_animation_patterns",
-      "community": 86,
-      "norm_label": "5.d forbidden animation patterns"
-    },
-    {
-      "label": "6. PERFORMANCE & ACCESSIBILITY GUARDRAILS",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L519",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "community": 84,
-      "norm_label": "6. performance & accessibility guardrails"
-    },
-    {
-      "label": "6.A Hardware Acceleration",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L521",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_a_hardware_acceleration",
-      "community": 84,
-      "norm_label": "6.a hardware acceleration"
-    },
-    {
-      "label": "6.B Reduced Motion (mandatory)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L525",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_b_reduced_motion_mandatory",
-      "community": 84,
-      "norm_label": "6.b reduced motion (mandatory)"
-    },
-    {
-      "label": "6.C Dark Mode (mandatory for any consumer-facing page)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L531",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_c_dark_mode_mandatory_for_any_consumer_facing_page",
-      "community": 84,
-      "norm_label": "6.c dark mode (mandatory for any consumer-facing page)"
-    },
-    {
-      "label": "6.D Core Web Vitals Targets",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L537",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_d_core_web_vitals_targets",
-      "community": 84,
-      "norm_label": "6.d core web vitals targets"
-    },
-    {
-      "label": "6.E DOM Cost",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L543",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_e_dom_cost",
-      "community": 84,
-      "norm_label": "6.e dom cost"
-    },
-    {
-      "label": "6.F Z-Index Restraint",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L547",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_6_f_z_index_restraint",
-      "community": 84,
-      "norm_label": "6.f z-index restraint"
-    },
-    {
-      "label": "7. DIAL DEFINITIONS (Technical Reference)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L552",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_7_dial_definitions_technical_reference",
-      "community": 90,
-      "norm_label": "7. dial definitions (technical reference)"
-    },
-    {
-      "label": "DESIGN_VARIANCE (Level 1-10)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L554",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_design_variance_level_1_10",
-      "community": 90,
-      "norm_label": "design_variance (level 1-10)"
-    },
-    {
-      "label": "MOTION_INTENSITY (Level 1-10)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L560",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_motion_intensity_level_1_10",
-      "community": 90,
-      "norm_label": "motion_intensity (level 1-10)"
-    },
-    {
-      "label": "VISUAL_DENSITY (Level 1-10)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L565",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_visual_density_level_1_10",
-      "community": 90,
-      "norm_label": "visual_density (level 1-10)"
-    },
-    {
-      "label": "8. DARK MODE PROTOCOL",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L572",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "community": 87,
-      "norm_label": "8. dark mode protocol"
-    },
-    {
-      "label": "8.A Token Strategy (pick one, stick to it)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L576",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_8_a_token_strategy_pick_one_stick_to_it",
-      "community": 87,
-      "norm_label": "8.a token strategy (pick one, stick to it)"
-    },
-    {
-      "label": "8.B Do Not Prescribe Specific Colors Here",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L580",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_8_b_do_not_prescribe_specific_colors_here",
-      "community": 87,
-      "norm_label": "8.b do not prescribe specific colors here"
-    },
-    {
-      "label": "8.C Default Mode",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L587",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_8_c_default_mode",
-      "community": 87,
-      "norm_label": "8.c default mode"
-    },
-    {
-      "label": "8.D Test in Both Modes Before Finishing",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L590",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_8_d_test_in_both_modes_before_finishing",
-      "community": 87,
-      "norm_label": "8.d test in both modes before finishing"
-    },
-    {
-      "label": "9. AI TELLS (Forbidden Patterns)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L595",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "community": 77,
-      "norm_label": "9. ai tells (forbidden patterns)"
-    },
-    {
-      "label": "9.A Visual & CSS",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L599",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_a_visual_css",
-      "community": 77,
-      "norm_label": "9.a visual & css"
-    },
-    {
-      "label": "9.B Typography",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L606",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_b_typography",
-      "community": 77,
-      "norm_label": "9.b typography"
-    },
-    {
-      "label": "9.C Layout & Spacing",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L611",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_c_layout_spacing",
-      "community": 77,
-      "norm_label": "9.c layout & spacing"
-    },
-    {
-      "label": "9.D Content & Data (\"Jane Doe\" Effect)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L615",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_d_content_data_jane_doe_effect",
-      "community": 77,
-      "norm_label": "9.d content & data (\"jane doe\" effect)"
-    },
-    {
-      "label": "9.E External Resources & Components",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L622",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_e_external_resources_components",
-      "community": 77,
-      "norm_label": "9.e external resources & components"
-    },
-    {
-      "label": "9.F Production-Test Tells (banned outright)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L630",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_f_production_test_tells_banned_outright",
-      "community": 77,
-      "norm_label": "9.f production-test tells (banned outright)"
-    },
-    {
-      "label": "9.G EM-DASH BAN (the single most-violated Tell)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L685",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_9_g_em_dash_ban_the_single_most_violated_tell",
-      "community": 77,
-      "norm_label": "9.g em-dash ban (the single most-violated tell)"
-    },
-    {
-      "label": "10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L705",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "community": 72,
-      "norm_label": "10. reference vocabulary (pattern names the agent should know)"
-    },
-    {
-      "label": "Hero Paradigms",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L709",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_hero_paradigms",
-      "community": 72,
-      "norm_label": "hero paradigms"
-    },
-    {
-      "label": "Navigation & Menus",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L717",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_navigation_menus",
-      "community": 72,
-      "norm_label": "navigation & menus"
-    },
-    {
-      "label": "Layout & Grids",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L726",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_layout_grids",
-      "community": 72,
-      "norm_label": "layout & grids"
-    },
-    {
-      "label": "Cards & Containers",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L733",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_cards_containers",
-      "community": 72,
-      "norm_label": "cards & containers"
-    },
-    {
-      "label": "Scroll Animations",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L741",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_scroll_animations",
-      "community": 72,
-      "norm_label": "scroll animations"
-    },
-    {
-      "label": "Galleries & Media",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L749",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_galleries_media",
-      "community": 72,
-      "norm_label": "galleries & media"
-    },
-    {
-      "label": "Typography & Text",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L757",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_typography_text",
-      "community": 72,
-      "norm_label": "typography & text"
-    },
-    {
-      "label": "Micro-Interactions & Effects",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L765",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_micro_interactions_effects",
-      "community": 72,
-      "norm_label": "micro-interactions & effects"
-    },
-    {
-      "label": "Animation Library Choice",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L775",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_animation_library_choice",
-      "community": 72,
-      "norm_label": "animation library choice"
-    },
-    {
-      "label": "11. REDESIGN PROTOCOL",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L783",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "community": 82,
-      "norm_label": "11. redesign protocol"
-    },
-    {
-      "label": "11.A Detect the Mode (first action)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L787",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_a_detect_the_mode_first_action",
-      "community": 82,
-      "norm_label": "11.a detect the mode (first action)"
-    },
-    {
-      "label": "11.B Audit Before Touching",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L794",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_b_audit_before_touching",
-      "community": 82,
-      "norm_label": "11.b audit before touching"
-    },
-    {
-      "label": "11.C Preservation Rules",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L804",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_c_preservation_rules",
-      "community": 82,
-      "norm_label": "11.c preservation rules"
-    },
-    {
-      "label": "11.D Modernisation Levers (priority order)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L811",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_d_modernisation_levers_priority_order",
-      "community": 82,
-      "norm_label": "11.d modernisation levers (priority order)"
-    },
-    {
-      "label": "11.E Decision Tree: Targeted Evolution vs Full Redesign",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L820",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_e_decision_tree_targeted_evolution_vs_full_redesign",
-      "community": 82,
-      "norm_label": "11.e decision tree: targeted evolution vs full redesign"
-    },
-    {
-      "label": "11.F What Never Changes Silently",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L825",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_11_f_what_never_changes_silently",
-      "community": 82,
-      "norm_label": "11.f what never changes silently"
-    },
-    {
-      "label": "12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L835",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "community": 85,
-      "norm_label": "12. the block library (contract - implementations land here iteratively)"
-    },
-    {
-      "label": "12.A File Location",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L841",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_12_a_file_location",
-      "community": 85,
-      "norm_label": "12.a file location"
-    },
-    {
-      "label": "12.B Required Frontmatter",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L863",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_12_b_required_frontmatter",
-      "community": 85,
-      "norm_label": "12.b required frontmatter"
-    },
-    {
-      "label": "12.C Required Body Sections",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L878",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_12_c_required_body_sections",
-      "community": 85,
-      "norm_label": "12.c required body sections"
-    },
-    {
-      "label": "12.D Block-Library Discipline",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L888",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_12_d_block_library_discipline",
-      "community": 85,
-      "norm_label": "12.d block-library discipline"
-    },
-    {
-      "label": "13. OUT OF SCOPE",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L896",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_13_out_of_scope",
-      "community": 68,
-      "norm_label": "13. out of scope"
-    },
-    {
-      "label": "14. FINAL PRE-FLIGHT CHECK",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L910",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_14_final_pre_flight_check",
-      "community": 68,
-      "norm_label": "14. final pre-flight check"
-    },
-    {
-      "label": "APPENDICES - Real Source-Backed Reference Material",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L983",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_appendices_real_source_backed_reference_material",
-      "community": 81,
-      "norm_label": "appendices - real source-backed reference material"
-    },
-    {
-      "label": "Appendix A - Install Commands per Design System",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L987",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_appendix_a_install_commands_per_design_system",
-      "community": 81,
-      "norm_label": "appendix a - install commands per design system"
-    },
-    {
-      "label": "Appendix B - Canonical Sources (read these before reinventing)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1033",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "community": 55,
-      "norm_label": "appendix b - canonical sources (read these before reinventing)"
-    },
-    {
-      "label": "Material Web",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1035",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_material_web",
-      "community": 55,
-      "norm_label": "material web"
-    },
-    {
-      "label": "Fluent UI",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1040",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_fluent_ui",
-      "community": 55,
-      "norm_label": "fluent ui"
-    },
-    {
-      "label": "Carbon",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1046",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_carbon",
-      "community": 55,
-      "norm_label": "carbon"
-    },
-    {
-      "label": "Shopify Polaris",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1052",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_shopify_polaris",
-      "community": 55,
-      "norm_label": "shopify polaris"
-    },
-    {
-      "label": "Atlassian",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1057",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_atlassian",
-      "community": 55,
-      "norm_label": "atlassian"
-    },
-    {
-      "label": "Primer",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1063",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_primer",
-      "community": 55,
-      "norm_label": "primer"
-    },
-    {
-      "label": "GOV.UK",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1068",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_gov_uk",
-      "community": 55,
-      "norm_label": "gov.uk"
-    },
-    {
-      "label": "USWDS",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1073",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_uswds",
-      "community": 55,
-      "norm_label": "uswds"
-    },
-    {
-      "label": "Bootstrap",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1079",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_bootstrap",
-      "community": 55,
-      "norm_label": "bootstrap"
-    },
-    {
-      "label": "Tailwind",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1083",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_tailwind",
-      "community": 55,
-      "norm_label": "tailwind"
-    },
-    {
-      "label": "Radix",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1087",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_radix",
-      "community": 55,
-      "norm_label": "radix"
-    },
-    {
-      "label": "shadcn/ui",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1092",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_shadcn_ui",
-      "community": 55,
-      "norm_label": "shadcn/ui"
-    },
-    {
-      "label": "Native CSS / W3C standards",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1097",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_native_css_w3c_standards",
-      "community": 55,
-      "norm_label": "native css / w3c standards"
-    },
-    {
-      "label": "Apple Liquid Glass (Apple platforms only)",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1105",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_apple_liquid_glass_apple_platforms_only",
-      "community": 55,
-      "norm_label": "apple liquid glass (apple platforms only)"
-    },
-    {
-      "label": "Appendix C - Apple Liquid Glass: Honest Web Approximation",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1113",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_appendix_c_apple_liquid_glass_honest_web_approximation",
-      "community": 81,
-      "norm_label": "appendix c - apple liquid glass: honest web approximation"
-    },
-    {
-      "label": "What is official",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1117",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_what_is_official",
-      "community": 81,
-      "norm_label": "what is official"
-    },
-    {
-      "label": "What is NOT official",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1126",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_what_is_not_official",
-      "community": 81,
-      "norm_label": "what is not official"
-    },
-    {
-      "label": "Safer web approximation skeleton",
-      "file_type": "document",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1140",
-      "_origin": "ast",
-      "id": "agents_skills_design_taste_frontend_skill_safer_web_approximation_skeleton",
-      "community": 81,
-      "norm_label": "safer web approximation skeleton"
-    },
-    {
       "label": "DESIGN.md",
       "file_type": "document",
       "source_file": "DESIGN.md",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "design",
       "community": 58,
-      "norm_label": "design.md",
-      "id": "design"
+      "norm_label": "design.md"
     },
     {
       "label": "Design System: SellerHub",
@@ -1089,9 +19,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L103",
       "_origin": "ast",
+      "id": "design_design_system_sellerhub",
       "community": 58,
-      "norm_label": "design system: sellerhub",
-      "id": "design_design_system_sellerhub"
+      "norm_label": "design system: sellerhub"
     },
     {
       "label": "1. Overview",
@@ -1099,9 +29,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L105",
       "_origin": "ast",
+      "id": "design_1_overview",
       "community": 58,
-      "norm_label": "1. overview",
-      "id": "design_1_overview"
+      "norm_label": "1. overview"
     },
     {
       "label": "2. Colors",
@@ -1109,9 +39,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L122",
       "_origin": "ast",
+      "id": "design_2_colors",
       "community": 58,
-      "norm_label": "2. colors",
-      "id": "design_2_colors"
+      "norm_label": "2. colors"
     },
     {
       "label": "Primary",
@@ -1119,9 +49,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L126",
       "_origin": "ast",
+      "id": "design_primary",
       "community": 58,
-      "norm_label": "primary",
-      "id": "design_primary"
+      "norm_label": "primary"
     },
     {
       "label": "Neutral",
@@ -1129,9 +59,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L129",
       "_origin": "ast",
+      "id": "design_neutral",
       "community": 58,
-      "norm_label": "neutral",
-      "id": "design_neutral"
+      "norm_label": "neutral"
     },
     {
       "label": "Tertiary \u2014 Status hues (data only)",
@@ -1139,9 +69,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L137",
       "_origin": "ast",
+      "id": "design_tertiary_status_hues_data_only",
       "community": 58,
-      "norm_label": "tertiary \u2014 status hues (data only)",
-      "id": "design_tertiary_status_hues_data_only"
+      "norm_label": "tertiary \u2014 status hues (data only)"
     },
     {
       "label": "Named Rules",
@@ -1149,9 +79,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L140",
       "_origin": "ast",
+      "id": "design_named_rules",
       "community": 58,
-      "norm_label": "named rules",
-      "id": "design_named_rules"
+      "norm_label": "named rules"
     },
     {
       "label": "3. Typography",
@@ -1159,9 +89,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L147",
       "_origin": "ast",
+      "id": "design_3_typography",
       "community": 58,
-      "norm_label": "3. typography",
-      "id": "design_3_typography"
+      "norm_label": "3. typography"
     },
     {
       "label": "Hierarchy",
@@ -1169,9 +99,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L154",
       "_origin": "ast",
+      "id": "design_hierarchy",
       "community": 58,
-      "norm_label": "hierarchy",
-      "id": "design_hierarchy"
+      "norm_label": "hierarchy"
     },
     {
       "label": "Named Rules",
@@ -1179,9 +109,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L161",
       "_origin": "ast",
+      "id": "design_named_rules_161",
       "community": 58,
-      "norm_label": "named rules",
-      "id": "design_named_rules_161"
+      "norm_label": "named rules"
     },
     {
       "label": "4. Elevation",
@@ -1189,9 +119,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L166",
       "_origin": "ast",
+      "id": "design_4_elevation",
       "community": 58,
-      "norm_label": "4. elevation",
-      "id": "design_4_elevation"
+      "norm_label": "4. elevation"
     },
     {
       "label": "Shadow Vocabulary",
@@ -1199,9 +129,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L170",
       "_origin": "ast",
+      "id": "design_shadow_vocabulary",
       "community": 58,
-      "norm_label": "shadow vocabulary",
-      "id": "design_shadow_vocabulary"
+      "norm_label": "shadow vocabulary"
     },
     {
       "label": "Named Rules",
@@ -1209,9 +139,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L176",
       "_origin": "ast",
+      "id": "design_named_rules_176",
       "community": 58,
-      "norm_label": "named rules",
-      "id": "design_named_rules_176"
+      "norm_label": "named rules"
     },
     {
       "label": "5. Components",
@@ -1219,9 +149,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L179",
       "_origin": "ast",
+      "id": "design_5_components",
       "community": 58,
-      "norm_label": "5. components",
-      "id": "design_5_components"
+      "norm_label": "5. components"
     },
     {
       "label": "Buttons",
@@ -1229,9 +159,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L181",
       "_origin": "ast",
+      "id": "design_buttons",
       "community": 58,
-      "norm_label": "buttons",
-      "id": "design_buttons"
+      "norm_label": "buttons"
     },
     {
       "label": "Chips / Badges",
@@ -1239,9 +169,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L187",
       "_origin": "ast",
+      "id": "design_chips_badges",
       "community": 58,
-      "norm_label": "chips / badges",
-      "id": "design_chips_badges"
+      "norm_label": "chips / badges"
     },
     {
       "label": "Cards / Containers",
@@ -1249,9 +179,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L191",
       "_origin": "ast",
+      "id": "design_cards_containers",
       "community": 58,
-      "norm_label": "cards / containers",
-      "id": "design_cards_containers"
+      "norm_label": "cards / containers"
     },
     {
       "label": "Inputs / Fields",
@@ -1259,9 +189,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L198",
       "_origin": "ast",
+      "id": "design_inputs_fields",
       "community": 58,
-      "norm_label": "inputs / fields",
-      "id": "design_inputs_fields"
+      "norm_label": "inputs / fields"
     },
     {
       "label": "Navigation",
@@ -1269,9 +199,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L203",
       "_origin": "ast",
+      "id": "design_navigation",
       "community": 58,
-      "norm_label": "navigation",
-      "id": "design_navigation"
+      "norm_label": "navigation"
     },
     {
       "label": "Signature \u2014 Help System",
@@ -1279,9 +209,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L208",
       "_origin": "ast",
+      "id": "design_signature_help_system",
       "community": 58,
-      "norm_label": "signature \u2014 help system",
-      "id": "design_signature_help_system"
+      "norm_label": "signature \u2014 help system"
     },
     {
       "label": "6. Do's and Don'ts",
@@ -1289,9 +219,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L211",
       "_origin": "ast",
+      "id": "design_6_do_s_and_don_ts",
       "community": 58,
-      "norm_label": "6. do's and don'ts",
-      "id": "design_6_do_s_and_don_ts"
+      "norm_label": "6. do's and don'ts"
     },
     {
       "label": "Do:",
@@ -1299,9 +229,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L213",
       "_origin": "ast",
+      "id": "design_do",
       "community": 58,
-      "norm_label": "do:",
-      "id": "design_do"
+      "norm_label": "do:"
     },
     {
       "label": "Don't:",
@@ -1309,9 +239,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L221",
       "_origin": "ast",
+      "id": "design_don_t",
       "community": 58,
-      "norm_label": "don't:",
-      "id": "design_don_t"
+      "norm_label": "don't:"
     },
     {
       "label": "admin.js",
@@ -1689,7 +619,7 @@
       "source_file": "js/app.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "load()",
       "id": "js_app_load"
     },
@@ -1709,7 +639,7 @@
       "source_file": "js/app.js",
       "source_location": "L74",
       "_origin": "ast",
-      "community": 35,
+      "community": 4,
       "norm_label": "save()",
       "id": "js_app_save"
     },
@@ -1849,7 +779,7 @@
       "source_file": "js/app.js",
       "source_location": "L294",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "radarapi()",
       "id": "js_app_radarapi"
     },
@@ -1859,7 +789,7 @@
       "source_file": "js/app.js",
       "source_location": "L295",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "radarreltime()",
       "id": "js_app_radarreltime"
     },
@@ -1869,7 +799,7 @@
       "source_file": "js/app.js",
       "source_location": "L303",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "radarprofileparams()",
       "id": "js_app_radarprofileparams"
     },
@@ -1879,7 +809,7 @@
       "source_file": "js/app.js",
       "source_location": "L315",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "renderradarwidget()",
       "id": "js_app_renderradarwidget"
     },
@@ -1889,7 +819,7 @@
       "source_file": "js/app.js",
       "source_location": "L335",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "radarwidgethtml()",
       "id": "js_app_radarwidgethtml"
     },
@@ -1939,7 +869,7 @@
       "source_file": "js/app.js",
       "source_location": "L628",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "migratepipelinestatus()",
       "id": "js_app_migratepipelinestatus"
     },
@@ -1949,7 +879,7 @@
       "source_file": "js/app.js",
       "source_location": "L652",
       "_origin": "ast",
-      "community": 35,
+      "community": 4,
       "norm_label": "migrateideen()",
       "id": "js_app_migrateideen"
     },
@@ -1979,7 +909,7 @@
       "source_file": "js/app.js",
       "source_location": "L720",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "decisionmarge()",
       "id": "js_app_decisionmarge"
     },
@@ -1989,7 +919,7 @@
       "source_file": "js/app.js",
       "source_location": "L737",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "decisionauto()",
       "id": "js_app_decisionauto"
     },
@@ -1999,7 +929,7 @@
       "source_file": "js/app.js",
       "source_location": "L796",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "decisioneff()",
       "id": "js_app_decisioneff"
     },
@@ -2019,7 +949,7 @@
       "source_file": "js/app.js",
       "source_location": "L852",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "compliancefor()",
       "id": "js_app_compliancefor"
     },
@@ -2029,7 +959,7 @@
       "source_file": "js/app.js",
       "source_location": "L866",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "compliancetoggle()",
       "id": "js_app_compliancetoggle"
     },
@@ -2039,7 +969,7 @@
       "source_file": "js/app.js",
       "source_location": "L877",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "compliancehtml()",
       "id": "js_app_compliancehtml"
     },
@@ -2149,7 +1079,7 @@
       "source_file": "js/app.js",
       "source_location": "L1094",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "qcwhyhtml()",
       "id": "js_app_qcwhyhtml"
     },
@@ -2169,7 +1099,7 @@
       "source_file": "js/app.js",
       "source_location": "L1157",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "quickcheckrenderresult()",
       "id": "js_app_quickcheckrenderresult"
     },
@@ -2189,7 +1119,7 @@
       "source_file": "js/app.js",
       "source_location": "L1240",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "sourcinginquirytext()",
       "id": "js_app_sourcinginquirytext"
     },
@@ -2199,7 +1129,7 @@
       "source_file": "js/app.js",
       "source_location": "L1287",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "sourcingopen()",
       "id": "js_app_sourcingopen"
     },
@@ -2209,7 +1139,7 @@
       "source_file": "js/app.js",
       "source_location": "L1313",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "decisionredflags()",
       "id": "js_app_decisionredflags"
     },
@@ -2229,7 +1159,7 @@
       "source_file": "js/app.js",
       "source_location": "L1360",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "decisionconfidence()",
       "id": "js_app_decisionconfidence"
     },
@@ -2299,7 +1229,7 @@
       "source_file": "js/app.js",
       "source_location": "L1462",
       "_origin": "ast",
-      "community": 35,
+      "community": 4,
       "norm_label": "auswahlsavenote()",
       "id": "js_app_auswahlsavenote"
     },
@@ -2459,7 +1389,7 @@
       "source_file": "js/app.js",
       "source_location": "L1753",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatprogpaint()",
       "id": "js_app_researchbeatprogpaint"
     },
@@ -2469,7 +1399,7 @@
       "source_file": "js/app.js",
       "source_location": "L1759",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatprogshow()",
       "id": "js_app_researchbeatprogshow"
     },
@@ -2479,7 +1409,7 @@
       "source_file": "js/app.js",
       "source_location": "L1782",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatprogstep()",
       "id": "js_app_researchbeatprogstep"
     },
@@ -2489,7 +1419,7 @@
       "source_file": "js/app.js",
       "source_location": "L1791",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatprogdone()",
       "id": "js_app_researchbeatprogdone"
     },
@@ -2499,7 +1429,7 @@
       "source_file": "js/app.js",
       "source_location": "L1792",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatproghide()",
       "id": "js_app_researchbeatproghide"
     },
@@ -2509,7 +1439,7 @@
       "source_file": "js/app.js",
       "source_location": "L1794",
       "_origin": "ast",
-      "community": 11,
+      "community": 60,
       "norm_label": "researchbeatcandidate()",
       "id": "js_app_researchbeatcandidate"
     },
@@ -2619,7 +1549,7 @@
       "source_file": "js/app.js",
       "source_location": "L2180",
       "_origin": "ast",
-      "community": 35,
+      "community": 36,
       "norm_label": "pipelinedelidee()",
       "id": "js_app_pipelinedelidee"
     },
@@ -2759,7 +1689,7 @@
       "source_file": "js/app.js",
       "source_location": "L2402",
       "_origin": "ast",
-      "community": 35,
+      "community": 4,
       "norm_label": "researchupdateusps()",
       "id": "js_app_researchupdateusps"
     },
@@ -2809,7 +1739,7 @@
       "source_file": "js/app.js",
       "source_location": "L2507",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "pruefplanfor()",
       "id": "js_app_pruefplanfor"
     },
@@ -2849,7 +1779,7 @@
       "source_file": "js/app.js",
       "source_location": "L2621",
       "_origin": "ast",
-      "community": 35,
+      "community": 4,
       "norm_label": "researchupdatestepnote()",
       "id": "js_app_researchupdatestepnote"
     },
@@ -2969,7 +1899,7 @@
       "source_file": "js/app.js",
       "source_location": "L2941",
       "_origin": "ast",
-      "community": 4,
+      "community": 24,
       "norm_label": "nischenscanopen()",
       "id": "js_app_nischenscanopen"
     },
@@ -2989,7 +1919,7 @@
       "source_file": "js/app.js",
       "source_location": "L3002",
       "_origin": "ast",
-      "community": 4,
+      "community": 24,
       "norm_label": "nischenscanresulthtml()",
       "id": "js_app_nischenscanresulthtml"
     },
@@ -3009,7 +1939,7 @@
       "source_file": "js/app.js",
       "source_location": "L3047",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "dossierreasoning()",
       "id": "js_app_dossierreasoning"
     },
@@ -3019,7 +1949,7 @@
       "source_file": "js/app.js",
       "source_location": "L3063",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "dossierhtml()",
       "id": "js_app_dossierhtml"
     },
@@ -3029,7 +1959,7 @@
       "source_file": "js/app.js",
       "source_location": "L3217",
       "_origin": "ast",
-      "community": 4,
+      "community": 11,
       "norm_label": "researchrenderprompts()",
       "id": "js_app_researchrenderprompts"
     },
@@ -3079,7 +2009,7 @@
       "source_file": "js/app.js",
       "source_location": "L3278",
       "_origin": "ast",
-      "community": 6,
+      "community": 24,
       "norm_label": "fmt()",
       "id": "js_app_fmt"
     },
@@ -3089,7 +2019,7 @@
       "source_file": "js/app.js",
       "source_location": "L3279",
       "_origin": "ast",
-      "community": 8,
+      "community": 23,
       "norm_label": "eur()",
       "id": "js_app_eur"
     },
@@ -3129,7 +2059,7 @@
       "source_file": "js/app.js",
       "source_location": "L3293",
       "_origin": "ast",
-      "community": 4,
+      "community": 11,
       "norm_label": "helpbox()",
       "id": "js_app_helpbox"
     },
@@ -3179,7 +2109,7 @@
       "source_file": "js/app.js",
       "source_location": "L3438",
       "_origin": "ast",
-      "community": 8,
+      "community": 63,
       "norm_label": "prodtoggleselect()",
       "id": "js_app_prodtoggleselect"
     },
@@ -3189,7 +2119,7 @@
       "source_file": "js/app.js",
       "source_location": "L3451",
       "_origin": "ast",
-      "community": 8,
+      "community": 63,
       "norm_label": "prodtoggleselectall()",
       "id": "js_app_prodtoggleselectall"
     },
@@ -3199,7 +2129,7 @@
       "source_file": "js/app.js",
       "source_location": "L3471",
       "_origin": "ast",
-      "community": 8,
+      "community": 63,
       "norm_label": "prodclearselection()",
       "id": "js_app_prodclearselection"
     },
@@ -3209,7 +2139,7 @@
       "source_file": "js/app.js",
       "source_location": "L3482",
       "_origin": "ast",
-      "community": 8,
+      "community": 63,
       "norm_label": "updateprodbulkbar()",
       "id": "js_app_updateprodbulkbar"
     },
@@ -3339,7 +2269,7 @@
       "source_file": "js/app.js",
       "source_location": "L3597",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "openproductdetail()",
       "id": "js_app_openproductdetail"
     },
@@ -3349,7 +2279,7 @@
       "source_file": "js/app.js",
       "source_location": "L3699",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "gosub()",
       "id": "js_app_gosub"
     },
@@ -3359,7 +2289,7 @@
       "source_file": "js/app.js",
       "source_location": "L3711",
       "_origin": "ast",
-      "community": 60,
+      "community": 24,
       "norm_label": "heliumsourcelabel()",
       "id": "js_app_heliumsourcelabel"
     },
@@ -3369,7 +2299,7 @@
       "source_file": "js/app.js",
       "source_location": "L3716",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "producthasheliumdata()",
       "id": "js_app_producthasheliumdata"
     },
@@ -3379,7 +2309,7 @@
       "source_file": "js/app.js",
       "source_location": "L3721",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "renderdetailsales()",
       "id": "js_app_renderdetailsales"
     },
@@ -3419,7 +2349,7 @@
       "source_file": "js/app.js",
       "source_location": "L3859",
       "_origin": "ast",
-      "community": 60,
+      "community": 24,
       "norm_label": "applyheliumpick()",
       "id": "js_app_applyheliumpick"
     },
@@ -3429,7 +2359,7 @@
       "source_file": "js/app.js",
       "source_location": "L3866",
       "_origin": "ast",
-      "community": 60,
+      "community": 24,
       "norm_label": "applyheliumtoproduct()",
       "id": "js_app_applyheliumtoproduct"
     },
@@ -3439,7 +2369,7 @@
       "source_file": "js/app.js",
       "source_location": "L3888",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "estimateheliumforproduct()",
       "id": "js_app_estimateheliumforproduct"
     },
@@ -3449,7 +2379,7 @@
       "source_file": "js/app.js",
       "source_location": "L3908",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "estpreview()",
       "id": "js_app_estpreview"
     },
@@ -3459,7 +2389,7 @@
       "source_file": "js/app.js",
       "source_location": "L3917",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "estapply()",
       "id": "js_app_estapply"
     },
@@ -3469,7 +2399,7 @@
       "source_file": "js/app.js",
       "source_location": "L3936",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "clearproductsalesdata()",
       "id": "js_app_clearproductsalesdata"
     },
@@ -3489,7 +2419,7 @@
       "source_file": "js/app.js",
       "source_location": "L3982",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrgetcalib()",
       "id": "js_app_bsrgetcalib"
     },
@@ -3499,7 +2429,7 @@
       "source_file": "js/app.js",
       "source_location": "L3983",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrsetcalib()",
       "id": "js_app_bsrsetcalib"
     },
@@ -3509,7 +2439,7 @@
       "source_file": "js/app.js",
       "source_location": "L3984",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrscalefor()",
       "id": "js_app_bsrscalefor"
     },
@@ -3519,7 +2449,7 @@
       "source_file": "js/app.js",
       "source_location": "L3990",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "estimatemonthlysalesbsr()",
       "id": "js_app_estimatemonthlysalesbsr"
     },
@@ -3529,7 +2459,7 @@
       "source_file": "js/app.js",
       "source_location": "L3995",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrcalc()",
       "id": "js_app_bsrcalc"
     },
@@ -3539,7 +2469,7 @@
       "source_file": "js/app.js",
       "source_location": "L4012",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrcalibrate()",
       "id": "js_app_bsrcalibrate"
     },
@@ -3549,7 +2479,7 @@
       "source_file": "js/app.js",
       "source_location": "L4022",
       "_origin": "ast",
-      "community": 73,
+      "community": 24,
       "norm_label": "bsrresetcalib()",
       "id": "js_app_bsrresetcalib"
     },
@@ -3569,7 +2499,7 @@
       "source_file": "js/app.js",
       "source_location": "L4071",
       "_origin": "ast",
-      "community": 60,
+      "community": 14,
       "norm_label": "edittitleinline()",
       "id": "js_app_edittitleinline"
     },
@@ -3579,7 +2509,7 @@
       "source_file": "js/app.js",
       "source_location": "L4094",
       "_origin": "ast",
-      "community": 60,
+      "community": 8,
       "norm_label": "setdetaildirty()",
       "id": "js_app_setdetaildirty"
     },
@@ -3589,7 +2519,7 @@
       "source_file": "js/app.js",
       "source_location": "L4109",
       "_origin": "ast",
-      "community": 60,
+      "community": 44,
       "norm_label": "setdetailsaved()",
       "id": "js_app_setdetailsaved"
     },
@@ -3599,7 +2529,7 @@
       "source_file": "js/app.js",
       "source_location": "L4124",
       "_origin": "ast",
-      "community": 60,
+      "community": 44,
       "norm_label": "savedetailmanual()",
       "id": "js_app_savedetailmanual"
     },
@@ -3609,7 +2539,7 @@
       "source_file": "js/app.js",
       "source_location": "L4142",
       "_origin": "ast",
-      "community": 60,
+      "community": 8,
       "norm_label": "savedetailfield()",
       "id": "js_app_savedetailfield"
     },
@@ -3659,7 +2589,7 @@
       "source_file": "js/app.js",
       "source_location": "L4304",
       "_origin": "ast",
-      "community": 88,
+      "community": 14,
       "norm_label": "renderdetailsuppliers()",
       "id": "js_app_renderdetailsuppliers"
     },
@@ -3669,7 +2599,7 @@
       "source_file": "js/app.js",
       "source_location": "L4338",
       "_origin": "ast",
-      "community": 88,
+      "community": 14,
       "norm_label": "calcsupplierscore()",
       "id": "js_app_calcsupplierscore"
     },
@@ -3679,7 +2609,7 @@
       "source_file": "js/app.js",
       "source_location": "L4356",
       "_origin": "ast",
-      "community": 88,
+      "community": 14,
       "norm_label": "adddetailsupplier()",
       "id": "js_app_adddetailsupplier"
     },
@@ -3689,7 +2619,7 @@
       "source_file": "js/app.js",
       "source_location": "L4373",
       "_origin": "ast",
-      "community": 88,
+      "community": 14,
       "norm_label": "editdetailsupplier()",
       "id": "js_app_editdetailsupplier"
     },
@@ -3699,7 +2629,7 @@
       "source_file": "js/app.js",
       "source_location": "L4403",
       "_origin": "ast",
-      "community": 88,
+      "community": 14,
       "norm_label": "deldetailsupplier()",
       "id": "js_app_deldetailsupplier"
     },
@@ -3719,7 +2649,7 @@
       "source_file": "js/app.js",
       "source_location": "L4424",
       "_origin": "ast",
-      "community": 8,
+      "community": 23,
       "norm_label": "fsc()",
       "id": "js_app_fsc"
     },
@@ -4009,7 +2939,7 @@
       "source_file": "js/app.js",
       "source_location": "L5174",
       "_origin": "ast",
-      "community": 8,
+      "community": 56,
       "norm_label": "calculatetradetaxestimate()",
       "id": "js_app_calculatetradetaxestimate"
     },
@@ -4019,7 +2949,7 @@
       "source_file": "js/app.js",
       "source_location": "L5190",
       "_origin": "ast",
-      "community": 8,
+      "community": 56,
       "norm_label": "calculateincometaxestimate()",
       "id": "js_app_calculateincometaxestimate"
     },
@@ -4029,7 +2959,7 @@
       "source_file": "js/app.js",
       "source_location": "L5202",
       "_origin": "ast",
-      "community": 8,
+      "community": 56,
       "norm_label": "calculatecorporatetaxestimate()",
       "id": "js_app_calculatecorporatetaxestimate"
     },
@@ -4039,7 +2969,7 @@
       "source_file": "js/app.js",
       "source_location": "L5214",
       "_origin": "ast",
-      "community": 8,
+      "community": 56,
       "norm_label": "calculatevatreserve()",
       "id": "js_app_calculatevatreserve"
     },
@@ -4049,7 +2979,7 @@
       "source_file": "js/app.js",
       "source_location": "L5220",
       "_origin": "ast",
-      "community": 8,
+      "community": 56,
       "norm_label": "calculatetaxreserve()",
       "id": "js_app_calculatetaxreserve"
     },
@@ -4129,7 +3059,7 @@
       "source_file": "js/app.js",
       "source_location": "L5446",
       "_origin": "ast",
-      "community": 22,
+      "community": 24,
       "norm_label": "rendersrc()",
       "id": "js_app_rendersrc"
     },
@@ -4139,7 +3069,7 @@
       "source_file": "js/app.js",
       "source_location": "L5459",
       "_origin": "ast",
-      "community": 22,
+      "community": 24,
       "norm_label": "calcsrcscore()",
       "id": "js_app_calcsrcscore"
     },
@@ -4149,7 +3079,7 @@
       "source_file": "js/app.js",
       "source_location": "L5460",
       "_origin": "ast",
-      "community": 22,
+      "community": 24,
       "norm_label": "addsrc()",
       "id": "js_app_addsrc"
     },
@@ -4159,7 +3089,7 @@
       "source_file": "js/app.js",
       "source_location": "L5469",
       "_origin": "ast",
-      "community": 8,
+      "community": 23,
       "norm_label": "lcalc()",
       "id": "js_app_lcalc"
     },
@@ -4759,7 +3689,7 @@
       "source_file": "js/app.js",
       "source_location": "L9463",
       "_origin": "ast",
-      "community": 6,
+      "community": 4,
       "norm_label": "pmmigratelegacy()",
       "id": "js_app_pmmigratelegacy"
     },
@@ -4799,7 +3729,7 @@
       "source_file": "js/app.js",
       "source_location": "L9585",
       "_origin": "ast",
-      "community": 6,
+      "community": 61,
       "norm_label": "createtask()",
       "id": "js_app_createtask"
     },
@@ -4829,7 +3759,7 @@
       "source_file": "js/app.js",
       "source_location": "L9588",
       "_origin": "ast",
-      "community": 36,
+      "community": 8,
       "norm_label": "deletetask()",
       "id": "js_app_deletetask"
     },
@@ -5139,7 +4069,7 @@
       "source_file": "js/app.js",
       "source_location": "L10001",
       "_origin": "ast",
-      "community": 6,
+      "community": 61,
       "norm_label": "pmquickadd()",
       "id": "js_app_pmquickadd"
     },
@@ -5159,7 +4089,7 @@
       "source_file": "js/app.js",
       "source_location": "L10009",
       "_origin": "ast",
-      "community": 6,
+      "community": 22,
       "norm_label": "pmboardmenu()",
       "id": "js_app_pmboardmenu"
     },
@@ -5309,7 +4239,7 @@
       "source_file": "js/app.js",
       "source_location": "L10199",
       "_origin": "ast",
-      "community": 36,
+      "community": 8,
       "norm_label": "pmdeletetaskconfirm()",
       "id": "js_app_pmdeletetaskconfirm"
     },
@@ -5879,7 +4809,7 @@
       "source_file": "js/app.js",
       "source_location": "L11078",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "lgsytoken()",
       "id": "js_app_lgsytoken"
     },
@@ -5919,7 +4849,7 @@
       "source_file": "js/app.js",
       "source_location": "L11147",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "lgimportamazon()",
       "id": "js_app_lgimportamazon"
     },
@@ -5929,7 +4859,7 @@
       "source_file": "js/app.js",
       "source_location": "L11173",
       "_origin": "ast",
-      "community": 92,
+      "community": 8,
       "norm_label": "lgbuildprompt()",
       "id": "js_app_lgbuildprompt"
     },
@@ -5939,7 +4869,7 @@
       "source_file": "js/app.js",
       "source_location": "L11192",
       "_origin": "ast",
-      "community": 92,
+      "community": 8,
       "norm_label": "lgparse()",
       "id": "js_app_lgparse"
     },
@@ -5949,7 +4879,7 @@
       "source_file": "js/app.js",
       "source_location": "L11203",
       "_origin": "ast",
-      "community": 92,
+      "community": 8,
       "norm_label": "lggenerate()",
       "id": "js_app_lggenerate"
     },
@@ -6129,7 +5059,7 @@
       "source_file": "js/app.js",
       "source_location": "L11590",
       "_origin": "ast",
-      "community": 6,
+      "community": 36,
       "norm_label": "notifrequestpermission()",
       "id": "js_app_notifrequestpermission"
     },
@@ -6409,7 +5339,7 @@
       "source_file": "js/app.js",
       "source_location": "L12258",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "xraydraftcandidate()",
       "id": "js_app_xraydraftcandidate"
     },
@@ -6419,7 +5349,7 @@
       "source_file": "js/app.js",
       "source_location": "L12268",
       "_origin": "ast",
-      "community": 10,
+      "community": 4,
       "norm_label": "xraypasteresulthtml()",
       "id": "js_app_xraypasteresulthtml"
     },
@@ -6629,7 +5559,7 @@
       "source_file": "js/app.js",
       "source_location": "L13015",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newsstate()",
       "id": "js_app_newsstate"
     },
@@ -6639,7 +5569,7 @@
       "source_file": "js/app.js",
       "source_location": "L13016",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newssetstate()",
       "id": "js_app_newssetstate"
     },
@@ -6649,7 +5579,7 @@
       "source_file": "js/app.js",
       "source_location": "L13020",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newsact()",
       "id": "js_app_newsact"
     },
@@ -6659,7 +5589,7 @@
       "source_file": "js/app.js",
       "source_location": "L13028",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newsresetdeleted()",
       "id": "js_app_newsresetdeleted"
     },
@@ -6669,7 +5599,7 @@
       "source_file": "js/app.js",
       "source_location": "L13032",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newssetfilter()",
       "id": "js_app_newssetfilter"
     },
@@ -6679,7 +5609,7 @@
       "source_file": "js/app.js",
       "source_location": "L13033",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "newssetpage()",
       "id": "js_app_newssetpage"
     },
@@ -6699,7 +5629,7 @@
       "source_file": "js/app.js",
       "source_location": "L13058",
       "_origin": "ast",
-      "community": 56,
+      "community": 20,
       "norm_label": "rendernewspage()",
       "id": "js_app_rendernewspage"
     },
@@ -6789,7 +5719,7 @@
       "source_file": "js/app.js",
       "source_location": "L13554",
       "_origin": "ast",
-      "community": 44,
+      "community": 35,
       "norm_label": "handleimp()",
       "id": "js_app_handleimp"
     },
@@ -6839,7 +5769,7 @@
       "source_file": "js/app.js",
       "source_location": "L13750",
       "_origin": "ast",
-      "community": 35,
+      "community": 74,
       "norm_label": "repairideen()",
       "id": "js_app_repairideen"
     },
@@ -6849,7 +5779,7 @@
       "source_file": "js/app.js",
       "source_location": "L13765",
       "_origin": "ast",
-      "community": 8,
+      "community": 68,
       "norm_label": "toggleselect()",
       "id": "js_app_toggleselect"
     },
@@ -6859,7 +5789,7 @@
       "source_file": "js/app.js",
       "source_location": "L13775",
       "_origin": "ast",
-      "community": 8,
+      "community": 68,
       "norm_label": "toggleselectall()",
       "id": "js_app_toggleselectall"
     },
@@ -6869,7 +5799,7 @@
       "source_file": "js/app.js",
       "source_location": "L13795",
       "_origin": "ast",
-      "community": 8,
+      "community": 68,
       "norm_label": "clearselection()",
       "id": "js_app_clearselection"
     },
@@ -6879,7 +5809,7 @@
       "source_file": "js/app.js",
       "source_location": "L13805",
       "_origin": "ast",
-      "community": 8,
+      "community": 68,
       "norm_label": "updatebulkbar()",
       "id": "js_app_updatebulkbar"
     },
@@ -6929,7 +5859,7 @@
       "source_file": "js/app.js",
       "source_location": "L13860",
       "_origin": "ast",
-      "community": 91,
+      "community": 8,
       "norm_label": "ideenopenproduct()",
       "id": "js_app_ideenopenproduct"
     },
@@ -6959,7 +5889,7 @@
       "source_file": "js/app.js",
       "source_location": "L13885",
       "_origin": "ast",
-      "community": 91,
+      "community": 8,
       "norm_label": "amazonsearchterms()",
       "id": "js_app_amazonsearchterms"
     },
@@ -6969,7 +5899,7 @@
       "source_file": "js/app.js",
       "source_location": "L13892",
       "_origin": "ast",
-      "community": 91,
+      "community": 8,
       "norm_label": "buildamazonsearchurl()",
       "id": "js_app_buildamazonsearchurl"
     },
@@ -6989,7 +5919,7 @@
       "source_file": "js/app.js",
       "source_location": "L14004",
       "_origin": "ast",
-      "community": 91,
+      "community": 35,
       "norm_label": "searchimageongoogle()",
       "id": "js_app_searchimageongoogle"
     },
@@ -7109,7 +6039,7 @@
       "source_file": "js/app.js",
       "source_location": "L14190",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "normalizeidee()",
       "id": "js_app_normalizeidee"
     },
@@ -7119,7 +6049,7 @@
       "source_file": "js/app.js",
       "source_location": "L14218",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "fixenc()",
       "id": "js_app_fixenc"
     },
@@ -7229,7 +6159,7 @@
       "source_file": "js/app.js",
       "source_location": "L14550",
       "_origin": "ast",
-      "community": 35,
+      "community": 74,
       "norm_label": "closeclaudemodal()",
       "id": "js_app_closeclaudemodal"
     },
@@ -7259,7 +6189,7 @@
       "source_file": "js/app.js",
       "source_location": "L14683",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "extractjson()",
       "id": "js_app_extractjson"
     },
@@ -7269,7 +6199,7 @@
       "source_file": "js/app.js",
       "source_location": "L14752",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "findjsonarraybounds()",
       "id": "js_app_findjsonarraybounds"
     },
@@ -7279,7 +6209,7 @@
       "source_file": "js/app.js",
       "source_location": "L14772",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "tryrepairjson()",
       "id": "js_app_tryrepairjson"
     },
@@ -7289,7 +6219,7 @@
       "source_file": "js/app.js",
       "source_location": "L14842",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "removeoutermarkdownlinks()",
       "id": "js_app_removeoutermarkdownlinks"
     },
@@ -7299,7 +6229,7 @@
       "source_file": "js/app.js",
       "source_location": "L14870",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "removeoutercitations()",
       "id": "js_app_removeoutercitations"
     },
@@ -7309,7 +6239,7 @@
       "source_file": "js/app.js",
       "source_location": "L14895",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "repairbracketsinstrings()",
       "id": "js_app_repairbracketsinstrings"
     },
@@ -7319,7 +6249,7 @@
       "source_file": "js/app.js",
       "source_location": "L14928",
       "_origin": "ast",
-      "community": 29,
+      "community": 74,
       "norm_label": "previewparse()",
       "id": "js_app_previewparse"
     },
@@ -7329,7 +6259,7 @@
       "source_file": "js/app.js",
       "source_location": "L14969",
       "_origin": "ast",
-      "community": 35,
+      "community": 74,
       "norm_label": "importclauderesponse()",
       "id": "js_app_importclauderesponse"
     },
@@ -7489,7 +6419,7 @@
       "source_file": "js/app.js",
       "source_location": "L15401",
       "_origin": "ast",
-      "community": 35,
+      "community": 72,
       "norm_label": "lcvals()",
       "id": "js_app_lcvals"
     },
@@ -7499,7 +6429,7 @@
       "source_file": "js/app.js",
       "source_location": "L15414",
       "_origin": "ast",
-      "community": 35,
+      "community": 72,
       "norm_label": "lccalc()",
       "id": "js_app_lccalc"
     },
@@ -7509,7 +6439,7 @@
       "source_file": "js/app.js",
       "source_location": "L15433",
       "_origin": "ast",
-      "community": 35,
+      "community": 72,
       "norm_label": "lcapply()",
       "id": "js_app_lcapply"
     },
@@ -7519,7 +6449,7 @@
       "source_file": "js/app.js",
       "source_location": "L15444",
       "_origin": "ast",
-      "community": 35,
+      "community": 72,
       "norm_label": "lceustcashflow()",
       "id": "js_app_lceustcashflow"
     },
@@ -11227,7 +10157,7 @@
       "source_file": "server/src/core/config.js",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 19,
+      "community": 5,
       "norm_label": "keywords",
       "id": "server_src_core_config_keywords"
     },
@@ -11237,7 +10167,7 @@
       "source_file": "server/src/core/config.js",
       "source_location": "L73",
       "_origin": "ast",
-      "community": 19,
+      "community": 5,
       "norm_label": "keywords_negative",
       "id": "server_src_core_config_keywords_negative"
     },
@@ -11397,7 +10327,7 @@
       "source_file": "server/src/crawl-once.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 19,
+      "community": 27,
       "norm_label": "crawl-once.js",
       "id": "server_src_crawl_once"
     },
@@ -11407,7 +10337,7 @@
       "source_file": "server/src/data/db.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 19,
+      "community": 55,
       "norm_label": "db.js",
       "id": "server_src_data_db"
     },
@@ -11527,7 +10457,7 @@
       "source_file": "server/src/data/repos/alerts.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 55,
       "norm_label": "alerts.js",
       "id": "server_src_data_repos_alerts"
     },
@@ -11537,7 +10467,7 @@
       "source_file": "server/src/data/repos/alerts.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "insertalert()",
       "id": "server_src_data_repos_alerts_insertalert"
     },
@@ -11547,7 +10477,7 @@
       "source_file": "server/src/data/repos/alerts.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 25,
+      "community": 15,
       "norm_label": "queryalerts()",
       "id": "server_src_data_repos_alerts_queryalerts"
     },
@@ -11587,7 +10517,7 @@
       "source_file": "server/src/data/repos/alerts.js",
       "source_location": "L60",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "itemswithoutalertcheck()",
       "id": "server_src_data_repos_alerts_itemswithoutalertcheck"
     },
@@ -11727,7 +10657,7 @@
       "source_file": "server/src/data/repos/forecast.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 25,
+      "community": 55,
       "norm_label": "forecast.js",
       "id": "server_src_data_repos_forecast"
     },
@@ -11757,7 +10687,7 @@
       "source_file": "server/src/data/repos/importCache.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 55,
       "norm_label": "importcache.js",
       "id": "server_src_data_repos_importcache"
     },
@@ -11797,7 +10727,7 @@
       "source_file": "server/src/data/repos/items.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 18,
+      "community": 55,
       "norm_label": "items.js",
       "id": "server_src_data_repos_items"
     },
@@ -11807,7 +10737,7 @@
       "source_file": "server/src/data/repos/items.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "parseaisummary()",
       "id": "server_src_data_repos_items_parseaisummary"
     },
@@ -11847,7 +10777,7 @@
       "source_file": "server/src/data/repos/items.js",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 15,
+      "community": 55,
       "norm_label": "queryevents()",
       "id": "server_src_data_repos_items_queryevents"
     },
@@ -11867,7 +10797,7 @@
       "source_file": "server/src/data/repos/items.js",
       "source_location": "L72",
       "_origin": "ast",
-      "community": 18,
+      "community": 9,
       "norm_label": "saveairesult()",
       "id": "server_src_data_repos_items_saveairesult"
     },
@@ -11977,7 +10907,7 @@
       "source_file": "server/src/data/repos/strategy.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "strategy.js",
       "id": "server_src_data_repos_strategy"
     },
@@ -11987,7 +10917,7 @@
       "source_file": "server/src/data/repos/strategy.js",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "savestrategybrief()",
       "id": "server_src_data_repos_strategy_savestrategybrief"
     },
@@ -11997,7 +10927,7 @@
       "source_file": "server/src/data/repos/strategy.js",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "getstrategybrief()",
       "id": "server_src_data_repos_strategy_getstrategybrief"
     },
@@ -12647,7 +11577,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "trends.js",
       "id": "server_src_data_repos_trends"
     },
@@ -12657,7 +11587,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "analyzeditemssince()",
       "id": "server_src_data_repos_trends_analyzeditemssince"
     },
@@ -12667,7 +11597,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "unanalyzeditemssince()",
       "id": "server_src_data_repos_trends_unanalyzeditemssince"
     },
@@ -12677,7 +11607,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "upserttrendtopic()",
       "id": "server_src_data_repos_trends_upserttrendtopic"
     },
@@ -12687,7 +11617,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "upserttopicdaily()",
       "id": "server_src_data_repos_trends_upserttopicdaily"
     },
@@ -12697,7 +11627,7 @@
       "source_file": "server/src/data/repos/trends.js",
       "source_location": "L49",
       "_origin": "ast",
-      "community": 25,
+      "community": 15,
       "norm_label": "querytrends()",
       "id": "server_src_data_repos_trends_querytrends"
     },
@@ -12717,7 +11647,7 @@
       "source_file": "server/src/data/repos/userData.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "userdata.js",
       "id": "server_src_data_repos_userdata"
     },
@@ -12727,7 +11657,7 @@
       "source_file": "server/src/data/repos/userData.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "listuserdata()",
       "id": "server_src_data_repos_userdata_listuserdata"
     },
@@ -12737,7 +11667,7 @@
       "source_file": "server/src/data/repos/userData.js",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "upsertuserdata()",
       "id": "server_src_data_repos_userdata_upsertuserdata"
     },
@@ -12747,7 +11677,7 @@
       "source_file": "server/src/data/repos/userData.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "userdatatotalsize()",
       "id": "server_src_data_repos_userdata_userdatatotalsize"
     },
@@ -12757,7 +11687,7 @@
       "source_file": "server/src/data/repos/userData.js",
       "source_location": "L65",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "userdatasizes()",
       "id": "server_src_data_repos_userdata_userdatasizes"
     },
@@ -12787,7 +11717,7 @@
       "source_file": "server/src/data/repos/users.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 0,
+      "community": 7,
       "norm_label": "findbyemail()",
       "id": "server_src_data_repos_users_findbyemail"
     },
@@ -12847,7 +11777,7 @@
       "source_file": "server/src/data/schema.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 19,
+      "community": 55,
       "norm_label": "schema.js",
       "id": "server_src_data_schema"
     },
@@ -13107,7 +12037,7 @@
       "source_file": "server/src/services/alerts/rules.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "rules.js",
       "id": "server_src_services_alerts_rules"
     },
@@ -13117,7 +12047,7 @@
       "source_file": "server/src/services/alerts/rules.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "alertstate",
       "id": "server_src_services_alerts_rules_alertstate"
     },
@@ -13127,7 +12057,7 @@
       "source_file": "server/src/services/alerts/rules.js",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "classifyalert()",
       "id": "server_src_services_alerts_rules_classifyalert"
     },
@@ -13137,7 +12067,7 @@
       "source_file": "server/src/services/alerts/rules.js",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "generatealerts()",
       "id": "server_src_services_alerts_rules_generatealerts"
     },
@@ -14007,7 +12937,7 @@
       "source_file": "server/src/services/crawler/scoring.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 19,
+      "community": 5,
       "norm_label": "scoring.js",
       "id": "server_src_services_crawler_scoring"
     },
@@ -14017,7 +12947,7 @@
       "source_file": "server/src/services/crawler/scoring.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 19,
+      "community": 5,
       "norm_label": "kwre()",
       "id": "server_src_services_crawler_scoring_kwre"
     },
@@ -14027,7 +12957,7 @@
       "source_file": "server/src/services/crawler/scoring.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 19,
+      "community": 5,
       "norm_label": "re",
       "id": "server_src_services_crawler_scoring_re"
     },
@@ -14287,7 +13217,7 @@
       "source_file": "server/src/services/intelligence/engine.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "engine.js",
       "id": "server_src_services_intelligence_engine"
     },
@@ -14297,7 +13227,7 @@
       "source_file": "server/src/services/intelligence/engine.js",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 31,
+      "community": 27,
       "norm_label": "trendstate",
       "id": "server_src_services_intelligence_engine_trendstate"
     },
@@ -14307,7 +13237,7 @@
       "source_file": "server/src/services/intelligence/engine.js",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "computemetrics()",
       "id": "server_src_services_intelligence_engine_computemetrics"
     },
@@ -14317,7 +13247,7 @@
       "source_file": "server/src/services/intelligence/engine.js",
       "source_location": "L66",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "dailybuckets()",
       "id": "server_src_services_intelligence_engine_dailybuckets"
     },
@@ -14327,7 +13257,7 @@
       "source_file": "server/src/services/intelligence/engine.js",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "runtrendengine()",
       "id": "server_src_services_intelligence_engine_runtrendengine"
     },
@@ -14347,7 +13277,7 @@
       "source_file": "server/src/services/intelligence/forecast.js",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 31,
+      "community": 27,
       "norm_label": "forecaststate",
       "id": "server_src_services_intelligence_forecast_forecaststate"
     },
@@ -14477,7 +13407,7 @@
       "source_file": "server/src/services/intelligence/registry.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 27,
       "norm_label": "registry.js",
       "id": "server_src_services_intelligence_registry"
     },
@@ -14487,7 +13417,7 @@
       "source_file": "server/src/services/intelligence/registry.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 31,
+      "community": 15,
       "norm_label": "ai_modules",
       "id": "server_src_services_intelligence_registry_ai_modules"
     },
@@ -14497,7 +13427,7 @@
       "source_file": "server/src/services/intelligence/registry.js",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 31,
+      "community": 15,
       "norm_label": "modulestate()",
       "id": "server_src_services_intelligence_registry_modulestate"
     },
@@ -14507,7 +13437,7 @@
       "source_file": "server/src/services/intelligence/registry.js",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 19,
+      "community": 27,
       "norm_label": "runintelligencepipeline()",
       "id": "server_src_services_intelligence_registry_runintelligencepipeline"
     },
@@ -14517,7 +13447,7 @@
       "source_file": "server/src/services/intelligence/strategy.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "strategy.js",
       "id": "server_src_services_intelligence_strategy"
     },
@@ -14527,7 +13457,7 @@
       "source_file": "server/src/services/intelligence/strategy.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 31,
+      "community": 27,
       "norm_label": "strategystate",
       "id": "server_src_services_intelligence_strategy_strategystate"
     },
@@ -14537,7 +13467,7 @@
       "source_file": "server/src/services/intelligence/strategy.js",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "brief_schema",
       "id": "server_src_services_intelligence_strategy_brief_schema"
     },
@@ -14547,7 +13477,7 @@
       "source_file": "server/src/services/intelligence/strategy.js",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "updatestrategybrief()",
       "id": "server_src_services_intelligence_strategy_updatestrategybrief"
     },
@@ -14557,7 +13487,7 @@
       "source_file": "server/src/services/intelligence/strategy.js",
       "source_location": "L86",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "fallbackbrief()",
       "id": "server_src_services_intelligence_strategy_fallbackbrief"
     },
@@ -14567,7 +13497,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "topics.js",
       "id": "server_src_services_intelligence_topics"
     },
@@ -14577,7 +13507,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "buildclusters()",
       "id": "server_src_services_intelligence_topics_buildclusters"
     },
@@ -14587,7 +13517,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "fallback_topics",
       "id": "server_src_services_intelligence_topics_fallback_topics"
     },
@@ -14597,7 +13527,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L70",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "esc()",
       "id": "server_src_services_intelligence_topics_esc"
     },
@@ -14607,7 +13537,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L71",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "fallback_re",
       "id": "server_src_services_intelligence_topics_fallback_re"
     },
@@ -14617,7 +13547,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L78",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "fallback_name",
       "id": "server_src_services_intelligence_topics_fallback_name"
     },
@@ -14627,7 +13557,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L81",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "fallbacktopic()",
       "id": "server_src_services_intelligence_topics_fallbacktopic"
     },
@@ -14637,7 +13567,7 @@
       "source_file": "server/src/services/intelligence/topics.js",
       "source_location": "L90",
       "_origin": "ast",
-      "community": 9,
+      "community": 55,
       "norm_label": "topiclabel()",
       "id": "server_src_services_intelligence_topics_topiclabel"
     },
@@ -14647,7 +13577,7 @@
       "source_file": "server/src/services/sync/index.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "index.js",
       "id": "server_src_services_sync_index"
     },
@@ -14657,7 +13587,7 @@
       "source_file": "server/src/services/sync/index.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "listsyncdata()",
       "id": "server_src_services_sync_index_listsyncdata"
     },
@@ -14667,7 +13597,7 @@
       "source_file": "server/src/services/sync/index.js",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 15,
+      "community": 0,
       "norm_label": "applysyncbatch()",
       "id": "server_src_services_sync_index_applysyncbatch"
     },
@@ -15817,7 +14747,7 @@
       "source_file": "server/test/calendar.test.js",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 9,
+      "community": 3,
       "norm_label": "day()",
       "id": "server_test_calendar_test_day"
     },
@@ -15997,7 +14927,7 @@
       "source_file": "server/test/dispatch.test.js",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 31,
+      "community": 9,
       "norm_label": "seedalert()",
       "id": "server_test_dispatch_test_seedalert"
     },
@@ -16047,7 +14977,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "forecast.test.js",
       "id": "server_test_forecast_test"
     },
@@ -16057,7 +14987,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "t()",
       "id": "server_test_forecast_test_t"
     },
@@ -16067,7 +14997,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "daystr()",
       "id": "server_test_forecast_test_daystr"
     },
@@ -16077,7 +15007,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "up",
       "id": "server_test_forecast_test_up"
     },
@@ -16087,7 +15017,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "flat",
       "id": "server_test_forecast_test_flat"
     },
@@ -16097,7 +15027,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "down",
       "id": "server_test_forecast_test_down"
     },
@@ -16107,7 +15037,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "sparse",
       "id": "server_test_forecast_test_sparse"
     },
@@ -16117,7 +15047,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "mem",
       "id": "server_test_forecast_test_mem"
     },
@@ -16127,7 +15057,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L58",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "{ pool }",
       "id": "server_test_forecast_test_pool"
     },
@@ -16137,7 +15067,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "n1",
       "id": "server_test_forecast_test_n1"
     },
@@ -16147,7 +15077,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L81",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "n2",
       "id": "server_test_forecast_test_n2"
     },
@@ -16157,7 +15087,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "gpsr",
       "id": "server_test_forecast_test_gpsr"
     },
@@ -16167,7 +15097,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L86",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "duenn",
       "id": "server_test_forecast_test_duenn"
     },
@@ -16177,7 +15107,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L95",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "callkeys",
       "id": "server_test_forecast_test_callkeys"
     },
@@ -16187,7 +15117,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L99",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "app",
       "id": "server_test_forecast_test_app"
     },
@@ -16197,7 +15127,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L100",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "srv",
       "id": "server_test_forecast_test_srv"
     },
@@ -16207,7 +15137,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L102",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "api",
       "id": "server_test_forecast_test_api"
     },
@@ -16217,7 +15147,7 @@
       "source_file": "server/test/forecast.test.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 27,
+      "community": 25,
       "norm_label": "health",
       "id": "server_test_forecast_test_health"
     },
@@ -16757,7 +15687,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "strategy.test.js",
       "id": "server_test_strategy_test"
     },
@@ -16767,7 +15697,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "t()",
       "id": "server_test_strategy_test_t"
     },
@@ -16777,7 +15707,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 25,
+      "community": 9,
       "norm_label": "daysago()",
       "id": "server_test_strategy_test_daysago"
     },
@@ -16787,7 +15717,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "mem",
       "id": "server_test_strategy_test_mem"
     },
@@ -16797,7 +15727,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "{ pool }",
       "id": "server_test_strategy_test_pool"
     },
@@ -16807,7 +15737,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L60",
       "_origin": "ast",
-      "community": 25,
+      "community": 9,
       "norm_label": "seed()",
       "id": "server_test_strategy_test_seed"
     },
@@ -16817,7 +15747,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L77",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "today",
       "id": "server_test_strategy_test_today"
     },
@@ -16827,7 +15757,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L84",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "keys",
       "id": "server_test_strategy_test_keys"
     },
@@ -16837,7 +15767,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L88",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "fb",
       "id": "server_test_strategy_test_fb"
     },
@@ -16847,7 +15777,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L105",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "app",
       "id": "server_test_strategy_test_app"
     },
@@ -16857,7 +15787,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L106",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "srv",
       "id": "server_test_strategy_test_srv"
     },
@@ -16867,7 +15797,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L108",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "brief",
       "id": "server_test_strategy_test_brief"
     },
@@ -16877,7 +15807,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L110",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "mi",
       "id": "server_test_strategy_test_mi"
     },
@@ -16887,7 +15817,7 @@
       "source_file": "server/test/strategy.test.js",
       "source_location": "L112",
       "_origin": "ast",
-      "community": 25,
+      "community": 27,
       "norm_label": "health",
       "id": "server_test_strategy_test_health"
     },
@@ -18674,1072 +17604,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L983",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_appendices_real_source_backed_reference_material",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L6",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L13",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L705",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L783",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L835",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L896",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_13_out_of_scope",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L910",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_14_final_pre_flight_check",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L43",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_1_the_three_dials_core_configuration",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L82",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_2_brief_design_system_map",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L122",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L161",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L352",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L519",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L552",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_7_dial_definitions_technical_reference",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L572",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L595",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_tasteskill_anti_slop_frontend_skill",
-      "target": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L17",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "target": "agents_skills_design_taste_frontend_skill_0_a_read_these_signals_first",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L25",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "target": "agents_skills_design_taste_frontend_skill_0_b_output_a_one_line_design_read_before_generating",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L33",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "target": "agents_skills_design_taste_frontend_skill_0_c_if_the_brief_is_ambiguous_ask_one_question_do_not_guess",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L38",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_0_brief_inference_read_the_room_before_anything_else",
-      "target": "agents_skills_design_taste_frontend_skill_0_d_anti_default_discipline",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L53",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_1_the_three_dials_core_configuration",
-      "target": "agents_skills_design_taste_frontend_skill_1_a_dial_inference_design_read_dial_values",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L64",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_1_the_three_dials_core_configuration",
-      "target": "agents_skills_design_taste_frontend_skill_1_b_use_case_presets",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L77",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_1_the_three_dials_core_configuration",
-      "target": "agents_skills_design_taste_frontend_skill_1_c_how_the_dials_drive_output",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L86",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_2_brief_design_system_map",
-      "target": "agents_skills_design_taste_frontend_skill_2_a_when_to_reach_for_a_real_design_system_use_official_packages",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L106",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_2_brief_design_system_map",
-      "target": "agents_skills_design_taste_frontend_skill_2_b_when_the_brief_is_an_aesthetic_not_a_system",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L126",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_a_stack",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L135",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_b_state",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L140",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_c_icons",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L147",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_d_emoji_policy",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L150",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_e_responsiveness_layout_mechanics",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L156",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_3_default_architecture_conventions",
-      "target": "agents_skills_design_taste_frontend_skill_3_f_dependency_verification_mandatory",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L333",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_10_quotes_testimonials",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L341",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_11_page_theme_lock_light_dark_mode_consistency",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L165",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_1_typography",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L185",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_2_color_calibration",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L209",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_3_layout_diversification",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L213",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_4_materiality_shadows_cards",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L219",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_5_interactive_ui_states",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L230",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_6_data_form_patterns",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L234",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_7_layout_discipline_hard_rules_failing_any_of_these_is_shipping_broken_work",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L262",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_8_image_visual_asset_strategy",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L298",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_4_design_engineering_directives_bias_correction",
-      "target": "agents_skills_design_taste_frontend_skill_4_9_content_density",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L365",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "target": "agents_skills_design_taste_frontend_skill_5_a_sticky_stack_canonical_skeleton",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L427",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "target": "agents_skills_design_taste_frontend_skill_5_b_horizontal_pan_canonical_skeleton",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L475",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "target": "agents_skills_design_taste_frontend_skill_5_c_scroll_reveal_stagger_canonical_skeleton_lighter_alternative",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L509",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_5_context_aware_proactivity",
-      "target": "agents_skills_design_taste_frontend_skill_5_d_forbidden_animation_patterns",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L521",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_a_hardware_acceleration",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L525",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_b_reduced_motion_mandatory",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L531",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_c_dark_mode_mandatory_for_any_consumer_facing_page",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L537",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_d_core_web_vitals_targets",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L543",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_e_dom_cost",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L547",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_6_performance_accessibility_guardrails",
-      "target": "agents_skills_design_taste_frontend_skill_6_f_z_index_restraint",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L554",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_7_dial_definitions_technical_reference",
-      "target": "agents_skills_design_taste_frontend_skill_design_variance_level_1_10",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L560",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_7_dial_definitions_technical_reference",
-      "target": "agents_skills_design_taste_frontend_skill_motion_intensity_level_1_10",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L565",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_7_dial_definitions_technical_reference",
-      "target": "agents_skills_design_taste_frontend_skill_visual_density_level_1_10",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L576",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_8_a_token_strategy_pick_one_stick_to_it",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L580",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_8_b_do_not_prescribe_specific_colors_here",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L587",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_8_c_default_mode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L590",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_8_dark_mode_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_8_d_test_in_both_modes_before_finishing",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L599",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_a_visual_css",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L606",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_b_typography",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L611",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_c_layout_spacing",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L615",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_d_content_data_jane_doe_effect",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L622",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_e_external_resources_components",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L630",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_f_production_test_tells_banned_outright",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L685",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_9_ai_tells_forbidden_patterns",
-      "target": "agents_skills_design_taste_frontend_skill_9_g_em_dash_ban_the_single_most_violated_tell",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L775",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_animation_library_choice",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L733",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_cards_containers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L749",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_galleries_media",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L709",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_hero_paradigms",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L726",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_layout_grids",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L765",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_micro_interactions_effects",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L717",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_navigation_menus",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L741",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_scroll_animations",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L757",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_10_reference_vocabulary_pattern_names_the_agent_should_know",
-      "target": "agents_skills_design_taste_frontend_skill_typography_text",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L787",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_a_detect_the_mode_first_action",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L794",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_b_audit_before_touching",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L804",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_c_preservation_rules",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L811",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_d_modernisation_levers_priority_order",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L820",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_e_decision_tree_targeted_evolution_vs_full_redesign",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L825",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_11_redesign_protocol",
-      "target": "agents_skills_design_taste_frontend_skill_11_f_what_never_changes_silently",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L841",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "target": "agents_skills_design_taste_frontend_skill_12_a_file_location",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L863",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "target": "agents_skills_design_taste_frontend_skill_12_b_required_frontmatter",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L878",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "target": "agents_skills_design_taste_frontend_skill_12_c_required_body_sections",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L888",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_12_the_block_library_contract_implementations_land_here_iteratively",
-      "target": "agents_skills_design_taste_frontend_skill_12_d_block_library_discipline",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L987",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendices_real_source_backed_reference_material",
-      "target": "agents_skills_design_taste_frontend_skill_appendix_a_install_commands_per_design_system",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1033",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendices_real_source_backed_reference_material",
-      "target": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1113",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendices_real_source_backed_reference_material",
-      "target": "agents_skills_design_taste_frontend_skill_appendix_c_apple_liquid_glass_honest_web_approximation",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1105",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_apple_liquid_glass_apple_platforms_only",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1057",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_atlassian",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1079",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_bootstrap",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1046",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_carbon",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1040",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_fluent_ui",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1068",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_gov_uk",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1035",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_material_web",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1097",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_native_css_w3c_standards",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1063",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_primer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1087",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_radix",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1092",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_shadcn_ui",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1052",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_shopify_polaris",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1083",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_tailwind",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1073",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_b_canonical_sources_read_these_before_reinventing",
-      "target": "agents_skills_design_taste_frontend_skill_uswds",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1140",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_c_apple_liquid_glass_honest_web_approximation",
-      "target": "agents_skills_design_taste_frontend_skill_safer_web_approximation_skeleton",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1126",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_c_apple_liquid_glass_honest_web_approximation",
-      "target": "agents_skills_design_taste_frontend_skill_what_is_not_official",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".agents/skills/design-taste-frontend/SKILL.md",
-      "source_location": "L1117",
-      "weight": 1.0,
-      "source": "agents_skills_design_taste_frontend_skill_appendix_c_apple_liquid_glass_honest_web_approximation",
-      "target": "agents_skills_design_taste_frontend_skill_what_is_official",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "DESIGN.md",
       "source_location": "L103",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design",
-      "target": "design_design_system_sellerhub"
+      "target": "design_design_system_sellerhub",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19747,9 +17617,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L105",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_1_overview"
+      "target": "design_1_overview",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19757,9 +17627,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L122",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_2_colors"
+      "target": "design_2_colors",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19767,9 +17637,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L147",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_3_typography"
+      "target": "design_3_typography",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19777,9 +17647,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L166",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_4_elevation"
+      "target": "design_4_elevation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19787,9 +17657,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L179",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_5_components"
+      "target": "design_5_components",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19797,9 +17667,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L211",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_design_system_sellerhub",
-      "target": "design_6_do_s_and_don_ts"
+      "target": "design_6_do_s_and_don_ts",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19807,9 +17677,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L140",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_2_colors",
-      "target": "design_named_rules"
+      "target": "design_named_rules",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19817,9 +17687,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L129",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_2_colors",
-      "target": "design_neutral"
+      "target": "design_neutral",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19827,9 +17697,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L126",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_2_colors",
-      "target": "design_primary"
+      "target": "design_primary",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19837,9 +17707,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L137",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_2_colors",
-      "target": "design_tertiary_status_hues_data_only"
+      "target": "design_tertiary_status_hues_data_only",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19847,9 +17717,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L154",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_3_typography",
-      "target": "design_hierarchy"
+      "target": "design_hierarchy",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19857,9 +17727,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L161",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_3_typography",
-      "target": "design_named_rules_161"
+      "target": "design_named_rules_161",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19867,9 +17737,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L176",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_4_elevation",
-      "target": "design_named_rules_176"
+      "target": "design_named_rules_176",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19877,9 +17747,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L170",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_4_elevation",
-      "target": "design_shadow_vocabulary"
+      "target": "design_shadow_vocabulary",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19887,9 +17757,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L181",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_buttons"
+      "target": "design_buttons",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19897,9 +17767,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L191",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_cards_containers"
+      "target": "design_cards_containers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19907,9 +17777,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L187",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_chips_badges"
+      "target": "design_chips_badges",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19917,9 +17787,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L198",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_inputs_fields"
+      "target": "design_inputs_fields",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19927,9 +17797,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L203",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_navigation"
+      "target": "design_navigation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19937,9 +17807,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L208",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_5_components",
-      "target": "design_signature_help_system"
+      "target": "design_signature_help_system",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19947,9 +17817,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L213",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_6_do_s_and_don_ts",
-      "target": "design_do"
+      "target": "design_do",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -19957,9 +17827,9 @@
       "source_file": "DESIGN.md",
       "source_location": "L221",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "design_6_do_s_and_don_ts",
-      "target": "design_don_t"
+      "target": "design_don_t",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -69135,5 +67005,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5b748321b1c6fd4fdc295cb6c260a554eeb6572c"
+  "built_at_commit": "36905946cf8fd3984f636690dc25edcdf8763efa"
 }

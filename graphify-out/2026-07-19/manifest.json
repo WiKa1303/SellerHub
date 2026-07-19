@@ -544,6 +544,11 @@
     "ast_hash": "7dfdaf61cd31246ffce6bed8b7885ffa",
     "semantic_hash": ""
   },
+  ".impeccable/live/server.json": {
+    "mtime": 1783686629.4303384,
+    "ast_hash": "115c18c3d05fcf075fe09514df5804a2",
+    "semantic_hash": ""
+  },
   "skills-lock.json": {
     "mtime": 1783687505.4775016,
     "ast_hash": "d8bf81f05fd8d3433537f92def6e7964",
